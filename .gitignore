@@ -1,0 +1,14 @@
+.cache/
+docs/build/
+imgui.ini
+compile_commands.json
+core.*
+
+build/
+data.zip
+my_game
+
+test/build/
+test/data.zip
+test/test
+test/core.*
