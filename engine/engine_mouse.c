@@ -37,7 +37,7 @@ engine_mouse_update()
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
-  memcpy(_mouse.buttons_prev, _mouse.buttons, sizeof(_mouse.buttons_prev));
+  SDL_memcpy(_mouse.buttons_prev, _mouse.buttons, sizeof(_mouse.buttons_prev));
 
   _mouse.x_prev = _mouse.x;
   _mouse.y_prev = _mouse.y;

@@ -237,7 +237,7 @@ engine_vec2_len2(engine_vec2_t v)
 ENGINE_INLINE float
 engine_vec2_len(engine_vec2_t v)
 {
-  return sqrt(engine_vec2_len2(v));
+  return engine_sqrt(engine_vec2_len2(v));
 }
 
 /**
@@ -338,7 +338,7 @@ engine_vec2_lerp(engine_vec2_t v1, engine_vec2_t v2, float step)
 ENGINE_INLINE engine_vec2_t
 engine_vec2_polar(float angle, float len)
 {
-  return engine_vec2_make(len * cos(angle), len * sin(angle));
+  return engine_vec2_make(len * engine_cos(angle), len * engine_sin(angle));
 }
 
 /**
@@ -365,7 +365,7 @@ vec2_max(engine_vec2_t v1, engine_vec2_t v2)
 ENGINE_INLINE engine_vec2_t
 engine_vec2_floor(engine_vec2_t v)
 {
-  return engine_vec2_make(floor(v.x), floor(v.y));
+  return engine_vec2_make(engine_floor(v.x), engine_floor(v.y));
 }
 
 /**
@@ -374,7 +374,7 @@ engine_vec2_floor(engine_vec2_t v)
 ENGINE_INLINE engine_vec2_t
 engine_vec2_ceil(engine_vec2_t v)
 {
-  return engine_vec2_make(ceil(v.x), ceil(v.y));
+  return engine_vec2_make(engine_ceil(v.x), engine_ceil(v.y));
 }
 
 // Vectors 3

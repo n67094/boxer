@@ -26,7 +26,7 @@ _engine_pipeline_blend_state(engine_blendmode_e blend_mode)
 {
   SDL_GPUColorTargetBlendState blend;
 
-  memset(&blend, 0, sizeof(SDL_GPUColorTargetBlendState));
+  SDL_memset(&blend, 0, sizeof(SDL_GPUColorTargetBlendState));
 
   switch (blend_mode) {
   case ENGINE_BLENDMODE_BLEND:

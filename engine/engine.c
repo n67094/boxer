@@ -8,10 +8,6 @@
 
 #include "engine.h"
 
-// #ifdef DEBUG
-// #include "debug.h"
-// #endif
-
 void
 engine_quit(void)
 {
@@ -240,10 +236,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   engine_mouse_setup(context);
   engine_gamepad_setup();
 
-  // #ifdef DEBUG
-  //  debug_setup(context);
-  // #endif
-
   // Call user setup
   engine_game_setup();
 
@@ -317,10 +309,6 @@ SDL_AppIterate(void *appstate)
 
   ++frame_count;
 
-  // #ifdef DEBUG
-  //  debug_render(context);
-  // #endif
-
   SDL_SubmitGPUCommandBuffer(context->cmd_buffer);
 
   if (fps_timer_ms >= 1000) { // Calculate FPS and UPS every second (1000 ms)
@@ -341,10 +329,6 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
 {
   SDL_assert(event);
   SDL_assert(engine_context_is_valid());
-
-  // #ifdef DEBUG
-  //  debug_event(event);
-  // #endif
 
   engine_keyboard_update();
   engine_mouse_update();

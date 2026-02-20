@@ -1,5 +1,4 @@
 #include "engine_context.h"
-// #include "engine_config.h"
 #include "engine_math.h"
 
 static engine_context_t _context = { 0 };

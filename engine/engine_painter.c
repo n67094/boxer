@@ -134,7 +134,7 @@ _engine_painter_sampler(engine_sampler_e sampler_type)
 {
   SDL_GPUSamplerCreateInfo sampler_info;
 
-  memset(&sampler_info, 0, sizeof(SDL_GPUSamplerCreateInfo));
+  SDL_memset(&sampler_info, 0, sizeof(SDL_GPUSamplerCreateInfo));
 
   switch (sampler_type) {
   case ENGINE_SAMPLER_POINT_WRAP:
@@ -810,7 +810,7 @@ engine_painter_viewport(int x, int y, int w, int h)
   engine_rect_t viewport
       = engine_rect_make((float)x, (float)y, (float)w, (float)h);
 
-  memset(&cmd->args.viewport, 0, sizeof(engine_rect_t));
+  SDL_memset(&cmd->args.viewport, 0, sizeof(engine_rect_t));
 
   cmd->cmd           = ENGINE_COMMAND_VIEWPORT;
   cmd->args.viewport = viewport;

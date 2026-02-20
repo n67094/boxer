@@ -18,7 +18,6 @@
 
 #include <SDL3/SDL.h>
 
-#include "engine_config.h"
 #include "engine_game.h"
 #include "engine_math.h"
 

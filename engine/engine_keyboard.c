@@ -26,7 +26,7 @@ engine_keyboard_update(void)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
-  memcpy(_key.keys_prev, _key.keys, sizeof(_key.keys_prev));
+  SDL_memcpy(_key.keys_prev, _key.keys, sizeof(_key.keys_prev));
 }
 
 void

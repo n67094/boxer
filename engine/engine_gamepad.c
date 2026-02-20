@@ -96,22 +96,23 @@ engine_gamepad_update(void)
         _gamepads[j].id      = id;
         _gamepads[j].serial  = SDL_GetGamepadSerial(gamepad);
 
-        memset(_gamepads[j].buttons, 0, sizeof(_gamepads[j].buttons));
-        memset(_gamepads[j].buttons_prev, 0, sizeof(_gamepads[j].buttons_prev));
-        memset(_gamepads[j].buttons_pressed_at,
-               0,
-               sizeof(_gamepads[j].buttons_pressed_at));
-        memset(_gamepads[j].axis, 0, sizeof(_gamepads[j].axis));
-        memset(_gamepads[j].axis_prev, 0, sizeof(_gamepads[j].axis_prev));
+        SDL_memset(_gamepads[j].buttons, 0, sizeof(_gamepads[j].buttons));
+        SDL_memset(
+            _gamepads[j].buttons_prev, 0, sizeof(_gamepads[j].buttons_prev));
+        SDL_memset(_gamepads[j].buttons_pressed_at,
+                   0,
+                   sizeof(_gamepads[j].buttons_pressed_at));
+        SDL_memset(_gamepads[j].axis, 0, sizeof(_gamepads[j].axis));
+        SDL_memset(_gamepads[j].axis_prev, 0, sizeof(_gamepads[j].axis_prev));
         break;
       } else {
         // If the slot is not empty update the state
-        memcpy(_gamepads[i].buttons_prev,
-               _gamepads[i].buttons,
-               sizeof(_gamepads[i].buttons));
-        memcpy(_gamepads[i].axis_prev,
-               _gamepads[i].axis,
-               sizeof(_gamepads[i].axis));
+        SDL_memcpy(_gamepads[i].buttons_prev,
+                   _gamepads[i].buttons,
+                   sizeof(_gamepads[i].buttons));
+        SDL_memcpy(_gamepads[i].axis_prev,
+                   _gamepads[i].axis,
+                   sizeof(_gamepads[i].axis));
       }
     }
   }
