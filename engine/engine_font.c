@@ -244,3 +244,26 @@ engine_font_set_line_spacing(engine_font_t *font, int line_spacing)
     break;
   }
 }
+
+engine_vec2_t
+engine_font_measure(const engine_font_t *font, const char *text)
+{
+  // TODO
+}
+
+char *
+engine_font_wrap(const engine_font_t *font,
+                 const char *text,
+                 float max_width,
+                 float *height,
+                 int tab_size,
+                 engine_font_align_e align)
+{
+  // TODO
+}
+
+engine_image_t
+engine_font_render(const engine_font_t *font, const char *text)
+{
+  // TODO
+}
