@@ -228,7 +228,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   context->last_time_ms = SDL_GetTicks();
 
   // Setup subsystems
-
   engine_image_setup(context);
   engine_shader_setup(context);
   engine_pipeline_setup(context);

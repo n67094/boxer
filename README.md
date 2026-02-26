@@ -1,4 +1,4 @@
-![Alt text](logo.png)
+<img src="logo.png" align="center" alt="Boxer logo" />
 
 _The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine flat design._
 
@@ -20,7 +20,7 @@ Install the following development dependencies (via your package manager or from
   - SDL3 (>= 3.4.2).
   - SDL3_image (>= 3.0.0).
   - SDL3_mixer (>= 3.0.0).
-  - SDL3_ttf (>= 3.0.0).
+  - SDL3_ttf (>= 3.4.0).
 
 ## Build and Run
 
