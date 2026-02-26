@@ -27,7 +27,8 @@ typedef struct engine_context_s
 
   engine_game_config_t config; // Copy of the user configuration
 
-  SDL_GPUDevice *device;
+  SDL_GPUDevice *gpu_device;
+  SDL_AudioDeviceID *audio_devices;
   SDL_Window *window;
   SDL_Event *event;
 

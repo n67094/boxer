@@ -153,7 +153,7 @@ engine_shader_make(engine_shader_desc_t *vertex_desc,
   SDL_assert(SDL_strstr(fragment_desc->name, ".frag") != NULL);
 
   SDL_GPUShader *vertex_shader
-      = _be_shader_load(_context->device,
+      = _be_shader_load(_context->gpu_device,
                         vertex_desc->name,
                         vertex_desc->num_samplers,
                         vertex_desc->num_storage_textures,
@@ -164,7 +164,7 @@ engine_shader_make(engine_shader_desc_t *vertex_desc,
   }
 
   SDL_GPUShader *fragment_shader
-      = _be_shader_load(_context->device,
+      = _be_shader_load(_context->gpu_device,
                         fragment_desc->name,
                         fragment_desc->num_samplers,
                         fragment_desc->num_storage_textures,
@@ -172,7 +172,7 @@ engine_shader_make(engine_shader_desc_t *vertex_desc,
                         fragment_desc->num_uniform_buffers);
 
   if (fragment_shader == NULL) {
-    SDL_ReleaseGPUShader(_context->device, vertex_shader);
+    SDL_ReleaseGPUShader(_context->gpu_device, vertex_shader);
     return (engine_shader_t){ .id = ENGINE_INVALID_ID };
   }
 
@@ -219,8 +219,8 @@ engine_shader_destroy(engine_shader_t shader)
 
   _engine_shader_t inner_shader = _shaders[slot_index];
 
-  SDL_ReleaseGPUShader(_context->device, inner_shader.vertex);
-  SDL_ReleaseGPUShader(_context->device, inner_shader.fragment);
+  SDL_ReleaseGPUShader(_context->gpu_device, inner_shader.vertex);
+  SDL_ReleaseGPUShader(_context->gpu_device, inner_shader.fragment);
 
   _shaders[slot_index] = (_engine_shader_t){
     .vertex   = NULL,

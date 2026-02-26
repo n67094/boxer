@@ -23,12 +23,12 @@ engine_quit(void)
   engine_image_shutdown();
 
   if (context) {
-    if (context->device && context->window) {
-      SDL_ReleaseWindowFromGPUDevice(context->device, context->window);
+    if (context->gpu_device && context->window) {
+      SDL_ReleaseWindowFromGPUDevice(context->gpu_device, context->window);
     }
 
-    if (context->device) {
-      SDL_DestroyGPUDevice(context->device);
+    if (context->gpu_device) {
+      SDL_DestroyGPUDevice(context->gpu_device);
     }
 
     if (context->window) {
@@ -148,17 +148,17 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
 #endif
 
-  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
     return SDL_APP_FAILURE;
   }
 
   // Create a GPU Device
-  context->device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV
-                                            | SDL_GPU_SHADERFORMAT_DXIL
-                                            | SDL_GPU_SHADERFORMAT_MSL,
-                                        true,
-                                        NULL);
-  if (context->device == NULL) {
+  context->gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV
+                                                | SDL_GPU_SHADERFORMAT_DXIL
+                                                | SDL_GPU_SHADERFORMAT_MSL,
+                                            true,
+                                            NULL);
+  if (context->gpu_device == NULL) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to create GPU Device (error: %s)",
                  SDL_GetError());
@@ -167,7 +167,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
   SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
               "Using GPU Driver: %s",
-              SDL_GetGPUDeviceDriver(context->device));
+              SDL_GetGPUDeviceDriver(context->gpu_device));
 
   int flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
@@ -185,28 +185,29 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   }
 
   // Claime the window for the GPU device
-  if (!SDL_ClaimWindowForGPUDevice(context->device, context->window)) {
+  if (!SDL_ClaimWindowForGPUDevice(context->gpu_device, context->window)) {
     return SDL_APP_FAILURE;
   }
 
   // Set swapchain parameters
   SDL_GPUPresentMode present_mode = SDL_GPU_PRESENTMODE_VSYNC;
-  if (SDL_WindowSupportsGPUPresentMode(
-          context->device, context->window, SDL_GPU_PRESENTMODE_IMMEDIATE)) {
+  if (SDL_WindowSupportsGPUPresentMode(context->gpu_device,
+                                       context->window,
+                                       SDL_GPU_PRESENTMODE_IMMEDIATE)) {
     present_mode = SDL_GPU_PRESENTMODE_IMMEDIATE;
-  } else if (SDL_WindowSupportsGPUPresentMode(context->device,
+  } else if (SDL_WindowSupportsGPUPresentMode(context->gpu_device,
                                               context->window,
                                               SDL_GPU_PRESENTMODE_MAILBOX)) {
     present_mode = SDL_GPU_PRESENTMODE_MAILBOX;
   }
 
-  SDL_SetGPUSwapchainParameters(context->device,
+  SDL_SetGPUSwapchainParameters(context->gpu_device,
                                 context->window,
                                 SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
                                 present_mode);
 
   context->texture_format
-      = SDL_GetGPUSwapchainTextureFormat(context->device, context->window);
+      = SDL_GetGPUSwapchainTextureFormat(context->gpu_device, context->window);
   context->pixel_format
       = SDL_GetPixelFormatFromGPUTextureFormat(context->texture_format);
 
@@ -215,7 +216,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
               SDL_GetPixelFormatName(context->pixel_format));
 
   SDL_GPUCommandBuffer *cmd_buffer
-      = SDL_AcquireGPUCommandBuffer(context->device);
+      = SDL_AcquireGPUCommandBuffer(context->gpu_device);
   if (cmd_buffer == NULL) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to acquire GPU command buffer (error: %s)",
@@ -283,7 +284,7 @@ SDL_AppIterate(void *appstate)
   // Render Game (variable timestep)
 
   SDL_GPUCommandBuffer *cmd_buffer
-      = SDL_AcquireGPUCommandBuffer(context->device);
+      = SDL_AcquireGPUCommandBuffer(context->gpu_device);
   if (cmd_buffer == NULL) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to acquire GPU command buffer (error: %s)",

@@ -275,7 +275,7 @@ engine_painter_setup(engine_context_t *context)
 
   // Create buffers for vertex data
   _painter.vertex_transfer_buffer = SDL_CreateGPUTransferBuffer(
-      _context->device,
+      _context->gpu_device,
       &(SDL_GPUTransferBufferCreateInfo){
           .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
           .size  = ENGINE_PAINTER_VERTICES_MAX * sizeof(engine_vertex_t),
@@ -290,7 +290,7 @@ engine_painter_setup(engine_context_t *context)
   }
 
   _painter.vertex_data_buffer = SDL_CreateGPUBuffer(
-      _context->device,
+      _context->gpu_device,
       &(SDL_GPUBufferCreateInfo){
           .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
           .size  = ENGINE_PAINTER_VERTICES_MAX * sizeof(engine_vertex_t),
@@ -359,7 +359,7 @@ engine_painter_setup(engine_context_t *context)
     SDL_GPUSamplerCreateInfo sampler_info
         = _engine_painter_sampler((engine_sampler_e)i);
     SDL_GPUSampler *sampler
-        = SDL_CreateGPUSampler(_context->device, &sampler_info);
+        = SDL_CreateGPUSampler(_context->gpu_device, &sampler_info);
 
     if (sampler == NULL) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
@@ -378,9 +378,9 @@ engine_painter_shutdown()
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
-  SDL_ReleaseGPUTransferBuffer(_context->device,
+  SDL_ReleaseGPUTransferBuffer(_context->gpu_device,
                                _painter.vertex_transfer_buffer);
-  SDL_ReleaseGPUBuffer(_context->device, _painter.vertex_data_buffer);
+  SDL_ReleaseGPUBuffer(_context->gpu_device, _painter.vertex_data_buffer);
 
   for (int i = 0; i < ENGINE_PRIMITIVE_SIZE * ENGINE_BLENDMODE_SIZE; ++i) {
     if (_painter.pipelines[i].id != ENGINE_INVALID_ID) {
@@ -392,7 +392,7 @@ engine_painter_shutdown()
   engine_shader_destroy(_painter.shader);
 
   for (int i = 0; i < ENGINE_SAMPLE_SIZE; ++i) {
-    SDL_ReleaseGPUSampler(_context->device, _painter.samplers[i]);
+    SDL_ReleaseGPUSampler(_context->gpu_device, _painter.samplers[i]);
   }
 
   engine_image_destroy(_painter.white_image);
@@ -446,7 +446,7 @@ engine_painter_flush()
 
   // Upload vertices
   engine_vertex_t *vertex_data = (engine_vertex_t *)SDL_MapGPUTransferBuffer(
-      _context->device, _painter.vertex_transfer_buffer, true);
+      _context->gpu_device, _painter.vertex_transfer_buffer, true);
   if (vertex_data == NULL) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to map vertex transfer buffer (error: %s)",
@@ -460,7 +460,8 @@ engine_painter_flush()
              &_painter.vertices[_painter.state.base_vertex],
              vertex_count * sizeof(engine_vertex_t));
 
-  SDL_UnmapGPUTransferBuffer(_context->device, _painter.vertex_transfer_buffer);
+  SDL_UnmapGPUTransferBuffer(_context->gpu_device,
+                             _painter.vertex_transfer_buffer);
 
   // Copy pass
   SDL_GPUCopyPass *copy_pass = SDL_BeginGPUCopyPass(_context->cmd_buffer);

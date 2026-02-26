@@ -33,7 +33,7 @@ _engine_image_load(SDL_Surface *surface)
 
   // Create GPU texture from surface
   Uint8 *texture_transfer_ptr = SDL_MapGPUTransferBuffer(
-      _context->device, _texture_transfer_buffer, true);
+      _context->gpu_device, _texture_transfer_buffer, true);
 
   SDL_assert(surface->w * surface->h * 4
              <= ENGINE_RESOURCES_TEXTURE_DIMENSION_MAX
@@ -42,11 +42,11 @@ _engine_image_load(SDL_Surface *surface)
   SDL_memcpy(
       texture_transfer_ptr, surface->pixels, surface->w * surface->h * 4);
 
-  SDL_UnmapGPUTransferBuffer(_context->device, _texture_transfer_buffer);
+  SDL_UnmapGPUTransferBuffer(_context->gpu_device, _texture_transfer_buffer);
 
   // Create the GPU resources
   SDL_GPUTexture *texture = SDL_CreateGPUTexture(
-      _context->device,
+      _context->gpu_device,
       &(SDL_GPUTextureCreateInfo){ .type   = SDL_GPU_TEXTURETYPE_2D,
                                    .format = _context->texture_format,
                                    .width  = surface->w,
@@ -82,7 +82,7 @@ _engine_image_load(SDL_Surface *surface)
   // Allocate image from pool
   int image_slot = engine_pool_acquire_slot(_image_pool);
   if (image_slot == _ENGINE_INVALID_SLOT) {
-    SDL_ReleaseGPUTexture(_context->device, texture);
+    SDL_ReleaseGPUTexture(_context->gpu_device, texture);
     engine_set_error(ENGINE_ERROR_IMAGE_LOAD);
     return (engine_image_t){ .id = ENGINE_INVALID_ID };
   }
@@ -109,7 +109,7 @@ engine_image_setup(engine_context_t *context)
   ENGINE_CALLOC(_images, ENGINE_RESOURCES_IMAGE_MAX, sizeof(_engine_image_t));
 
   _texture_transfer_buffer = SDL_CreateGPUTransferBuffer(
-      context->device,
+      context->gpu_device,
       &(SDL_GPUTransferBufferCreateInfo){
           .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
           .size  = 4 * ENGINE_RESOURCES_TEXTURE_DIMENSION_MAX
@@ -131,7 +131,7 @@ engine_image_shutdown(void)
   engine_pool_destroy(_image_pool);
   ENGINE_FREE(_images);
 
-  SDL_ReleaseGPUTransferBuffer(_context->device, _texture_transfer_buffer);
+  SDL_ReleaseGPUTransferBuffer(_context->gpu_device, _texture_transfer_buffer);
 
   _initialized = 0;
   _context     = NULL;
@@ -229,7 +229,7 @@ engine_image_destroy(engine_image_t image)
 
   _engine_image_t inner_image = _images[slot_index];
 
-  SDL_ReleaseGPUTexture(_context->device, inner_image.texture);
+  SDL_ReleaseGPUTexture(_context->gpu_device, inner_image.texture);
 
   _images[slot_index] = (_engine_image_t){
     .texture = NULL,

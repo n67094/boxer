@@ -60,7 +60,7 @@ SANITIZER ?= 0
 CC = gcc
 CXX = g++
 
-LDFLAGS = -lSDL3 -lm
+LDFLAGS = -lSDL3 -lSDL_mixer -lphysfs -lm
 
 CFLAGS = -std=c99 -Wall
 CXXFLAGS = -std=c++11 -Wall
@@ -122,8 +122,8 @@ all: $(TARGET) data
 data:
 	zip -r data.zip $(DATA_DIR)
 
-docs:
-	doxygen
+# docs:
+# doxygen
 
 $(TARGET): $(ALL_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@

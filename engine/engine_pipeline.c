@@ -112,12 +112,12 @@ engine_pipeline_make(engine_shader_t shader,
   SDL_GPUGraphicsPipelineTargetInfo target_info
       = { .num_color_targets         = 1,
           .color_target_descriptions = (SDL_GPUColorTargetDescription[]){
-              { .format = SDL_GetGPUSwapchainTextureFormat(_context->device,
+              { .format = SDL_GetGPUSwapchainTextureFormat(_context->gpu_device,
                                                            _context->window),
                 .blend_state = blend_state } } };
 
   SDL_GPUGraphicsPipeline *pipeline = SDL_CreateGPUGraphicsPipeline(
-      _context->device,
+      _context->gpu_device,
       &(SDL_GPUGraphicsPipelineCreateInfo){
           .target_info        = target_info,
           .primitive_type     = engine_sdl_primitive_type(primitive_type),
@@ -137,7 +137,7 @@ engine_pipeline_make(engine_shader_t shader,
 
   int slot_index = engine_pool_acquire_slot(_pipeline_pool);
   if (slot_index == _ENGINE_INVALID_SLOT) {
-    SDL_ReleaseGPUGraphicsPipeline(_context->device, pipeline);
+    SDL_ReleaseGPUGraphicsPipeline(_context->gpu_device, pipeline);
     engine_set_error(ENGINE_ERROR_PIPELINE_MAKE);
     return (engine_pipeline_t){ .id = ENGINE_INVALID_ID };
   }
@@ -169,7 +169,7 @@ engine_pipeline_destroy(engine_pipeline_t pipeline)
 
   _engine_pipeline_t inner_pipeline = _pipelines[slot_index];
 
-  SDL_ReleaseGPUGraphicsPipeline(_context->device, inner_pipeline.pipeline);
+  SDL_ReleaseGPUGraphicsPipeline(_context->gpu_device, inner_pipeline.pipeline);
 
   _pipelines[slot_index] = (_engine_pipeline_t){
     .pipeline = NULL,

@@ -28,6 +28,8 @@
 #define ENGINE_RESOURCES_SHADER_MAX 8
 // Max number of pipelines that can be created at the same time
 #define ENGINE_RESOURCES_PIPELINE_MAX 64
+// Max number of sound that can be loaded at the same time
+#define ENGINE_RESOURCES_SOUND_MAX 64
 
 // Painter
 // ---------------------------------------------------------------------------

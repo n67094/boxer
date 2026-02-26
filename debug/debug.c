@@ -31,7 +31,7 @@ debug_setup(engine_context_t *context)
   cImGui_ImplSDL3_InitForSDLGPU(context->window);
 
   ImGui_ImplSDLGPU3_InitInfo info = {
-    .Device            = context->device,
+    .Device            = context->gpu_device,
     .ColorTargetFormat = SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM,
     .MSAASamples       = SDL_GPU_SAMPLECOUNT_1,
   };
