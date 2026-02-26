@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="" alt="Boxer logo" />
-</p>
-
-![Boxer logo](logo.png){width=200% fig-align=center}
+![Alt text](logo.png)
 
 _The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine flat design._
 
