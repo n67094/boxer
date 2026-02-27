@@ -1,86 +1,25 @@
 #include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 
 #include "engine_font.h"
 #include "engine_image.h"
 #include "engine_mem.h"
 
-typedef enum
-{
-  ENGINE_FONT_TYPE_TTF,
-  ENGINE_FONT_TYPE_ATLAS,
-} engine_font_type_e;
-
-typedef struct _engine_font_ttf_s
-{
-  TTF_Font *font;
-} _engine_font_ttf_t;
-
-typedef struct _engine_font_atlas_s
+struct engine_font_s
 {
   engine_image_t image;
   engine_rect_t *glyphs;
   size_t glyph_count;
-  float spacing;
-  float line_spacing;
-} _engine_font_atlas_t;
-
-struct engine_font_s
-{
-  engine_font_type_e type;
-  union
-  {
-    _engine_font_ttf_t ttf;
-    _engine_font_atlas_t atlas;
-  };
-  float line_spacing;
+  int tab_size;
+  int char_spacing;
+  int line_spacing;
 };
-
-engine_font_t *
-engine_font_ttf_load(const char *path, unsigned int size)
-{
-  SDL_assert(path);
-
-  engine_font_t *font = NULL;
-  ENGINE_NEW(font);
-  if (!font) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for TTF font");
-    return NULL;
-  }
-
-  font->type     = ENGINE_FONT_TYPE_TTF;
-  font->ttf.font = TTF_OpenFont(path, (int)size);
-
-  return font;
-}
-
-engine_font_t *
-engine_font_ttf_mem(const void *data, size_t len, unsigned int size)
-{
-  SDL_assert(data);
-  SDL_assert(len > 0);
-
-  engine_font_t *font = NULL;
-  ENGINE_NEW(font);
-  if (!font) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for TTF font");
-    return NULL;
-  }
-
-  font->type = ENGINE_FONT_TYPE_TTF;
-  font->ttf.font
-      = TTF_OpenFontIO(SDL_IOFromConstMem(data, (int)len), true, (int)size);
-
-  return font;
-}
 
 engine_font_t *
 engine_font_atlas_load(const char *path,
                        engine_rect_t *glyphs,
                        size_t glyph_count,
-                       int spacing,
+                       int tab_size,
+                       int char_spacing,
                        int line_spacing)
 {
   SDL_assert(path);
@@ -95,13 +34,12 @@ engine_font_atlas_load(const char *path,
     return NULL;
   }
 
-  font->type = ENGINE_FONT_TYPE_ATLAS;
-
-  font->atlas.image        = engine_image_load(path);
-  font->atlas.glyphs       = glyphs;
-  font->atlas.glyph_count  = glyph_count;
-  font->atlas.spacing      = spacing;
-  font->atlas.line_spacing = line_spacing;
+  font->image        = engine_image_load(path);
+  font->glyphs       = glyphs;
+  font->glyph_count  = glyph_count;
+  font->tab_size     = tab_size;
+  font->char_spacing = char_spacing;
+  font->line_spacing = line_spacing;
 
   return font;
 }
@@ -112,7 +50,8 @@ engine_font_atlas_mem(unsigned int width,
                       const void *data,
                       engine_rect_t *glyphs,
                       size_t glyph_count,
-                      int spacing,
+                      int tab_size,
+                      int char_spacing,
                       int line_spacing)
 {
   SDL_assert(data);
@@ -129,13 +68,12 @@ engine_font_atlas_mem(unsigned int width,
     return NULL;
   }
 
-  font->type = ENGINE_FONT_TYPE_ATLAS;
-
-  font->atlas.image        = engine_image_load_mem(width, height, (void *)data);
-  font->atlas.glyphs       = glyphs;
-  font->atlas.glyph_count  = glyph_count;
-  font->atlas.spacing      = spacing;
-  font->atlas.line_spacing = line_spacing;
+  font->image        = engine_image_load_mem(width, height, (void *)data);
+  font->glyphs       = glyphs;
+  font->glyph_count  = glyph_count;
+  font->tab_size     = tab_size;
+  font->char_spacing = char_spacing;
+  font->line_spacing = line_spacing;
 
   return font;
 }
@@ -144,126 +82,182 @@ void
 engine_font_destroy(engine_font_t *font)
 {
   if (!font)
-    return;
-
-  switch (font->type) {
-  case ENGINE_FONT_TYPE_TTF:
-    TTF_CloseFont(font->ttf.font);
-    break;
-  case ENGINE_FONT_TYPE_ATLAS:
-    engine_image_destroy(font->atlas.image);
-    break;
-  default:
-    break;
-  }
-
-  ENGINE_FREE(font);
+    engine_image_destroy(font->image);
 }
 
 int
-engine_font_get_height(const engine_font_t *font)
+engine_font_get_char_spacing(const engine_font_t *font)
 {
-  if (!font)
-    return 0.0f;
-
-  switch (font->type) {
-  case ENGINE_FONT_TYPE_TTF:
-    return TTF_GetFontHeight(font->ttf.font);
-  case ENGINE_FONT_TYPE_ATLAS:
-    // For atlas font, we can use the line spacing as the height of the font
-    return font->line_spacing;
-  default:
-    return 0.0f;
-  }
-}
-
-int
-engine_font_get_spacing(const engine_font_t *font)
-{
-  if (!font)
-    return 0.0f;
-
-  switch (font->type) {
-  case ENGINE_FONT_TYPE_TTF:
-    // TODO avail in 3.4.0 return TTF_GetFontCharSpacing(font->ttf.font);
-  case ENGINE_FONT_TYPE_ATLAS:
-    return font->atlas.spacing;
-  default:
-    return 0.0f;
-  }
+  SDL_assert(font);
+  return font->char_spacing;
 }
 
 void
-engine_font_set_spacing(engine_font_t *font, int spacing)
+engine_font_set_char_spacing(engine_font_t *font, int spacing)
 {
-  if (!font)
-    return;
-
-  switch (font->type) {
-  case ENGINE_FONT_TYPE_TTF:
-    // TODO avail in 3.4.0 TTF_SetFontCharSpacing(font->ttf.font, (int)spacing);
-    break;
-  case ENGINE_FONT_TYPE_ATLAS:
-    font->atlas.spacing = spacing;
-    break;
-  default:
-    break;
-  }
+  SDL_assert(font);
+  font->char_spacing = spacing;
 }
 
 int
 engine_font_get_line_spacing(const engine_font_t *font)
 {
-  if (!font)
-    return 0.0f;
-
-  switch (font->type) {
-  case ENGINE_FONT_TYPE_TTF:
-    return TTF_GetFontLineSkip(font->ttf.font);
-  case ENGINE_FONT_TYPE_ATLAS:
-    return font->atlas.line_spacing;
-  default:
-    return 0.0f;
-  }
+  SDL_assert(font);
+  return font->line_spacing;
 }
 
 void
 engine_font_set_line_spacing(engine_font_t *font, int line_spacing)
 {
-  if (!font)
-    return;
+  SDL_assert(font);
+  font->line_spacing = line_spacing;
+}
 
-  switch (font->type) {
-  case ENGINE_FONT_TYPE_TTF:
-    TTF_SetFontLineSkip(font->ttf.font, (int)line_spacing);
-    break;
-  case ENGINE_FONT_TYPE_ATLAS:
-    font->atlas.line_spacing = line_spacing;
-    break;
-  default:
-    break;
+static void
+engine_font_skip_color_tag(char *cursor)
+{
+  if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
+    // Skip opening tag
+    *cursor += 2;
+    while (*cursor && *cursor != '}') {
+      cursor++;
+    }
+    cursor++;
+  } else if (*cursor + 1 == '/' && *cursor + 2 == 'c' && *cursor + 3 == '}') {
+    // Skip the closing tag
+    *cursor += 4;
   }
 }
 
-engine_vec2_t
-engine_font_measure(const engine_font_t *font, const char *text)
+static engine_color_t
+engine_font_handle_color_tag(char *cursor)
 {
-  // TODO
+  char color_str[9]; // 8 characters for RGBA + null terminator
+
+  for (int i = 0; i < 8 && cursor[i] && cursor[i] != '}'; ++i) {
+    color_str[i]     = cursor[i];
+    color_str[i + 1] = '\0';
+  }
+
+  Uint32 color_value   = SDL_strtoul(color_str, NULL, 16);
+  engine_color_t color = {
+    .r = (color_value >> 24) & 0xFF,
+    .g = (color_value >> 16) & 0xFF,
+    .b = (color_value >> 8) & 0xFF,
+    .a = color_value & 0xFF,
+  };
+
+  return color;
+}
+
+static int
+engine_font_handle_icon_tag(const engine_font_t *font, char *cursor)
+{
+  char icon_index_str[16];
+
+  for (int i = 0; *cursor && *cursor != '}'; ++i) {
+    icon_index_str[i]     = *cursor;
+    icon_index_str[i + 1] = '\0';
+    cursor++;
+  }
+
+  int icon_index = SDL_strtol(icon_index_str, NULL, 10);
+
+  if (icon_index < 224) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Invalid glyph index: %d. Icon indices must be 224 or higher.",
+                 icon_index);
+    return -1;
+  }
+
+  return icon_index;
+}
+
+engine_vec2_t
+engine_font_measure_text(const engine_font_t *font, const char *text)
+{
+  SDL_assert(font);
+
+  if (!text) {
+    return (engine_vec2_t){ .x = 0, .y = 0 };
+  }
+
+  engine_vec2_t retval = { .x = 0, .y = 0 };
+
+  retval.y = font->line_spacing;
+
+  char *cursor = (char *)text;
+
+  while (*cursor) {
+    int glyphs_index = (int)*cursor - ' ';
+
+    switch (*cursor) {
+    case '\n':
+      retval.y += font->line_spacing;
+      cursor++;
+      break;
+    case '\t':
+      retval.x += (font->glyphs[0].w + font->char_spacing) * font->tab_size;
+      cursor++;
+      break;
+    case '{':
+      if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
+        engine_font_skip_color_tag(cursor);
+      } else if (*cursor + 1 == '/' && *cursor + 2 == 'c'
+                 && *cursor + 3 == '}') {
+        engine_font_skip_color_tag(cursor);
+      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
+        cursor += 3; // Skip the "{i=" part
+        int icon_index = engine_font_handle_icon_tag(font, cursor);
+        if (icon_index >= 0) {
+          retval.x += (font->glyphs[icon_index - ' '].w + font->char_spacing);
+        }
+        cursor++; // Skip the closing '}'
+      }
+      break;
+    default:
+      retval.x += (font->glyphs[glyphs_index].w + font->char_spacing);
+      cursor++;
+    }
+  }
+
+  return retval;
 }
 
 char *
-engine_font_wrap(const engine_font_t *font,
-                 const char *text,
-                 float max_width,
-                 float *height,
-                 int tab_size,
-                 engine_font_align_e align)
+engine_font_wrap_text(const engine_font_t *font,
+                      const char *text,
+                      float max_width,
+                      float *out_height,
+                      engine_font_align_e align)
 {
-  // TODO
+  SDL_assert(font);
+
+  if (!text) {
+    if (out_height) {
+      *out_height = 0;
+    }
+    SDL_strdup("");
+  }
+
+  return NULL;
 }
 
-engine_image_t
-engine_font_render(const engine_font_t *font, const char *text)
+void
+engine_font_render(engine_vec2_t position,
+                   const engine_font_t *font,
+                   const char *text,
+                   engine_color_t background,
+                   engine_color_t foreground)
 {
-  // TODO
+  SDL_assert(font);
+  SDL_assert(text);
 }
+
+void engine_font_render_wrapped(engine_vec2_t position,
+                                const engine_font_t *font,
+                                const char *text,
+                                float max_width,
+                                engine_font_align_e align,
+                                engine_color_t background,
+                                engine_color_t foreground);

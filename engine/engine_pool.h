@@ -22,8 +22,6 @@
 
 #include <SDL3/SDL.h>
 
-#define ENGINE_INVALID_ID 0
-
 #define _ENGINE_INVALID_SLOT 0
 #define _ENGINE_SLOT_SHIFT 16
 #define _ENGINE_SLOT_MASK ((1 << _ENGINE_SLOT_SHIFT) - 1)

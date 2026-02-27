@@ -259,7 +259,7 @@ engine_jsonr_eq_str(engine_jsonr_token_t *key, const char *expected)
   // SDL_assert(key->type == ENGINE_JSON_STRING);
 
   size_t len = key->end - key->start;
-  return SDL_strlen(expected) == len && !memcmp(expected, key->start, len);
+  return SDL_strlen(expected) == len && !SDL_memcmp(expected, key->start, len);
 }
 
 bool
