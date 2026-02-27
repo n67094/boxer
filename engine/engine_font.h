@@ -8,19 +8,16 @@
  * The font atlas is arranged at your will, glyphs are defined by an array of
  * rectangles that specify the position and size of each character in the atlas.
  *
- * The mapping from characters to glyphs is determined by the order of the
- * rectangles in the array, starting from the ASCII character 32 to
- * 255 (up to 224 glyphs) where 32 is the space character, 33 is the exclamation
- * mark, and so on.
+ * The array should start with your icons (if you have any) and then continue
+ * with the characters in the order of ASCII characters from 32 (space) to 255.
  *
- * If you need icons you can add them to the end of the glyphs array (past the
- * 224th character which is nbsp) and use them with this tag: {i=glyph_index}
- * or you can fill the empty space in the atlas with icons and use them as
- * regular characters.
+ * To render:
  *
- * The font rendering functions support color tags, allowing you to specify
- * different colors for different parts of the text example:
- * {c=#RRGGBBAA}text{/c}.
+ * - An icons use the syntax {i=icon_index}.
+ * - Colored text use the syntax {c=#RRGGBBAA}text{/c}.
+ *
+ * (You can use rxi atlas generator to generate the atlas and the corresponding
+ * glyphs array: https://github.com/rxi/atlas)
  *
  * @copyright Copyright (c) 2026 nsix. All rights reserved.
  */
@@ -31,7 +28,6 @@
 #include <SDL3/SDL.h>
 
 #include "engine_color.h"
-#include "engine_image.h"
 #include "engine_math.h"
 
 typedef struct engine_font_s engine_font_t;
@@ -39,6 +35,7 @@ typedef struct engine_font_s engine_font_t;
 engine_font_t *engine_font_atlas_load(const char *path,
                                       engine_rect_t *glyphs,
                                       size_t glyph_count,
+                                      int glyph_spacing_index,
                                       int char_spacing,
                                       int line_spacing);
 
@@ -47,6 +44,7 @@ engine_font_t *engine_font_atlas_mem(unsigned int width,
                                      const void *data,
                                      engine_rect_t *glyphs,
                                      size_t glyph_count,
+                                     int glyph_spacing_index,
                                      int char_spacing,
                                      int line_spacing);
 
@@ -94,6 +92,15 @@ char *engine_font_wrap_text(const engine_font_t *font,
                             const char *text,
                             float max_width,
                             float *height);
+
+// FIXME the function below should should return engine_textured_rect_t to use
+// with the painter system.
+
+void engine_font_render_glyph(engine_vec2_t position,
+                              const engine_font_t *font,
+                              int glyphs_index,
+                              engine_color_t background,
+                              engine_color_t foreground);
 
 void engine_font_render_char(engine_vec2_t position,
                              const engine_font_t *font,

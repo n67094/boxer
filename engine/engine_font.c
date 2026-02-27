@@ -10,23 +10,23 @@ struct engine_font_s
   engine_image_t image;
   engine_rect_t *glyphs;
   size_t glyph_count;
-  int tab_size;
+  int glyph_spacing_index;
   int char_spacing;
   int line_spacing;
 };
 
 static void
-engine_font_skip_color_tag(char *cursor)
+engine_font_discard_color_tag(char *cursor)
 {
   if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
-    // Skip opening tag
+    // Discard opening tag
     *cursor += 2;
     while (*cursor && *cursor != '}') {
       cursor++;
     }
     cursor++;
   } else if (*cursor + 1 == '/' && *cursor + 2 == 'c' && *cursor + 3 == '}') {
-    // Skip the closing tag
+    // Discard the closing tag
     *cursor += 4;
   }
 }
@@ -34,7 +34,7 @@ engine_font_skip_color_tag(char *cursor)
 static engine_color_t
 engine_font_handle_color_tag(char *cursor)
 {
-  cursor += 3; // Skip the "{c=" part
+  cursor += 3; // Discard the "{c=" part
 
   char color_str[9]; // 8 characters for RGBA + null terminator
 
@@ -58,7 +58,7 @@ engine_font_handle_color_tag(char *cursor)
 static int
 engine_font_handle_icon_tag(const engine_font_t *font, char *cursor)
 {
-  cursor += 3; // Skip the "{i=" part
+  cursor += 3; // Discard the "{i=" part
 
   char icon_index_str[16];
 
@@ -68,14 +68,14 @@ engine_font_handle_icon_tag(const engine_font_t *font, char *cursor)
     cursor++;
   }
 
-  cursor++; // Skip the closing '}'
+  cursor++; // Discard the closing '}'
 
   int icon_index = SDL_strtol(icon_index_str, NULL, 10);
 
-  if (icon_index < 224) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Invalid glyph index: %d. Icon indices must be 224 or higher.",
-                 icon_index);
+  if (icon_index < font->glyph_spacing_index) {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Invalid glyph index: %d. Icon indices must be 224 or higher.",
+                icon_index);
     return -1;
   }
 
@@ -86,6 +86,7 @@ engine_font_t *
 engine_font_atlas_load(const char *path,
                        engine_rect_t *glyphs,
                        size_t glyph_count,
+                       int glyph_spacing_index,
                        int char_spacing,
                        int line_spacing)
 {
@@ -116,6 +117,7 @@ engine_font_atlas_mem(unsigned int width,
                       const void *data,
                       engine_rect_t *glyphs,
                       size_t glyph_count,
+                      int glyph_spacing_index,
                       int char_spacing,
                       int line_spacing)
 {
@@ -193,7 +195,7 @@ engine_font_measure_text(const engine_font_t *font, const char *text)
   char *cursor = (char *)text;
 
   while (*cursor) {
-    int glyphs_index = (int)*cursor - ' ';
+    int glyphs_index = (int)*cursor - font->glyph_spacing_index;
 
     switch (*cursor) {
     case '\n':
@@ -203,29 +205,23 @@ engine_font_measure_text(const engine_font_t *font, const char *text)
     case '{':
       if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
         // Handle for color tags
-        engine_font_skip_color_tag(cursor);
+        engine_font_discard_color_tag(cursor);
       } else if (*cursor + 1 == '/' && *cursor + 2 == 'c'
                  && *cursor + 3 == '}') {
         // Handle for closing color tags
-        engine_font_skip_color_tag(cursor);
+        engine_font_discard_color_tag(cursor);
       } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
         // Handle for icon tag
         int icon_index = engine_font_handle_icon_tag(font, cursor);
+
         if (icon_index >= 0) {
-          retval.x += (font->glyphs[icon_index - ' '].w + font->char_spacing);
+          retval.x += (font->glyphs[icon_index].w + font->char_spacing);
         }
       }
       break;
     default:
-      // Skip invalid characters
-      if (*cursor < ' ' || *cursor > ' ' + font->glyph_count) {
-        SDL_LogWarn(
-            SDL_LOG_CATEGORY_APPLICATION,
-            "Invalid character '%c' found while measure text. Only characters "
-            "from ' ' (space) to '%c' are supported (Skipping the invalid "
-            "character).",
-            *cursor,
-            (char)(' ' + font->glyph_count - 1));
+      // Discard invalid characters
+      if (*cursor < ' ') {
         cursor++;
         continue;
       }
@@ -262,6 +258,7 @@ engine_font_wrap_text(const engine_font_t *font,
   if (!wrapped_text) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to allocate memory for wrapped text");
+    // TODO add error
     return NULL;
   }
 
@@ -277,35 +274,29 @@ engine_font_wrap_text(const engine_font_t *font,
     case '{':
       if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
         // Check for color tags
-        engine_font_skip_color_tag(cursor);
+        engine_font_discard_color_tag(cursor);
       } else if (*cursor + 1 == '/' && *cursor + 2 == 'c'
                  && *cursor + 3 == '}') {
         // Check for closing color tags
-        engine_font_skip_color_tag(cursor);
+        engine_font_discard_color_tag(cursor);
       } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
         // Check for icon tags
         cursor += 3; // Skip the "{i=" part
         int icon_index = engine_font_handle_icon_tag(font, cursor);
+
         if (icon_index >= 0) {
-          width += (font->glyphs[icon_index - ' '].w + font->char_spacing);
+          width += (font->glyphs[icon_index].w + font->char_spacing);
         }
       }
       break;
     default: {
-      // Skip invalid characters
-      if (*cursor < ' ' || *cursor > ' ' + font->glyph_count) {
-        SDL_LogWarn(
-            SDL_LOG_CATEGORY_APPLICATION,
-            "Invalid character '%c' found while measure text. Only characters "
-            "from ' ' (space) to '%c' are supported (Skipping the invalid "
-            "character).",
-            *cursor,
-            (char)(' ' + font->glyph_count - 1));
+      // Discard invalid characters
+      if (*cursor < ' ') {
         cursor++;
         continue;
       }
 
-      int glyphs_index = (int)*cursor - ' ';
+      int glyphs_index = (int)*cursor - font->glyph_spacing_index;
 
       int next_width
           = width + font->glyphs[glyphs_index].w + font->char_spacing;
@@ -347,6 +338,7 @@ engine_font_wrap_text(const engine_font_t *font,
     if (!new_buffer) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                    "Failed to allocate memory for wrapped text");
+      // TODO add error
       ENGINE_FREE(wrapped_text);
       return NULL;
     }
@@ -361,26 +353,14 @@ engine_font_wrap_text(const engine_font_t *font,
 }
 
 void
-engine_font_render_char(engine_vec2_t position,
-                        const engine_font_t *font,
-                        char c,
-                        engine_color_t background,
-                        engine_color_t foreground)
+engine_font_render_glyph(engine_vec2_t position,
+                         const engine_font_t *font,
+                         int glyphs_index,
+                         engine_color_t background,
+                         engine_color_t foreground)
 {
   SDL_assert(font);
-
-  if (c < ' ' || c > ' ' + font->glyph_count) {
-    SDL_LogWarn(
-        SDL_LOG_CATEGORY_APPLICATION,
-        "Invalid character '%c' found while rendering text. Only characters "
-        "from ' ' (space) to '%c' are supported (Skipping the invalid "
-        "character).",
-        c,
-        (char)(' ' + font->glyph_count - 1));
-    return;
-  }
-
-  int glyphs_index = (int)c - ' ';
+  SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
 
   engine_rect_t glyph_rect = font->glyphs[glyphs_index];
 
@@ -401,6 +381,25 @@ engine_font_render_char(engine_vec2_t position,
       foreground.r, foreground.g, foreground.b, foreground.a);
 
   engine_painter_draw_textured_rect(dest_rect, src_rect);
+}
+
+void
+engine_font_render_char(engine_vec2_t position,
+                        const engine_font_t *font,
+                        char c,
+                        engine_color_t background,
+                        engine_color_t foreground)
+{
+  SDL_assert(font);
+
+  if (c < ' ') {
+    return;
+  }
+
+  int glyphs_index = (int)c - font->glyph_spacing_index;
+
+  engine_font_render_glyph(
+      position, font, glyphs_index, background, foreground);
 }
 
 void
@@ -439,19 +438,13 @@ engine_font_render_text(engine_vec2_t position,
         int icon_index = engine_font_handle_icon_tag(font, cursor);
 
         if (icon_index >= 0) {
-          engine_font_render_char(
-              position, font, (char)icon_index, background, current_color);
+          engine_font_render_glyph(
+              position, font, icon_index, background, current_color);
         }
       }
     default:
-      // Skip invalid characters
-      if (*cursor < ' ' || *cursor > ' ' + font->glyph_count) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                    "Invalid character '%c' found while rendering text. Only "
-                    "characters from ' ' (space) to '%c' are supported "
-                    "(Skipping the invalid character).",
-                    *cursor,
-                    (char)(' ' + font->glyph_count - 1));
+      // Discard invalid characters
+      if (*cursor < ' ') {
         cursor++;
         continue;
       }
@@ -459,7 +452,8 @@ engine_font_render_text(engine_vec2_t position,
       engine_font_render_char(
           position, font, *cursor, background, current_color);
 
-      position.x += (font->glyphs[*cursor - ' '].w + font->char_spacing);
+      position.x += (font->glyphs[*cursor - font->glyph_spacing_index].w
+                     + font->char_spacing);
       cursor++;
     }
   }
