@@ -39,7 +39,6 @@ typedef struct engine_font_s engine_font_t;
 engine_font_t *engine_font_atlas_load(const char *path,
                                       engine_rect_t *glyphs,
                                       size_t glyph_count,
-                                      int tab_size,
                                       int char_spacing,
                                       int line_spacing);
 
@@ -48,7 +47,6 @@ engine_font_t *engine_font_atlas_mem(unsigned int width,
                                      const void *data,
                                      engine_rect_t *glyphs,
                                      size_t glyph_count,
-                                     int tab_size,
                                      int char_spacing,
                                      int line_spacing);
 
@@ -62,22 +60,21 @@ void engine_font_set_line_spacing(engine_font_t *font, int line_spacing);
 
 /**
  * @brief Measure the width and height of the given text when rendered with the
- * specified font.
+ * specified font. (tags are ignored for measurement)
  *
  * @param font The font to use for measuring the text.
  * @param text The text string to measure.
  *
  * @return An engine_vec2_t containing the width (x) and height (y) of the
  *         measured text.
- *
- * @note Tags are not counted in the measurement.
  */
 engine_vec2_t engine_font_measure_text(const engine_font_t *font,
                                        const char *text);
 
 /**
  * @brief Wrap the given text to fit within the specified maximum width when
- * rendered with the provided font.
+ * rendered with the provided font. (tags are ignored for
+ * wrapping)
  *
  * @param font The font to use for measuring and wrapping the text.
  * @param text The text string to wrap.
@@ -91,14 +88,18 @@ engine_vec2_t engine_font_measure_text(const engine_font_t *font,
  * @return A newly allocated string containing the wrapped text. The caller is
  *         responsible for freeing this string using `engine_mem_free()`.
  *
- * @note Tags are not counted in the measurement.
  * @note The caller is responsible for freeing the returned value.
  */
 char *engine_font_wrap_text(const engine_font_t *font,
                             const char *text,
                             float max_width,
-                            float *height,
-                            engine_font_align_e align);
+                            float *height);
+
+void engine_font_render_char(engine_vec2_t position,
+                             const engine_font_t *font,
+                             char c,
+                             engine_color_t background,
+                             engine_color_t foreground);
 
 /**
  * @brief Render the given text at the specified position using the provided
@@ -113,36 +114,10 @@ char *engine_font_wrap_text(const engine_font_t *font,
  * @note You need to be in between `engine_painter_begin()` and
  * `engine_painter_end()` to call this function.
  */
-void engine_font_render(engine_vec2_t position,
-                        const engine_font_t *font,
-                        const char *text,
-                        engine_color_t background,
-                        engine_color_t foreground);
-
-/**
- * @brief Render the given text at the specified position using the provided
- * font and colors, with word wrapping to fit within the specified maximum
- * width.
- *
- * @param position The position (in pixels) where the text should be rendered.
- * @param font The font to use for rendering the text.
- * @param text The text string to render.
- * @param max_width The maximum width (in pixels) that the rendered text should
- *                  fit within.
- * @param tab_size The number of spaces to replace tab characters with.
- * @param align The alignment of the text (left, center, right).
- * @param background The background color to use when rendering the text.
- * @param foreground The foreground color to use when rendering the text.
- *
- * @note You need to be in between `engine_painter_begin()` and
- * `engine_painter_end()` to call this function.
- */
-void engine_font_render_wrapped(engine_vec2_t position,
-                                const engine_font_t *font,
-                                const char *text,
-                                float max_width,
-                                engine_font_align_e align,
-                                engine_color_t background,
-                                engine_color_t foreground);
+void engine_font_render_text(engine_vec2_t position,
+                             const engine_font_t *font,
+                             const char *text,
+                             engine_color_t background,
+                             engine_color_t foreground);
 
 #endif // ENGINE_FONT_H_
