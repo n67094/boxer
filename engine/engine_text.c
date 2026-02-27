@@ -14,7 +14,14 @@ engine_text_discard_color_tag(char *cursor)
     while (*cursor && *cursor != '}') {
       cursor++;
     }
-    cursor++;
+
+    if (*cursor == '\0') {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Unterminated color tag in text string.");
+      return;
+    }
+
+    cursor++; // Discard the closing '}'
   } else if (*cursor + 1 == '/' && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
              && *cursor + 3 == '}') {
     // Discard the closing tag
@@ -44,6 +51,26 @@ engine_text_handle_color_tag(char *cursor)
   };
 
   return color;
+}
+
+static void
+engine_text_discard_icon_tag(char *cursor)
+{
+  if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
+    cursor += 3; // Discard the "{i=" part
+
+    while (*cursor && *cursor != '}') {
+      cursor++;
+    }
+
+    if (*cursor == '\0') {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Unterminated icon tag in text string.");
+      return;
+    }
+
+    cursor++; // Discard the closing '}'
+  }
 }
 
 static int
@@ -183,6 +210,62 @@ engine_text_char(engine_vec2_t position,
   text->entries[0].foreground = foreground;
 
   return text;
+}
+
+char *
+engine_text_to_str(const char *text)
+{
+  SDL_assert(text);
+
+  // The length should be the same or shorter than the original text, since
+  // we're discarding tags and invalid characters.
+  size_t text_length = engine_text_length(text);
+
+  char *buffer     = NULL;
+  int buffer_count = 0;
+  ENGINE_ALLOC(buffer, text_length + 1); // +1 for null terminator
+  if (!buffer) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to allocate memory for text string");
+    // TODO add error
+    return NULL;
+  }
+
+  char *cursor = (char *)text;
+
+  while (*cursor) {
+    switch (*cursor) {
+    case '\n':
+      buffer[buffer_count++] = '\n';
+      cursor++;
+      break;
+    case '{':
+      if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
+        // Handle for color tags
+        engine_text_discard_color_tag(cursor);
+      } else if (*cursor + 1 == '/'
+                 && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
+                 && *cursor + 3 == '}') {
+        // Handle for closing color tags
+        engine_text_discard_color_tag(cursor);
+      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
+        engine_text_discard_icon_tag(cursor);
+      }
+      break;
+    default:
+      // Discard invalid characters
+      if (*cursor < ' ') {
+        cursor++;
+        continue;
+      }
+
+      buffer[buffer_count++] = *cursor;
+      cursor++;
+    }
+  }
+
+  buffer[buffer_count] = '\0'; // Null terminator
+  return buffer;
 }
 
 void

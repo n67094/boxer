@@ -34,9 +34,6 @@ typedef struct engine_text_s
   size_t entry_count;
 } engine_text_t;
 
-// Public API
-// -----------------------------------------------------------------------------
-
 engine_text_t *engine_text_glyph(engine_vec2_t position,
                                  const engine_font_t *font,
                                  int glyphs_index,
@@ -69,6 +66,8 @@ engine_text_t *engine_text(engine_vec2_t position,
                            engine_color_t foreground);
 
 void engine_text_destroy(engine_text_t *text);
+
+char *engine_text_to_str(const char *text);
 
 // FIXME those function should return engine_text_t instead of rendering
 // directly, then the user can use  the painter to render text.
