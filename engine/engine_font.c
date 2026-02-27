@@ -1,85 +1,145 @@
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "engine_font.h"
 #include "engine_image.h"
 #include "engine_mem.h"
-#include "engine_painter.h"
 
-struct engine_font_s
+static engine_font_t *
+engine_font_generate_atlas_from_ttf(TTF_Font *ttf_font,
+                                    engine_vec2_t icon_range,
+                                    engine_vec2_t char_range,
+                                    int char_spacing,
+                                    int line_spacing)
 {
-  engine_image_t image;
-  engine_rect_t *glyphs;
-  size_t glyph_count;
-  int glyph_spacing_index;
-  int char_spacing;
-  int line_spacing;
-};
+  char *glyphs = NULL;
+  size_t glyphs_count
+      = (icon_range.y - icon_range.x + 1) + (char_range.y - char_range.x + 1);
+  ENGINE_ALLOC(glyphs, glyphs_count);
+  if (!glyphs) {
+    // TODO handle error
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to allocate memory for font glyphs.");
+    return NULL;
+  }
 
-static void
-engine_font_discard_color_tag(char *cursor)
-{
-  if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
-    // Discard opening tag
-    *cursor += 2;
-    while (*cursor && *cursor != '}') {
-      cursor++;
+  // Generate a string containing all icons and char.
+  for (int i = icon_range.x; i <= icon_range.y; ++i) {
+    *glyphs++ = (char)i;
+  }
+  for (int i = char_range.x; i <= char_range.y; ++i) {
+    *glyphs++ = (char)i;
+  }
+
+  // Render the glyphs to a surface
+  SDL_Surface *surface = TTF_RenderText_Blended(
+      ttf_font, glyphs, glyphs_count, (SDL_Color){ 255, 255, 255, 255 });
+
+  if (!surface) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to render font glyphs to surface.");
+    // TODO handle error
+    ENGINE_FREE(ttf_font);
+    ENGINE_FREE(glyphs);
+    return NULL;
+  }
+
+  engine_rect_t *glyph_rects = NULL;
+  ENGINE_ALLOC(glyph_rects, glyphs_count * sizeof(engine_rect_t));
+  if (!glyph_rects) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to allocate memory for font glyph rects.");
+    // TODO handle error
+    ENGINE_FREE(ttf_font);
+    ENGINE_FREE(glyphs);
+    SDL_FreeSurface(surface);
+    return NULL;
+  }
+
+  for (size_t i = 0; i < glyphs_count; ++i) {
+    int min_x, max_x, min_y, max_y, advance;
+
+    if (!TTF_GetGlyphMetrics(
+            ttf_font, glyphs[i], &min_x, &max_x, &min_y, &max_y, &advance)) {
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                   "Failed to get glyph metrics for character '%c'.",
+                   glyphs[i]);
+      // TODO handle error
+      ENGINE_FREE(ttf_font);
+      ENGINE_FREE(glyphs);
+      ENGINE_FREE(glyph_rects);
+      SDL_FreeSurface(surface);
+      return NULL;
     }
-    cursor++;
-  } else if (*cursor + 1 == '/' && *cursor + 2 == 'c' && *cursor + 3 == '}') {
-    // Discard the closing tag
-    *cursor += 4;
+
+    glyph_rects[i] = (engine_rect_t){
+      .x = min_x,
+      .y = min_y,
+      .w = max_x - min_x,
+      .h = max_y - min_y,
+    };
   }
+
+  engine_font_t *font = NULL;
+  ENGINE_NEW(font);
+  if (!font) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to allocate memory for TTF font.");
+    // TODO handle error
+    return NULL;
+  }
+
+  font->image = engine_image_load_mem(surface->w, surface->h, surface->pixels);
+  SDL_FreeSurface(surface);
+
+  font->glyphs              = glyph_rects;
+  font->glyph_count         = glyphs_count;
+  font->free_glyphs         = true;
+  font->glyph_spacing_index = char_range.x;
+  font->char_spacing        = char_spacing;
+  font->line_spacing        = line_spacing;
 }
 
-static engine_color_t
-engine_font_handle_color_tag(char *cursor)
+engine_font_t *
+engine_font_load_ttf(const char *path,
+                     engine_vec2_t icon_range,
+                     engine_vec2_t char_range,
+                     int font_size,
+                     int char_spacing,
+                     int line_spacing)
 {
-  cursor += 3; // Discard the "{c=" part
+  SDL_assert(path);
 
-  char color_str[9]; // 8 characters for RGBA + null terminator
+  TTF_Font *ttf_font = TTF_OpenFont(path, font_size);
 
-  for (int i = 0; i < 8 && cursor[i] && cursor[i] != '}'; ++i) {
-    color_str[i]     = cursor[i];
-    color_str[i + 1] = '\0';
-  }
+  engine_font_t *font = engine_font_generate_atlas_from_ttf(
+      ttf_font, icon_range, char_range, char_spacing, line_spacing);
 
-  Uint32 color_value = SDL_strtoul(color_str, NULL, 16);
+  TTF_CloseFont(ttf_font);
 
-  engine_color_t color = {
-    .r = (color_value >> 24) & 0xFF,
-    .g = (color_value >> 16) & 0xFF,
-    .b = (color_value >> 8) & 0xFF,
-    .a = color_value & 0xFF,
-  };
-
-  return color;
+  return font;
 }
 
-static int
-engine_font_handle_icon_tag(const engine_font_t *font, char *cursor)
+engine_font_t *
+engine_font_load_ttf_mem(const void *data,
+                         size_t data_size,
+                         engine_vec2_t icon_range,
+                         engine_vec2_t char_range,
+                         int font_size,
+                         int char_spacing,
+                         int line_spacing)
 {
-  cursor += 3; // Discard the "{i=" part
+  SDL_assert(data);
 
-  char icon_index_str[16];
+  TTF_Font *ttf_font
+      = TTF_OpenFontIO(SDL_IOFromConstMem(data, data_size), true, font_size);
 
-  for (int i = 0; *cursor && *cursor != '}'; ++i) {
-    icon_index_str[i]     = *cursor;
-    icon_index_str[i + 1] = '\0';
-    cursor++;
-  }
+  engine_font_t *font = engine_font_generate_atlas_from_ttf(
+      ttf_font, icon_range, char_range, char_spacing, line_spacing);
 
-  cursor++; // Discard the closing '}'
+  TTF_CloseFont(ttf_font);
 
-  int icon_index = SDL_strtol(icon_index_str, NULL, 10);
-
-  if (icon_index < font->glyph_spacing_index) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Invalid glyph index: %d. Icon indices must be 224 or higher.",
-                icon_index);
-    return -1;
-  }
-
-  return icon_index;
+  return font;
 }
 
 engine_font_t *
@@ -147,8 +207,15 @@ engine_font_atlas_mem(unsigned int width,
 void
 engine_font_destroy(engine_font_t *font)
 {
-  if (!font)
+  if (!font) {
     engine_image_destroy(font->image);
+
+    if (font->free_glyphs) {
+      ENGINE_FREE(font->glyphs);
+    }
+
+    ENGINE_FREE(font);
+  }
 }
 
 int
@@ -179,282 +246,11 @@ engine_font_set_line_spacing(engine_font_t *font, int line_spacing)
   font->line_spacing = line_spacing;
 }
 
-engine_vec2_t
-engine_font_measure_text(const engine_font_t *font, const char *text)
-{
-  SDL_assert(font);
-
-  if (!text) {
-    return (engine_vec2_t){ .x = 0, .y = 0 };
-  }
-
-  engine_vec2_t retval = { .x = 0, .y = 0 };
-
-  retval.y = font->line_spacing;
-
-  char *cursor = (char *)text;
-
-  while (*cursor) {
-    int glyphs_index = (int)*cursor - font->glyph_spacing_index;
-
-    switch (*cursor) {
-    case '\n':
-      retval.y += font->line_spacing;
-      cursor++;
-      break;
-    case '{':
-      if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
-        // Handle for color tags
-        engine_font_discard_color_tag(cursor);
-      } else if (*cursor + 1 == '/' && *cursor + 2 == 'c'
-                 && *cursor + 3 == '}') {
-        // Handle for closing color tags
-        engine_font_discard_color_tag(cursor);
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-        // Handle for icon tag
-        int icon_index = engine_font_handle_icon_tag(font, cursor);
-
-        if (icon_index >= 0) {
-          retval.x += (font->glyphs[icon_index].w + font->char_spacing);
-        }
-      }
-      break;
-    default:
-      // Discard invalid characters
-      if (*cursor < ' ') {
-        cursor++;
-        continue;
-      }
-
-      retval.x += (font->glyphs[glyphs_index].w + font->char_spacing);
-      cursor++;
-    }
-  }
-
-  return retval;
-}
-
-char *
-engine_font_wrap_text(const engine_font_t *font,
-                      const char *text,
-                      float max_width,
-                      float *out_height)
-{
-  SDL_assert(font);
-
-  if (!text) {
-    if (out_height) {
-      *out_height = 0;
-    }
-    return NULL;
-  }
-
-  // Create buffer
-  size_t buffer_size  = 256;
-  size_t buffer_count = 0;
-
-  char *wrapped_text = NULL;
-  ENGINE_ALLOC(wrapped_text, buffer_size);
-  if (!wrapped_text) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for wrapped text");
-    // TODO add error
-    return NULL;
-  }
-
-  int width = 0;
-
-  char *cursor = (char *)text;
-
-  while (*cursor) {
-    switch (*cursor) {
-    case '\n':
-      width = 0;
-      break;
-    case '{':
-      if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
-        // Check for color tags
-        engine_font_discard_color_tag(cursor);
-      } else if (*cursor + 1 == '/' && *cursor + 2 == 'c'
-                 && *cursor + 3 == '}') {
-        // Check for closing color tags
-        engine_font_discard_color_tag(cursor);
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-        // Check for icon tags
-        cursor += 3; // Skip the "{i=" part
-        int icon_index = engine_font_handle_icon_tag(font, cursor);
-
-        if (icon_index >= 0) {
-          width += (font->glyphs[icon_index].w + font->char_spacing);
-        }
-      }
-      break;
-    default: {
-      // Discard invalid characters
-      if (*cursor < ' ') {
-        cursor++;
-        continue;
-      }
-
-      int glyphs_index = (int)*cursor - font->glyph_spacing_index;
-
-      int next_width
-          = width + font->glyphs[glyphs_index].w + font->char_spacing;
-
-      // Add a line break if adding the next character would exceed the maximum
-      // width
-      if (next_width > max_width) {
-        //  Check if we need to reallocate the buffer before adding the current
-        if (buffer_count + 1 >= buffer_size) {
-          goto realloc;
-        }
-
-        wrapped_text[buffer_count++] = '\n';
-        width                        = 0;
-      }
-
-      //  Check if we need to reallocate the buffer before adding the current
-      //  character
-      if (buffer_count + 1 >= buffer_size) {
-        goto realloc;
-      }
-
-      wrapped_text[buffer_count++] = *cursor;
-      width                        = next_width;
-
-      cursor++;
-    } break;
-    }
-
-    continue; // Skip the realloc part
-
-  realloc:
-    // If passed here, the cursor was not incremented, so we need to process the
-    // same character again after reallocating.
-    buffer_size *= 2;
-
-    char *new_buffer = NULL;
-    ENGINE_ALLOC(new_buffer, buffer_size);
-    if (!new_buffer) {
-      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                   "Failed to allocate memory for wrapped text");
-      // TODO add error
-      ENGINE_FREE(wrapped_text);
-      return NULL;
-    }
-
-    SDL_memcpy(new_buffer, wrapped_text, buffer_count);
-    ENGINE_FREE(wrapped_text);
-
-    wrapped_text = new_buffer;
-  }
-
-  return NULL;
-}
-
-void
-engine_font_render_glyph(engine_vec2_t position,
-                         const engine_font_t *font,
-                         int glyphs_index,
-                         engine_color_t background,
-                         engine_color_t foreground)
+engine_rect_t
+engine_font_get_glyph_rect(const engine_font_t *font, int glyphs_index)
 {
   SDL_assert(font);
   SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
 
-  engine_rect_t glyph_rect = font->glyphs[glyphs_index];
-
-  engine_rect_t dest_rect = {
-    .x = position.x, .y = position.y, .w = glyph_rect.w, .h = glyph_rect.h
-  };
-  engine_rect_t src_rect = {
-    .x = glyph_rect.x, .y = glyph_rect.y, .w = glyph_rect.w, .h = glyph_rect.h
-  };
-
-  engine_painter_set_color(
-      background.r, background.g, background.b, background.a);
-  engine_painter_draw_filled_rect(
-      dest_rect.x, dest_rect.y, dest_rect.w, dest_rect.h);
-
-  engine_painter_set_image(font->image);
-  engine_painter_set_color(
-      foreground.r, foreground.g, foreground.b, foreground.a);
-
-  engine_painter_draw_textured_rect(dest_rect, src_rect);
-}
-
-void
-engine_font_render_char(engine_vec2_t position,
-                        const engine_font_t *font,
-                        char c,
-                        engine_color_t background,
-                        engine_color_t foreground)
-{
-  SDL_assert(font);
-
-  if (c < ' ') {
-    return;
-  }
-
-  int glyphs_index = (int)c - font->glyph_spacing_index;
-
-  engine_font_render_glyph(
-      position, font, glyphs_index, background, foreground);
-}
-
-void
-engine_font_render_text(engine_vec2_t position,
-                        const engine_font_t *font,
-                        const char *text,
-                        engine_color_t background,
-                        engine_color_t foreground)
-{
-  SDL_assert(font);
-  if (!text) {
-    return;
-  }
-
-  engine_color_t current_color = foreground;
-
-  char *cursor = (char *)text;
-
-  while (*cursor) {
-    switch (*cursor) {
-    case '\n':
-      position.y += (font->line_spacing);
-      position.x = 0;
-      cursor++;
-      break;
-    case '{':
-      if (*cursor + 1 == 'c' && *cursor + 12 == '}') {
-        // Handle color tags
-        current_color = engine_font_handle_color_tag(cursor);
-      } else if (*cursor + 1 == '/' && *cursor + 2 == 'c'
-                 && *cursor + 3 == '}') {
-        // Handle closing color tags
-        current_color = foreground;
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-        // Handle icon tags
-        int icon_index = engine_font_handle_icon_tag(font, cursor);
-
-        if (icon_index >= 0) {
-          engine_font_render_glyph(
-              position, font, icon_index, background, current_color);
-        }
-      }
-    default:
-      // Discard invalid characters
-      if (*cursor < ' ') {
-        cursor++;
-        continue;
-      }
-
-      engine_font_render_char(
-          position, font, *cursor, background, current_color);
-
-      position.x += (font->glyphs[*cursor - font->glyph_spacing_index].w
-                     + font->char_spacing);
-      cursor++;
-    }
-  }
+  return font->glyphs[glyphs_index];
 }

@@ -1,4 +1,5 @@
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include <SDL3/SDL_init.h>
 #define SDL_MAIN_USE_CALLBACKS
@@ -38,6 +39,7 @@ engine_quit(void)
 
   PHYSFS_deinit();
 
+  TTF_Quit();
   SDL_Quit();
 }
 
@@ -149,6 +151,14 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 #endif
 
   if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Couldn't initialize SDL: %s\n",
+                 SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
+
+  if (!TTF_Init()) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL_ttf.");
     return SDL_APP_FAILURE;
   }
 
@@ -371,7 +381,6 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
       break;
     engine_gamepad_button_up(index, event->gbutton.button);
   } break;
-
   case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
     SDL_JoystickID id = event->gaxis.which;
     int index         = SDL_GetGamepadPlayerIndexForID(id);
