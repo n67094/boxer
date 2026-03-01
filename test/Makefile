@@ -40,7 +40,7 @@ SANITIZER ?= 0
 
 CC = gcc
 
-LDFLAGS = -lSDL3 -lm
+LDFLAGS = -lSDL3 -lSDL3_ttf -lm
 
 CFLAGS = -std=c99 -Wall
 

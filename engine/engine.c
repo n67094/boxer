@@ -93,7 +93,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   char mount_dir[ENGINE_PATH_MAX];
   SDL_snprintf(mount_dir, ENGINE_PATH_MAX, "%s%s", base_dir, ENGINE_DATA_DIR);
 
-  if (!PHYSFS_mount(mount_dir, NULL, 1)) {
+  if (!PHYSFS_mount(mount_dir, "data/", 1)) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                 "Failed to mount %s: (error code: %d)",
                 mount_dir,
@@ -107,22 +107,63 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   engine_inir_t *config_ini = engine_inir("config.ini");
 
   if (config_ini) {
-    config->width = engine_inir_number_or_else(
+    // Read width from ini
+    int width = engine_inir_number_or_else(
         config_ini, "window", "width", config->width);
-    config->height = engine_inir_number_or_else(
-        config_ini, "window", "height", config->height);
+    if (width != config->width) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Overriding config width from %d to %d",
+                  config->width,
+                  width);
+      config->width = width;
+    }
 
-    config->fullscreen
+    // Read height from ini
+    int height = engine_inir_number_or_else(
+        config_ini, "window", "height", config->height);
+    if (height != config->height) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Overriding config height from %d to %d",
+                  config->height,
+                  height);
+      config->height = height;
+    }
+
+    // Read fullscreen from ini
+    bool fullscreen
         = engine_inir_number_or_else(
               config_ini, "window", "fullscreen", config->fullscreen)
           != 0;
-    config->resizable
-        = engine_inir_number_or_else(
-              config_ini, "window", "resizable", config->resizable)
-          != 0;
+    if (fullscreen != config->fullscreen) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Overriding config fullscreen from %d to %d",
+                  config->fullscreen,
+                  fullscreen);
+      config->fullscreen = fullscreen;
+    }
 
-    config->target_ups = engine_inir_number_or_else(
+    // Read resizable from ini
+    bool resizable = engine_inir_number_or_else(
+                         config_ini, "window", "resizable", config->resizable)
+                     != 0;
+    if (resizable != config->resizable) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Overriding config resizable from %d to %d",
+                  config->resizable,
+                  resizable);
+      config->resizable = resizable;
+    }
+
+    // Read target_ups from ini
+    int target_ups = engine_inir_number_or_else(
         config_ini, "window", "target_ups", config->target_ups);
+    if (target_ups != config->target_ups) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Overriding config target_ups from %d to %d",
+                  config->target_ups,
+                  target_ups);
+      config->target_ups = target_ups;
+    }
 
     engine_inir_destroy(config_ini);
   }
@@ -346,7 +387,8 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
 
   switch (event->type) {
   case SDL_EVENT_WINDOW_RESIZED:
-    engine_context_set_window_size(event->window.data1, event->window.data2);
+    engine_context_set_window_dimensions(event->window.data1,
+                                         event->window.data2);
     break;
   case SDL_EVENT_KEY_DOWN:
     engine_key_down((engine_key_e)event->key.scancode);

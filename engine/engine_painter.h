@@ -61,6 +61,8 @@ void engine_painter_begin(int width, int height);
 void engine_painter_flush(void);
 void engine_painter_end(void);
 
+engine_vec2_t engine_painter_dimensions(void);
+
 void
 engine_painter_set_projection(float left, float right, float bottom, float top);
 void engine_painter_reset_projection(void);

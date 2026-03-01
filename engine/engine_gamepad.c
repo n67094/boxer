@@ -105,15 +105,18 @@ engine_gamepad_update(void)
         SDL_memset(_gamepads[j].axis, 0, sizeof(_gamepads[j].axis));
         SDL_memset(_gamepads[j].axis_prev, 0, sizeof(_gamepads[j].axis_prev));
         break;
-      } else {
-        // If the slot is not empty update the state
-        SDL_memcpy(_gamepads[i].buttons_prev,
-                   _gamepads[i].buttons,
-                   sizeof(_gamepads[i].buttons));
-        SDL_memcpy(_gamepads[i].axis_prev,
-                   _gamepads[i].axis,
-                   sizeof(_gamepads[i].axis));
       }
+    }
+  }
+
+  // Update previous state for all gamepads
+  for (int i = 0; i < ENGINE_GAMEPAD_MAX; ++i) {
+    if (_gamepads[i].gamepad != NULL) {
+      SDL_memcpy(_gamepads[i].buttons_prev,
+                 _gamepads[i].buttons,
+                 sizeof(_gamepads[i].buttons));
+      SDL_memcpy(
+          _gamepads[i].axis_prev, _gamepads[i].axis, sizeof(_gamepads[i].axis));
     }
   }
 

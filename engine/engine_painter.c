@@ -304,13 +304,13 @@ engine_painter_setup(engine_context_t *context)
   }
 
   _painter.shader = engine_shader_make(
-      &(engine_shader_desc_t){ .name                 = "shaders/painter.vert",
-                               .num_samplers         = 0,
+      &(engine_shader_desc_t){ .name         = "data/shaders/painter.vert",
+                               .num_samplers = 0,
                                .num_uniform_buffers  = 0,
                                .num_storage_buffers  = 0,
                                .num_storage_textures = 0 },
-      &(engine_shader_desc_t){ .name                 = "shaders/painter.frag",
-                               .num_samplers         = 1,
+      &(engine_shader_desc_t){ .name         = "data/shaders/painter.frag",
+                               .num_samplers = 1,
                                .num_uniform_buffers  = 0,
                                .num_storage_buffers  = 0,
                                .num_storage_textures = 0 });
@@ -560,6 +560,15 @@ engine_painter_end(void)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
   _painter.state = _painter.states[--_painter.current_state];
+}
+
+engine_vec2_t
+engine_painter_dimensions(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.current_state > 0);
+
+  return engine_vec2_make(_painter.state.viewport.w, _painter.state.viewport.h);
 }
 
 void

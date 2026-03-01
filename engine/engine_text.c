@@ -101,11 +101,11 @@ engine_text_handle_icon_tag(const engine_font_t *font, char *cursor)
 }
 
 engine_text_t *
-engine_tex_glyph(engine_vec2_t position,
-                 const engine_font_t *font,
-                 int glyphs_index,
-                 engine_color_t background,
-                 engine_color_t foreground)
+engine_text_glyph_make(engine_vec2_t position,
+                       const engine_font_t *font,
+                       int glyphs_index,
+                       engine_color_t background,
+                       engine_color_t foreground)
 {
   SDL_assert(font);
   SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
@@ -140,39 +140,14 @@ engine_tex_glyph(engine_vec2_t position,
   text->entries[0].foreground = foreground;
 
   return text;
-
-  /*
-  SDL_assert(font);
-  SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
-
-  engine_rect_t glyph_rect = font->glyphs[glyphs_index];
-
-  engine_rect_t dest_rect = {
-    .x = position.x, .y = position.y, .w = glyph_rect.w, .h = glyph_rect.h
-  };
-  engine_rect_t src_rect = {
-    .x = glyph_rect.x, .y = glyph_rect.y, .w = glyph_rect.w, .h = glyph_rect.h
-  };
-
-  engine_painter_set_color(
-      background.r, background.g, background.b, background.a);
-  engine_painter_draw_filled_rect(
-      dest_rect.x, dest_rect.y, dest_rect.w, dest_rect.h);
-
-  engine_painter_set_image(font->image);
-  engine_painter_set_color(
-      foreground.r, foreground.g, foreground.b, foreground.a);
-
-  engine_painter_draw_textured_rect(dest_rect, src_rect);
-  */
 }
 
 engine_text_t *
-engine_text_char(engine_vec2_t position,
-                 const engine_font_t *font,
-                 char c,
-                 engine_color_t background,
-                 engine_color_t foreground)
+engine_text_char_make(engine_vec2_t position,
+                      const engine_font_t *font,
+                      char c,
+                      engine_color_t background,
+                      engine_color_t foreground)
 {
   SDL_assert(font);
 
@@ -212,18 +187,136 @@ engine_text_char(engine_vec2_t position,
   return text;
 }
 
-char *
-engine_text_to_str(const char *text)
+engine_text_t *
+engine_text_make(engine_vec2_t position,
+                 const engine_font_t *font,
+                 const char *rich_str,
+                 engine_color_t background,
+                 engine_color_t foreground)
 {
-  SDL_assert(text);
+  SDL_assert(font);
+  if (!rich_str) {
+    return NULL;
+  }
+
+  size_t rich_str_len = engine_text_length(rich_str);
+
+  engine_text_t *text = NULL;
+  ENGINE_ALLOC(text, rich_str_len * sizeof(engine_text_t));
+  if (!text) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to allocate memory for rendered text");
+    // TODO add error
+    return NULL;
+  }
+
+  text->entry_count = rich_str_len;
+  ENGINE_ALLOC(text->entries, text->entry_count);
+  if (!text->entries) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to allocate memory for rendered text entries");
+    // TODO add error
+    ENGINE_FREE(text);
+    return NULL;
+  }
+
+  engine_color_t current_foreground = foreground;
+  engine_color_t current_background = background;
+
+  char *cursor = (char *)rich_str;
+
+  int entry_index = 0;
+
+  while (*cursor) {
+    switch (*cursor) {
+    case '\n':
+      position.y += (font->line_spacing);
+      position.x = 0;
+      cursor++;
+      break;
+    case '{':
+      if (*cursor + 1 == 'b' && *cursor + 12 == '}') { // Background
+        // Handle color tags
+        current_background = engine_text_handle_color_tag(cursor);
+      } else if (*cursor + 1 == '/' && *cursor + 2 == 'b'
+                 && *cursor + 3 == '}') {
+        // Handle closing color tags
+        current_background = background;
+      } else if (*cursor + 1 == 'f' && *cursor + 12 == '}') { // Foreground
+        // Handle color tags
+        current_foreground = engine_text_handle_color_tag(cursor);
+      } else if (*cursor + 1 == '/' && *cursor + 2 == 'f'
+                 && *cursor + 3 == '}') {
+        // Handle closing color tags
+        current_foreground = foreground;
+      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') { // Icon
+        // Handle icon tags
+        int icon_index = engine_text_handle_icon_tag(font, cursor);
+
+        if (icon_index >= 0) {
+          text->entries[entry_index++] = (engine_text_entry_t){
+            .dest_rect  = (engine_rect_t){
+              .x = position.x,
+              .y = position.y,
+              .w = font->glyphs[icon_index].w,
+              .h = font->glyphs[icon_index].h,
+            },
+            .src_rect   = &font->glyphs[icon_index],
+            .background = current_background,
+            .foreground = current_foreground,
+          };
+        }
+      }
+      break;
+    default:
+      // Discard invalid characters
+      if (*cursor < ' ') {
+        cursor++;
+        continue;
+      }
+
+      text->entries[entry_index++] = (engine_text_entry_t){
+        .dest_rect  = (engine_rect_t){
+          .x = position.x,
+          .y = position.y,
+          .w = font->glyphs[*cursor - font->glyph_spacing_index].w,
+          .h = font->glyphs[*cursor - font->glyph_spacing_index].h,
+        },
+        .src_rect   = &font->glyphs[*cursor - font->glyph_spacing_index],
+        .background = current_background,
+        .foreground = current_foreground,
+      };
+
+      position.x += (font->glyphs[*cursor - font->glyph_spacing_index].w
+                     + font->char_spacing);
+      cursor++;
+    }
+  }
+
+  return text;
+}
+
+void
+engine_text_destroy(engine_text_t *text)
+{
+  if (text) {
+    ENGINE_FREE(text->entries);
+    ENGINE_FREE(text);
+  }
+}
+
+char *
+engine_text_remove_tags(const char *rich_str)
+{
+  SDL_assert(rich_str);
 
   // The length should be the same or shorter than the original text, since
   // we're discarding tags and invalid characters.
-  size_t text_length = engine_text_length(text);
+  size_t rich_str_len = engine_text_length(rich_str);
 
   char *buffer     = NULL;
   int buffer_count = 0;
-  ENGINE_ALLOC(buffer, text_length + 1); // +1 for null terminator
+  ENGINE_ALLOC(buffer, rich_str_len + 1); // +1 for null terminator
   if (!buffer) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to allocate memory for text string");
@@ -231,7 +324,7 @@ engine_text_to_str(const char *text)
     return NULL;
   }
 
-  char *cursor = (char *)text;
+  char *cursor = (char *)rich_str;
 
   while (*cursor) {
     switch (*cursor) {
@@ -241,12 +334,10 @@ engine_text_to_str(const char *text)
       break;
     case '{':
       if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
-        // Handle for color tags
         engine_text_discard_color_tag(cursor);
       } else if (*cursor + 1 == '/'
                  && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
                  && *cursor + 3 == '}') {
-        // Handle for closing color tags
         engine_text_discard_color_tag(cursor);
       } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
         engine_text_discard_icon_tag(cursor);
@@ -268,85 +359,34 @@ engine_text_to_str(const char *text)
   return buffer;
 }
 
-void
-engine_font_render_text(engine_vec2_t position,
-                        const engine_font_t *font,
-                        const char *text,
-                        engine_color_t background,
-                        engine_color_t foreground)
+size_t
+engine_text_length(const char *rich_str)
 {
-  SDL_assert(font);
-  if (!text) {
-    return;
+  if (!rich_str) {
+    return 0;
   }
 
-  size_t text_length = engine_text_length(text);
+  int count = 0;
 
-  engine_text_t *retval = NULL;
-  ENGINE_ALLOC(retval, text_length * sizeof(engine_text_t));
-  if (!text) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for rendered text");
-    // TODO add error
-    return;
-  }
-
-  retval->entry_count = text_length;
-  ENGINE_ALLOC(retval->entries, retval->entry_count);
-  if (!retval->entries) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for rendered text entries");
-    // TODO add error
-    ENGINE_FREE(retval);
-    return;
-  }
-
-  engine_color_t cur_foreground = foreground;
-  engine_color_t cur_background = background;
-
-  char *cursor = (char *)text;
-
-  int entry_index = 0;
+  char *cursor = (char *)rich_str;
 
   while (*cursor) {
     switch (*cursor) {
     case '\n':
-      position.y += (font->line_spacing);
-      position.x = 0;
+      count++;
       cursor++;
       break;
     case '{':
-      if (*cursor + 1 == 'b' && *cursor + 12 == '}') { // Background
-        // Handle color tags
-        cur_background = engine_text_handle_color_tag(cursor);
-      } else if (*cursor + 1 == '/' && *cursor + 2 == 'b'
+      if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
+        engine_text_discard_color_tag(cursor);
+      } else if (*cursor + 1 == '/'
+                 && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
                  && *cursor + 3 == '}') {
-        // Handle closing color tags
-        cur_background = background;
-      } else if (*cursor + 1 == 'f' && *cursor + 12 == '}') { // Foreground
-        // Handle color tags
-        cur_foreground = engine_text_handle_color_tag(cursor);
-      } else if (*cursor + 1 == '/' && *cursor + 2 == 'f'
-                 && *cursor + 3 == '}') {
-        // Handle closing color tags
-        cur_foreground = foreground;
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') { // Icon
-        // Handle icon tags
-        int icon_index = engine_text_handle_icon_tag(font, cursor);
-
-        if (icon_index >= 0) {
-          retval->entries[entry_index++] = (engine_text_entry_t){
-            .dest_rect  = (engine_rect_t){
-              .x = position.x,
-              .y = position.y,
-              .w = font->glyphs[icon_index].w,
-              .h = font->glyphs[icon_index].h,
-            },
-            .src_rect   = &font->glyphs[icon_index],
-            .background = cur_background,
-            .foreground = cur_foreground,
-          };
-        }
+        engine_text_discard_color_tag(cursor);
+      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
+        engine_text_discard_icon_tag(cursor);
+        count++;
+        cursor++;
       }
       break;
     default:
@@ -356,31 +396,21 @@ engine_font_render_text(engine_vec2_t position,
         continue;
       }
 
-      retval->entries[entry_index++] = (engine_text_entry_t){
-        .dest_rect  = (engine_rect_t){
-          .x = position.x,
-          .y = position.y,
-          .w = font->glyphs[*cursor - font->glyph_spacing_index].w,
-          .h = font->glyphs[*cursor - font->glyph_spacing_index].h,
-        },
-        .src_rect   = &font->glyphs[*cursor - font->glyph_spacing_index],
-        .background = cur_background,
-        .foreground = cur_foreground,
-      };
-
-      position.x += (font->glyphs[*cursor - font->glyph_spacing_index].w
-                     + font->char_spacing);
+      count++;
       cursor++;
+      break;
     }
   }
+
+  return count;
 }
 
 engine_vec2_t
-engine_text_measure(const engine_font_t *font, const char *text)
+engine_text_measure(const engine_font_t *font, const char *rich_str)
 {
   SDL_assert(font);
 
-  if (!text) {
+  if (!rich_str) {
     return (engine_vec2_t){ .x = 0, .y = 0 };
   }
 
@@ -388,7 +418,7 @@ engine_text_measure(const engine_font_t *font, const char *text)
 
   retval.y = font->line_spacing;
 
-  char *cursor = (char *)text;
+  char *cursor = (char *)rich_str;
 
   while (*cursor) {
     int glyphs_index = (int)*cursor - font->glyph_spacing_index;
@@ -431,24 +461,15 @@ engine_text_measure(const engine_font_t *font, const char *text)
   return retval;
 }
 
-void
-engine_text_destroy(engine_text_t *text)
-{
-  if (text) {
-    ENGINE_FREE(text->entries);
-    ENGINE_FREE(text);
-  }
-}
-
 char *
 engine_text_wrap(const engine_font_t *font,
-                 const char *text,
+                 const char *rich_str,
                  float max_width,
                  float *out_height)
 {
   SDL_assert(font);
 
-  if (!text) {
+  if (!rich_str) {
     if (out_height) {
       *out_height = 0;
     }
@@ -470,7 +491,7 @@ engine_text_wrap(const engine_font_t *font,
 
   int width = 0;
 
-  char *cursor = (char *)text;
+  char *cursor = (char *)rich_str;
 
   while (*cursor) {
     switch (*cursor) {

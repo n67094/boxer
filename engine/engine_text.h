@@ -34,17 +34,17 @@ typedef struct engine_text_s
   size_t entry_count;
 } engine_text_t;
 
-engine_text_t *engine_text_glyph(engine_vec2_t position,
-                                 const engine_font_t *font,
-                                 int glyphs_index,
-                                 engine_color_t background,
-                                 engine_color_t foreground);
+engine_text_t *engine_text_glyph_make(engine_vec2_t position,
+                                      const engine_font_t *font,
+                                      int glyphs_index,
+                                      engine_color_t background,
+                                      engine_color_t foreground);
 
-engine_text_t *engine_text_char(engine_vec2_t position,
-                                const engine_font_t *font,
-                                char c,
-                                engine_color_t background,
-                                engine_color_t foreground);
+engine_text_t *engine_text_char_make(engine_vec2_t position,
+                                     const engine_font_t *font,
+                                     char c,
+                                     engine_color_t background,
+                                     engine_color_t foreground);
 
 /**
  * @brief Render the given text at the specified position using the provided
@@ -59,20 +59,23 @@ engine_text_t *engine_text_char(engine_vec2_t position,
  * @note You need to be in between `engine_painter_begin()` and
  * `engine_painter_end()` to call this function.
  */
-engine_text_t *engine_text(engine_vec2_t position,
-                           const engine_font_t *font,
-                           const char *text,
-                           engine_color_t background,
-                           engine_color_t foreground);
+engine_text_t *engine_text_make(engine_vec2_t position,
+                                const engine_font_t *font,
+                                const char *rich_str,
+                                engine_color_t background,
+                                engine_color_t foreground);
 
 void engine_text_destroy(engine_text_t *text);
 
-char *engine_text_to_str(const char *text);
+char *engine_text_remove_tags(const char *rich_str);
 
 // FIXME those function should return engine_text_t instead of rendering
 // directly, then the user can use  the painter to render text.
 
-size_t engine_text_length(const char *text);
+/**
+ * @brief Get the length of a
+ */
+size_t engine_text_length(const char *rich_str);
 
 /**
  * @brief Measure the width and height of the given text when rendered with the
@@ -85,7 +88,7 @@ size_t engine_text_length(const char *text);
  *         measured text.
  */
 engine_vec2_t engine_font_measure_text(const engine_font_t *font,
-                                       const char *text);
+                                       const char *rich_str);
 
 /**
  * @brief Wrap the given text to fit within the specified maximum width when
@@ -106,9 +109,9 @@ engine_vec2_t engine_font_measure_text(const engine_font_t *font,
  *
  * @note The caller is responsible for freeing the returned value.
  */
-char *engine_font_wrap_text(const engine_font_t *font,
-                            const char *text,
-                            float max_width,
-                            float *height);
+char *engine_text_wrap(const engine_font_t *font,
+                       const char *rich_str,
+                       float max_width,
+                       float *height);
 
 #endif // ENGINE_TEXT_H_

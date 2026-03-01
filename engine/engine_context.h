@@ -53,8 +53,8 @@ typedef struct engine_context_s
 engine_context_t *engine_context_get(void);
 bool engine_context_is_valid(void);
 
-void engine_context_set_window_size(int width, int height);
-engine_vec2_t engine_context_get_window_size(void);
+void engine_context_set_window_dimensions(int width, int height);
+engine_vec2_t engine_context_get_window_dimensions(void);
 
 void engine_context_set_fullscreen(bool fullscreen);
 bool engine_context_is_fullscreen(void);

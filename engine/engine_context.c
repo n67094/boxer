@@ -16,7 +16,7 @@ engine_context_is_valid(void)
 }
 
 void
-engine_context_set_window_size(int width, int height)
+engine_context_set_window_dimensions(int width, int height)
 {
   engine_context_t *context = engine_context_get();
   context->config.width     = width;
@@ -26,7 +26,7 @@ engine_context_set_window_size(int width, int height)
 }
 
 engine_vec2_t
-engine_context_get_window_size(void)
+engine_context_get_window_dimensions(void)
 {
   engine_context_t *context = engine_context_get();
   return (engine_vec2_t){ .x = context->config.width,

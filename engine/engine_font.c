@@ -52,7 +52,7 @@ engine_font_generate_atlas_from_ttf(TTF_Font *ttf_font,
     // TODO handle error
     ENGINE_FREE(ttf_font);
     ENGINE_FREE(glyphs);
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
     return NULL;
   }
 
@@ -68,7 +68,7 @@ engine_font_generate_atlas_from_ttf(TTF_Font *ttf_font,
       ENGINE_FREE(ttf_font);
       ENGINE_FREE(glyphs);
       ENGINE_FREE(glyph_rects);
-      SDL_FreeSurface(surface);
+      SDL_DestroySurface(surface);
       return NULL;
     }
 
@@ -90,11 +90,11 @@ engine_font_generate_atlas_from_ttf(TTF_Font *ttf_font,
   }
 
   font->image = engine_image_load_mem(surface->w, surface->h, surface->pixels);
-  SDL_FreeSurface(surface);
+  SDL_DestroySurface(surface);
 
   font->glyphs              = glyph_rects;
   font->glyph_count         = glyphs_count;
-  font->free_glyphs         = true;
+  font->shoud_free_glyphs   = true;
   font->glyph_spacing_index = char_range.x;
   font->char_spacing        = char_spacing;
   font->line_spacing        = line_spacing;
@@ -210,7 +210,7 @@ engine_font_destroy(engine_font_t *font)
   if (!font) {
     engine_image_destroy(font->image);
 
-    if (font->free_glyphs) {
+    if (font->shoud_free_glyphs) {
       ENGINE_FREE(font->glyphs);
     }
 

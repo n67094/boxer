@@ -126,7 +126,7 @@ engine_key_just_released(engine_key_e key)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
-  return _key.keys[key] && !_key.keys_prev[key];
+  return !_key.keys[key] && _key.keys_prev[key];
 }
 
 Uint64

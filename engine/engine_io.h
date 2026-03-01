@@ -5,6 +5,7 @@
 
 #include <physfs.h>
 
+#include "engine_config.h"
 #include "engine_defs.h"
 #include "engine_error.h"
 #include "engine_mem.h"

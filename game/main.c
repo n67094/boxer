@@ -12,7 +12,7 @@ engine_game_config(void)
   _config.width      = 1024;
   _config.height     = 768;
   _config.fullscreen = false;
-  _config.resizable  = false;
+  _config.resizable  = true;
   _config.target_ups = 60;
 
   return &_config;
@@ -22,7 +22,7 @@ void
 engine_game_setup(void)
 {
   // Load an image
-  _image = engine_image_load("images/logo.png");
+  _image = engine_image_load("data/images/logo.png");
 }
 
 void
@@ -145,10 +145,9 @@ engine_game_render(Uint64 alpha_time_ms)
     engine_painter_draw_textured_rect(img_dst, img_src);
 
     engine_painter_pop_transform();
-
-    engine_painter_flush();
-    engine_painter_end();
   }
+  engine_painter_flush();
+  engine_painter_end();
 }
 
 void

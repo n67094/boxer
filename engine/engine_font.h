@@ -13,7 +13,6 @@
  * The array should start with your icons (if you have any) and then continue
  * with the characters in the order of ASCII characters from 32 (space) to 255.
  *
- *
  * (You can use rxi atlas generator to generate the atlas and the corresponding
  * glyphs array: https://github.com/rxi/atlas)
  *
@@ -36,7 +35,7 @@ typedef struct engine_font_s
   int glyph_spacing_index;
   int char_spacing;
   int line_spacing;
-  bool free_glyphs; // For ttf fonts.
+  bool shoud_free_glyphs; // For ttf fonts.
 } engine_font_t;
 
 engine_font_t *engine_font_load_ttf(const char *path,
