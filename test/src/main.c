@@ -52,23 +52,27 @@ engine_game_update(Uint64 delta_time_ms)
 {
   // Cycle test left
   if (engine_key_just_pressed(ENGINE_KEY_LEFT)
-      || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_LEFT)) {
+      || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_LEFT)
+      || engine_mouse_just_pressed(ENGINE_MOUSE_LEFT)) {
     SDL_Log("Current test: %d", _current_test);
     _current_test = (_current_test + TEST_SIZE - 1) % (TEST_SIZE);
   }
 
   // Cycle test right
   if (engine_key_just_pressed(ENGINE_KEY_RIGHT)
-      || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_RIGHT)) {
+      || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_RIGHT)
+      || engine_mouse_just_pressed(ENGINE_MOUSE_RIGHT)) {
     SDL_Log("Current test: %d", _current_test);
     _current_test = (_current_test + 1) % (TEST_SIZE);
   }
 
-  if (engine_gamepad_pressed(0, ENGINE_GAMEPAD_BUTTON_SOUTH)) {
+  if (engine_key_held(ENGINE_KEY_SPACE)
+      || engine_gamepad_held(0, ENGINE_GAMEPAD_BUTTON_SOUTH)) {
     SDL_Log("pressed south");
   }
 
-  if (engine_gamepad_pressed(0, ENGINE_GAMEPAD_BUTTON_NORTH)) {
+  if (engine_key_held(ENGINE_KEY_RETURN)
+      || engine_gamepad_held(0, ENGINE_GAMEPAD_BUTTON_NORTH)) {
     SDL_Log("pressed north");
   }
 
@@ -87,9 +91,6 @@ engine_game_update(Uint64 delta_time_ms)
 void
 engine_game_render(Uint64 alpha_time_ms)
 {
-  engine_context_t *context = engine_context_get();
-  // TODO fix math window dimensions vs painter viewport dimensions, c.f
-  // test_image.c
   engine_vec2_t window_dimensions = engine_context_get_window_dimensions();
 
   engine_painter_begin(window_dimensions.x / 2,

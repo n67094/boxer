@@ -35,12 +35,12 @@ typedef enum
 // Internal API
 // -----------------------------------------------------------------
 
-void engine_mouse_setup(engine_context_t *context);
-void engine_mouse_update(void); // Should be called once per frame with the
-                                // current SDL_Event to update mouse state
+void engine_mouse_setup(void);
+void engine_mouse_begin_frame(void);
 void engine_mouse_shutdown(void);
 void engine_mouse_button_down(engine_mouse_e button,
                               engine_mouse_click_e click);
+
 void engine_mouse_button_up(engine_mouse_e button);
 void engine_mouse_motion(float x, float y);
 void engine_mouse_wheel_motion(float x, float y);
@@ -54,8 +54,7 @@ float engine_mouse_y(void);
 float engine_mouse_prev_x(void);
 float engine_mouse_prev_y(void);
 
-bool engine_mouse_pressed(engine_mouse_e button);
-bool engine_mouse_released(engine_mouse_e button);
+bool engine_mouse_held(engine_mouse_e button);
 
 bool engine_mouse_just_pressed(engine_mouse_e button);
 bool engine_mouse_just_released(engine_mouse_e button);

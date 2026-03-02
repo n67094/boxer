@@ -3,12 +3,19 @@
 #include "engine_defs.h"
 #include "engine_keyboard.h"
 
+typedef struct _engine_key_state_s
+{
+  bool is_down;
+  bool just_pressed;
+  bool just_released;
+  Uint64 pressed_at[ENGINE_KEY_SIZE];
+} _engine_key_state_t;
+
 typedef struct _engine_keyboard_s
 {
-  bool keys[ENGINE_KEY_SIZE];
-  bool keys_prev[ENGINE_KEY_SIZE];
-
-  Uint64 keys_pressed_at[ENGINE_KEY_SIZE];
+  _engine_key_state_t keys[ENGINE_KEY_SIZE];
+  bool just_pressed_acc[ENGINE_KEY_SIZE];
+  bool just_released_acc[ENGINE_KEY_SIZE];
 } _engine_keyboard_t;
 
 static Uint32 _initialized     = 0;
@@ -22,11 +29,17 @@ engine_keyboard_setup(void)
 }
 
 void
-engine_keyboard_update(void)
+engine_keyboard_begin_frame(void)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
-  SDL_memcpy(_key.keys_prev, _key.keys, sizeof(_key.keys_prev));
+  for (int i = 0; i < ENGINE_KEY_SIZE; ++i) {
+    _key.just_pressed_acc[i]  = _key.keys[i].just_pressed;
+    _key.just_released_acc[i] = _key.keys[i].just_released;
+
+    _key.keys[i].just_pressed  = false;
+    _key.keys[i].just_released = false;
+  }
 }
 
 void
@@ -39,29 +52,31 @@ engine_keyboard_shutdown(void)
 }
 
 void
-engine_key_up(engine_key_e key)
-{
-  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
-
-  if (_key.keys[key]) {
-    _key.keys_pressed_at[key] = 0;
-  }
-
-  _key.keys[key] = false;
-}
-
-void
 engine_key_down(engine_key_e key)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
 
-  if (!_key.keys[key]) {
-    _key.keys_pressed_at[key] = SDL_GetTicks();
+  if (!_key.keys[key].is_down) {
+    _key.keys[key].pressed_at[key] = SDL_GetTicks();
+    _key.keys[key].just_pressed    = true;
   }
 
-  _key.keys[key] = true;
+  _key.keys[key].is_down = true;
+}
+
+void
+engine_key_up(engine_key_e key)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
+
+  if (_key.keys[key].is_down) {
+    _key.keys[key].just_released = true;
+  }
+
+  _key.keys[key].pressed_at[key] = 0;
+  _key.keys[key].is_down         = false;
 }
 
 const char *
@@ -98,19 +113,11 @@ engine_key_name_ex(engine_key_e key, engine_keymode_e mod)
 }
 
 bool
-engine_key_pressed(engine_key_e key)
+engine_key_held(engine_key_e key)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
-  return _key.keys[key];
-}
-
-bool
-engine_key_released(engine_key_e key)
-{
-  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
-  return _key.keys[key];
+  return _key.keys[key].is_down;
 }
 
 bool
@@ -118,7 +125,8 @@ engine_key_just_pressed(engine_key_e key)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
-  return _key.keys[key] && !_key.keys_prev[key];
+
+  return _key.just_pressed_acc[key];
 }
 
 bool
@@ -126,7 +134,8 @@ engine_key_just_released(engine_key_e key)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
-  return !_key.keys[key] && _key.keys_prev[key];
+
+  return _key.just_released_acc[key];
 }
 
 Uint64
@@ -135,8 +144,8 @@ engine_key_held_time(engine_key_e key)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(key >= 0 && key < ENGINE_KEY_SIZE);
 
-  if (_key.keys[key]) {
-    return SDL_GetTicks() - _key.keys_pressed_at[key];
+  if (_key.keys[key].is_down) {
+    return SDL_GetTicks() - _key.keys[key].pressed_at[key];
   } else {
     return 0;
   }

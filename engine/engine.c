@@ -9,40 +9,6 @@
 
 #include "engine.h"
 
-void
-engine_quit(void)
-{
-  engine_context_t *context = engine_context_get();
-
-  engine_game_shutdown();
-
-  engine_gamepad_shutdown();
-  engine_mouse_shutdown();
-  engine_painter_shutdown();
-  engine_pipeline_shutdown();
-  engine_shader_shutdown();
-  engine_image_shutdown();
-
-  if (context) {
-    if (context->gpu_device && context->window) {
-      SDL_ReleaseWindowFromGPUDevice(context->gpu_device, context->window);
-    }
-
-    if (context->gpu_device) {
-      SDL_DestroyGPUDevice(context->gpu_device);
-    }
-
-    if (context->window) {
-      SDL_DestroyWindow(context->window);
-    }
-  }
-
-  PHYSFS_deinit();
-
-  TTF_Quit();
-  SDL_Quit();
-}
-
 SDL_AppResult
 SDL_AppInit(void **appstate, int argc, char **argv)
 {
@@ -279,13 +245,13 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   context->last_time_ms = SDL_GetTicks();
 
   // Setup subsystems
+  engine_keyboard_setup();
+  engine_mouse_setup();
+  engine_gamepad_setup();
   engine_image_setup(context);
   engine_shader_setup(context);
   engine_pipeline_setup(context);
   engine_painter_setup(context);
-  engine_keyboard_setup();
-  engine_mouse_setup(context);
-  engine_gamepad_setup();
 
   // Call user setup
   engine_game_setup();
@@ -324,15 +290,18 @@ SDL_AppIterate(void *appstate)
   }
 
   // Update Logic (fixed timestep)
-
   while (context->lag_ms >= context->delta_ms) {
+    engine_keyboard_begin_frame();
+    engine_mouse_begin_frame();
+    engine_gamepad_begin_frame();
+
     engine_game_update(context->delta_ms);
+
     context->lag_ms -= context->delta_ms;
     ++update_count;
   }
 
   // Render Game (variable timestep)
-
   SDL_GPUCommandBuffer *cmd_buffer
       = SDL_AcquireGPUCommandBuffer(context->gpu_device);
   if (cmd_buffer == NULL) {
@@ -356,6 +325,7 @@ SDL_AppIterate(void *appstate)
   context->target_texture = swapchain_texture;
 
   context->alpha_ms = context->lag_ms / context->delta_ms;
+
   engine_game_render(context->alpha_ms);
 
   ++frame_count;
@@ -381,15 +351,20 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
   SDL_assert(event);
   SDL_assert(engine_context_is_valid());
 
-  engine_keyboard_update();
-  engine_mouse_update();
-  engine_gamepad_update();
+  engine_gamepad_listen();
 
   switch (event->type) {
   case SDL_EVENT_WINDOW_RESIZED:
     engine_context_set_window_dimensions(event->window.data1,
                                          event->window.data2);
     break;
+  case SDL_EVENT_MOUSE_WHEEL:
+    engine_mouse_wheel_motion(event->wheel.x, event->wheel.y);
+    break;
+  case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+    return SDL_APP_SUCCESS;
+  case SDL_EVENT_QUIT:
+    return SDL_APP_SUCCESS;
   case SDL_EVENT_KEY_DOWN:
     engine_key_down((engine_key_e)event->key.scancode);
     break;
@@ -398,9 +373,6 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
     break;
   case SDL_EVENT_MOUSE_MOTION:
     engine_mouse_motion(event->motion.x, event->motion.y);
-    break;
-  case SDL_EVENT_MOUSE_WHEEL:
-    engine_mouse_wheel_motion(event->wheel.x, event->wheel.y);
     break;
   case SDL_EVENT_MOUSE_BUTTON_DOWN:
     engine_mouse_button_down((engine_mouse_e)event->button.button,
@@ -430,12 +402,6 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
       break;
     engine_gamepad_axis_motion(index, event->gaxis.axis, event->gaxis.value);
   } break;
-  case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-    engine_quit();
-    return SDL_APP_SUCCESS;
-  case SDL_EVENT_QUIT:
-    engine_quit();
-    return SDL_APP_SUCCESS;
   default:
     break;
   }
@@ -446,6 +412,34 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
 void
 SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
-  // engine_quit() is called from SDL_AppEvent on quit events, so we don't need
-  // to call it here again
+  engine_context_t *context = engine_context_get();
+
+  engine_game_shutdown();
+
+  engine_keyboard_shutdown();
+  engine_mouse_shutdown();
+  engine_gamepad_shutdown();
+  engine_painter_shutdown();
+  engine_pipeline_shutdown();
+  engine_shader_shutdown();
+  engine_image_shutdown();
+
+  if (context) {
+    if (context->gpu_device && context->window) {
+      SDL_ReleaseWindowFromGPUDevice(context->gpu_device, context->window);
+    }
+
+    if (context->gpu_device) {
+      SDL_DestroyGPUDevice(context->gpu_device);
+    }
+
+    if (context->window) {
+      SDL_DestroyWindow(context->window);
+    }
+  }
+
+  PHYSFS_deinit();
+
+  TTF_Quit();
+  SDL_Quit();
 }

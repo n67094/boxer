@@ -65,11 +65,11 @@ typedef enum
 // -----------------------------------------------------------------
 
 void engine_gamepad_setup(void);
-void engine_gamepad_update(void); // Should be called once per frame just before
-                                  // processing input events
+void engine_gamepad_listen(void);
+void engine_gamepad_begin_frame(void);
 void engine_gamepad_shutdown(void);
-void engine_gamepad_button_up(int index, engine_gamepad_button_e button);
 void engine_gamepad_button_down(int index, engine_gamepad_button_e button);
+void engine_gamepad_button_up(int index, engine_gamepad_button_e button);
 void
 engine_gamepad_axis_motion(int index, engine_gamepad_axis_e axis, float value);
 
@@ -87,8 +87,7 @@ const char *engine_gamepad_name(int index);
 
 const char *engine_gamepad_serial(int index);
 
-bool engine_gamepad_pressed(int index, engine_gamepad_button_e button);
-bool engine_gamepad_released(int index, engine_gamepad_button_e button);
+bool engine_gamepad_held(int index, engine_gamepad_button_e button);
 
 bool engine_gamepad_just_pressed(int index, engine_gamepad_button_e button);
 bool engine_gamepad_just_released(int index, engine_gamepad_button_e button);

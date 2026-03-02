@@ -3,16 +3,24 @@
 #include "engine_defs.h"
 #include "engine_gamepad.h"
 
+typedef struct _engine_gamepad_button_state_s
+{
+  bool is_down;
+  bool just_pressed;
+  bool just_released;
+  Uint64 pressed_at;
+} _engine_gamepad_button_state_t;
+
 typedef struct _engine_gamepad_s
 {
   SDL_Gamepad *gamepad;
   SDL_JoystickID id;
   const char *serial;
 
-  bool buttons[ENGINE_GAMEPAD_BUTTON_SIZE];
-  bool buttons_prev[ENGINE_GAMEPAD_BUTTON_SIZE];
+  _engine_gamepad_button_state_t buttons[ENGINE_GAMEPAD_BUTTON_SIZE];
 
-  Uint64 buttons_pressed_at[ENGINE_GAMEPAD_BUTTON_SIZE];
+  bool just_pressed_acc[ENGINE_GAMEPAD_BUTTON_SIZE];
+  bool just_released_acc[ENGINE_GAMEPAD_BUTTON_SIZE];
 
   float axis[ENGINE_GAMEPAD_AXIS_SIZE];
   float axis_prev[ENGINE_GAMEPAD_AXIS_SIZE];
@@ -32,7 +40,7 @@ engine_gamepad_setup(void)
 }
 
 void
-engine_gamepad_update(void)
+engine_gamepad_listen(void)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
@@ -97,30 +105,40 @@ engine_gamepad_update(void)
         _gamepads[j].serial  = SDL_GetGamepadSerial(gamepad);
 
         SDL_memset(_gamepads[j].buttons, 0, sizeof(_gamepads[j].buttons));
-        SDL_memset(
-            _gamepads[j].buttons_prev, 0, sizeof(_gamepads[j].buttons_prev));
-        SDL_memset(_gamepads[j].buttons_pressed_at,
-                   0,
-                   sizeof(_gamepads[j].buttons_pressed_at));
         SDL_memset(_gamepads[j].axis, 0, sizeof(_gamepads[j].axis));
         SDL_memset(_gamepads[j].axis_prev, 0, sizeof(_gamepads[j].axis_prev));
         break;
       }
     }
-  }
 
-  // Update previous state for all gamepads
+    SDL_free(gamepad_ids);
+  }
+}
+
+void
+engine_gamepad_begin_frame(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+
   for (int i = 0; i < ENGINE_GAMEPAD_MAX; ++i) {
-    if (_gamepads[i].gamepad != NULL) {
-      SDL_memcpy(_gamepads[i].buttons_prev,
-                 _gamepads[i].buttons,
-                 sizeof(_gamepads[i].buttons));
-      SDL_memcpy(
-          _gamepads[i].axis_prev, _gamepads[i].axis, sizeof(_gamepads[i].axis));
+    if (_gamepads[i].gamepad == NULL) {
+      continue;
     }
-  }
 
-  SDL_free(gamepad_ids);
+    // Update just pressed/released accumulators
+    for (int j = 0; j < ENGINE_GAMEPAD_BUTTON_SIZE; ++j) {
+      _gamepads[i].just_pressed_acc[j]  = _gamepads[i].buttons[j].just_pressed;
+      _gamepads[i].just_released_acc[j] = _gamepads[i].buttons[j].just_released;
+
+      _gamepads[i].buttons[j].just_pressed  = false;
+      _gamepads[i].buttons[j].just_released = false;
+    }
+
+    // Update previous axis values
+    SDL_memcpy(_gamepads[i].axis_prev,
+               _gamepads[i].axis,
+               sizeof(_gamepads[i].axis_prev));
+  }
 }
 
 void
@@ -140,20 +158,6 @@ engine_gamepad_shutdown(void)
 }
 
 void
-engine_gamepad_button_up(int index, engine_gamepad_button_e button)
-{
-  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < ENGINE_GAMEPAD_MAX);
-
-  if (!engine_gamepad_connected(index)) {
-    return;
-  }
-
-  _gamepads[index].buttons_pressed_at[button] = 0;
-  _gamepads[index].buttons[button]            = false;
-}
-
-void
 engine_gamepad_button_down(int index, engine_gamepad_button_e button)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
@@ -163,11 +167,30 @@ engine_gamepad_button_down(int index, engine_gamepad_button_e button)
     return;
   }
 
-  if (!_gamepads[index].buttons[button]) {
-    _gamepads[index].buttons_pressed_at[button] = SDL_GetTicks();
+  if (!_gamepads[index].buttons[button].is_down) {
+    _gamepads[index].buttons[button].pressed_at   = SDL_GetTicks();
+    _gamepads[index].buttons[button].just_pressed = true;
   }
 
-  _gamepads[index].buttons[button] = true;
+  _gamepads[index].buttons[button].is_down = true;
+}
+
+void
+engine_gamepad_button_up(int index, engine_gamepad_button_e button)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(index >= 0 && index < ENGINE_GAMEPAD_MAX);
+
+  if (!engine_gamepad_connected(index)) {
+    return;
+  }
+
+  if (_gamepads[index].buttons[button].is_down) {
+    _gamepads[index].buttons[button].just_released = true;
+  }
+
+  _gamepads[index].buttons[button].pressed_at = 0;
+  _gamepads[index].buttons[button].is_down    = false;
 }
 
 void
@@ -262,7 +285,7 @@ engine_gamepad_serial(int index)
 }
 
 bool
-engine_gamepad_pressed(int index, engine_gamepad_button_e button)
+engine_gamepad_held(int index, engine_gamepad_button_e button)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(index >= 0 && index < ENGINE_GAMEPAD_MAX);
@@ -272,21 +295,7 @@ engine_gamepad_pressed(int index, engine_gamepad_button_e button)
     return false;
   }
 
-  return _gamepads[index].buttons[button];
-}
-
-bool
-engine_gamepad_released(int index, engine_gamepad_button_e button)
-{
-  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < ENGINE_GAMEPAD_MAX);
-  SDL_assert(button >= 0 && button < ENGINE_GAMEPAD_BUTTON_SIZE);
-
-  if (!engine_gamepad_connected(index)) {
-    return false;
-  }
-
-  return !_gamepads[index].buttons[button];
+  return _gamepads[index].buttons[button].is_down;
 }
 
 bool
@@ -300,8 +309,7 @@ engine_gamepad_just_pressed(int index, engine_gamepad_button_e button)
     return false;
   }
 
-  return _gamepads[index].buttons[button]
-         && !_gamepads[index].buttons_prev[button];
+  return _gamepads[index].just_pressed_acc[button];
 }
 
 bool
@@ -315,8 +323,7 @@ engine_gamepad_just_released(int index, engine_gamepad_button_e button)
     return false;
   }
 
-  return !_gamepads[index].buttons[button]
-         && _gamepads[index].buttons_prev[button];
+  return _gamepads[index].just_released_acc[button];
 }
 
 Uint64
@@ -330,8 +337,8 @@ engine_gamepad_held_time(int index, engine_gamepad_button_e button)
     return 0;
   }
 
-  if (_gamepads[index].buttons[button]) {
-    return SDL_GetTicks() - _gamepads[index].buttons_pressed_at[button];
+  if (_gamepads[index].buttons[button].is_down) {
+    return SDL_GetTicks() - _gamepads[index].buttons[button].pressed_at;
   } else {
     return 0;
   }

@@ -157,11 +157,10 @@ typedef enum
 // -----------------------------------------------------------------
 
 void engine_keyboard_setup(void);
-void engine_keyboard_update(void); // Should be called once per frame just
-                                   // before processing input events
+void engine_keyboard_begin_frame(void);
 void engine_keyboard_shutdown(void);
-void engine_key_up(engine_key_e scancode);
 void engine_key_down(engine_key_e scancode);
+void engine_key_up(engine_key_e scancode);
 
 // Public API
 // -----------------------------------------------------------------
@@ -170,8 +169,7 @@ const char *engine_key_name(engine_key_e key); // Use the current modifier state
                                                // to determine the key name
 const char *engine_key_name_ex(engine_key_e key, engine_keymode_e mod);
 
-bool engine_key_pressed(engine_key_e key);
-bool engine_key_released(engine_key_e key);
+bool engine_key_held(engine_key_e key);
 
 bool engine_key_just_pressed(engine_key_e key);
 bool engine_key_just_released(engine_key_e key);
