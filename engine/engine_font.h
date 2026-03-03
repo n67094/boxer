@@ -27,15 +27,43 @@
 #include "engine_image.h"
 #include "engine_math.h"
 
-typedef struct engine_font_s
+typedef enum
+{
+  ENGINE_FONT_TYPE_TTF,
+  ENGINE_FONT_TYPE_ATLAS,
+} engine_font_type_e;
+
+typedef struct engine_font_ttf_s
 {
   engine_image_t image;
   engine_rect_t *glyphs;
   size_t glyph_count;
-  int glyph_spacing_index;
+  engine_vec2_t icon_range;
+  engine_vec2_t char_range;
   int char_spacing;
   int line_spacing;
-  bool shoud_free_glyphs; // For ttf fonts.
+
+} engine_font_ttf_t;
+
+typedef struct engine_font_atlas_s
+{
+  engine_image_t image;
+  const engine_rect_t *glyphs;
+  size_t glyph_count;
+  engine_vec2_t icon_range;
+  engine_vec2_t char_range;
+  int char_spacing;
+  int line_spacing;
+} engine_font_atlas_t;
+
+typedef struct engine_font_s
+{
+  engine_font_type_e type;
+  union
+  {
+    engine_font_ttf_t ttf;
+    engine_font_atlas_t atlas;
+  };
 } engine_font_t;
 
 engine_font_t *engine_font_load_ttf(const char *path,
@@ -54,18 +82,20 @@ engine_font_t *engine_font_load_ttf_mem(const void *data,
                                         int line_spacing);
 
 engine_font_t *engine_font_atlas_load(const char *path,
-                                      engine_rect_t *glyphs,
+                                      const engine_rect_t *glyphs,
                                       size_t glyph_count,
-                                      int glyph_spacing_index,
+                                      engine_vec2_t icon_range,
+                                      engine_vec2_t char_range,
                                       int char_spacing,
                                       int line_spacing);
 
 engine_font_t *engine_font_atlas_mem(unsigned int width,
                                      unsigned int height,
                                      const void *data,
-                                     engine_rect_t *glyphs,
+                                     const engine_rect_t *glyphs,
                                      size_t glyph_count,
-                                     int glyph_spacing_index,
+                                     engine_vec2_t icon_range,
+                                     engine_vec2_t char_range,
                                      int char_spacing,
                                      int line_spacing);
 
@@ -76,6 +106,11 @@ void engine_font_set_char_spacing(engine_font_t *font, int spacing);
 
 int engine_font_get_line_spacing(const engine_font_t *font);
 void engine_font_set_line_spacing(engine_font_t *font, int line_spacing);
+
+engine_vec2_t engine_font_get_icon_range(const engine_font_t *font);
+engine_vec2_t engine_font_get_char_range(const engine_font_t *font);
+
+int engine_font_get_glyph_count(const engine_font_t *font);
 
 engine_rect_t engine_font_get_glyph_rect(const engine_font_t *font,
                                          int glyphs_index);

@@ -16,6 +16,7 @@
 #include "engine_context.h"
 #include "engine_defs.h"
 #include "engine_error.h"
+#include "engine_font.h"
 #include "engine_game.h"
 #include "engine_gamepad.h"
 #include "engine_image.h"
@@ -30,6 +31,7 @@
 #include "engine_pipeline.h"
 #include "engine_pool.h"
 #include "engine_shader.h"
+#include "engine_text.h"
 #include "engine_unit.h"
 
 void engine_quit(void);

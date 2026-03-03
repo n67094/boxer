@@ -12,9 +12,10 @@ engine_font_generate_atlas_from_ttf(TTF_Font *ttf_font,
                                     int char_spacing,
                                     int line_spacing)
 {
-  char *glyphs = NULL;
-  size_t glyphs_count
-      = (icon_range.y - icon_range.x + 1) + (char_range.y - char_range.x + 1);
+  char *glyphs        = NULL;
+  size_t glyphs_count = (icon_range.y - icon_range.x + 1)
+                        + (char_range.y - char_range.x + 1)
+                        + 1; // +1 for null terminator
   ENGINE_ALLOC(glyphs, glyphs_count);
   if (!glyphs) {
     // TODO handle error
@@ -30,6 +31,8 @@ engine_font_generate_atlas_from_ttf(TTF_Font *ttf_font,
   for (int i = char_range.x; i <= char_range.y; ++i) {
     *glyphs++ = (char)i;
   }
+
+  glyphs[glyphs_count - 1] = '\0'; // Null terminator
 
   // Render the glyphs to a surface
   SDL_Surface *surface = TTF_RenderText_Blended(
@@ -89,15 +92,19 @@ engine_font_generate_atlas_from_ttf(TTF_Font *ttf_font,
     return NULL;
   }
 
-  font->image = engine_image_load_mem(surface->w, surface->h, surface->pixels);
-  SDL_DestroySurface(surface);
+  font->type = ENGINE_FONT_TYPE_TTF;
 
-  font->glyphs              = glyph_rects;
-  font->glyph_count         = glyphs_count;
-  font->shoud_free_glyphs   = true;
-  font->glyph_spacing_index = char_range.x;
-  font->char_spacing        = char_spacing;
-  font->line_spacing        = line_spacing;
+  font->ttf.image
+      = engine_image_load_mem(surface->w, surface->h, surface->pixels);
+  SDL_DestroySurface(surface);
+  font->ttf.glyphs       = glyph_rects;
+  font->ttf.glyph_count  = glyphs_count;
+  font->ttf.icon_range   = icon_range;
+  font->ttf.char_range   = char_range;
+  font->ttf.line_spacing = line_spacing;
+  font->ttf.char_spacing = char_spacing;
+
+  return font;
 }
 
 engine_font_t *
@@ -111,6 +118,13 @@ engine_font_load_ttf(const char *path,
   SDL_assert(path);
 
   TTF_Font *ttf_font = TTF_OpenFont(path, font_size);
+  if (!ttf_font) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to load TTF font from path: %s",
+                 path);
+    // TODO handle error
+    return NULL;
+  }
 
   engine_font_t *font = engine_font_generate_atlas_from_ttf(
       ttf_font, icon_range, char_range, char_spacing, line_spacing);
@@ -144,9 +158,10 @@ engine_font_load_ttf_mem(const void *data,
 
 engine_font_t *
 engine_font_atlas_load(const char *path,
-                       engine_rect_t *glyphs,
+                       const engine_rect_t *glyphs,
                        size_t glyph_count,
-                       int glyph_spacing_index,
+                       engine_vec2_t icon_range,
+                       engine_vec2_t char_range,
                        int char_spacing,
                        int line_spacing)
 {
@@ -162,11 +177,14 @@ engine_font_atlas_load(const char *path,
     return NULL;
   }
 
-  font->image        = engine_image_load(path);
-  font->glyphs       = glyphs;
-  font->glyph_count  = glyph_count;
-  font->char_spacing = char_spacing;
-  font->line_spacing = line_spacing;
+  font->type               = ENGINE_FONT_TYPE_ATLAS;
+  font->atlas.image        = engine_image_load(path);
+  font->atlas.glyphs       = glyphs;
+  font->atlas.glyph_count  = glyph_count;
+  font->atlas.icon_range   = icon_range;
+  font->atlas.char_range   = char_range;
+  font->atlas.char_spacing = char_spacing;
+  font->atlas.line_spacing = line_spacing;
 
   return font;
 }
@@ -175,9 +193,10 @@ engine_font_t *
 engine_font_atlas_mem(unsigned int width,
                       unsigned int height,
                       const void *data,
-                      engine_rect_t *glyphs,
+                      const engine_rect_t *glyphs,
                       size_t glyph_count,
-                      int glyph_spacing_index,
+                      engine_vec2_t icon_range,
+                      engine_vec2_t char_range,
                       int char_spacing,
                       int line_spacing)
 {
@@ -195,11 +214,15 @@ engine_font_atlas_mem(unsigned int width,
     return NULL;
   }
 
-  font->image        = engine_image_load_mem(width, height, (void *)data);
-  font->glyphs       = glyphs;
-  font->glyph_count  = glyph_count;
-  font->char_spacing = char_spacing;
-  font->line_spacing = line_spacing;
+  font->type         = ENGINE_FONT_TYPE_ATLAS;
+  font->atlas.image  = engine_image_load_mem(width, height, (void *)data);
+  font->atlas.glyphs = (engine_rect_t *)
+      glyphs; // Intentional cast, ttf font glyphs are generated as non-const.
+  font->atlas.glyph_count  = glyph_count;
+  font->atlas.icon_range   = icon_range;
+  font->atlas.char_range   = char_range;
+  font->atlas.char_spacing = char_spacing;
+  font->atlas.line_spacing = line_spacing;
 
   return font;
 }
@@ -207,11 +230,15 @@ engine_font_atlas_mem(unsigned int width,
 void
 engine_font_destroy(engine_font_t *font)
 {
-  if (!font) {
-    engine_image_destroy(font->image);
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
 
-    if (font->shoud_free_glyphs) {
-      ENGINE_FREE(font->glyphs);
+  if (!font) {
+    if (font->type == ENGINE_FONT_TYPE_TTF) {
+      engine_image_destroy(font->ttf.image);
+      ENGINE_FREE(font->ttf.glyphs);
+    } else if (font->type == ENGINE_FONT_TYPE_ATLAS) {
+      engine_image_destroy(font->atlas.image);
     }
 
     ENGINE_FREE(font);
@@ -222,35 +249,115 @@ int
 engine_font_get_char_spacing(const engine_font_t *font)
 {
   SDL_assert(font);
-  return font->char_spacing;
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    return font->ttf.char_spacing;
+  } else {
+    return font->atlas.char_spacing;
+  }
 }
 
 void
 engine_font_set_char_spacing(engine_font_t *font, int spacing)
 {
   SDL_assert(font);
-  font->char_spacing = spacing;
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    font->ttf.char_spacing = spacing;
+  } else {
+    font->atlas.char_spacing = spacing;
+  }
 }
 
 int
 engine_font_get_line_spacing(const engine_font_t *font)
 {
   SDL_assert(font);
-  return font->line_spacing;
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    return font->ttf.line_spacing;
+  } else {
+    return font->atlas.line_spacing;
+  }
 }
 
 void
 engine_font_set_line_spacing(engine_font_t *font, int line_spacing)
 {
   SDL_assert(font);
-  font->line_spacing = line_spacing;
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    font->ttf.line_spacing = line_spacing;
+  } else {
+    font->atlas.line_spacing = line_spacing;
+  }
+}
+
+engine_vec2_t
+engine_font_get_icon_range(const engine_font_t *font)
+{
+  SDL_assert(font);
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    return font->ttf.icon_range;
+  } else {
+    return font->atlas.icon_range;
+  }
+}
+
+engine_vec2_t
+engine_font_get_char_range(const engine_font_t *font)
+{
+  SDL_assert(font);
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    return font->ttf.char_range;
+  } else {
+    return font->atlas.char_range;
+  }
+}
+
+int
+engine_font_get_glyph_count(const engine_font_t *font)
+{
+  SDL_assert(font);
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    return font->ttf.glyph_count;
+  } else {
+    return font->atlas.glyph_count;
+  }
 }
 
 engine_rect_t
 engine_font_get_glyph_rect(const engine_font_t *font, int glyphs_index)
 {
   SDL_assert(font);
-  SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
 
-  return font->glyphs[glyphs_index];
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    SDL_assert(glyphs_index >= 0
+               && (size_t)glyphs_index < font->ttf.glyph_count);
+    return font->ttf.glyphs[glyphs_index];
+  } else {
+    SDL_assert(glyphs_index >= 0
+               && (size_t)glyphs_index < font->atlas.glyph_count);
+
+    return font->atlas.glyphs[glyphs_index];
+  }
 }
