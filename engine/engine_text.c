@@ -90,13 +90,6 @@ engine_text_handle_icon_tag(const engine_font_t *font, char *cursor)
 
   int icon_index = SDL_strtol(icon_index_str, NULL, 10);
 
-  if (icon_index < font->glyph_spacing_index) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Invalid glyph index: %d. Icon indices must be 224 or higher.",
-                icon_index);
-    return -1;
-  }
-
   return icon_index;
 }
 
@@ -108,7 +101,9 @@ engine_text_glyph_make(engine_vec2_t position,
                        engine_color_t foreground)
 {
   SDL_assert(font);
-  SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
+
+  size_t glyph_count = engine_font_get_glyph_count(font);
+  SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < glyph_count);
 
   engine_text_t *text = NULL;
   ENGINE_NEW(text);
@@ -129,13 +124,15 @@ engine_text_glyph_make(engine_vec2_t position,
     return NULL;
   }
 
+  engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
+
   text->entries[0].dest_rect = (engine_rect_t){
     .x = position.x,
     .y = position.y,
-    .w = font->glyphs[glyphs_index].w,
-    .h = font->glyphs[glyphs_index].h,
+    .w = glyph_rect.w,
+    .h = glyph_rect.h,
   };
-  text->entries[0].src_rect   = &font->glyphs[glyphs_index];
+  text->entries[0].src_rect   = glyph_rect;
   text->entries[0].background = background;
   text->entries[0].foreground = foreground;
 
@@ -151,7 +148,19 @@ engine_text_char_make(engine_vec2_t position,
 {
   SDL_assert(font);
 
-  if (c < ' ') {
+  engine_vec2_t char_range = engine_font_get_char_range(font);
+
+  char base_char = engine_font_get_base_char(font);
+
+  int glyphs_index = (int)c - (int)base_char;
+
+  if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Invalid character '%c' in text string. Valid characters are "
+                "from %d to %d.",
+                c,
+                (int)char_range.x,
+                (int)char_range.y);
     return NULL;
   }
 
@@ -174,13 +183,15 @@ engine_text_char_make(engine_vec2_t position,
     return NULL;
   }
 
+  engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
+
   text->entries[0].dest_rect = (engine_rect_t){
     .x = position.x,
     .y = position.y,
-    .w = font->glyphs[c - font->glyph_spacing_index].w,
-    .h = font->glyphs[c - font->glyph_spacing_index].h,
+    .w = glyph_rect.w,
+    .h = glyph_rect.h,
   };
-  text->entries[0].src_rect   = &font->glyphs[c - font->glyph_spacing_index];
+  text->entries[0].src_rect   = glyph_rect;
   text->entries[0].background = background;
   text->entries[0].foreground = foreground;
 
@@ -225,12 +236,18 @@ engine_text_make(engine_vec2_t position,
 
   char *cursor = (char *)rich_str;
 
+  engine_vec2_t char_range = engine_font_get_char_range(font);
+  engine_vec2_t icon_range = engine_font_get_icon_range(font);
+
+  int line_spacing = engine_font_get_line_spacing(font);
+  int char_spacing = engine_font_get_char_spacing(font);
+
   int entry_index = 0;
 
   while (*cursor) {
     switch (*cursor) {
     case '\n':
-      position.y += (font->line_spacing);
+      position.y += (line_spacing);
       position.x = 0;
       cursor++;
       break;
@@ -253,43 +270,63 @@ engine_text_make(engine_vec2_t position,
         // Handle icon tags
         int icon_index = engine_text_handle_icon_tag(font, cursor);
 
-        if (icon_index >= 0) {
-          text->entries[entry_index++] = (engine_text_entry_t){
+        if (icon_index < icon_range.x || icon_index > icon_range.y) {
+          SDL_LogWarn(
+              SDL_LOG_CATEGORY_APPLICATION,
+              "Invalid icon index %d in text string. Valid icon indices are "
+              "from %d to %d.",
+              icon_index,
+              (int)icon_range.x,
+              (int)icon_range.y);
+          continue;
+        }
+
+        engine_rect_t icon_rect = engine_font_get_glyph_rect(font, icon_index);
+
+        text->entries[entry_index++] = (engine_text_entry_t){
             .dest_rect  = (engine_rect_t){
               .x = position.x,
               .y = position.y,
-              .w = font->glyphs[icon_index].w,
-              .h = font->glyphs[icon_index].h,
+              .w = icon_rect.w,
+              .h = icon_rect.h,
             },
-            .src_rect   = &font->glyphs[icon_index],
+            .src_rect   = icon_rect,
             .background = current_background,
             .foreground = current_foreground,
           };
-        }
       }
       break;
-    default:
-      // Discard invalid characters
-      if (*cursor < ' ') {
+    default: {
+      int glyphs_index = (int)*cursor - (int)engine_font_get_base_char(font);
+
+      if (glyphs_index >= icon_range.x && glyphs_index <= icon_range.y) {
+        SDL_LogWarn(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Invalid character '%c' in text string. It is reserved for icons. "
+            "Use {i=%d} to render it as an icon.",
+            *cursor,
+            (int)*cursor);
         cursor++;
         continue;
       }
+
+      engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
       text->entries[entry_index++] = (engine_text_entry_t){
         .dest_rect  = (engine_rect_t){
           .x = position.x,
           .y = position.y,
-          .w = font->glyphs[*cursor - font->glyph_spacing_index].w,
-          .h = font->glyphs[*cursor - font->glyph_spacing_index].h,
+          .w = glyph_rect.w,
+          .h = glyph_rect.h,
         },
-        .src_rect   = &font->glyphs[*cursor - font->glyph_spacing_index],
+        .src_rect   = glyph_rect,
         .background = current_background,
         .foreground = current_foreground,
       };
 
-      position.x += (font->glyphs[*cursor - font->glyph_spacing_index].w
-                     + font->char_spacing);
+      position.x += glyph_rect.w + char_spacing;
       cursor++;
+    } break;
     }
   }
 
@@ -306,7 +343,7 @@ engine_text_destroy(engine_text_t *text)
 }
 
 char *
-engine_text_remove_tags(const char *rich_str)
+engine_text_without_tags(const char *rich_str)
 {
   SDL_assert(rich_str);
 
@@ -414,18 +451,26 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
     return (engine_vec2_t){ .x = 0, .y = 0 };
   }
 
-  engine_vec2_t retval = { .x = 0, .y = 0 };
+  engine_vec2_t icon_range = engine_font_get_icon_range(font);
+  engine_vec2_t char_range = engine_font_get_char_range(font);
 
-  retval.y = font->line_spacing;
+  int line_spacing = engine_font_get_line_spacing(font);
+  int char_spacing = engine_font_get_char_spacing(font);
+
+  char base_char = engine_font_get_base_char(font);
+
+  engine_vec2_t measure = { .x = 0, .y = 0 };
+
+  measure.y = line_spacing;
 
   char *cursor = (char *)rich_str;
 
   while (*cursor) {
-    int glyphs_index = (int)*cursor - font->glyph_spacing_index;
+    int glyphs_index = (int)*cursor - (int)base_char;
 
     switch (*cursor) {
     case '\n':
-      retval.y += font->line_spacing;
+      measure.y += line_spacing;
       cursor++;
       break;
     case '{':
@@ -440,25 +485,36 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
       } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
         // Handle for icon tag
         int icon_index = engine_text_handle_icon_tag(font, cursor);
+        if (icon_index >= icon_range.x && icon_index <= icon_range.y) {
+          engine_rect_t icon_rect
+              = engine_font_get_glyph_rect(font, icon_index);
 
-        if (icon_index >= 0) {
-          retval.x += (font->glyphs[icon_index].w + font->char_spacing);
+          measure.x += (icon_rect.w + char_spacing);
         }
       }
       break;
-    default:
-      // Discard invalid characters
-      if (*cursor < ' ') {
+    default: {
+      int glyphs_index = (int)*cursor - (int)base_char;
+      if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
+        SDL_LogWarn(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Invalid character '%c' in text string. Valid characters are "
+            "from %d to %d.",
+            *cursor,
+            (int)char_range.x,
+            (int)char_range.y);
         cursor++;
         continue;
       }
 
-      retval.x += (font->glyphs[glyphs_index].w + font->char_spacing);
+      engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
+      measure.x += (glyph_rect.w + line_spacing);
       cursor++;
+    } break;
     }
   }
 
-  return retval;
+  return measure;
 }
 
 char *
@@ -489,6 +545,12 @@ engine_text_wrap(const engine_font_t *font,
     return NULL;
   }
 
+  int char_spacing = engine_font_get_char_spacing(font);
+
+  char base_char = engine_font_get_base_char(font);
+
+  engine_vec2_t icon_range = engine_font_get_icon_range(font);
+
   int width = 0;
 
   char *cursor = (char *)rich_str;
@@ -511,8 +573,10 @@ engine_text_wrap(const engine_font_t *font,
         // Check for icon tags
         int icon_index = engine_text_handle_icon_tag(font, cursor);
 
-        if (icon_index >= 0) {
-          width += (font->glyphs[icon_index].w + font->char_spacing);
+        engine_rect_t icon_rect = engine_font_get_glyph_rect(font, icon_index);
+
+        if (icon_index >= icon_range.x && icon_index <= icon_range.y) {
+          width += (icon_rect.w + char_spacing);
         }
       }
       break;
@@ -523,10 +587,12 @@ engine_text_wrap(const engine_font_t *font,
         continue;
       }
 
-      int glyphs_index = (int)*cursor - font->glyph_spacing_index;
+      int glyphs_index         = (int)*cursor - (int)base_char;
+      engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
       int next_width
-          = width + font->glyphs[glyphs_index].w + font->char_spacing;
+          = width + glyph_rect.w
+            + char_spacing; // Calculate the width if we add the next character
 
       // Add a line break if adding the next character would exceed the maximum
       // width

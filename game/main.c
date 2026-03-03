@@ -7,12 +7,15 @@ static engine_game_config_t _config = { 0 };
 engine_game_config_t *
 engine_game_config(void)
 {
-  _config.name       = "boxer_engine";
-  _config.title      = "Boxer Engine";
-  _config.width      = 1024;
-  _config.height     = 768;
+  _config.name  = "boxer_engine";
+  _config.title = "Boxer Engine";
+
+  _config.width  = 1280;
+  _config.height = 720;
+
   _config.fullscreen = false;
   _config.resizable  = true;
+
   _config.target_ups = 60;
 
   return &_config;
@@ -44,8 +47,11 @@ engine_game_render(Uint64 alpha_time_ms)
   // Oscillates enginetween 0.5 and 1.5 slowly
   float osc_2 = 1.0f + engine_sin(ticks / 2 * ENGINE_PI2) * 0.5f;
 
+  engine_vec2_t window_dimensions = engine_context_get_window_dimensions();
+
   // Begin painter queue
-  engine_painter_begin(1024 / 2, 768 / 2); // zoom x2
+  engine_painter_begin(window_dimensions.x / 2,
+                       window_dimensions.y / 2); // zoom x2
 
   // Draw 4 pink points that form a square and rotate over time.
   {

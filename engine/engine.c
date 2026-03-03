@@ -17,8 +17,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_assert(config);
   SDL_assert(config->name);
   SDL_assert(config->title);
-  SDL_assert(config->width);
-  SDL_assert(config->height);
+  SDL_assert(config->width > 0);
+  SDL_assert(config->height > 0);
   SDL_assert(config->fullscreen == true || config->fullscreen == false);
   SDL_assert(config->resizable == true || config->resizable == false);
   SDL_assert(config->target_ups > 0);
@@ -169,6 +169,43 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     return SDL_APP_FAILURE;
   }
 
+  int flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
+
+  flags |= context->config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+  flags |= context->config.resizable ? SDL_WINDOW_RESIZABLE : 0;
+
+  // Create a window
+  context->window
+      = SDL_CreateWindow(config->title, config->width, config->height, flags);
+  if (context->window == NULL) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to create window (error: %s)",
+                 SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
+
+  int w, h;
+  SDL_GetWindowSize(context->window, &w, &h);
+  SDL_LogInfo(
+      SDL_LOG_CATEGORY_APPLICATION, "Window logical size: %d x %d", w, h);
+
+  SDL_GetWindowSizeInPixels(context->window, &w, &h);
+  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Window pixel size: %d x %d", w, h);
+
+  SDL_DisplayID display_id = SDL_GetPrimaryDisplay();
+
+  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+              "Window content scale: %.g",
+              SDL_GetDisplayContentScale(display_id));
+
+  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+              "Window display scale: %g",
+              SDL_GetWindowDisplayScale(context->window));
+
+  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+              "Window pixel density: %.g",
+              SDL_GetWindowPixelDensity(context->window));
+
   // Create a GPU Device
   context->gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV
                                                 | SDL_GPU_SHADERFORMAT_DXIL
@@ -185,21 +222,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
               "Using GPU Driver: %s",
               SDL_GetGPUDeviceDriver(context->gpu_device));
-
-  int flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
-
-  flags |= context->config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
-  flags |= context->config.resizable ? SDL_WINDOW_RESIZABLE : 0;
-
-  // Create a window
-  context->window
-      = SDL_CreateWindow(config->title, config->width, config->height, flags);
-  if (context->window == NULL) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to create window (error: %s)",
-                 SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
 
   // Claime the window for the GPU device
   if (!SDL_ClaimWindowForGPUDevice(context->gpu_device, context->window)) {

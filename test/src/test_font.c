@@ -124,6 +124,7 @@ test_font_setup(void)
                                        _font_atlas_glyph_count,
                                        (engine_vec2_t){ 0, 3 },
                                        (engine_vec2_t){ 32, 126 },
+                                       ' ',
                                        0,
                                        0);
 

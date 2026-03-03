@@ -23,7 +23,7 @@
 typedef struct engine_text_entry_s
 {
   engine_rect_t dest_rect;
-  engine_rect_t *src_rect;
+  engine_rect_t src_rect;
   engine_color_t background;
   engine_color_t foreground;
 } engine_text_entry_t;
@@ -67,7 +67,7 @@ engine_text_t *engine_text_make(engine_vec2_t position,
 
 void engine_text_destroy(engine_text_t *text);
 
-char *engine_text_remove_tags(const char *rich_str);
+char *engine_text_without_tags(const char *rich_str);
 
 // FIXME those function should return engine_text_t instead of rendering
 // directly, then the user can use  the painter to render text.
