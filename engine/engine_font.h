@@ -5,9 +5,6 @@
  *
  * @details ASCII characters are supported.
  *
- * If you load the font from a TTF file, the engine will generate a font atlas
- * for you.
- *
  * Font are defined by an array of rectangles that specify the position and
  * size of each chars or icons within an image. Icons and chars are defined by
  * a range of indices. For example, if you have 4 icons and 96 chars, you can
@@ -29,27 +26,12 @@
 
 typedef struct engine_font_s engine_font_t;
 
-engine_font_t *engine_font_load_ttf(const char *path,
-                                    engine_vec2_t icon_range,
-                                    engine_vec2_t char_range,
-                                    int font_size,
-                                    int char_spacing,
-                                    int line_spacing);
-
-engine_font_t *engine_font_load_ttf_mem(const void *data,
-                                        size_t data_size,
-                                        engine_vec2_t icon_range,
-                                        engine_vec2_t char_range,
-                                        int font_size,
-                                        int char_spacing,
-                                        int line_spacing);
-
 engine_font_t *engine_font_atlas_load(const char *path,
                                       const engine_rect_t *glyphs,
                                       size_t glyph_count,
                                       engine_vec2_t icon_range,
                                       engine_vec2_t char_range,
-                                      char base_char,
+                                      char first_char,
                                       int char_spacing,
                                       int line_spacing);
 
@@ -60,7 +42,7 @@ engine_font_t *engine_font_atlas_mem(unsigned int width,
                                      size_t glyph_count,
                                      engine_vec2_t icon_range,
                                      engine_vec2_t char_range,
-                                     char base_char,
+                                     char first_char,
                                      int char_spacing,
                                      int line_spacing);
 
@@ -76,7 +58,7 @@ int engine_font_get_glyph_count(const engine_font_t *font);
 engine_vec2_t engine_font_get_icon_range(const engine_font_t *font);
 engine_vec2_t engine_font_get_char_range(const engine_font_t *font);
 
-char engine_font_get_base_char(const engine_font_t *font);
+int engine_font_get_base(const engine_font_t *font);
 
 int engine_font_get_char_spacing(const engine_font_t *font);
 void engine_font_set_char_spacing(engine_font_t *font, int spacing);

@@ -115,96 +115,6 @@ engine_text_icon_tag_validate(const char *cursor,
   return true;
 }
 
-/*
-static void
-engine_text_discard_color_tag(char *cursor, char *end)
-{
-  if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
-    // Discard opening tag
-    *cursor += 2;
-    while (*cursor && *cursor != '}') {
-      cursor++;
-    }
-  } else if (*cursor + 1 == '/' && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
-             && *cursor + 3 == '}') {
-    // Discard the closing tag
-    *cursor += 4;
-  } else {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Invalid color tag in text string.");
-  }
-}
-
-static engine_color_t
-engine_text_handle_color_tag(char *cursor, char *end)
-{
-  cursor += 3; // Discard the "{c=" part
-
-  char color_str[9]; // 8 characters for RGBA + null terminator
-
-  int i;
-  for (i = 0; i < 8 && cursor[i] && cursor[i] != '}'; ++i) {
-    color_str[i]     = cursor[i];
-  }
-  color_str[i + 1] = '\0';
-
-  Uint32 color_value = SDL_strtoul(color_str, NULL, 16);
-
-  engine_color_t color = {
-    .r = (color_value >> 24) & 0xFF,
-    .g = (color_value >> 16) & 0xFF,
-    .b = (color_value >> 8) & 0xFF,
-    .a = color_value & 0xFF,
-  };
-
-  cursor += i; // Move cursor past the color value
-
-  if (*cursor == '}') {
-    cursor++; // Discard the closing '}'
-  } else {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Unterminated color tag in text string.");
-  }
-
-  return color;
-}
-
-static void
-engine_text_discard_icon_tag(char *cursor)
-{
-  if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-    cursor += 3; // Discard the "{i=" part
-
-    while (*cursor && *cursor != '}') {
-      cursor++;
-    }
-  } else {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Invalid icon tag in text string.");
-  }
-}
-
-static int
-engine_text_handle_icon_tag(const engine_font_t *font, char *cursor, char *end)
-{
-  cursor += 3; // Discard the "{i=" part
-
-  char icon_index_str[16];
-
-  for (int i = 0; *cursor && *cursor != '}'; ++i) {
-    icon_index_str[i]     = *cursor;
-    icon_index_str[i + 1] = '\0';
-    cursor++;
-  }
-
-  cursor++; // Discard the closing '}'
-
-  int icon_index = SDL_strtol(icon_index_str, NULL, 10);
-
-  return icon_index;
-}
-*/
-
 engine_text_t *
 engine_text_glyph_make(engine_vec2_t position,
                        const engine_font_t *font,
@@ -262,7 +172,7 @@ engine_text_char_make(engine_vec2_t position,
 
   engine_vec2_t char_range = engine_font_get_char_range(font);
 
-  char base_char = engine_font_get_base_char(font);
+  char base_char = engine_font_get_base(font);
 
   int glyphs_index = (int)c - (int)base_char;
 
@@ -349,7 +259,7 @@ engine_text_make(engine_vec2_t position,
   char *cursor = (char *)rich_str;
   char *end    = cursor + rich_str_len;
 
-  char base_char = engine_font_get_base_char(font);
+  char base_char = engine_font_get_base(font);
 
   engine_vec2_t char_range = engine_font_get_char_range(font);
   engine_vec2_t icon_range = engine_font_get_icon_range(font);
@@ -418,7 +328,7 @@ engine_text_make(engine_vec2_t position,
         cursor += skip_length;
         break;
       }
-      // Fall through to handle '{' as a normal character
+      // No break, Fall through to handle '{' as a normal character
     }
     default: {
       int glyphs_index = (int)*cursor - (int)base_char;
@@ -504,6 +414,7 @@ engine_text_without_tags(const char *rich_str)
   }
 
   char *cursor = (char *)rich_str;
+  char *end    = cursor + rich_str_len;
 
   while (*cursor) {
     switch (*cursor) {
@@ -511,17 +422,25 @@ engine_text_without_tags(const char *rich_str)
       buffer[buffer_count++] = '\n';
       cursor++;
       break;
-    case '{':
-      if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
-        engine_text_discard_color_tag(cursor);
-      } else if (*cursor + 1 == '/'
-                 && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
-                 && *cursor + 3 == '}') {
-        engine_text_discard_color_tag(cursor);
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-        engine_text_discard_icon_tag(cursor);
+    case '{': {
+      int skip_length = 0;
+      engine_color_t new_color;
+      int icon_index;
+
+      if (engine_text_color_tag_validate(cursor, end, &skip_length, &new_color)
+          || engine_text_icon_tag_validate(
+              cursor, end, &skip_length, &icon_index)) {
+        cursor += skip_length; // Skip the valid tag
+        break;
+      } else if (engine_text_color_tag_validate(
+                     cursor, end, &skip_length, &new_color)
+                 || engine_text_icon_tag_validate(
+                     cursor, end, &skip_length, &icon_index)) {
+        cursor += skip_length; // Skip the valid tag
+        break;
       }
-      break;
+      // No break, Fall through to handle '{' as a normal character
+    }
     default:
       // Discard invalid characters
       if (*cursor < ' ') {
@@ -531,6 +450,7 @@ engine_text_without_tags(const char *rich_str)
 
       buffer[buffer_count++] = *cursor;
       cursor++;
+      break;
     }
   }
 
@@ -548,6 +468,7 @@ engine_text_length(const char *rich_str)
   int count = 0;
 
   char *cursor = (char *)rich_str;
+  char *end    = cursor + SDL_strlen(rich_str);
 
   while (*cursor) {
     switch (*cursor) {
@@ -555,25 +476,21 @@ engine_text_length(const char *rich_str)
       count++;
       cursor++;
       break;
-    case '{':
-      if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
-        SDL_Log("color tag opening");
-        engine_text_discard_color_tag(cursor);
+    case '{': {
+      int skip_length = 0;
+
+      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)
+          || engine_text_icon_tag_validate(cursor, end, &skip_length, NULL)) {
+        cursor += skip_length; // Skip the valid tag
         break;
-      } else if (*cursor + 1 == '/'
-                 && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
-                 && *cursor + 3 == '}') {
-        SDL_Log("color tag closing");
-        engine_text_discard_color_tag(cursor);
-        break;
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-        SDL_Log("icon tag");
-        engine_text_discard_icon_tag(cursor);
-        count++;
-        cursor++;
+      } else if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)
+                 || engine_text_icon_tag_validate(
+                     cursor, end, &skip_length, NULL)) {
+        cursor += skip_length; // Skip the valid tag
         break;
       }
       // Fall through to handle as normal character if it's not a valid tag
+    }
     default:
       SDL_Log("character '%c'", *cursor);
       // Discard invalid characters
@@ -606,13 +523,14 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
   int line_spacing = engine_font_get_line_spacing(font);
   int char_spacing = engine_font_get_char_spacing(font);
 
-  char base_char = engine_font_get_base_char(font);
+  char base_char = engine_font_get_base(font);
 
   engine_vec2_t measure = { .x = 0, .y = 0 };
 
   measure.y = line_spacing;
 
   char *cursor = (char *)rich_str;
+  char *end    = cursor + SDL_strlen(rich_str);
 
   while (*cursor) {
     switch (*cursor) {
@@ -620,29 +538,35 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
       measure.y += line_spacing;
       cursor++;
       break;
-    case '{':
-      if ((*cursor + 1 == 'c' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
-        // Handle for color tags
-        engine_text_discard_color_tag(cursor);
-        break;
-      } else if (*cursor + 1 == '/'
-                 && (*cursor + 2 == 'c' || *cursor + 2 == 'f')
-                 && *cursor + 3 == '}') {
-        // Handle for closing color tags
-        engine_text_discard_color_tag(cursor);
-        break;
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-        // Handle for icon tag
-        int icon_index = engine_text_handle_icon_tag(font, cursor);
-        if (icon_index >= icon_range.x && icon_index <= icon_range.y) {
-          engine_rect_t icon_rect
-              = engine_font_get_glyph_rect(font, icon_index);
+    case '{': {
+      int skip_length = 0;
+      int icon_index;
 
-          measure.x += (icon_rect.w + char_spacing);
+      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)) {
+        cursor += skip_length; // Skip the valid tag
+        break;
+      } else if (engine_text_icon_tag_validate(
+                     cursor, end, &skip_length, &icon_index)) {
+        if (icon_index < icon_range.x || icon_index > icon_range.y) {
+          SDL_LogWarn(
+              SDL_LOG_CATEGORY_APPLICATION,
+              "Invalid icon index %d in text string. Valid icon indices are "
+              "from %d to %d.",
+              icon_index,
+              (int)icon_range.x,
+              (int)icon_range.y);
+          cursor += skip_length; // Skip the invalid tag
+          break;
         }
+
+        engine_rect_t icon_rect = engine_font_get_glyph_rect(font, icon_index);
+        measure.x += (icon_rect.w + char_spacing);
+
+        cursor += skip_length; // Skip the valid tag
         break;
       }
       // Fall through to handle as normal character if it's not a valid tag
+    }
     default: {
       int glyphs_index = (int)*cursor - (int)base_char;
       if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
@@ -697,42 +621,66 @@ engine_text_wrap(const engine_font_t *font,
 
   int char_spacing = engine_font_get_char_spacing(font);
 
-  char base_char = engine_font_get_base_char(font);
+  char base_char = engine_font_get_base(font);
 
   engine_vec2_t icon_range = engine_font_get_icon_range(font);
 
   int width = 0;
 
   char *cursor = (char *)rich_str;
+  char *end    = cursor + SDL_strlen(rich_str);
 
   while (*cursor) {
     switch (*cursor) {
     case '\n':
       width = 0;
       break;
-    case '{':
-      if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
-        // Check for color tags
-        engine_text_discard_color_tag(cursor);
+    case '{': {
+      int skip_length = 0;
+      int icon_index;
+
+      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)) {
+        cursor += skip_length; // Skip the valid tag
         break;
-      } else if (*cursor + 1 == '/'
-                 && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
-                 && *cursor + 3 == '}') {
-        // Check for closing color tags
-        engine_text_discard_color_tag(cursor);
-        break;
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
-        // Check for icon tags
-        int icon_index = engine_text_handle_icon_tag(font, cursor);
+      } else if (engine_text_icon_tag_validate(
+                     cursor, end, &skip_length, &icon_index)) {
+        if (icon_index < icon_range.x || icon_index > icon_range.y) {
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                      "Invalid icon index %d in text string. Valid icon "
+                      "indices are from %d to %d.",
+                      icon_index,
+                      (int)icon_range.x,
+                      (int)icon_range.y);
+          cursor += skip_length; // Skip the invalid tag
+          break;
+        }
 
         engine_rect_t icon_rect = engine_font_get_glyph_rect(font, icon_index);
 
-        if (icon_index >= icon_range.x && icon_index <= icon_range.y) {
-          width += (icon_rect.w + char_spacing);
+        int next_width = width + icon_rect.w + char_spacing; // Calculate the
+                                                             // width if we add
+                                                             // the next icon
+
+        // Add a line break if adding the next icon would exceed the
+        // maximum width
+        if (next_width > max_width) {
+          //  Check if we need to reallocate the buffer before adding
+          //  the current character
+          if (buffer_count + 1 >= buffer_size) {
+            goto realloc;
+          }
+
+          wrapped_text[buffer_count++] = '\n';
+          width                        = 0;
         }
+
+        width += (icon_rect.w + char_spacing);
+
+        cursor += skip_length; // Skip the valid tag
         break;
       }
       // Fall through to handle as normal character if it's not a valid tag
+    }
     default: {
       // Discard invalid characters
       if (*cursor < ' ') {
