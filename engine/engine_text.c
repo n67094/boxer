@@ -366,33 +366,25 @@ engine_text_make(engine_vec2_t position,
       position.x = 0;
       cursor++;
       break;
-    case '{':
-      // Check if it's a color tag background
-      if (cursor + 12 < end && *cursor + 1 == 'c' && *cursor + 2 == '='
-          && *cursor + 3 != '\0') {
-        current_foreground = engine_text_handle_color_tag(cursor, end);
-        break;
-      } else if (cursor + 3 < end && *cursor + 1 == '/' && *cursor + 2 == 'c'
-                 && *cursor + 3 == '}') {
-        current_background = background;
+    case '{': {
+      int skip_length = 0;
+      engine_color_t new_color;
+      int icon_index;
+
+      // Handle color tags
+      if (engine_text_color_tag_validate(
+              cursor, end, &skip_length, &new_color)) {
+        if (*(cursor + 1) == 'b') {
+          current_background = new_color;
+        } else {
+          current_foreground = new_color;
+        }
+        cursor += skip_length;
         break;
       }
-
-      // Check if it's a color tag foreground
-      else if (cursor + 12 < end && *cursor + 1 == 'c' && *cursor + 2 == '='
-               && *cursor + 3 != '\0') {
-        current_foreground = engine_text_handle_color_tag(cursor, end);
-        break;
-      } else if (cursor + 3 < end && *cursor + 1 == '/' && *cursor + 2 == 'c'
-                 && *cursor + 3 == '}') {
-        current_foreground = foreground;
-        break;
-      }
-
-      // Check if it's an icon tag
-      else if (cursor + 2 < end && *cursor + 1 == 'i' && *cursor + 2 == '=') {
-        int icon_index = engine_text_handle_icon_tag(font, cursor, end);
-
+      // Handle icon tags
+      else if (engine_text_icon_tag_validate(
+                   cursor, end, &skip_length, &icon_index)) {
         if (icon_index < icon_range.x || icon_index > icon_range.y) {
           SDL_LogWarn(
               SDL_LOG_CATEGORY_APPLICATION,
@@ -401,6 +393,7 @@ engine_text_make(engine_vec2_t position,
               icon_index,
               (int)icon_range.x,
               (int)icon_range.y);
+          cursor += skip_length; // Skip the invalid tag
           break;
         }
 
@@ -419,9 +412,14 @@ engine_text_make(engine_vec2_t position,
           .background = current_background,
           .foreground = current_foreground,
         };
+
+        position.x += icon_rect.w + char_spacing;
+
+        cursor += skip_length;
         break;
       }
-    // Fall through to handle '{' as a normal character
+      // Fall through to handle '{' as a normal character
+    }
     default: {
       int glyphs_index = (int)*cursor - (int)base_char;
 
