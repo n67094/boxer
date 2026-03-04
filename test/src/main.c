@@ -37,14 +37,14 @@ engine_game_config(void)
 void
 engine_game_setup(void)
 {
-  // engine_unit_enable_colors(true);
+  engine_unit_enable_colors(true);
 
-  // ENGINE_UNIT_RUN_SUITE(suite_math);
-  // ENGINE_UNIT_RUN_SUITE(suite_json);
-  // ENGINE_UNIT_RUN_SUITE(suite_ini);
+  ENGINE_UNIT_RUN_SUITE(suite_math);
+  ENGINE_UNIT_RUN_SUITE(suite_json);
+  ENGINE_UNIT_RUN_SUITE(suite_ini);
 
-  // test_image_setup();
-  // test_font_setup();
+  test_image_setup();
+  test_font_setup();
 }
 
 void
@@ -78,10 +78,10 @@ engine_game_update(Uint64 delta_time_ms)
 
   switch (_current_test) {
   case TEST_IMAGE:
-    // test_image_update(delta_time_ms);
+    test_image_update(delta_time_ms);
     break;
   case TEST_FONT:
-    // test_font_update(delta_time_ms);
+    test_font_update(delta_time_ms);
     break;
   default:
     break;
@@ -98,10 +98,10 @@ engine_game_render(Uint64 alpha_time_ms)
   {
     switch (_current_test) {
     case TEST_IMAGE:
-      // test_image_render(alpha_time_ms);
+      test_image_render(alpha_time_ms);
       break;
     case TEST_FONT:
-      // test_font_render(alpha_time_ms);
+      test_font_render(alpha_time_ms);
       break;
     default:
       break;
@@ -115,6 +115,6 @@ engine_game_render(Uint64 alpha_time_ms)
 void
 engine_game_shutdown(void)
 {
-  // test_image_shutdown();
-  // test_font_shutdown();
+  test_image_shutdown();
+  test_font_shutdown();
 }

@@ -266,6 +266,20 @@ engine_font_atlas_mem(unsigned int width,
   return font;
 }
 
+engine_image_t
+engine_font_get_image(const engine_font_t *font)
+{
+  SDL_assert(font);
+  SDL_assert(font->type == ENGINE_FONT_TYPE_TTF
+             || font->type == ENGINE_FONT_TYPE_ATLAS);
+
+  if (font->type == ENGINE_FONT_TYPE_TTF) {
+    return font->ttf.image;
+  } else {
+    return font->atlas.image;
+  }
+}
+
 void
 engine_font_set_char_spacing(engine_font_t *font, int spacing)
 {

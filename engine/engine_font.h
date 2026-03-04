@@ -66,6 +66,8 @@ engine_font_t *engine_font_atlas_mem(unsigned int width,
 
 void engine_font_destroy(engine_font_t *font);
 
+engine_image_t engine_font_get_image(const engine_font_t *font);
+
 engine_rect_t engine_font_get_glyph_rect(const engine_font_t *font,
                                          int glyphs_index);
 

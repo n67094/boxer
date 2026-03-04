@@ -184,28 +184,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     return SDL_APP_FAILURE;
   }
 
-  int w, h;
-  SDL_GetWindowSize(context->window, &w, &h);
-  SDL_LogInfo(
-      SDL_LOG_CATEGORY_APPLICATION, "Window logical size: %d x %d", w, h);
-
-  SDL_GetWindowSizeInPixels(context->window, &w, &h);
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Window pixel size: %d x %d", w, h);
-
-  SDL_DisplayID display_id = SDL_GetPrimaryDisplay();
-
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-              "Window content scale: %.g",
-              SDL_GetDisplayContentScale(display_id));
-
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-              "Window display scale: %g",
-              SDL_GetWindowDisplayScale(context->window));
-
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-              "Window pixel density: %.g",
-              SDL_GetWindowPixelDensity(context->window));
-
   // Create a GPU Device
   context->gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV
                                                 | SDL_GPU_SHADERFORMAT_DXIL

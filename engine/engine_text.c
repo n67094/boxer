@@ -5,8 +5,119 @@
 #include "engine_mem.h"
 #include "engine_text.h"
 
+#define ENGINE_COLOR_OPEN_TAG_LENGTH 14 // Length of "{X=XXXXXXXX}"
+#define ENGINE_COLOR_CLOSE_TAG_LENGTH 4 // Length of "{/X}"
+#define ENGINE_ICON_TAG_LENGTH 6        // Length of "{X=XX}"
+
+static bool
+engine_text_color_tag_validate(const char *cursor,
+                               const char *end,
+                               int *skip_length,
+                               engine_color_t *out_color)
+{
+  if (*(cursor + 1) != 'b' || *(cursor + 1) != 'f' || *(cursor + 1) != '/') {
+    return false;
+  }
+
+  // Opening tag: {b=RRGGBBAA} or {f=RRGGBBAA}
+  if (*(cursor + 1) == 'b' || *(cursor + 1) == 'f') {
+    if (cursor + ENGINE_COLOR_OPEN_TAG_LENGTH > end) {
+      SDL_LogWarn(
+          SDL_LOG_CATEGORY_APPLICATION,
+          "Color opening tag is too short. Expected format: {c=RRGGBBAA}");
+      return false;
+    }
+
+    *skip_length = ENGINE_COLOR_OPEN_TAG_LENGTH;
+
+    char color_str[9]; // 8 characters for RGBA + null terminator
+
+    int i;
+    for (i = 0; i < 8 && cursor[i] && cursor[i] != '}'; ++i) {
+      color_str[i] = cursor[i];
+    }
+    color_str[i] = '\0';
+
+    char *endptr       = NULL;
+    Uint32 color_value = SDL_strtoul(color_str, &endptr, 16);
+
+    if (endptr != NULL) {
+      SDL_LogWarn(
+          SDL_LOG_CATEGORY_APPLICATION,
+          "Invalid color value in color tag. Expected a hexadecimal number.");
+      return false;
+    }
+
+    *out_color = (engine_color_t){
+      .r = (color_value >> 24) & 0xFF,
+      .g = (color_value >> 16) & 0xFF,
+      .b = (color_value >> 8) & 0xFF,
+      .a = color_value & 0xFF,
+    };
+
+    return true;
+  }
+
+  // Closing tag: {/b} or {/f}
+  if (*cursor + 1 == '/') {
+    if (cursor + ENGINE_COLOR_CLOSE_TAG_LENGTH > end) {
+      SDL_LogWarn(
+          SDL_LOG_CATEGORY_APPLICATION,
+          "Color closing tag is too short. Expected format: {/b} or {/f}");
+      return false;
+    }
+
+    *skip_length = ENGINE_COLOR_CLOSE_TAG_LENGTH;
+
+    return true;
+  }
+
+  return false;
+}
+
+static bool
+engine_text_icon_tag_validate(const char *cursor,
+                              const char *end,
+                              int *skip_length,
+                              int *out_icon_index)
+{
+  if (*cursor + 1 != 'i' || *cursor + 2 != '=') {
+    return false;
+  }
+
+  if (cursor + ENGINE_ICON_TAG_LENGTH > end) {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Icon tag is too short. Expected format: {i=XX}");
+    return false;
+  }
+
+  *skip_length = ENGINE_ICON_TAG_LENGTH;
+
+  char icon_index_str[3]; // 2 characters for icon index + null terminator
+
+  int i;
+  for (i = 0; i < 2 && cursor[i] && cursor[i] != '}'; ++i) {
+    icon_index_str[i] = cursor[i];
+  }
+  icon_index_str[i] = '\0';
+
+  char *endptr   = NULL;
+  int icon_index = SDL_strtoul(icon_index_str, &endptr, 16);
+
+  if (endptr != NULL) {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Invalid icon index in icon tag. Expected a number.");
+    return false;
+  }
+
+  *out_icon_index = icon_index;
+
+  return true;
+}
+
+/*
 static void
-engine_text_discard_color_tag(char *cursor)
+engine_text_discard_color_tag(char *cursor, char *end)
 {
   if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
     // Discard opening tag
@@ -14,32 +125,28 @@ engine_text_discard_color_tag(char *cursor)
     while (*cursor && *cursor != '}') {
       cursor++;
     }
-
-    if (*cursor == '\0') {
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                  "Unterminated color tag in text string.");
-      return;
-    }
-
-    cursor++; // Discard the closing '}'
   } else if (*cursor + 1 == '/' && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
              && *cursor + 3 == '}') {
     // Discard the closing tag
     *cursor += 4;
+  } else {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Invalid color tag in text string.");
   }
 }
 
 static engine_color_t
-engine_text_handle_color_tag(char *cursor)
+engine_text_handle_color_tag(char *cursor, char *end)
 {
   cursor += 3; // Discard the "{c=" part
 
   char color_str[9]; // 8 characters for RGBA + null terminator
 
-  for (int i = 0; i < 8 && cursor[i] && cursor[i] != '}'; ++i) {
+  int i;
+  for (i = 0; i < 8 && cursor[i] && cursor[i] != '}'; ++i) {
     color_str[i]     = cursor[i];
-    color_str[i + 1] = '\0';
   }
+  color_str[i + 1] = '\0';
 
   Uint32 color_value = SDL_strtoul(color_str, NULL, 16);
 
@@ -49,6 +156,15 @@ engine_text_handle_color_tag(char *cursor)
     .b = (color_value >> 8) & 0xFF,
     .a = color_value & 0xFF,
   };
+
+  cursor += i; // Move cursor past the color value
+
+  if (*cursor == '}') {
+    cursor++; // Discard the closing '}'
+  } else {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Unterminated color tag in text string.");
+  }
 
   return color;
 }
@@ -62,19 +178,14 @@ engine_text_discard_icon_tag(char *cursor)
     while (*cursor && *cursor != '}') {
       cursor++;
     }
-
-    if (*cursor == '\0') {
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                  "Unterminated icon tag in text string.");
-      return;
-    }
-
-    cursor++; // Discard the closing '}'
+  } else {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Invalid icon tag in text string.");
   }
 }
 
 static int
-engine_text_handle_icon_tag(const engine_font_t *font, char *cursor)
+engine_text_handle_icon_tag(const engine_font_t *font, char *cursor, char *end)
 {
   cursor += 3; // Discard the "{i=" part
 
@@ -92,6 +203,7 @@ engine_text_handle_icon_tag(const engine_font_t *font, char *cursor)
 
   return icon_index;
 }
+*/
 
 engine_text_t *
 engine_text_glyph_make(engine_vec2_t position,
@@ -126,13 +238,13 @@ engine_text_glyph_make(engine_vec2_t position,
 
   engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
-  text->entries[0].dest_rect = (engine_rect_t){
+  text->entries[0].rects.dst = (engine_rect_t){
     .x = position.x,
     .y = position.y,
     .w = glyph_rect.w,
     .h = glyph_rect.h,
   };
-  text->entries[0].src_rect   = glyph_rect;
+  text->entries[0].rects.src  = glyph_rect;
   text->entries[0].background = background;
   text->entries[0].foreground = foreground;
 
@@ -185,13 +297,13 @@ engine_text_char_make(engine_vec2_t position,
 
   engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
-  text->entries[0].dest_rect = (engine_rect_t){
+  text->entries[0].rects.dst = (engine_rect_t){
     .x = position.x,
     .y = position.y,
     .w = glyph_rect.w,
     .h = glyph_rect.h,
   };
-  text->entries[0].src_rect   = glyph_rect;
+  text->entries[0].rects.src  = glyph_rect;
   text->entries[0].background = background;
   text->entries[0].foreground = foreground;
 
@@ -235,6 +347,9 @@ engine_text_make(engine_vec2_t position,
   engine_color_t current_background = background;
 
   char *cursor = (char *)rich_str;
+  char *end    = cursor + rich_str_len;
+
+  char base_char = engine_font_get_base_char(font);
 
   engine_vec2_t char_range = engine_font_get_char_range(font);
   engine_vec2_t icon_range = engine_font_get_icon_range(font);
@@ -244,7 +359,7 @@ engine_text_make(engine_vec2_t position,
 
   int entry_index = 0;
 
-  while (*cursor) {
+  while (cursor < end && *cursor) {
     switch (*cursor) {
     case '\n':
       position.y += (line_spacing);
@@ -252,23 +367,31 @@ engine_text_make(engine_vec2_t position,
       cursor++;
       break;
     case '{':
-      if (*cursor + 1 == 'b' && *cursor + 12 == '}') { // Background
-        // Handle color tags
-        current_background = engine_text_handle_color_tag(cursor);
-      } else if (*cursor + 1 == '/' && *cursor + 2 == 'b'
+      // Check if it's a color tag background
+      if (cursor + 12 < end && *cursor + 1 == 'c' && *cursor + 2 == '='
+          && *cursor + 3 != '\0') {
+        current_foreground = engine_text_handle_color_tag(cursor, end);
+        break;
+      } else if (cursor + 3 < end && *cursor + 1 == '/' && *cursor + 2 == 'c'
                  && *cursor + 3 == '}') {
-        // Handle closing color tags
         current_background = background;
-      } else if (*cursor + 1 == 'f' && *cursor + 12 == '}') { // Foreground
-        // Handle color tags
-        current_foreground = engine_text_handle_color_tag(cursor);
-      } else if (*cursor + 1 == '/' && *cursor + 2 == 'f'
+        break;
+      }
+
+      // Check if it's a color tag foreground
+      else if (cursor + 12 < end && *cursor + 1 == 'c' && *cursor + 2 == '='
+               && *cursor + 3 != '\0') {
+        current_foreground = engine_text_handle_color_tag(cursor, end);
+        break;
+      } else if (cursor + 3 < end && *cursor + 1 == '/' && *cursor + 2 == 'c'
                  && *cursor + 3 == '}') {
-        // Handle closing color tags
         current_foreground = foreground;
-      } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') { // Icon
-        // Handle icon tags
-        int icon_index = engine_text_handle_icon_tag(font, cursor);
+        break;
+      }
+
+      // Check if it's an icon tag
+      else if (cursor + 2 < end && *cursor + 1 == 'i' && *cursor + 2 == '=') {
+        int icon_index = engine_text_handle_icon_tag(font, cursor, end);
 
         if (icon_index < icon_range.x || icon_index > icon_range.y) {
           SDL_LogWarn(
@@ -278,34 +401,37 @@ engine_text_make(engine_vec2_t position,
               icon_index,
               (int)icon_range.x,
               (int)icon_range.y);
-          continue;
+          break;
         }
 
         engine_rect_t icon_rect = engine_font_get_glyph_rect(font, icon_index);
 
         text->entries[entry_index++] = (engine_text_entry_t){
-            .dest_rect  = (engine_rect_t){
+          .rects = (engine_textured_rect_t){
+            .dst  = (engine_rect_t){
               .x = position.x,
               .y = position.y,
               .w = icon_rect.w,
               .h = icon_rect.h,
             },
-            .src_rect   = icon_rect,
-            .background = current_background,
-            .foreground = current_foreground,
-          };
+            .src   = icon_rect,
+          },
+          .background = current_background,
+          .foreground = current_foreground,
+        };
+        break;
       }
-      break;
+    // Fall through to handle '{' as a normal character
     default: {
-      int glyphs_index = (int)*cursor - (int)engine_font_get_base_char(font);
+      int glyphs_index = (int)*cursor - (int)base_char;
 
-      if (glyphs_index >= icon_range.x && glyphs_index <= icon_range.y) {
-        SDL_LogWarn(
-            SDL_LOG_CATEGORY_APPLICATION,
-            "Invalid character '%c' in text string. It is reserved for icons. "
-            "Use {i=%d} to render it as an icon.",
-            *cursor,
-            (int)*cursor);
+      if (glyphs_index >= char_range.x && glyphs_index <= char_range.y) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                    "Invalid character '%c' in text string. Valid characters "
+                    "are from %d to %d.",
+                    *cursor,
+                    (int)char_range.x,
+                    (int)char_range.y);
         cursor++;
         continue;
       }
@@ -313,13 +439,15 @@ engine_text_make(engine_vec2_t position,
       engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
       text->entries[entry_index++] = (engine_text_entry_t){
-        .dest_rect  = (engine_rect_t){
-          .x = position.x,
-          .y = position.y,
-          .w = glyph_rect.w,
-          .h = glyph_rect.h,
+        .rects     = (engine_textured_rect_t){
+          .dst  = (engine_rect_t){
+            .x = position.x,
+            .y = position.y,
+            .w = glyph_rect.w,
+            .h = glyph_rect.h,
+          },
+          .src   = glyph_rect,
         },
-        .src_rect   = glyph_rect,
         .background = current_background,
         .foreground = current_foreground,
       };
@@ -340,6 +468,22 @@ engine_text_destroy(engine_text_t *text)
     ENGINE_FREE(text->entries);
     ENGINE_FREE(text);
   }
+}
+
+const engine_textured_rect_t *
+engine_text_get_textured_rects(const engine_text_t *text)
+{
+  SDL_assert(text);
+
+  return (const engine_textured_rect_t *)text->entries;
+}
+
+size_t
+engine_text_get_textured_rects_count(const engine_text_t *text)
+{
+  SDL_assert(text);
+
+  return text->entry_count;
 }
 
 char *
@@ -415,18 +559,25 @@ engine_text_length(const char *rich_str)
       break;
     case '{':
       if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
+        SDL_Log("color tag opening");
         engine_text_discard_color_tag(cursor);
+        break;
       } else if (*cursor + 1 == '/'
                  && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
                  && *cursor + 3 == '}') {
+        SDL_Log("color tag closing");
         engine_text_discard_color_tag(cursor);
+        break;
       } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
+        SDL_Log("icon tag");
         engine_text_discard_icon_tag(cursor);
         count++;
         cursor++;
+        break;
       }
-      break;
+      // Fall through to handle as normal character if it's not a valid tag
     default:
+      SDL_Log("character '%c'", *cursor);
       // Discard invalid characters
       if (*cursor < ' ') {
         cursor++;
@@ -466,8 +617,6 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
   char *cursor = (char *)rich_str;
 
   while (*cursor) {
-    int glyphs_index = (int)*cursor - (int)base_char;
-
     switch (*cursor) {
     case '\n':
       measure.y += line_spacing;
@@ -477,11 +626,13 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
       if ((*cursor + 1 == 'c' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
         // Handle for color tags
         engine_text_discard_color_tag(cursor);
+        break;
       } else if (*cursor + 1 == '/'
                  && (*cursor + 2 == 'c' || *cursor + 2 == 'f')
                  && *cursor + 3 == '}') {
         // Handle for closing color tags
         engine_text_discard_color_tag(cursor);
+        break;
       } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
         // Handle for icon tag
         int icon_index = engine_text_handle_icon_tag(font, cursor);
@@ -491,8 +642,9 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
 
           measure.x += (icon_rect.w + char_spacing);
         }
+        break;
       }
-      break;
+      // Fall through to handle as normal character if it's not a valid tag
     default: {
       int glyphs_index = (int)*cursor - (int)base_char;
       if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
@@ -564,11 +716,13 @@ engine_text_wrap(const engine_font_t *font,
       if ((*cursor + 1 == 'b' || *cursor + 1 == 'f') && *cursor + 12 == '}') {
         // Check for color tags
         engine_text_discard_color_tag(cursor);
+        break;
       } else if (*cursor + 1 == '/'
                  && (*cursor + 2 == 'b' || *cursor + 2 == 'f')
                  && *cursor + 3 == '}') {
         // Check for closing color tags
         engine_text_discard_color_tag(cursor);
+        break;
       } else if (*cursor + 1 == 'i' && *cursor + 2 == '=') {
         // Check for icon tags
         int icon_index = engine_text_handle_icon_tag(font, cursor);
@@ -578,8 +732,9 @@ engine_text_wrap(const engine_font_t *font,
         if (icon_index >= icon_range.x && icon_index <= icon_range.y) {
           width += (icon_rect.w + char_spacing);
         }
+        break;
       }
-      break;
+      // Fall through to handle as normal character if it's not a valid tag
     default: {
       // Discard invalid characters
       if (*cursor < ' ') {
@@ -591,13 +746,14 @@ engine_text_wrap(const engine_font_t *font,
       engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
       int next_width
-          = width + glyph_rect.w
-            + char_spacing; // Calculate the width if we add the next character
+          = width + glyph_rect.w + char_spacing; // Calculate the width if we
+                                                 // add the next character
 
-      // Add a line break if adding the next character would exceed the maximum
-      // width
+      // Add a line break if adding the next character would exceed the
+      // maximum width
       if (next_width > max_width) {
-        //  Check if we need to reallocate the buffer before adding the current
+        //  Check if we need to reallocate the buffer before adding the
+        //  current
         if (buffer_count + 1 >= buffer_size) {
           goto realloc;
         }
@@ -622,8 +778,8 @@ engine_text_wrap(const engine_font_t *font,
     continue; // Skip the realloc part
 
   realloc:
-    // If passed here, the cursor was not incremented, so we need to process the
-    // same character again after reallocating.
+    // If passed here, the cursor was not incremented, so we need to process
+    // the same character again after reallocating.
     buffer_size *= 2;
 
     char *new_buffer = NULL;

@@ -5,9 +5,9 @@
  *
  * @details To render:
  *
- * - An icons{i=icon_index}.
- * - Change Background color  {b=#RRGGBBAA}text{/b}.
- * - Change Foreground color {f=#RRGGBBAA}text{/f}.
+ * - An icons{i=FF}.
+ * - Change Background color  {b=RRGGBBAA}text{/b}.
+ * - Change Foreground color {f=RRGGBBAA}text{/f}.
  *
  * @copyright Copyright (c) 2026 nsix. All rights reserved.
  */
@@ -19,11 +19,11 @@
 
 #include "engine_color.h"
 #include "engine_font.h"
+#include "engine_painter.h"
 
 typedef struct engine_text_entry_s
 {
-  engine_rect_t dest_rect;
-  engine_rect_t src_rect;
+  engine_textured_rect_t rects;
   engine_color_t background;
   engine_color_t foreground;
 } engine_text_entry_t;
@@ -67,10 +67,11 @@ engine_text_t *engine_text_make(engine_vec2_t position,
 
 void engine_text_destroy(engine_text_t *text);
 
-char *engine_text_without_tags(const char *rich_str);
+const engine_textured_rect_t *
+engine_text_get_textured_rects(const engine_text_t *text);
+size_t engine_text_get_textured_rects_count(const engine_text_t *text);
 
-// FIXME those function should return engine_text_t instead of rendering
-// directly, then the user can use  the painter to render text.
+char *engine_text_without_tags(const char *rich_str);
 
 /**
  * @brief Get the length of a

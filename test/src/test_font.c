@@ -2,8 +2,15 @@
 
 #include "test_font.h"
 
-engine_font_t *_font_atlas = NULL;
-engine_font_t *_font_ttf   = NULL;
+static engine_font_t *_font_atlas = NULL;
+static engine_font_t *_font_ttf   = NULL;
+
+static const char *_str = "Hello, World!\nThis is a test of the font rendering "
+                          "system.\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
+
+// Cached text objects
+static engine_text_t *_text_atlas = NULL;
+static engine_text_t *_text_ttf   = NULL;
 
 const size_t _font_atlas_glyph_count     = 4 + 100; // 4 icons + 96 chars
 const engine_rect_t _font_atlas_glyphs[] = {
@@ -128,18 +135,35 @@ test_font_setup(void)
                                        0,
                                        0);
 
+  SDL_Log("Loaded");
+
+  _text_atlas = engine_text_make((engine_vec2_t){ 10, 10 },
+                                 _font_atlas,
+                                 _str,
+                                 ENGINE_COLOR_WHITE,
+                                 ENGINE_COLOR_BLACK);
+
+  SDL_Log("Text made");
+
+  /*
   _font_ttf = engine_font_load_ttf("data/fonts/ProggyClean.ttf",
                                    (engine_vec2_t){ 0, 0 },
                                    (engine_vec2_t){ 32, 126 },
                                    13,
                                    0,
                                    0);
+
+  _text_ttf = engine_text_make((engine_vec2_t){ 10, 100 },
+                               _font_ttf,
+                               _str,
+                               ENGINE_COLOR_WHITE,
+                               ENGINE_COLOR_BLACK);
+                               */
 }
 
 void
 test_font_update(Uint64 delta_time_ms)
 {
-  //
 }
 
 void
@@ -147,10 +171,30 @@ test_font_render(Uint64 alpha_time_ms)
 {
   engine_painter_set_color(0, 0, 0, 255);
   engine_painter_clear();
+
+  // Draw atlas font text
+  engine_painter_set_image(engine_font_get_image(_font_atlas));
+
+  engine_painter_draw_textured_rects(
+      engine_text_get_textured_rects(_text_atlas),
+      engine_text_get_textured_rects_count(_text_atlas));
+
+  // Draw TTF font text
+  /*
+  engine_painter_set_image(engine_font_get_image(_font_ttf));
+
+  engine_painter_draw_textured_rects(
+      engine_text_get_textured_rects(_text_ttf),
+      engine_text_get_textured_rects_count(_text_ttf));
+      */
 }
 
 void
 test_font_shutdown(void)
 {
-  //
+  engine_text_destroy(_text_atlas);
+  engine_text_destroy(_text_ttf);
+
+  engine_font_destroy(_font_atlas);
+  engine_font_destroy(_font_ttf);
 }
