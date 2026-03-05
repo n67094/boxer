@@ -1,19 +1,21 @@
 #include "engine.h"
 
-#include "test_font.h"
-#include "test_image.h"
+#include "example_image.h"
+#include "example_text.h"
+
 #include "test_ini.h"
 #include "test_json.h"
 #include "test_math.h"
+#include "test_text.h"
 
 typedef enum
 {
-  TEST_IMAGE = 0,
-  TEST_FONT,
-  TEST_SIZE,
-} test_e;
+  EXAMPLE_IMAGE = 0,
+  EXAMPLE_FONT,
+  EXAMPLE_SIZE,
+} example_e;
 
-static test_e _current_test = TEST_IMAGE;
+static example_e _current_test = EXAMPLE_IMAGE;
 
 static engine_game_config_t _config = { 0 };
 
@@ -42,42 +44,35 @@ engine_game_setup(void)
   ENGINE_UNIT_RUN_SUITE(suite_math);
   ENGINE_UNIT_RUN_SUITE(suite_json);
   ENGINE_UNIT_RUN_SUITE(suite_ini);
+  ENGINE_UNIT_RUN_SUITE(suite_text);
 
-  test_image_setup();
-  test_font_setup();
+  example_image_setup();
+  example_text_setup();
 }
 
 void
 engine_game_update(Uint64 delta_time_ms)
 {
-  // Cycle test left
+  // Cycle example left
   if (engine_key_just_pressed(ENGINE_KEY_LEFT)
       || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_LEFT)
       || engine_mouse_just_pressed(ENGINE_MOUSE_LEFT)) {
-    _current_test = (_current_test + TEST_SIZE - 1) % (TEST_SIZE);
+    _current_test = (_current_test + EXAMPLE_SIZE - 1) % (EXAMPLE_SIZE);
   }
 
-  // Cycle test right
+  // Cycle example right
   if (engine_key_just_pressed(ENGINE_KEY_RIGHT)
       || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_RIGHT)
       || engine_mouse_just_pressed(ENGINE_MOUSE_RIGHT)) {
-    _current_test = (_current_test + 1) % (TEST_SIZE);
-  }
-
-  if (engine_key_held(ENGINE_KEY_SPACE)
-      || engine_gamepad_held(0, ENGINE_GAMEPAD_BUTTON_SOUTH)) {
-  }
-
-  if (engine_key_held(ENGINE_KEY_RETURN)
-      || engine_gamepad_held(0, ENGINE_GAMEPAD_BUTTON_NORTH)) {
+    _current_test = (_current_test + 1) % (EXAMPLE_SIZE);
   }
 
   switch (_current_test) {
-  case TEST_IMAGE:
-    test_image_update(delta_time_ms);
+  case EXAMPLE_IMAGE:
+    example_image_update(delta_time_ms);
     break;
-  case TEST_FONT:
-    test_font_update(delta_time_ms);
+  case EXAMPLE_FONT:
+    example_text_update(delta_time_ms);
     break;
   default:
     break;
@@ -93,11 +88,11 @@ engine_game_render(Uint64 alpha_time_ms)
                        window_dimensions.y * 0.5); // zoom x2
   {
     switch (_current_test) {
-    case TEST_IMAGE:
-      test_image_render(alpha_time_ms);
+    case EXAMPLE_IMAGE:
+      example_image_render(alpha_time_ms);
       break;
-    case TEST_FONT:
-      test_font_render(alpha_time_ms);
+    case EXAMPLE_FONT:
+      example_text_render(alpha_time_ms);
       break;
     default:
       break;
@@ -111,6 +106,6 @@ engine_game_render(Uint64 alpha_time_ms)
 void
 engine_game_shutdown(void)
 {
-  test_image_shutdown();
-  test_font_shutdown();
+  example_image_shutdown();
+  example_text_shutdown();
 }

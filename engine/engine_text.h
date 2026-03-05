@@ -76,7 +76,7 @@ size_t engine_text_get_text_entries_count(const engine_text_t *text);
 char *engine_text_without_tags(const char *rich_str);
 
 /**
- * @brief Get the length of a
+ * @brief Get the length of a text string without counting any formatting tags.
  */
 size_t engine_text_length(const char *rich_str);
 

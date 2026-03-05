@@ -1,6 +1,6 @@
 #include "engine.h"
 
-#include "test_font.h"
+#include "example_text.h"
 
 const size_t _font_glyph_count     = 4 + 100; // 4 icons + 96 chars
 const engine_rect_t _font_glyphs[] = {
@@ -116,14 +116,16 @@ const engine_rect_t _font_glyphs[] = {
 static engine_font_t *_font = NULL;
 static engine_text_t *_text = NULL;
 
-static const char *_str = "{b=00FF00FF}{f=FF0000FF}Hello, World!{/b}{/f}\nThis "
-                          "is a test of the font rendering\n"
-                          "This is an icon: {i=02}\n"
-                          "system.\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
+static const char *_str_1
+    = "{b=00FF00FF}{f=FF0000FF}Hello, World!{/b}{/f}\nThis "
+      "is a test of the font rendering\n"
+      "This is an icon: {i=02}\n"
+      "system.\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
 void
-test_font_setup(void)
+example_text_setup(void)
 {
+
   _font = engine_font_load("data/images/font.png",
                            _font_glyphs,
                            _font_glyph_count,
@@ -136,20 +138,22 @@ test_font_setup(void)
   // FIXME Engine text make shouldn't take a position as param
   _text = engine_text_make((engine_vec2_t){ 10, 10 },
                            _font,
-                           _str,
+                           _str_1,
                            ENGIEN_COLOR_PINK,
                            ENGINE_COLOR_WHITE);
 }
 
 void
-test_font_update(Uint64 delta_time_ms)
+example_text_update(Uint64 delta_time_ms)
 {
 }
 
 void
-test_font_render(Uint64 alpha_time_ms)
+example_text_render(Uint64 alpha_time_ms)
 {
-  engine_painter_set_color(engine_color_make(0, 0, 255, 255));
+  // TODO this is one way with total control over the rendering, the API should
+  // feater a fastest way of doing it
+  engine_painter_set_color(engine_color_make(0, 0, 0, 255));
   engine_painter_clear();
 
   engine_painter_set_blend_mode(ENGINE_BLENDMODE_BLEND);
@@ -159,11 +163,13 @@ test_font_render(Uint64 alpha_time_ms)
   size_t entries_count = engine_text_get_text_entries_count(_text);
 
   for (size_t i = 0; i < entries_count; ++i) {
+    /*
     SDL_Log("Background r: %d g: %d b: %d a: %d",
             entries[i].background.r,
             entries[i].background.g,
             entries[i].background.b,
             entries[i].background.a);
+            */
 
     engine_painter_reset_image();
 
@@ -179,7 +185,7 @@ test_font_render(Uint64 alpha_time_ms)
 }
 
 void
-test_font_shutdown(void)
+example_text_shutdown(void)
 {
   engine_text_destroy(_text);
 }

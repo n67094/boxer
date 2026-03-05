@@ -2,24 +2,24 @@
 
 #include "engine.h"
 
-#include "test_image.h"
+#include "example_image.h"
 
 static engine_image_t _image;
 
 void
-test_image_setup(void)
+example_image_setup(void)
 {
   _image = engine_image_load("data/images/logo.png");
 }
 
 void
-test_image_update(Uint64 delta_time_ms)
+example_image_update(Uint64 delta_time_ms)
 {
   //
 }
 
 void
-test_image_render(Uint64 alpha_time_ms)
+example_image_render(Uint64 alpha_time_ms)
 {
   engine_painter_set_color(engine_color_make(0, 0, 0, 255));
   engine_painter_clear();
@@ -51,7 +51,7 @@ test_image_render(Uint64 alpha_time_ms)
 }
 
 void
-test_image_shutdown(void)
+example_image_shutdown(void)
 {
   engine_image_destroy(_image);
 }

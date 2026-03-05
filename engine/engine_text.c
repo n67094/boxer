@@ -339,10 +339,10 @@ engine_text_make(engine_vec2_t position,
       cursor++;
       break;
     case '{': {
-      int skip_length = 0;
-      engine_color_t new_color;
-      engine_text_tag_e tag_type;
-      int icon_index;
+      int skip_length            = 0;
+      engine_color_t new_color   = { 0 };
+      engine_text_tag_e tag_type = ENGINE_TEXT_TAG_NONE;
+      int icon_index             = -1;
 
       // Handle color tags
       if (engine_text_color_tag_validate(
@@ -379,7 +379,6 @@ engine_text_make(engine_vec2_t position,
               icon_index,
               (int)icon_range.x,
               (int)icon_range.y);
-          cursor += skip_length; // Skip the invalid tag
           break;
         }
 
@@ -398,18 +397,6 @@ engine_text_make(engine_vec2_t position,
           .background = current_background,
           .foreground = current_foreground,
         };
-
-        SDL_Log("Background r: %d g: %d b: %d a: %d",
-                current_background.r,
-                current_background.g,
-                current_background.b,
-                current_background.a);
-
-        SDL_Log("Foreground r: %d g: %d b: %d a: %d",
-                current_foreground.r,
-                current_foreground.g,
-                current_foreground.b,
-                current_foreground.a);
 
         position.x += icon_rect.w + char_spacing;
 
@@ -447,18 +434,6 @@ engine_text_make(engine_vec2_t position,
         .background = current_background,
         .foreground = current_foreground,
       };
-
-      SDL_Log("Background r: %d g: %d b: %d a: %d",
-              current_background.r,
-              current_background.g,
-              current_background.b,
-              current_background.a);
-
-      SDL_Log("Foreground r: %d g: %d b: %d a: %d",
-              current_foreground.r,
-              current_foreground.g,
-              current_foreground.b,
-              current_foreground.a);
 
       position.x += glyph_rect.w + char_spacing;
       cursor++;
@@ -524,17 +499,13 @@ engine_text_without_tags(const char *rich_str)
       break;
     case '{': {
       int skip_length = 0;
-      int icon_index;
 
-      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL, NULL)
-          || engine_text_icon_tag_validate(
-              cursor, end, &skip_length, &icon_index)) {
+      if (engine_text_color_tag_validate(
+              cursor, end, &skip_length, NULL, NULL)) {
         cursor += skip_length; // Skip the valid tag
         break;
-      } else if (engine_text_color_tag_validate(
-                     cursor, end, &skip_length, NULL, NULL)
-                 || engine_text_icon_tag_validate(
-                     cursor, end, &skip_length, &icon_index)) {
+      } else if (engine_text_icon_tag_validate(
+                     cursor, end, &skip_length, NULL)) {
         cursor += skip_length; // Skip the valid tag
         break;
       }
@@ -557,7 +528,6 @@ engine_text_without_tags(const char *rich_str)
   return buffer;
 }
 
-// FXIME: seems to return length + 1, need to investigate
 size_t
 engine_text_length(const char *rich_str)
 {
@@ -578,15 +548,15 @@ engine_text_length(const char *rich_str)
       break;
     case '{': {
       int skip_length = 0;
+      int icon_index;
 
-      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL, NULL)
-          || engine_text_icon_tag_validate(cursor, end, &skip_length, NULL)) {
+      if (engine_text_color_tag_validate(
+              cursor, end, &skip_length, NULL, NULL)) {
         cursor += skip_length; // Skip the valid tag
         break;
-      } else if (engine_text_color_tag_validate(
-                     cursor, end, &skip_length, NULL, NULL)
-                 || engine_text_icon_tag_validate(
-                     cursor, end, &skip_length, NULL)) {
+      } else if (engine_text_icon_tag_validate(
+                     cursor, end, &skip_length, &icon_index)) {
+        count++;               // Count the icon as a single character
         cursor += skip_length; // Skip the valid tag
         break;
       }
@@ -605,7 +575,7 @@ engine_text_length(const char *rich_str)
     }
   }
 
-  return count;
+  return count; // Subtract 1 to account for the null terminator
 }
 
 engine_vec2_t
