@@ -116,7 +116,7 @@ const engine_rect_t _font_glyphs[] = {
 static engine_font_t *_font = NULL;
 static engine_text_t *_text = NULL;
 
-static const char *_str = "{b=00FF0000}{f=FF000000}Hello, World!{/b}{/f}\nThis "
+static const char *_str = "{b=00FF00FF}{f=FF0000FF}Hello, World!{/b}{/f}\nThis "
                           "is a test of the font rendering\n"
                           "This is an icon: {i=02}\n"
                           "system.\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
@@ -137,7 +137,7 @@ test_font_setup(void)
   _text = engine_text_make((engine_vec2_t){ 10, 10 },
                            _font,
                            _str,
-                           ENGINE_COLOR_BLACK,
+                           ENGIEN_COLOR_PINK,
                            ENGINE_COLOR_WHITE);
 }
 
@@ -152,16 +152,25 @@ test_font_render(Uint64 alpha_time_ms)
   engine_painter_set_color(engine_color_make(0, 0, 255, 255));
   engine_painter_clear();
 
-  // FIXME a engine_painter_draw_text(position, text) would be better
-  engine_painter_set_image(engine_font_get_image(_font));
+  engine_painter_set_blend_mode(ENGINE_BLENDMODE_BLEND);
 
   engine_text_entry_t *entries
       = (engine_text_entry_t *)engine_text_get_text_entries(_text);
   size_t entries_count = engine_text_get_text_entries_count(_text);
 
   for (size_t i = 0; i < entries_count; ++i) {
+    SDL_Log("Background r: %d g: %d b: %d a: %d",
+            entries[i].background.r,
+            entries[i].background.g,
+            entries[i].background.b,
+            entries[i].background.a);
+
+    engine_painter_reset_image();
+
     engine_painter_set_color(entries[i].background);
     engine_painter_draw_filled_rect(entries[i].rects.dst);
+
+    engine_painter_set_image(engine_font_get_image(_font));
 
     engine_painter_set_color(entries[i].foreground);
     engine_painter_draw_textured_rect(entries[i].rects.dst,

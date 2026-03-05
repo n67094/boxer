@@ -12,8 +12,10 @@
 typedef enum
 {
   ENGINE_TEXT_TAG_NONE = 0,
-  ENGINE_TEXT_TAG_COLOR_FOREGROUND,
-  ENGINE_TEXT_TAG_COLOR_BACKGROUND,
+  ENGINE_TEXT_TAG_OPEN_COLOR_BACKGROUND,
+  ENGINE_TEXT_TAG_CLOSE_COLOR_BACKGROUND,
+  ENGINE_TEXT_TAG_OPEN_COLOR_FOREGROUND,
+  ENGINE_TEXT_TAG_CLOSE_COLOR_FOREGROUND,
   ENGINE_TEXT_TAG_ICON,
 } engine_text_tag_e;
 
@@ -30,10 +32,10 @@ engine_text_color_tag_validate(const char *cursor,
 
   // Opening tag: {b=RRGGBBAA} or {f=RRGGBBAA}
   if (*(cursor + 1) == 'b' || *(cursor + 1) == 'f') {
-
     if (out_tag_type) {
-      *out_tag_type = (*(cursor + 1) == 'b') ? ENGINE_TEXT_TAG_COLOR_BACKGROUND
-                                             : ENGINE_TEXT_TAG_COLOR_FOREGROUND;
+      *out_tag_type = (*(cursor + 1) == 'b')
+                          ? ENGINE_TEXT_TAG_OPEN_COLOR_BACKGROUND
+                          : ENGINE_TEXT_TAG_OPEN_COLOR_FOREGROUND;
     }
 
     if (*(cursor + 2) != '=') {
@@ -92,6 +94,12 @@ engine_text_color_tag_validate(const char *cursor,
 
   // Closing tag: {/b} or {/f}
   if (*(cursor + 1) == '/' && (*(cursor + 2) == 'b' || *(cursor + 2) == 'f')) {
+    if (out_tag_type) {
+      *out_tag_type = (*(cursor + 2) == 'b')
+                          ? ENGINE_TEXT_TAG_CLOSE_COLOR_BACKGROUND
+                          : ENGINE_TEXT_TAG_CLOSE_COLOR_FOREGROUND;
+    }
+
     if (cursor + ENGINE_COLOR_CLOSE_TAG_LENGTH > end) {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid color tag length.");
       return false;
@@ -283,7 +291,8 @@ engine_text_make(engine_vec2_t position,
     return NULL;
   }
 
-  size_t rich_str_len = SDL_strlen(rich_str);
+  size_t rich_str_len              = SDL_strlen(rich_str);
+  size_t rich_str_len_without_tags = engine_text_length(rich_str);
 
   engine_text_t *text = NULL;
   ENGINE_NEW(text);
@@ -294,7 +303,7 @@ engine_text_make(engine_vec2_t position,
     return NULL;
   }
 
-  text->entry_count = rich_str_len;
+  text->entry_count = rich_str_len_without_tags;
   ENGINE_CALLOC(text->entries, text->entry_count, sizeof(engine_text_entry_t));
   if (!text->entries) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
@@ -338,11 +347,24 @@ engine_text_make(engine_vec2_t position,
       // Handle color tags
       if (engine_text_color_tag_validate(
               cursor, end, &skip_length, &new_color, &tag_type)) {
-        if (tag_type == ENGINE_TEXT_TAG_COLOR_BACKGROUND) {
+        switch (tag_type) {
+        case ENGINE_TEXT_TAG_OPEN_COLOR_BACKGROUND:
           current_background = new_color;
-        } else if (tag_type == ENGINE_TEXT_TAG_COLOR_FOREGROUND) {
+          break;
+        case ENGINE_TEXT_TAG_CLOSE_COLOR_BACKGROUND:
+          current_background = background;
+          break;
+
+        case ENGINE_TEXT_TAG_OPEN_COLOR_FOREGROUND:
           current_foreground = new_color;
+          break;
+        case ENGINE_TEXT_TAG_CLOSE_COLOR_FOREGROUND:
+          current_foreground = foreground;
+          break;
+        default:
+          break;
         }
+
         cursor += skip_length;
         break;
       }
@@ -376,6 +398,18 @@ engine_text_make(engine_vec2_t position,
           .background = current_background,
           .foreground = current_foreground,
         };
+
+        SDL_Log("Background r: %d g: %d b: %d a: %d",
+                current_background.r,
+                current_background.g,
+                current_background.b,
+                current_background.a);
+
+        SDL_Log("Foreground r: %d g: %d b: %d a: %d",
+                current_foreground.r,
+                current_foreground.g,
+                current_foreground.b,
+                current_foreground.a);
 
         position.x += icon_rect.w + char_spacing;
 
@@ -413,6 +447,18 @@ engine_text_make(engine_vec2_t position,
         .background = current_background,
         .foreground = current_foreground,
       };
+
+      SDL_Log("Background r: %d g: %d b: %d a: %d",
+              current_background.r,
+              current_background.g,
+              current_background.b,
+              current_background.a);
+
+      SDL_Log("Foreground r: %d g: %d b: %d a: %d",
+              current_foreground.r,
+              current_foreground.g,
+              current_foreground.b,
+              current_foreground.a);
 
       position.x += glyph_rect.w + char_spacing;
       cursor++;
@@ -511,6 +557,7 @@ engine_text_without_tags(const char *rich_str)
   return buffer;
 }
 
+// FXIME: seems to return length + 1, need to investigate
 size_t
 engine_text_length(const char *rich_str)
 {
