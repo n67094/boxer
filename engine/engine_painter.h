@@ -76,7 +76,7 @@ void engine_painter_scale_at(float sx, float sy, float ax, float ay);
 
 void engine_painter_set_blend_mode(engine_blendmode_e blend_mode);
 void engine_painter_reset_blend_mode(void);
-void engine_painter_set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+void engine_painter_set_color(engine_color_t color);
 void engine_painter_reset_color(void);
 void engine_painter_set_image(engine_image_t image);
 void engine_painter_reset_image(void);
@@ -110,7 +110,7 @@ void engine_painter_draw_triangles_strip(const engine_point_t *points,
 
 void engine_painter_draw_filled_rects(const engine_rect_t *rects,
                                       uint32_t count);
-void engine_painter_draw_filled_rect(float x, float y, float w, float h);
+void engine_painter_draw_filled_rect(engine_rect_t rect);
 
 void engine_painter_draw_textured_rects(const engine_textured_rect_t *rects,
                                         Uint32 count);

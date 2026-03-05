@@ -5,43 +5,75 @@
 #include "engine_mem.h"
 #include "engine_text.h"
 
-#define ENGINE_COLOR_OPEN_TAG_LENGTH 14 // Length of "{X=XXXXXXXX}"
+#define ENGINE_COLOR_OPEN_TAG_LENGTH 12 // Length of "{X=XXXXXXXX}"
 #define ENGINE_COLOR_CLOSE_TAG_LENGTH 4 // Length of "{/X}"
 #define ENGINE_ICON_TAG_LENGTH 6        // Length of "{X=XX}"
+
+typedef enum
+{
+  ENGINE_TEXT_TAG_NONE = 0,
+  ENGINE_TEXT_TAG_COLOR_FOREGROUND,
+  ENGINE_TEXT_TAG_COLOR_BACKGROUND,
+  ENGINE_TEXT_TAG_ICON,
+} engine_text_tag_e;
 
 static bool
 engine_text_color_tag_validate(const char *cursor,
                                const char *end,
-                               int *skip_length,
-                               engine_color_t *out_color)
+                               int *out_skip_length,
+                               engine_color_t *out_color,
+                               engine_text_tag_e *out_tag_type)
 {
-  if (*(cursor + 1) != 'b' || *(cursor + 1) != 'f' || *(cursor + 1) != '/') {
+  if (*(cursor + 1) != 'b' && *(cursor + 1) != 'f' && *(cursor + 1) != '/') {
     return false;
   }
 
   // Opening tag: {b=RRGGBBAA} or {f=RRGGBBAA}
   if (*(cursor + 1) == 'b' || *(cursor + 1) == 'f') {
-    if (cursor + ENGINE_COLOR_OPEN_TAG_LENGTH > end) {
-      SDL_LogWarn(
-          SDL_LOG_CATEGORY_APPLICATION,
-          "Color opening tag is too short. Expected format: {c=RRGGBBAA}");
+
+    if (out_tag_type) {
+      *out_tag_type = (*(cursor + 1) == 'b') ? ENGINE_TEXT_TAG_COLOR_BACKGROUND
+                                             : ENGINE_TEXT_TAG_COLOR_FOREGROUND;
+    }
+
+    if (*(cursor + 2) != '=') {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Missing '=' in color tag.");
       return false;
     }
 
-    *skip_length = ENGINE_COLOR_OPEN_TAG_LENGTH;
+    if (cursor + ENGINE_COLOR_OPEN_TAG_LENGTH > end) {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid color tag length.");
+      return false;
+    }
 
-    char color_str[9]; // 8 characters for RGBA + null terminator
+    if (*(cursor + ENGINE_COLOR_OPEN_TAG_LENGTH - 1) != '}') {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Missing closing '}' in color tag.");
+      return false;
+    }
+
+    if (out_skip_length) {
+      *out_skip_length = ENGINE_COLOR_OPEN_TAG_LENGTH;
+    }
+
+    if (out_color == NULL) {
+      return true; // Only validating the tag format, not extracting color
+    }
+
+    size_t color_str_len = 9; // 8 characters for RGBA + null terminator
+    char color_str[color_str_len];
 
     int i;
-    for (i = 0; i < 8 && cursor[i] && cursor[i] != '}'; ++i) {
-      color_str[i] = cursor[i];
+    for (i = 0; i < color_str_len - 1 && cursor[i] != '}'; ++i) {
+      char c       = cursor[3 + i]; // Start after "{X="
+      color_str[i] = c;
     }
     color_str[i] = '\0';
 
     char *endptr       = NULL;
     Uint32 color_value = SDL_strtoul(color_str, &endptr, 16);
 
-    if (endptr != NULL) {
+    if (endptr != color_str + color_str_len - 1) {
       SDL_LogWarn(
           SDL_LOG_CATEGORY_APPLICATION,
           "Invalid color value in color tag. Expected a hexadecimal number.");
@@ -59,15 +91,21 @@ engine_text_color_tag_validate(const char *cursor,
   }
 
   // Closing tag: {/b} or {/f}
-  if (*cursor + 1 == '/') {
+  if (*(cursor + 1) == '/' && (*(cursor + 2) == 'b' || *(cursor + 2) == 'f')) {
     if (cursor + ENGINE_COLOR_CLOSE_TAG_LENGTH > end) {
-      SDL_LogWarn(
-          SDL_LOG_CATEGORY_APPLICATION,
-          "Color closing tag is too short. Expected format: {/b} or {/f}");
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid color tag length.");
       return false;
     }
 
-    *skip_length = ENGINE_COLOR_CLOSE_TAG_LENGTH;
+    if (*(cursor + ENGINE_COLOR_CLOSE_TAG_LENGTH - 1) != '}') {
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                  "Missing closing '}' in color tag.");
+      return false;
+    }
+
+    if (out_skip_length) {
+      *out_skip_length = ENGINE_COLOR_CLOSE_TAG_LENGTH;
+    }
 
     return true;
   }
@@ -81,36 +119,47 @@ engine_text_icon_tag_validate(const char *cursor,
                               int *skip_length,
                               int *out_icon_index)
 {
-  if (*cursor + 1 != 'i' || *cursor + 2 != '=') {
+  if (*(cursor + 1) != 'i' || *(cursor + 2) != '=') {
     return false;
   }
 
   if (cursor + ENGINE_ICON_TAG_LENGTH > end) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Icon tag is too short. Expected format: {i=XX}");
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid icon tag length.");
     return false;
   }
 
-  *skip_length = ENGINE_ICON_TAG_LENGTH;
+  if (*(cursor + ENGINE_ICON_TAG_LENGTH - 1) != '}') {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Missing closing '}' in icon tag.");
+    return false;
+  }
 
-  char icon_index_str[3]; // 2 characters for icon index + null terminator
+  if (skip_length) {
+    *skip_length = ENGINE_ICON_TAG_LENGTH;
+  }
+
+  char icon_str_len = 3; // 2 characters for icon index + null terminator
+  char icon_str[icon_str_len];
 
   int i;
-  for (i = 0; i < 2 && cursor[i] && cursor[i] != '}'; ++i) {
-    icon_index_str[i] = cursor[i];
+  for (i = 0; i < icon_str_len - 1 && cursor[i] != '}'; ++i) {
+    char c      = cursor[3 + i]; // Start after "{i="
+    icon_str[i] = c;
   }
-  icon_index_str[i] = '\0';
+  icon_str[i] = '\0';
 
   char *endptr   = NULL;
-  int icon_index = SDL_strtoul(icon_index_str, &endptr, 16);
+  int icon_index = SDL_strtoul(icon_str, &endptr, 16);
 
-  if (endptr != NULL) {
+  if (endptr != icon_str + icon_str_len - 1) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                 "Invalid icon index in icon tag. Expected a number.");
     return false;
   }
 
-  *out_icon_index = icon_index;
+  if (out_icon_index) {
+    *out_icon_index = icon_index;
+  }
 
   return true;
 }
@@ -137,7 +186,7 @@ engine_text_glyph_make(engine_vec2_t position,
   }
 
   text->entry_count = 1;
-  ENGINE_ALLOC(text->entries, text->entry_count);
+  ENGINE_CALLOC(text->entries, text->entry_count, sizeof(engine_text_entry_t));
   if (!text->entries) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to allocate memory for text glyph entries");
@@ -157,6 +206,7 @@ engine_text_glyph_make(engine_vec2_t position,
   text->entries[0].rects.src  = glyph_rect;
   text->entries[0].background = background;
   text->entries[0].foreground = foreground;
+  text->font                  = font;
 
   return text;
 }
@@ -196,7 +246,7 @@ engine_text_char_make(engine_vec2_t position,
   }
 
   text->entry_count = 1;
-  ENGINE_ALLOC(text->entries, text->entry_count);
+  ENGINE_CALLOC(text->entries, text->entry_count, sizeof(engine_text_entry_t));
   if (!text->entries) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to allocate memory for text char entries");
@@ -216,6 +266,7 @@ engine_text_char_make(engine_vec2_t position,
   text->entries[0].rects.src  = glyph_rect;
   text->entries[0].background = background;
   text->entries[0].foreground = foreground;
+  text->font                  = font;
 
   return text;
 }
@@ -232,10 +283,10 @@ engine_text_make(engine_vec2_t position,
     return NULL;
   }
 
-  size_t rich_str_len = engine_text_length(rich_str);
+  size_t rich_str_len = SDL_strlen(rich_str);
 
   engine_text_t *text = NULL;
-  ENGINE_ALLOC(text, rich_str_len * sizeof(engine_text_t));
+  ENGINE_NEW(text);
   if (!text) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to allocate memory for rendered text");
@@ -244,7 +295,7 @@ engine_text_make(engine_vec2_t position,
   }
 
   text->entry_count = rich_str_len;
-  ENGINE_ALLOC(text->entries, text->entry_count);
+  ENGINE_CALLOC(text->entries, text->entry_count, sizeof(engine_text_entry_t));
   if (!text->entries) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to allocate memory for rendered text entries");
@@ -252,6 +303,8 @@ engine_text_make(engine_vec2_t position,
     ENGINE_FREE(text);
     return NULL;
   }
+
+  int initial_pos_x = position.x;
 
   engine_color_t current_foreground = foreground;
   engine_color_t current_background = background;
@@ -273,20 +326,21 @@ engine_text_make(engine_vec2_t position,
     switch (*cursor) {
     case '\n':
       position.y += (line_spacing);
-      position.x = 0;
+      position.x = initial_pos_x;
       cursor++;
       break;
     case '{': {
       int skip_length = 0;
       engine_color_t new_color;
+      engine_text_tag_e tag_type;
       int icon_index;
 
       // Handle color tags
       if (engine_text_color_tag_validate(
-              cursor, end, &skip_length, &new_color)) {
-        if (*(cursor + 1) == 'b') {
+              cursor, end, &skip_length, &new_color, &tag_type)) {
+        if (tag_type == ENGINE_TEXT_TAG_COLOR_BACKGROUND) {
           current_background = new_color;
-        } else {
+        } else if (tag_type == ENGINE_TEXT_TAG_COLOR_FOREGROUND) {
           current_foreground = new_color;
         }
         cursor += skip_length;
@@ -333,7 +387,7 @@ engine_text_make(engine_vec2_t position,
     default: {
       int glyphs_index = (int)*cursor - (int)base_char;
 
-      if (glyphs_index >= char_range.x && glyphs_index <= char_range.y) {
+      if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
         SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                     "Invalid character '%c' in text string. Valid characters "
                     "are from %d to %d.",
@@ -373,24 +427,24 @@ void
 engine_text_destroy(engine_text_t *text)
 {
   if (text) {
-    ENGINE_FREE(text->entries);
+    if (text->entries) {
+      ENGINE_FREE(text->entries);
+    }
     ENGINE_FREE(text);
   }
 }
 
-const engine_textured_rect_t *
-engine_text_get_textured_rects(const engine_text_t *text)
+const engine_text_entry_t *
+engine_text_get_text_entries(const engine_text_t *text)
 {
   SDL_assert(text);
-
-  return (const engine_textured_rect_t *)text->entries;
+  return text->entries;
 }
 
 size_t
-engine_text_get_textured_rects_count(const engine_text_t *text)
+engine_text_get_text_entries_count(const engine_text_t *text)
 {
   SDL_assert(text);
-
   return text->entry_count;
 }
 
@@ -424,16 +478,15 @@ engine_text_without_tags(const char *rich_str)
       break;
     case '{': {
       int skip_length = 0;
-      engine_color_t new_color;
       int icon_index;
 
-      if (engine_text_color_tag_validate(cursor, end, &skip_length, &new_color)
+      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL, NULL)
           || engine_text_icon_tag_validate(
               cursor, end, &skip_length, &icon_index)) {
         cursor += skip_length; // Skip the valid tag
         break;
       } else if (engine_text_color_tag_validate(
-                     cursor, end, &skip_length, &new_color)
+                     cursor, end, &skip_length, NULL, NULL)
                  || engine_text_icon_tag_validate(
                      cursor, end, &skip_length, &icon_index)) {
         cursor += skip_length; // Skip the valid tag
@@ -479,11 +532,12 @@ engine_text_length(const char *rich_str)
     case '{': {
       int skip_length = 0;
 
-      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)
+      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL, NULL)
           || engine_text_icon_tag_validate(cursor, end, &skip_length, NULL)) {
         cursor += skip_length; // Skip the valid tag
         break;
-      } else if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)
+      } else if (engine_text_color_tag_validate(
+                     cursor, end, &skip_length, NULL, NULL)
                  || engine_text_icon_tag_validate(
                      cursor, end, &skip_length, NULL)) {
         cursor += skip_length; // Skip the valid tag
@@ -492,7 +546,6 @@ engine_text_length(const char *rich_str)
       // Fall through to handle as normal character if it's not a valid tag
     }
     default:
-      SDL_Log("character '%c'", *cursor);
       // Discard invalid characters
       if (*cursor < ' ') {
         cursor++;
@@ -542,7 +595,8 @@ engine_text_measure(const engine_font_t *font, const char *rich_str)
       int skip_length = 0;
       int icon_index;
 
-      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)) {
+      if (engine_text_color_tag_validate(
+              cursor, end, &skip_length, NULL, NULL)) {
         cursor += skip_length; // Skip the valid tag
         break;
       } else if (engine_text_icon_tag_validate(
@@ -639,7 +693,8 @@ engine_text_wrap(const engine_font_t *font,
       int skip_length = 0;
       int icon_index;
 
-      if (engine_text_color_tag_validate(cursor, end, &skip_length, NULL)) {
+      if (engine_text_color_tag_validate(
+              cursor, end, &skip_length, NULL, NULL)) {
         cursor += skip_length; // Skip the valid tag
         break;
       } else if (engine_text_icon_tag_validate(

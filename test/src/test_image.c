@@ -21,7 +21,7 @@ test_image_update(Uint64 delta_time_ms)
 void
 test_image_render(Uint64 alpha_time_ms)
 {
-  engine_painter_set_color(0, 0, 0, 255);
+  engine_painter_set_color(engine_color_make(0, 0, 0, 255));
   engine_painter_clear();
 
   // Seconds since start
@@ -39,7 +39,7 @@ test_image_render(Uint64 alpha_time_ms)
       center.x - width / 2.0f, center.y - height / 2.0f, width, height);
 
   engine_painter_set_image(_image);
-  engine_painter_set_color(255, 255, 255, 255);
+  engine_painter_set_color(engine_color_make(255, 255, 255, 255));
 
   engine_painter_push_transform();
 

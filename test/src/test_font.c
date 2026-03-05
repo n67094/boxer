@@ -2,8 +2,8 @@
 
 #include "test_font.h"
 
-const size_t _font_atlas_glyph_count     = 4 + 100; // 4 icons + 96 chars
-const engine_rect_t _font_atlas_glyphs[] = {
+const size_t _font_glyph_count     = 4 + 100; // 4 icons + 96 chars
+const engine_rect_t _font_glyphs[] = {
   // Icons (4)
   { 0, 0, 8, 8 },
   { 8, 0, 8, 8 },
@@ -116,28 +116,29 @@ const engine_rect_t _font_atlas_glyphs[] = {
 static engine_font_t *_font = NULL;
 static engine_text_t *_text = NULL;
 
-static const char *_str = "Hello, World!\nThis is a test of the font rendering "
+static const char *_str = "{b=00FF0000}{f=FF000000}Hello, World!{/b}{/f}\nThis "
+                          "is a test of the font rendering\n"
+                          "This is an icon: {i=02}\n"
                           "system.\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
 void
 test_font_setup(void)
 {
-  _font = engine_font_atlas_load("data/fonts/atlas.png",
-                                 _font_atlas_glyphs,
-                                 _font_atlas_glyph_count,
-                                 (engine_vec2_t){ 0, 3 },
-                                 (engine_vec2_t){ 4, 100 },
-                                 ' ',
-                                 0,
-                                 0);
+  _font = engine_font_load("data/images/font.png",
+                           _font_glyphs,
+                           _font_glyph_count,
+                           (engine_vec2_t){ 0, 3 },
+                           (engine_vec2_t){ 4, 100 },
+                           ' ',
+                           0,
+                           8);
 
+  // FIXME Engine text make shouldn't take a position as param
   _text = engine_text_make((engine_vec2_t){ 10, 10 },
                            _font,
                            _str,
-                           ENGINE_COLOR_WHITE,
-                           ENGINE_COLOR_BLACK);
-
-  SDL_Log("Text made");
+                           ENGINE_COLOR_BLACK,
+                           ENGINE_COLOR_WHITE);
 }
 
 void
@@ -148,20 +149,28 @@ test_font_update(Uint64 delta_time_ms)
 void
 test_font_render(Uint64 alpha_time_ms)
 {
-  engine_painter_set_color(0, 0, 0, 255);
+  engine_painter_set_color(engine_color_make(0, 0, 255, 255));
   engine_painter_clear();
 
-  // Draw atlas font text
+  // FIXME a engine_painter_draw_text(position, text) would be better
   engine_painter_set_image(engine_font_get_image(_font));
 
-  engine_painter_draw_textured_rects(
-      engine_text_get_textured_rects(_text),
-      engine_text_get_textured_rects_count(_text));
+  engine_text_entry_t *entries
+      = (engine_text_entry_t *)engine_text_get_text_entries(_text);
+  size_t entries_count = engine_text_get_text_entries_count(_text);
+
+  for (size_t i = 0; i < entries_count; ++i) {
+    engine_painter_set_color(entries[i].background);
+    engine_painter_draw_filled_rect(entries[i].rects.dst);
+
+    engine_painter_set_color(entries[i].foreground);
+    engine_painter_draw_textured_rect(entries[i].rects.dst,
+                                      entries[i].rects.src);
+  }
 }
 
 void
 test_font_shutdown(void)
 {
-  engine_text_destroy(_text);
   engine_text_destroy(_text);
 }

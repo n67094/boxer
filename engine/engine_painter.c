@@ -742,12 +742,12 @@ engine_painter_reset_blend_mode(void)
 }
 
 void
-engine_painter_set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+engine_painter_set_color(engine_color_t color)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
 
-  _painter.state.color = engine_color_make(r, g, b, a);
+  _painter.state.color = color;
 }
 
 void
@@ -1258,9 +1258,8 @@ engine_painter_draw_filled_rects(const engine_rect_t *rects, Uint32 count)
 }
 
 void
-engine_painter_draw_filled_rect(float x, float y, float w, float h)
+engine_painter_draw_filled_rect(engine_rect_t rect)
 {
-  engine_rect_t rect = engine_rect_make(x, y, w, h);
   engine_painter_draw_filled_rects(&rect, 1);
 }
 

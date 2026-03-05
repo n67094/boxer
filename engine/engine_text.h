@@ -32,6 +32,7 @@ typedef struct engine_text_s
 {
   engine_text_entry_t *entries;
   size_t entry_count;
+  const engine_font_t *font;
 } engine_text_t;
 
 engine_text_t *engine_text_glyph_make(engine_vec2_t position,
@@ -67,9 +68,10 @@ engine_text_t *engine_text_make(engine_vec2_t position,
 
 void engine_text_destroy(engine_text_t *text);
 
-const engine_textured_rect_t *
-engine_text_get_textured_rects(const engine_text_t *text);
-size_t engine_text_get_textured_rects_count(const engine_text_t *text);
+const engine_text_entry_t *
+engine_text_get_text_entries(const engine_text_t *text);
+
+size_t engine_text_get_text_entries_count(const engine_text_t *text);
 
 char *engine_text_without_tags(const char *rich_str);
 

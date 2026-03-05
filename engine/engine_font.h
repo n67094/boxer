@@ -26,25 +26,25 @@
 
 typedef struct engine_font_s engine_font_t;
 
-engine_font_t *engine_font_atlas_load(const char *path,
-                                      const engine_rect_t *glyphs,
-                                      size_t glyph_count,
-                                      engine_vec2_t icon_range,
-                                      engine_vec2_t char_range,
-                                      char first_char,
-                                      int char_spacing,
-                                      int line_spacing);
+engine_font_t *engine_font_load(const char *path,
+                                const engine_rect_t *glyphs,
+                                size_t glyph_count,
+                                engine_vec2_t icon_range,
+                                engine_vec2_t char_range,
+                                char first_char,
+                                int char_spacing,
+                                int line_spacing);
 
-engine_font_t *engine_font_atlas_mem(unsigned int width,
-                                     unsigned int height,
-                                     const void *data,
-                                     const engine_rect_t *glyphs,
-                                     size_t glyph_count,
-                                     engine_vec2_t icon_range,
-                                     engine_vec2_t char_range,
-                                     char first_char,
-                                     int char_spacing,
-                                     int line_spacing);
+engine_font_t *engine_font_mem(unsigned int width,
+                               unsigned int height,
+                               const void *data,
+                               const engine_rect_t *glyphs,
+                               size_t glyph_count,
+                               engine_vec2_t icon_range,
+                               engine_vec2_t char_range,
+                               char first_char,
+                               int char_spacing,
+                               int line_spacing);
 
 void engine_font_destroy(engine_font_t *font);
 

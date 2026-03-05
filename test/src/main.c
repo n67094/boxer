@@ -54,7 +54,6 @@ engine_game_update(Uint64 delta_time_ms)
   if (engine_key_just_pressed(ENGINE_KEY_LEFT)
       || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_LEFT)
       || engine_mouse_just_pressed(ENGINE_MOUSE_LEFT)) {
-    SDL_Log("Current test: %d", _current_test);
     _current_test = (_current_test + TEST_SIZE - 1) % (TEST_SIZE);
   }
 
@@ -62,18 +61,15 @@ engine_game_update(Uint64 delta_time_ms)
   if (engine_key_just_pressed(ENGINE_KEY_RIGHT)
       || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_RIGHT)
       || engine_mouse_just_pressed(ENGINE_MOUSE_RIGHT)) {
-    SDL_Log("Current test: %d", _current_test);
     _current_test = (_current_test + 1) % (TEST_SIZE);
   }
 
   if (engine_key_held(ENGINE_KEY_SPACE)
       || engine_gamepad_held(0, ENGINE_GAMEPAD_BUTTON_SOUTH)) {
-    SDL_Log("pressed south");
   }
 
   if (engine_key_held(ENGINE_KEY_RETURN)
       || engine_gamepad_held(0, ENGINE_GAMEPAD_BUTTON_NORTH)) {
-    SDL_Log("pressed north");
   }
 
   switch (_current_test) {
@@ -93,8 +89,8 @@ engine_game_render(Uint64 alpha_time_ms)
 {
   engine_vec2_t window_dimensions = engine_context_get_window_dimensions();
 
-  engine_painter_begin(window_dimensions.x / 2,
-                       window_dimensions.y / 2); // zoom x2
+  engine_painter_begin(window_dimensions.x * 0.5f,
+                       window_dimensions.y * 0.5); // zoom x2
   {
     switch (_current_test) {
     case TEST_IMAGE:

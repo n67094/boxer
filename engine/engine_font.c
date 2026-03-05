@@ -169,14 +169,14 @@ engine_font_load_ttf_mem(const void *data,
 }*/
 
 engine_font_t *
-engine_font_atlas_load(const char *path,
-                       const engine_rect_t *glyphs,
-                       size_t glyph_count,
-                       engine_vec2_t icon_range,
-                       engine_vec2_t char_range,
-                       char first_char,
-                       int char_spacing,
-                       int line_spacing)
+engine_font_load(const char *path,
+                 const engine_rect_t *glyphs,
+                 size_t glyph_count,
+                 engine_vec2_t icon_range,
+                 engine_vec2_t char_range,
+                 char first_char,
+                 int char_spacing,
+                 int line_spacing)
 {
   SDL_assert(path);
   SDL_assert(glyphs);
@@ -203,16 +203,16 @@ engine_font_atlas_load(const char *path,
 }
 
 engine_font_t *
-engine_font_atlas_mem(unsigned int width,
-                      unsigned int height,
-                      const void *data,
-                      const engine_rect_t *glyphs,
-                      size_t glyph_count,
-                      engine_vec2_t icon_range,
-                      engine_vec2_t char_range,
-                      char first_char,
-                      int char_spacing,
-                      int line_spacing)
+engine_font_mem(unsigned int width,
+                unsigned int height,
+                const void *data,
+                const engine_rect_t *glyphs,
+                size_t glyph_count,
+                engine_vec2_t icon_range,
+                engine_vec2_t char_range,
+                char first_char,
+                int char_spacing,
+                int line_spacing)
 {
   SDL_assert(data);
   SDL_assert(width > 0);
@@ -279,8 +279,6 @@ engine_rect_t
 engine_font_get_glyph_rect(const engine_font_t *font, int glyphs_index)
 {
   SDL_assert(font);
-
-  SDL_Log("Getting glyph rect for index %d", glyphs_index);
 
   SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
   return font->glyphs[glyphs_index];
