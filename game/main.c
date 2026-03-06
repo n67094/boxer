@@ -63,7 +63,7 @@ engine_game_render(Uint64 alpha_time_ms)
     float size   = 50;          // Size of the square
     float h_size = size * 0.5f; // Half size
 
-    engine_point_t points[4] = {
+    engine_vec2_t points[4] = {
       { center_x - h_size, center_y - h_size }, // top-left
       { center_x + h_size, center_y - h_size }, // top-right
       { center_x - h_size, center_y + h_size }, // bottom-left
@@ -90,7 +90,7 @@ engine_game_render(Uint64 alpha_time_ms)
   // Draw a pink triangle
   {
     engine_painter_set_color(engine_color_make(255, 0, 255, 255));
-    engine_painter_draw_filled_triangle(
+    engine_painter_draw_triangle_filled(
         engine_triangle_make(150, 60, 200, 110, 100, 110));
   }
 
@@ -112,7 +112,7 @@ engine_game_render(Uint64 alpha_time_ms)
     engine_painter_translate(osc_2 * 20.0f, 0.0f);
 
     engine_painter_set_color(engine_color_make(0, 255, 255, 255));
-    engine_painter_draw_filled_rect(engine_rect_make(50, 60, 50, 50));
+    engine_painter_draw_rect_filled(engine_rect_make(50, 60, 50, 50));
 
     engine_painter_pop_transform();
   }
@@ -149,7 +149,7 @@ engine_game_render(Uint64 alpha_time_ms)
     engine_painter_rotate_at(
         -ticks, img_dst.x + img_dst.w / 2.0f, img_dst.y + img_dst.h / 2.0f);
 
-    engine_painter_draw_textured_rect(
+    engine_painter_draw_rect_textured(
         engine_textured_rect_make(img_dst, img_src));
 
     engine_painter_pop_transform();

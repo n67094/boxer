@@ -1178,7 +1178,7 @@ engine_painter_draw_triangles(const engine_triangle_t *triangles, Uint32 count)
 }
 
 void
-engine_painter_draw_filled_triangle(engine_triangle_t triangle)
+engine_painter_draw_triangle_filled(engine_triangle_t triangle)
 {
   engine_painter_draw_triangles(&triangle, 1);
 }
