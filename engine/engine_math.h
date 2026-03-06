@@ -53,16 +53,6 @@ typedef struct engine_vec3_s
   float x, y, z;
 } engine_vec3_t;
 
-typedef struct engine_rect_s
-{
-  float x, y, w, h;
-} engine_rect_t;
-
-typedef struct engine_region_s
-{
-  float x0, y0, x1, y1;
-} engine_region_t;
-
 // Scalar functions and macros
 // -------------------------------------------------------------------------
 
@@ -429,68 +419,6 @@ ENGINE_INLINE engine_vec3_t
 engine_vec3_div(engine_vec3_t v1, engine_vec3_t v2)
 {
   return engine_vec3_make(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
-}
-
-// Rectangles
-// -------------------------------------------------------------------------
-
-/**
- * @brief Construct a rectangle
- */
-#define engine_rect_make(x, y, w, h) ((const engine_rect_t){ x, y, w, h })
-
-ENGINE_INLINE float
-engine_rect_area(engine_rect_t rect)
-{
-  return rect.w * rect.h;
-}
-
-/**
- * @brief Returns true if the rectangles intersect
- */
-ENGINE_INLINE bool
-engine_rect_intersect(engine_rect_t r1, engine_rect_t r2)
-{
-  if (r1.x + r1.w < r2.x)
-    return false;
-  if (r2.x + r2.w < r1.x)
-    return false;
-  if (r1.y + r1.h < r2.y)
-    return false;
-  if (r2.y + r2.h < r1.y)
-    return false;
-
-  return true;
-}
-
-/**
- * @brief Returns true if r1 completely contains r2
- */
-ENGINE_INLINE bool
-engine_rect_contains(engine_rect_t r1, engine_rect_t r2)
-{
-  if (r2.x < r1.x)
-    return false;
-  if (r2.x + r2.w > r1.x + r1.w)
-    return false;
-  if (r2.y < r1.y)
-    return false;
-  if (r2.y + r2.h > r1.y + r1.h)
-    return false;
-
-  return true;
-}
-
-/**
- * @brief Returns true if the rectangles are adjacent (share a side)
- */
-ENGINE_INLINE bool
-engine_rect_adjacent(engine_rect_t r1, engine_rect_t r2)
-{
-  return (r2.x - (r1.x + r1.w) == 0 || // Check if r2 is to the right of r1
-          r1.x - (r2.x + r2.w) == 0 || // Check if r2 is to the left of r1
-          r2.y - (r1.y + r1.h) == 0 || // Check if r2 is below r1
-          r1.y - (r2.y + r2.h) == 0);  // Check if r2 is above r1
 }
 
 #endif // ENGINE_MATH_H_

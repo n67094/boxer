@@ -5,9 +5,9 @@
 #include "engine_mem.h"
 #include "engine_text.h"
 
-#define ENGINE_COLOR_OPEN_TAG_LENGTH 12 // Length of "{X=XXXXXXXX}"
-#define ENGINE_COLOR_CLOSE_TAG_LENGTH 4 // Length of "{/X}"
-#define ENGINE_ICON_TAG_LENGTH 6        // Length of "{X=XX}"
+#define ENGINE_TEXT_TAG_COLOR_OPEN_LENGTH 12 // Length of "{X=XXXXXXXX}"
+#define ENGINE_TEXT_TAG_COLOR_CLOSE_LENGTH 4 // Length of "{/X}"
+#define ENGINE_TEXT_TAG_ICON_LENGTH 6        // Length of "{X=XX}"
 
 typedef enum
 {
@@ -43,19 +43,19 @@ engine_text_color_tag_validate(const char *cursor,
       return false;
     }
 
-    if (cursor + ENGINE_COLOR_OPEN_TAG_LENGTH > end) {
+    if (cursor + ENGINE_TEXT_TAG_COLOR_OPEN_LENGTH > end) {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid color tag length.");
       return false;
     }
 
-    if (*(cursor + ENGINE_COLOR_OPEN_TAG_LENGTH - 1) != '}') {
+    if (*(cursor + ENGINE_TEXT_TAG_COLOR_OPEN_LENGTH - 1) != '}') {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                   "Missing closing '}' in color tag.");
       return false;
     }
 
     if (out_skip_length) {
-      *out_skip_length = ENGINE_COLOR_OPEN_TAG_LENGTH;
+      *out_skip_length = ENGINE_TEXT_TAG_COLOR_OPEN_LENGTH;
     }
 
     if (out_color == NULL) {
@@ -100,19 +100,19 @@ engine_text_color_tag_validate(const char *cursor,
                           : ENGINE_TEXT_TAG_CLOSE_COLOR_FOREGROUND;
     }
 
-    if (cursor + ENGINE_COLOR_CLOSE_TAG_LENGTH > end) {
+    if (cursor + ENGINE_TEXT_TAG_COLOR_CLOSE_LENGTH > end) {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid color tag length.");
       return false;
     }
 
-    if (*(cursor + ENGINE_COLOR_CLOSE_TAG_LENGTH - 1) != '}') {
+    if (*(cursor + ENGINE_TEXT_TAG_COLOR_CLOSE_LENGTH - 1) != '}') {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                   "Missing closing '}' in color tag.");
       return false;
     }
 
     if (out_skip_length) {
-      *out_skip_length = ENGINE_COLOR_CLOSE_TAG_LENGTH;
+      *out_skip_length = ENGINE_TEXT_TAG_COLOR_CLOSE_LENGTH;
     }
 
     return true;
@@ -131,19 +131,19 @@ engine_text_icon_tag_validate(const char *cursor,
     return false;
   }
 
-  if (cursor + ENGINE_ICON_TAG_LENGTH > end) {
+  if (cursor + ENGINE_TEXT_TAG_ICON_LENGTH > end) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Invalid icon tag length.");
     return false;
   }
 
-  if (*(cursor + ENGINE_ICON_TAG_LENGTH - 1) != '}') {
+  if (*(cursor + ENGINE_TEXT_TAG_ICON_LENGTH - 1) != '}') {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                 "Missing closing '}' in icon tag.");
     return false;
   }
 
   if (skip_length) {
-    *skip_length = ENGINE_ICON_TAG_LENGTH;
+    *skip_length = ENGINE_TEXT_TAG_ICON_LENGTH;
   }
 
   char icon_str_len = 3; // 2 characters for icon index + null terminator

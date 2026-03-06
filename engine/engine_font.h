@@ -21,6 +21,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "engine_geometry.h"
 #include "engine_image.h"
 #include "engine_math.h"
 

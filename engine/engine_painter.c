@@ -750,6 +750,15 @@ engine_painter_set_color(engine_color_t color)
   _painter.state.color = color;
 }
 
+engine_color_t
+engine_painter_get_color(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.current_state > 0);
+
+  return _painter.state.color;
+}
+
 void
 engine_painter_reset_color(void)
 {
@@ -766,6 +775,15 @@ engine_painter_set_image(engine_image_t image)
   SDL_assert(_painter.current_state > 0);
 
   _painter.state.image = image;
+}
+
+engine_image_t
+engine_painter_get_image(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.current_state > 0);
+
+  return _painter.state.image;
 }
 
 void
@@ -1121,15 +1139,14 @@ engine_painter_draw(engine_primitive_e primitive_type,
 }
 
 void
-engine_painter_draw_points(const engine_point_t *points, Uint32 count)
+engine_painter_draw_points(const engine_vec2_t *points, Uint32 count)
 {
   _engine_painter_draw_solid(ENGINE_PRIMITIVE_POINTS, points, count);
 }
 
 void
-engine_painter_draw_point(float x, float y)
+engine_painter_draw_point(engine_vec2_t point)
 {
-  engine_point_t point = { x, y };
   engine_painter_draw_points(&point, 1);
 }
 
@@ -1141,14 +1158,13 @@ engine_painter_draw_lines(const engine_line_t *lines, Uint32 count)
 }
 
 void
-engine_painter_draw_line(float ax, float ay, float bx, float by)
+engine_painter_draw_line(engine_line_t line)
 {
-  engine_line_t line = engine_line_make(ax, ay, bx, by);
   engine_painter_draw_lines(&line, 1);
 }
 
 void
-engine_painter_draw_lines_strip(const engine_point_t *points, Uint32 count)
+engine_painter_draw_lines_strip(const engine_vec2_t *points, Uint32 count)
 {
   _engine_painter_draw_solid(
       ENGINE_PRIMITIVE_LINE_STRIP, (const engine_vec2_t *)points, count);
@@ -1162,22 +1178,26 @@ engine_painter_draw_triangles(const engine_triangle_t *triangles, Uint32 count)
 }
 
 void
-engine_painter_draw_filled_triangle(
-    float ax, float ay, float bx, float by, float cx, float cy)
+engine_painter_draw_filled_triangle(engine_triangle_t triangle)
 {
-  engine_triangle_t triangle = engine_triangle_make(ax, ay, bx, by, cx, cy);
   engine_painter_draw_triangles(&triangle, 1);
 }
 
 void
-engine_painter_draw_triangles_strip(const engine_point_t *points, Uint32 count)
+engine_painter_draw_triangles_strip(const engine_vec2_t *points, Uint32 count)
 {
   _engine_painter_draw_solid(
       ENGINE_PRIMITIVE_TRIANGLE_STRIP, (const engine_vec2_t *)points, count);
 }
 
 void
-engine_painter_draw_filled_rects(const engine_rect_t *rects, Uint32 count)
+engine_painter_draw_rect_filled(engine_rect_t rect)
+{
+  engine_painter_draw_rects_filled(&rect, 1);
+}
+
+void
+engine_painter_draw_rects_filled(const engine_rect_t *rects, Uint32 count)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
@@ -1258,13 +1278,13 @@ engine_painter_draw_filled_rects(const engine_rect_t *rects, Uint32 count)
 }
 
 void
-engine_painter_draw_filled_rect(engine_rect_t rect)
+engine_painter_draw_rect_textured(engine_textured_rect_t rect)
 {
-  engine_painter_draw_filled_rects(&rect, 1);
+  engine_painter_draw_rects_textured(&rect, 1);
 }
 
 void
-engine_painter_draw_textured_rects(const engine_textured_rect_t *rects,
+engine_painter_draw_rects_textured(const engine_textured_rect_t *rects,
                                    Uint32 count)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
@@ -1357,12 +1377,4 @@ engine_painter_draw_textured_rects(const engine_textured_rect_t *rects,
                              vertex_index,
                              total_vertices,
                              ENGINE_PRIMITIVE_TRIANGLES);
-}
-
-void
-engine_painter_draw_textured_rect(engine_rect_t dest, engine_rect_t src)
-{
-  // TODO improve when null draw the full rect
-  engine_textured_rect_t rect = { dest, src };
-  engine_painter_draw_textured_rects(&rect, 1);
 }

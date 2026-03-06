@@ -1,6 +1,6 @@
 #include "engine.h"
 
-#include "example_image.h"
+#include "example_draw.h"
 #include "example_text.h"
 
 #include "test_ini.h"
@@ -10,12 +10,12 @@
 
 typedef enum
 {
-  EXAMPLE_IMAGE = 0,
+  EXAMPLE_DRAW = 0,
   EXAMPLE_FONT,
   EXAMPLE_SIZE,
 } example_e;
 
-static example_e _current_test = EXAMPLE_IMAGE;
+static example_e _current_test = EXAMPLE_DRAW;
 
 static engine_game_config_t _config = { 0 };
 
@@ -46,7 +46,7 @@ engine_game_setup(void)
   ENGINE_UNIT_RUN_SUITE(suite_ini);
   ENGINE_UNIT_RUN_SUITE(suite_text);
 
-  example_image_setup();
+  example_draw_setup();
   example_text_setup();
 }
 
@@ -68,8 +68,8 @@ engine_game_update(Uint64 delta_time_ms)
   }
 
   switch (_current_test) {
-  case EXAMPLE_IMAGE:
-    example_image_update(delta_time_ms);
+  case EXAMPLE_DRAW:
+    example_draw_update(delta_time_ms);
     break;
   case EXAMPLE_FONT:
     example_text_update(delta_time_ms);
@@ -88,8 +88,8 @@ engine_game_render(Uint64 alpha_time_ms)
                        window_dimensions.y * 0.5); // zoom x2
   {
     switch (_current_test) {
-    case EXAMPLE_IMAGE:
-      example_image_render(alpha_time_ms);
+    case EXAMPLE_DRAW:
+      example_draw_render(alpha_time_ms);
       break;
     case EXAMPLE_FONT:
       example_text_render(alpha_time_ms);
@@ -106,6 +106,6 @@ engine_game_render(Uint64 alpha_time_ms)
 void
 engine_game_shutdown(void)
 {
-  example_image_shutdown();
+  example_draw_shutdown();
   example_text_shutdown();
 }

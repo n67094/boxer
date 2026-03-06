@@ -122,6 +122,10 @@ static const char *_str_1
       "This is an icon: {i=02}\n"
       "system.\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
+static const char *_str_3
+    = "This is a long text to use for {b=FF00FFFF}wrapping{/b} testing. It "
+      "should wrap correctly and maintain the colors and icons. {i=01}.";
+
 void
 example_text_setup(void)
 {
@@ -163,7 +167,7 @@ example_text_render(Uint64 alpha_time_ms)
   size_t entries_count = engine_text_get_text_entries_count(_text);
 
   for (size_t i = 0; i < entries_count; ++i) {
-    /*
+    /* FIXME check if still printing one more empty rect !
     SDL_Log("Background r: %d g: %d b: %d a: %d",
             entries[i].background.r,
             entries[i].background.g,
@@ -174,13 +178,13 @@ example_text_render(Uint64 alpha_time_ms)
     engine_painter_reset_image();
 
     engine_painter_set_color(entries[i].background);
-    engine_painter_draw_filled_rect(entries[i].rects.dst);
+    engine_painter_draw_rect_filled(entries[i].rects.dst);
 
     engine_painter_set_image(engine_font_get_image(_font));
 
     engine_painter_set_color(entries[i].foreground);
-    engine_painter_draw_textured_rect(entries[i].rects.dst,
-                                      entries[i].rects.src);
+    engine_painter_draw_rect_textured(
+        engine_textured_rect_make(entries[i].rects.dst, entries[i].rects.src));
   }
 }
 

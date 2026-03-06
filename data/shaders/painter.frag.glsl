@@ -10,9 +10,6 @@ layout(location=0) out vec4 frag_color;
 layout(set = 2, binding=0) uniform sampler2D uni_tex_sampler;
 
 void main() {
-  // Give a white color if no texture is bound
-  // frag_color = i_color;
-  // Every draw is black
   frag_color = texture(uni_tex_sampler, tex_uv) * i_color;
 }
 

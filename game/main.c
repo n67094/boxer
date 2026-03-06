@@ -44,7 +44,7 @@ engine_game_render(Uint64 alpha_time_ms)
   float ticks = (float)SDL_GetTicks() / 1000.0f;
   // Oscillates between -1 and 1
   float osc_1 = engine_sin(ticks * ENGINE_PI2);
-  // Oscillates enginetween 0.5 and 1.5 slowly
+  // Oscillates between 0.5 and 1.5 slowly
   float osc_2 = 1.0f + engine_sin(ticks / 2 * ENGINE_PI2) * 0.5f;
 
   engine_vec2_t window_dimensions = engine_context_get_window_dimensions();
@@ -70,7 +70,7 @@ engine_game_render(Uint64 alpha_time_ms)
       { center_x + h_size, center_y + h_size }, // bottom-right
     };
 
-    engine_painter_set_color(255, 0, 255, 255); // Pink color
+    engine_painter_set_color(engine_color_make(255, 0, 255, 255)); // Pink color
 
     engine_painter_push_transform();
 
@@ -89,8 +89,9 @@ engine_game_render(Uint64 alpha_time_ms)
 
   // Draw a pink triangle
   {
-    engine_painter_set_color(255, 0, 255, 255);
-    engine_painter_draw_filled_triangle(150, 60, 200, 110, 100, 110);
+    engine_painter_set_color(engine_color_make(255, 0, 255, 255));
+    engine_painter_draw_filled_triangle(
+        engine_triangle_make(150, 60, 200, 110, 100, 110));
   }
 
   // Draw a line
@@ -99,8 +100,8 @@ engine_game_render(Uint64 alpha_time_ms)
 
     engine_painter_rotate_at(ticks * 20.0f, 70.0f, 180.0f);
 
-    engine_painter_set_color(0, 255, 0, 255);
-    engine_painter_draw_line(20, 180, 120, 180);
+    engine_painter_set_color(engine_color_make(0, 255, 0, 255));
+    engine_painter_draw_line(engine_line_make(20, 180, 120, 180));
 
     engine_painter_pop_transform();
   }
@@ -110,15 +111,15 @@ engine_game_render(Uint64 alpha_time_ms)
     engine_painter_push_transform();
     engine_painter_translate(osc_2 * 20.0f, 0.0f);
 
-    engine_painter_set_color(0, 255, 255, 255);
-    engine_painter_draw_filled_rect(50, 60, 50, 50);
+    engine_painter_set_color(engine_color_make(0, 255, 255, 255));
+    engine_painter_draw_filled_rect(engine_rect_make(50, 60, 50, 50));
 
     engine_painter_pop_transform();
   }
 
   // Draw custom triangles
   {
-    engine_painter_set_color(255, 255, 255, 255);
+    engine_painter_set_color(engine_color_make(255, 255, 255, 255));
     static engine_vertex_t vertex_buffer[3];
 
     vertex_buffer[0].position = engine_vec2_make(150, 200);
@@ -141,14 +142,15 @@ engine_game_render(Uint64 alpha_time_ms)
         = engine_rect_make(220, 80, (float)width, (float)height);
 
     engine_painter_set_image(_image);
-    engine_painter_set_color(255, 255, 255, 255);
+    engine_painter_set_color(engine_color_make(255, 255, 255, 255));
 
     engine_painter_push_transform();
 
     engine_painter_rotate_at(
         -ticks, img_dst.x + img_dst.w / 2.0f, img_dst.y + img_dst.h / 2.0f);
 
-    engine_painter_draw_textured_rect(img_dst, img_src);
+    engine_painter_draw_textured_rect(
+        engine_textured_rect_make(img_dst, img_src));
 
     engine_painter_pop_transform();
   }

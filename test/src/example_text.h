@@ -9,8 +9,6 @@
 
 #include <SDL3/SDL.h>
 
-#include "engine.h"
-
 void example_text_setup(void);
 
 void example_text_update(Uint64 delta_time_ms);
