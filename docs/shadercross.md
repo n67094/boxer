@@ -5,94 +5,72 @@ Shader cross-compiler utility for SDL applications.
 
 **Link:** [https://github.com/libsdl-org/SDL_shadercross](https://github.com/libsdl-org/SDL_shadercross)
 
----
-
 Shadercross Setup (Linux)
 -----------------------------
 
-A quick guide to set up a Linux environment for GPU shader programming with SDL_gpu and SDL_shadercross.
-
-Install dependencies, Starting with `SPIRV-Cross`:
+To install the `SPIRV-Cross` dependencies:
 
 ```bash
-$ git clone https://github.com/KhronosGroup/SPIRV-Cross
-$ cd SPIRV-Cross
-$ cmake --build build --target install
-$ sudo cmake --build build --target install
+git clone https://github.com/KhronosGroup/SPIRV-Cross
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSPIRV_CROSS_SHARED=ON
+cmake --build build --parallel
+sudo cmake --install build
 ```
 
-Then with (https://github.com/microsoft/DirectXShaderCompiler/releases)[https://github.com/microsoft/DirectXShaderCompiler/releases], download the latest linux release then:
+To install the `DirectXShaderCompile` dependencies [https://github.com/microsoft/DirectXShaderCompiler/releases](https://github.com/microsoft/DirectXShaderCompiler/releases), download the latest linux version extract and run the following commands:
 
 ```bash
-$ cd linux_dxc_2025_07_14.x86_64 # The downloaded file
-$ sudo cp -r bin/* /usr/local/bin/
-$ sudo cp -r include/* /usr/local/include/
-$ sudo cp -r lib/* /usr/local/lib/
-$ sudo ldconfig
-```
+cp -r bin/* ~/.local/bin/
+cp -r lib/* ~/.local/lib/
+cp -r include/* ~/.local/include/
 
-Now clone SDL_shadercross and build it:
+sudo ldconfig ~/.local/lib
 
-```bash
-$ git clone https://github.com/libsdl-org/SDL_shadercross
-$ cd SDL_shadercross
-$ mkdir build && cd build
-$ cmake ..
-$ make
-$ sudo cp shadercross /usr/local/bin/
-$ sudo ldconfig
-```
+echo 'export PATH="$PATH:~/.local/bin"' >> ~/.bashrc
+echo 'export CMAKE_PREFIX_PATH="~/.local:$CMAKE_PREFIX_PATH"' >> ~/.bashrc
+echo 'export PKG_CONFIG_PATH="~/.local/share/pkgconfig:$PKG_CONFIG_PATH"' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH="~/.local/lib:$LD_LIBRARY_PATH"' >> ~/.bashrc
 
-You can now use `shadercross` from anywhere. Try `which shadercross` to confirm.
+source ~/.bashrc
+ ```
 
----
-
-How to Compile a shader
------------------------
-
-Install glslang if you don't have it yet:
+ Test with: 
 
 ```bash
-$ sudo dnf install glslang
+dxc --version
 ```
 
-Then compile a GLSL shader to SPIR-V:
+Finally to install `SDL_shadercross` run those commands:
 
 ```bash
-$ glslangValidator -V shader.frag.glsl -o shader.frag.spv
-$ glslangValidator -V shader.vert.glsl -o shader.vert.spv
+git clone https://github.com/libsdl-org/SDL_shadercross
+cd SDL_shadercross
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+cp -r shadercross ~/.local/bin/
 ```
 
-Now you can convert the SPIR-V shader to other formats, for example to HLSL:
+Test with:
 
 ```bash
-$ shadercross shader.vert.spv -o shader.frag.dxil
-$ shadercross shader.frag.spv -o shader.frag.dxil
-$ shadercross shader.vert.spv -o shader.frag.msl
-$ shadercross shader.frag.spv -o shader.frag.msl
+shadercross -h
 ```
 
----
-
-How to Setup RenderDoc
+How to Compile shaders
 ----------------------
 
-**NOTE:** `renderdoc` doesn't support `Wayland` yet, so make sure you are running an X11 session (c.f https://wiki.libsdl.org/SDL3/FAQDevelopment#renderdoc).
-
-To debug and inspect your shaders, you can use RenderDoc by Downloading it from (https://renderdoc.org/)[https://renderdoc.org/]:
+Install glslang using your package manager, then compile a GLSL shader to SPIR-V using those commands:
 
 ```bash
-$ cd linux_dxc_2025_07_14.x86_64 # The downloaded file
-$ sudo cp -r bin/* /usr/local/bin/
-$ sudo cp -r etc/* /usr/local/etc/
-$ sudo cp -r include/* /usr/local/include/
-$ sudo cp -r lib/* /usr/local/lib/
-$ sudo cp -r lib/* /usr/local/share/
-$ sudo ldconfig
+glslangValidator -V shader.frag.glsl -o shader.frag.spv
+glslangValidator -V shader.vert.glsl -o shader.vert.spv
 ```
 
-Then you can run renderdoc:
+Then convert the SPIR-V shader to other formats as follow:
 
 ```bash
-$ qrenderdoc
+shadercross shader.vert.spv -o shader.frag.dxil
+shadercross shader.frag.spv -o shader.frag.dxil
+shadercross shader.vert.spv -o shader.frag.msl
+shadercross shader.frag.spv -o shader.frag.msl
 ```
