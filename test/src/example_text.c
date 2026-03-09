@@ -120,7 +120,7 @@ static const char *_str_1
     = "{b=00FF00FF}{f=FF0000FF}Hello, World!{/b}{/f}\nThis "
       "is a test of the font rendering\n"
       "This is an icon: {i=02}\n"
-      "system.\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
+      "\n1234567890\n!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
 static const char *_str_3
     = "This is a long text to use for {b=FF00FFFF}wrapping{/b} testing. It "

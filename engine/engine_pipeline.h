@@ -36,7 +36,7 @@ typedef enum
   ENGINE_PRIMITIVE_TRIANGLES,      // = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
   ENGINE_PRIMITIVE_TRIANGLE_STRIP, // = SDL_GPU_PRIMITIVETYPE_TRIANGLESTRIP,
   ENGINE_PRIMITIVE_SIZE,
-} engine_primitive_e; // TODO renamte to engine_primitive_type_e
+} engine_primitive_e;
 
 typedef struct engine_vertex_s
 {

@@ -11,6 +11,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "engine_config.h"
 #include "engine_context.h"
 
 typedef struct engine_shader_s

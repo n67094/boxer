@@ -64,6 +64,8 @@ engine_get_error_msg(engine_erro_code_e error)
     return "Painter vertices buffer full.";
   case ENGINE_ERROR_PAINTER_COMMANDS_FULL:
     return "Painter commands buffer full.";
+  case ENGINE_ERROR_PAINTER_UNIFORMS_FULL:
+    return "Painter uniforms buffer full.";
   case ENGINE_ERROR_PAINTER_FLUSH:
     return "Painter flush error.";
   // engine_io.c errors

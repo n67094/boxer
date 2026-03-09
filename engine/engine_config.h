@@ -42,6 +42,8 @@
 #define ENGINE_PAINTER_COMMANDS_MAX 16384
 // Max number of transforms that can be pushed in the stack (per painter)
 #define ENGINE_PAINTER_TRANSFORMS_MAX 256
+// Max number of float uniforms that can be set in a single draw call
+#define ENGINE_PAINTER_CONTENT_SLOTS_MAX 8
 // TDDO not implemented yet
 #define ENGINE_PAINTER_OPTIMIZE_MAX 0
 

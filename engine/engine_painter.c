@@ -33,32 +33,59 @@ typedef struct _engine_mat2x3_s
 #define engine_mat2x3_make(m00, m01, m02, m10, m11, m12)                       \
   ((const _engine_mat2x3_t){ m00, m01, m02, m10, m11, m12 })
 
-typedef struct _engine_draw_args_s
+// FIXME clean the code prefix with painter
+
+typedef struct _engine_painter_draw_args_s
 {
   engine_pipeline_t pipeline;
   engine_image_t image;
+  // TODO: add region for optimization
+  Uint32 uniform_index;
   Uint32 vertex_index;
   Uint32 vertices_count;
-} _engine_draw_args_t;
+} _engine_painter_draw_args_t;
 
-typedef union _engine_command_args_s
+typedef union _engine_painter_command_args_s
 {
-  _engine_draw_args_t draw;
+  _engine_painter_draw_args_t draw;
   engine_rect_t viewport;
   engine_rect_t scissor;
-} _engine_command_args_t;
+} _engine_painter_command_args_t;
 
-typedef struct _engine_command_s
+typedef struct _engine_painter_command_s
 {
   _engine_draw_command_type_e cmd;
-  _engine_command_args_t args;
-} _engine_command_t;
+  _engine_painter_command_args_t args;
+} _engine_painter_command_t;
+
+typedef enum
+{
+  ENGINE_PAINTER_UNIFORM_SLOT_VS = 0,
+  ENGINE_PAINTER_UNIFORM_SLOT_FS = 1
+} _engine_painter_uniform_slot_e;
+
+typedef union _engine_painter_uniform_data_u
+{
+  float floats[ENGINE_PAINTER_CONTENT_SLOTS_MAX];
+  uint8_t bytes[ENGINE_PAINTER_CONTENT_SLOTS_MAX * sizeof(float)];
+} _engine_painter_uniform_data_t;
+
+typedef struct _engine_painter_uniform_s
+{
+  Uint16 vs_size;
+  Uint16 fs_size;
+  _engine_painter_uniform_data_t data;
+} _engine_painter_uniform_t;
 
 typedef struct _engine_painter_state_s
 {
   _engine_mat2x3_t projection;
   _engine_mat2x3_t transform;
   _engine_mat2x3_t mvp;
+
+  _engine_painter_uniform_t uniform;
+
+  engine_pipeline_t pipeline;
 
   engine_blendmode_e blend_mode;
   engine_rect_t viewport;
@@ -68,6 +95,7 @@ typedef struct _engine_painter_state_s
   SDL_GPUSampler *sampler;
   float thickness;
 
+  Uint32 base_uniform;
   Uint32 base_vertex;
   Uint32 base_command;
 } _engine_painter_state_t;
@@ -91,7 +119,7 @@ typedef struct _engine_painter_s
       states[ENGINE_PAINTER_MAX]; // save states for push/pop
   _engine_painter_state_t state;  // current state
 
-  // Transforms  management
+  // Transforms management
   Uint32 current_transform;
   _engine_mat2x3_t
       transforms[ENGINE_PAINTER_TRANSFORMS_MAX]; // save transforms for push/pop
@@ -101,11 +129,15 @@ typedef struct _engine_painter_s
   engine_vertex_t
       vertices[ENGINE_PAINTER_VERTICES_MAX]; // save vertecies for draw calls
 
+  // Uniforms management
+  Uint32 current_uniform;
+  _engine_painter_uniform_t
+      uniforms[ENGINE_PAINTER_COMMANDS_MAX]; // save uniforms for draw calls
+
   // Commands management
   Uint32 current_command;
-  _engine_command_t
+  _engine_painter_command_t
       commands[ENGINE_PAINTER_COMMANDS_MAX]; // save draw commands for flush
-
 } _engine_painter_t;
 
 static _engine_painter_t _painter = { 0 };
@@ -174,6 +206,27 @@ _engine_painter_sampler(engine_sampler_e sampler_type)
   return sampler_info;
 }
 
+ENGINE_INLINE _engine_painter_uniform_t *
+_engine_painter_next_uniform(void)
+{
+  if (_painter.current_uniform < ENGINE_PAINTER_COMMANDS_MAX) {
+    return &_painter.uniforms[_painter.current_uniform++];
+  } else {
+    engine_set_error(ENGINE_ERROR_PAINTER_UNIFORMS_FULL);
+    return NULL;
+  }
+}
+
+ENGINE_INLINE _engine_painter_uniform_t *
+_engine_painter_prev_uniform(void)
+{
+  if (_painter.current_uniform > 0) {
+    return &_painter.uniforms[_painter.current_uniform - 1];
+  } else {
+    return NULL;
+  }
+}
+
 ENGINE_INLINE engine_vertex_t *
 _engine_painter_next_vertices(Uint32 count)
 {
@@ -188,7 +241,7 @@ _engine_painter_next_vertices(Uint32 count)
   }
 }
 
-ENGINE_INLINE _engine_command_t *
+ENGINE_INLINE _engine_painter_command_t *
 _engine_painter_next_command(void)
 {
   if ((_painter.current_command < ENGINE_PAINTER_COMMANDS_MAX)) {
@@ -199,7 +252,7 @@ _engine_painter_next_command(void)
   }
 }
 
-ENGINE_INLINE _engine_command_t *
+ENGINE_INLINE _engine_painter_command_t *
 _engine_painter_prev_command(Uint32 count)
 {
   if (_painter.current_command - _painter.state.base_command >= count) {
@@ -281,6 +334,7 @@ engine_painter_setup(engine_context_t *context)
           .size  = ENGINE_PAINTER_VERTICES_MAX * sizeof(engine_vertex_t),
 
       });
+
   if (_painter.vertex_transfer_buffer == NULL) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to create vertex transfer buffer (error: %s)",
@@ -437,6 +491,7 @@ engine_painter_flush()
 
   // Rewind indexes
   _painter.current_vertex  = _painter.state.base_vertex;
+  _painter.current_uniform = _painter.state.base_uniform;
   _painter.current_command = _painter.state.base_command;
 
   // Nothing to be drawn
@@ -491,32 +546,84 @@ engine_painter_flush()
                                1,
                                NULL);
 
+  Uint32 cur_pipeline_id   = ENGINE_IMPOSSIBLE_ID;
+  Uint32 cur_uniform_index = ENGINE_IMPOSSIBLE_ID;
+  Uint32 cur_image_id      = ENGINE_IMPOSSIBLE_ID;
+
   // Flush commands
   for (Uint32 i = _painter.state.base_command; i < end_command; ++i) {
-    _engine_command_t *cmd = &_painter.commands[i];
+    _engine_painter_command_t *cmd = &_painter.commands[i];
 
     // Forward declartion
     SDL_Rect scissor         = { 0 };
     SDL_GPUViewport viewport = { 0 };
 
     switch (cmd->cmd) {
-    case ENGINE_COMMAND_DRAW:
-      // Bind pipeline
-      SDL_BindGPUGraphicsPipeline(render_pass,
-                                  engine_pipeline_get(cmd->args.draw.pipeline));
+    case ENGINE_COMMAND_DRAW: {
+      bool rebind_uniforms = false;
+      bool rebind_texture  = false;
 
-      // Get image texture
-      SDL_GPUTexture *texture = engine_image_get_texture(cmd->args.draw.image);
-      // TODO check texture validity
+      // Check if pipeline needs to be changed and bind it
+      if (cmd->args.draw.pipeline.id != cur_pipeline_id) {
+        cur_pipeline_id = cmd->args.draw.pipeline.id;
 
-      // Bind texture and sampler
-      SDL_BindGPUFragmentSamplers(
-          render_pass,
-          0,
-          &(SDL_GPUTextureSamplerBinding){ .texture = texture,
-                                           .sampler = _painter.state.sampler },
-          1);
+        // Bind pipeline
+        SDL_BindGPUGraphicsPipeline(
+            render_pass, engine_pipeline_get(cmd->args.draw.pipeline));
 
+        // When pipeline changes we need to rebind uniforms and textures
+        rebind_uniforms = true;
+        rebind_texture  = true;
+      }
+
+      if (cmd->args.draw.image.id != cur_image_id) {
+        cur_image_id = cmd->args.draw.image.id;
+
+        // When image changes we need to rebind textures
+        rebind_texture = true;
+      }
+
+      if (cmd->args.draw.uniform_index != cur_uniform_index) {
+        cur_uniform_index = cmd->args.draw.uniform_index;
+
+        // When uniform index changes we need to rebind uniforms
+        rebind_uniforms = true;
+      }
+
+      // Rebind texture if needed
+      if (rebind_texture) {
+        SDL_GPUTexture *texture
+            = engine_image_get_texture(cmd->args.draw.image);
+        // TODO check texture validity
+
+        SDL_BindGPUFragmentSamplers(
+            render_pass,
+            0,
+            &(SDL_GPUTextureSamplerBinding){
+                .texture = texture, .sampler = _painter.state.sampler },
+            1);
+      }
+
+      // Rebind uniforms if needed
+      if (rebind_uniforms && cur_uniform_index != ENGINE_IMPOSSIBLE_ID) {
+        _engine_painter_uniform_t *uniform
+            = &_painter.uniforms[cmd->args.draw.uniform_index];
+
+        if (uniform->vs_size > 0) {
+          SDL_PushGPUVertexUniformData(_context->cmd_buffer,
+                                       ENGINE_PAINTER_UNIFORM_SLOT_VS,
+                                       &uniform->data.bytes[0],
+                                       uniform->vs_size);
+        }
+        if (uniform->fs_size > 0) {
+          SDL_PushGPUFragmentUniformData(_context->cmd_buffer,
+                                         ENGINE_PAINTER_UNIFORM_SLOT_FS,
+                                         &uniform->data.bytes[0],
+                                         uniform->fs_size);
+        }
+      }
+
+      // In every case we need to bind vertex buffers
       SDL_BindGPUVertexBuffers(
           render_pass,
           0,
@@ -528,6 +635,7 @@ engine_painter_flush()
       SDL_DrawGPUPrimitives(
           render_pass, cmd->args.draw.vertices_count, 1, 0, 0);
       break;
+    }
     case ENGINE_COMMAND_VIEWPORT:
       viewport = (SDL_GPUViewport){
         .x = (float)cmd->args.viewport.x,
@@ -724,6 +832,69 @@ engine_painter_scale_at(float sx, float sy, float ax, float ay)
 }
 
 void
+engine_painter_set_pipeline(engine_pipeline_t pipeline)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+
+  _painter.state.pipeline = pipeline;
+
+  // Reset uniforms when pipeline changes
+  SDL_memset(&_painter.state.uniform, 0, sizeof(_engine_painter_uniform_t));
+}
+
+void
+engine_painter_reset_pipeline(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+
+  engine_pipeline_t pipeline = { .id = ENGINE_INVALID_ID };
+
+  engine_painter_set_pipeline(pipeline);
+}
+
+void
+engine_painter_set_uniforms(const void *vs_data,
+                            size_t vs_size,
+                            const void *fs_data,
+                            size_t fs_size)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.state.pipeline.id != ENGINE_INVALID_ID);
+
+  size_t size = vs_size + fs_size;
+
+  SDL_assert(size <= ENGINE_PAINTER_CONTENT_SLOTS_MAX * sizeof(float));
+
+  if (vs_size > 0) {
+    SDL_assert(vs_data != NULL);
+    SDL_memcpy(&_painter.state.uniform.data.bytes[0], vs_data, vs_size);
+  }
+  if (fs_size > 0) {
+    SDL_assert(fs_data != NULL);
+    SDL_memcpy(&_painter.state.uniform.data.bytes[vs_size], fs_data, fs_size);
+  }
+
+  size_t old_size
+      = _painter.state.uniform.vs_size + _painter.state.uniform.fs_size;
+
+  if (size != old_size) {
+    // Zero out the rest of the uniform data
+    SDL_memset((Uint8 *)(&_painter.state.uniform) + size, 0, old_size - size);
+  }
+
+  _painter.state.uniform.vs_size = (Uint16)vs_size;
+  _painter.state.uniform.fs_size = (Uint16)fs_size;
+}
+
+void
+engine_painter_reset_uniforms(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.state.pipeline.id != ENGINE_INVALID_ID);
+  engine_painter_set_uniforms(NULL, 0, NULL, 0);
+}
+
+void
 engine_painter_set_blend_mode(engine_blendmode_e blend_mode)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
@@ -766,6 +937,25 @@ engine_painter_reset_color(void)
   SDL_assert(_painter.current_state > 0);
 
   _painter.state.color = ENGINE_COLOR_WHITE;
+}
+
+void
+engine_painter_set_thickness(float thickness)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.current_state > 0);
+
+  _painter.state.thickness = thickness;
+}
+
+void
+engine_painter_reset_thickness(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.current_state > 0);
+
+  _painter.state.thickness = SDL_max(1.0f / _painter.state.viewport.w,
+                                     1.0f / _painter.state.viewport.h);
 }
 
 void
@@ -826,7 +1016,7 @@ engine_painter_viewport(int x, int y, int w, int h)
   }
 
   // Try to reuse previous command
-  _engine_command_t *cmd = _engine_painter_prev_command(1);
+  _engine_painter_command_t *cmd = _engine_painter_prev_command(1);
   if (cmd && cmd->cmd != ENGINE_COMMAND_VIEWPORT) {
     cmd = _engine_painter_next_command();
   }
@@ -968,17 +1158,51 @@ _engine_painter_queue_draw(engine_pipeline_t pipeline,
   }
   */
 
+  _engine_painter_uniform_t *uniform = NULL;
+  if (_painter.state.pipeline.id != ENGINE_INVALID_ID) {
+    pipeline = _painter.state.pipeline;
+    uniform  = &_painter.state.uniform;
+  }
+
+  Uint32 uniform_index = ENGINE_IMPOSSIBLE_ID;
+
+  if (uniform) {
+    _engine_painter_uniform_t *prev_uniform = _engine_painter_prev_uniform();
+
+    bool reuse_uniform
+        = prev_uniform
+          && (SDL_memcmp(
+                  prev_uniform, uniform, sizeof(_engine_painter_uniform_t))
+              == 0);
+
+    if (!reuse_uniform) {
+      _engine_painter_uniform_t *next_uniform = _engine_painter_next_uniform();
+      if (!next_uniform) {
+        _painter.current_vertex
+            -= vertices_count; // rollback allocated vertices
+        return;
+      }
+      *next_uniform = _painter.state.uniform;
+    }
+
+    uniform_index = _painter.current_uniform
+                    - 1; // - 1 since _engine_painter_next_uniform already
+                         // incremented the index
+  }
+
   // New draw command
-  _engine_command_t *cmd = _engine_painter_next_command();
+  _engine_painter_command_t *cmd = _engine_painter_next_command();
 
   if (!cmd) {
     _painter.current_vertex -= vertices_count; // rollback allocated vertices
     return;
   }
 
-  cmd->cmd                      = ENGINE_COMMAND_DRAW;
-  cmd->args.draw.pipeline       = pipeline;
-  cmd->args.draw.image          = _painter.state.image;
+  cmd->cmd                = ENGINE_COMMAND_DRAW;
+  cmd->args.draw.pipeline = pipeline;
+  cmd->args.draw.image    = _painter.state.image;
+  // TODO region for optimization
+  cmd->args.draw.uniform_index  = uniform_index;
   cmd->args.draw.vertex_index   = vertex_index;
   cmd->args.draw.vertices_count = vertices_count;
 }

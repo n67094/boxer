@@ -18,6 +18,7 @@
 #endif
 
 #define ENGINE_INVALID_ID 0
+#define ENGINE_IMPOSSIBLE_ID 0xFFFFFFFF
 
 #define ENGINE_INIT_COOKIE                                                     \
   0xC0DED1ED // Magic value to indicate that a subsystem has been initialized
