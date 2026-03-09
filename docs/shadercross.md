@@ -10,66 +10,57 @@ Shader cross-compiler utility for SDL applications.
 Shadercross Setup (Linux)
 -----------------------------
 
-A quick guide to set up a Linux environment for GPU shader programming with SDL_gpu and SDL_shadercross.
+A quick guide SDL_shadercross on linux.
 
-Install dependencies, Starting with `SPIRV-Cross`:
-
-```bash
-$ git clone https://github.com/KhronosGroup/SPIRV-Cross
-$ cd SPIRV-Cross
-$ cmake --build build --target install
-$ sudo cmake --build build --target install
-```
-
-Then with (https://github.com/microsoft/DirectXShaderCompiler/releases)[https://github.com/microsoft/DirectXShaderCompiler/releases], download the latest linux release then:
+To install the `SPIRV-Cross` dependencies:
 
 ```bash
-$ cd linux_dxc_2025_07_14.x86_64 # The downloaded file
-$ sudo cp -r bin/* /usr/local/bin/
-$ sudo cp -r include/* /usr/local/include/
-$ sudo cp -r lib/* /usr/local/lib/
-$ sudo ldconfig
+git clone https://github.com/KhronosGroup/SPIRV-Cross
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSPIRV_CROSS_SHARED=ON
+cmake --build build --parallel
+sudo cmake --install build
 ```
 
-Now clone SDL_shadercross and build it:
+To install the `DirectXShaderCompile` dependencies (here)https://github.com/microsoft/DirectXShaderCompiler/releases], download the latest linux version extra it into a folder you wont delete then:
+
+```bash
+sudo ln -sf bin /usr/local/bin/
+sudo ln -sf include /usr/local/include/
+sudo ln -sf lib /usr/local/lib/
+sudo ldconfig
+```
+
+Finally to install `SDL_shadercross` with:
 
 ```bash
 $ git clone https://github.com/libsdl-org/SDL_shadercross
 $ cd SDL_shadercross
-$ mkdir build && cd build
-$ cmake ..
-$ make
-$ sudo cp shadercross /usr/local/bin/
-$ sudo ldconfig
+$ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+$ cmake --build build --parallel
+$ sudo cmake --install build
 ```
 
-You can now use `shadercross` from anywhere. Try `which shadercross` to confirm.
+You can now use `shadercross`.
 
 ---
 
 How to Compile a shader
 -----------------------
 
-Install glslang if you don't have it yet:
+Install glslang using your package manager, then compile a GLSL shader to SPIR-V using those commands:
 
 ```bash
-$ sudo dnf install glslang
+glslangValidator -V shader.frag.glsl -o shader.frag.spv
+glslangValidator -V shader.vert.glsl -o shader.vert.spv
 ```
 
-Then compile a GLSL shader to SPIR-V:
+Then convert the SPIR-V shader to other formats as follow:
 
 ```bash
-$ glslangValidator -V shader.frag.glsl -o shader.frag.spv
-$ glslangValidator -V shader.vert.glsl -o shader.vert.spv
-```
-
-Now you can convert the SPIR-V shader to other formats, for example to HLSL:
-
-```bash
-$ shadercross shader.vert.spv -o shader.frag.dxil
-$ shadercross shader.frag.spv -o shader.frag.dxil
-$ shadercross shader.vert.spv -o shader.frag.msl
-$ shadercross shader.frag.spv -o shader.frag.msl
+shadercross shader.vert.spv -o shader.frag.dxil
+shadercross shader.frag.spv -o shader.frag.dxil
+shadercross shader.vert.spv -o shader.frag.msl
+shadercross shader.frag.spv -o shader.frag.msl
 ```
 
 ---
@@ -82,17 +73,17 @@ How to Setup RenderDoc
 To debug and inspect your shaders, you can use RenderDoc by Downloading it from (https://renderdoc.org/)[https://renderdoc.org/]:
 
 ```bash
-$ cd linux_dxc_2025_07_14.x86_64 # The downloaded file
-$ sudo cp -r bin/* /usr/local/bin/
-$ sudo cp -r etc/* /usr/local/etc/
-$ sudo cp -r include/* /usr/local/include/
-$ sudo cp -r lib/* /usr/local/lib/
-$ sudo cp -r lib/* /usr/local/share/
-$ sudo ldconfig
+cd linux_dxc_2025_07_14.x86_64 # The downloaded file
+sudo ln -sf bin /usr/local/bin/
+sudo ln -sf etc /usr/local/etc/
+sudo ln -sf include /usr/local/include/
+sudo ln -sf lib /usr/local/lib/
+sudo ln -sf share /usr/local/share/
+sudo ldconfig
 ```
 
-Then you can run renderdoc:
+Test it by running:
 
 ```bash
-$ qrenderdoc
+qrenderdoc
 ```
