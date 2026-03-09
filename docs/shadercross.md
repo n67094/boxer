@@ -17,7 +17,7 @@ cmake --build build --parallel
 sudo cmake --install build
 ```
 
-To install the `DirectXShaderCompile` dependencies (https://github.com/microsoft/DirectXShaderCompiler/releases)[here], download the latest linux version extract it into a folder you wont delete then:
+To install the `DirectXShaderCompile` dependencies (https://github.com/microsoft/DirectXShaderCompiler/releases)[https://github.com/microsoft/DirectXShaderCompiler/releases], download the latest linux version extract it into a folder you wont delete then:
 
 ```bash
 sudo ln -sf bin /usr/local/bin/
@@ -29,11 +29,11 @@ sudo ldconfig
 Finally to install `SDL_shadercross` with:
 
 ```bash
-$ git clone https://github.com/libsdl-org/SDL_shadercross
-$ cd SDL_shadercross
-$ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-$ cmake --build build --parallel
-$ sudo cmake --install build
+git clone https://github.com/libsdl-org/SDL_shadercross
+cd SDL_shadercross
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+sudo cmake --install build
 ```
 
 You can now use `shadercross`.
