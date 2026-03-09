@@ -17,7 +17,7 @@ cmake --build build --parallel
 sudo cmake --install build
 ```
 
-To install the `DirectXShaderCompile` dependencies (https://github.com/microsoft/DirectXShaderCompiler/releases)[here], download the latest linux version extra it into a folder you wont delete then:
+To install the `DirectXShaderCompile` dependencies (https://github.com/microsoft/DirectXShaderCompiler/releases)[here], download the latest linux version extract it into a folder you wont delete then:
 
 ```bash
 sudo ln -sf bin /usr/local/bin/
