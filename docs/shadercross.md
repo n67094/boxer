@@ -34,13 +34,13 @@ echo 'export LD_LIBRARY_PATH="~/.local/lib:$LD_LIBRARY_PATH"' >> ~/.bashrc
 source ~/.bashrc
  ```
 
- Verify with: 
+ Test with: 
 
 ```bash
 dxc --version
 ```
 
-Finally to install `SDL_shadercross` with:
+Finally to install `SDL_shadercross` run those commands:
 
 ```bash
 git clone https://github.com/libsdl-org/SDL_shadercross
@@ -50,10 +50,14 @@ cmake --build build --parallel
 cp -r shadercross ~/.local/bin/
 ```
 
-You can now use `shadercross`.
+Test with:
 
-How to Compile a shader
------------------------
+```bash
+shadercross -h
+```
+
+How to Compile shaders
+----------------------
 
 Install glslang using your package manager, then compile a GLSL shader to SPIR-V using those commands:
 
