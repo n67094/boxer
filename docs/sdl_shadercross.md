@@ -1,7 +1,7 @@
-Shadercross
+SDL_Shadercross
 ---------------
 
-Shader cross-compiler utility for SDL applications.
+SDL_shadercross is a CLI that allow to convert SPIRV-V shaders to other formats such as DirectX Shader Bytecode (DXIL) and Metal Shading Language (MSL).
 
 **Link:** [https://github.com/libsdl-org/SDL_shadercross](https://github.com/libsdl-org/SDL_shadercross)
 

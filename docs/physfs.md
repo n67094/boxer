@@ -4,9 +4,6 @@ PhysFS
 PhysFS (PhysicsFS) is a library to provide abstract access to various archives. It is used in many games and applications to handle file I/O in a platform-independent manner.
 
 **Link:** [https://github.com/icculus/physfs](https://github.com/icculus/physfs)
-**Version**: 3.0.2
-
----
 
 How to Update PhysFS (Linux)
 ----------------------------

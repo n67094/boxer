@@ -20,7 +20,7 @@ DATA_DIR := data
 TEST_SRC_DIR := src
 TEST_INC_DIR := src
 
-ENGINE_DIR := ../engine
+ENGINE_DIR := ../src
 ENGINE_SRC_DIR := $(ENGINE_DIR)
 ENGINE_INC_DIR := $(ENGINE_DIR)
 
