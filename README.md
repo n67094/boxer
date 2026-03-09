@@ -10,7 +10,7 @@ _The logo's left and right ends evoke the horizontally opposed pistons of the bo
 
 _"The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form."_
 
-A minimalist 2D game engine written in C, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
+A minimal and efficient 2D game engine written in C99, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
 
 ## Prerequisites
 

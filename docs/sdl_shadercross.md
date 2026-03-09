@@ -56,7 +56,7 @@ Test with:
 shadercross -h
 ```
 
-How to Compile shaders
+How to Compile Shaders
 ----------------------
 
 Install glslang using your package manager, then compile a GLSL shader to SPIR-V using those commands:
