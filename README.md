@@ -5,11 +5,10 @@ _The logo's left and right ends evoke the horizontally opposed pistons of the bo
 > As long as I can remember, I've always wanted to make games. Somehow I ended up doing it, and a good way for me to enjoy this journey is to build my own game engine and share it with you, hoping it will help you too.
 
 # Boxer
----
 
 _"The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form."_
 
-A minimalist, modern, and lightweight 2D game engine written in C, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
+A minimalist 2D game engine written in C, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
 
 ## Prerequisites
 
@@ -51,19 +50,17 @@ Run the example game:
 let's make it roar!
 
 # Project Structure
----
 
 The project is organized as follows:
 
 ```bash
 data/  # Game assets such as textures, audio, etc.
-boxer/ # Core engine source code
+src/ # Core engine source code
 game/  # Your game source code
 test/  # Unit tests for the engine (take a look for examples of how to use the API)
 ```
 
 # Project Filesystem
----
 
 Under its hood (or head cover since it's an engine), Boxer uses PhysFS for virtual filesystem management. By default, the following folders are mounted:
 
@@ -79,6 +76,5 @@ Depending on the operating system, the system preferred path is as follows:
 - **macOS:** `~/Library/Application Support/<config->name>/`
 
 # License
----
 
 This project is licensed under the MIT License
