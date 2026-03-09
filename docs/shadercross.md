@@ -17,13 +17,23 @@ cmake --build build --parallel
 sudo cmake --install build
 ```
 
-To install the `DirectXShaderCompile` dependencies (https://github.com/microsoft/DirectXShaderCompiler/releases)[https://github.com/microsoft/DirectXShaderCompiler/releases], download the latest linux version extract it into a folder you wont delete then:
+To install the `DirectXShaderCompile` dependencies [https://github.com/microsoft/DirectXShaderCompiler/releases](https://github.com/microsoft/DirectXShaderCompiler/releases), download the latest linux version extract it into a folder you wont delete then:
 
 ```bash
-sudo ln -sf bin /usr/local/bin/
-sudo ln -sf include /usr/local/include/
-sudo ln -sf lib /usr/local/lib/
-sudo ldconfig
+cp -r bin/* ~/.local/bin/
+cp -r lib/* ~/.local/lib/
+cp -r include/* ~/.local/include/
+
+sudo ldconfig ~/.local/lib
+
+echo 'export PATH="$PATH:~/.local/bin"' >> ~/.bashrc
+source ~/.bashrc
+ ```
+
+ Verify with: 
+
+```bash
+dxc --version
 ```
 
 Finally to install `SDL_shadercross` with:
@@ -55,27 +65,4 @@ shadercross shader.vert.spv -o shader.frag.dxil
 shadercross shader.frag.spv -o shader.frag.dxil
 shadercross shader.vert.spv -o shader.frag.msl
 shadercross shader.frag.spv -o shader.frag.msl
-```
-
-How to Setup RenderDoc
-----------------------
-
-**NOTE:** `renderdoc` doesn't support `Wayland` yet, so make sure you are running an X11 session (c.f https://wiki.libsdl.org/SDL3/FAQDevelopment#renderdoc).
-
-To debug and inspect your shaders, you can use RenderDoc by Downloading it from (https://renderdoc.org/)[https://renderdoc.org/]:
-
-```bash
-cd linux_dxc_2025_07_14.x86_64 # The downloaded file
-sudo ln -sf bin /usr/local/bin/
-sudo ln -sf etc /usr/local/etc/
-sudo ln -sf include /usr/local/include/
-sudo ln -sf lib /usr/local/lib/
-sudo ln -sf share /usr/local/share/
-sudo ldconfig
-```
-
-Test it by running:
-
-```bash
-qrenderdoc
 ```
