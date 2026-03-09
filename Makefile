@@ -32,20 +32,13 @@ GAME_DIR := game
 GAME_SRC_DIR := $(GAME_DIR)
 GAME_INC_DIR := $(GAME_DIR)
 
-ENGINE_DIR := src
-ENGINE_SRC_DIR := $(ENGINE_DIR)
-ENGINE_INC_DIR := $(ENGINE_DIR)
-
-# DEBUG_DIR := debug
-# DEBUG_SRC_DIR := $(DEBUG_DIR)
-# DEBUG_INC_DIR := $(DEBUG_DIR)
+BOXER_DIR := src
+BOXER_SRC_DIR := $(BOXER_DIR)
+BOXER_INC_DIR := $(BOXER_DIR)
 
 # Libraries Directories
 
 LIB_DIR := lib
-
-# IMGUI_SRC_DIR := $(LIB_DIR)/dcimgui
-# IMGUI_INC_DIR := $(LIB_DIR)/dcimgui
 
 PHYSFS_SRC_DIR := $(LIB_DIR)/physfs
 PHYSFS_INC_DIR := $(LIB_DIR)/physfs
@@ -65,52 +58,34 @@ LDFLAGS = -lSDL3 -lSDL3_ttf -lm
 CFLAGS = -std=c99 -Wall
 CXXFLAGS = -std=c++11 -Wall
 
-INC_FLAGS := -I$(PHYSFS_INC_DIR) -I$(ENGINE_INC_DIR) -I$(GAME_INC_DIR)
+INC_FLAGS := -I$(PHYSFS_INC_DIR) -I$(BOXER_INC_DIR) -I$(GAME_INC_DIR)
 
 ifeq ($(DEBUG), 1)
-# CFLAGS += -g -O0 -DDEBUG -D_GNU_SOURCE -I$(IMGUI_INC_DIR) -I$(DEBUG_INC_DIR) $(INC_FLAGS)
 CFLAGS += -g -O0 -DDEBUG -D_GNU_SOURCE $(INC_FLAGS)
-# CXXFLAGS += -g -O0 -DDEBUG
 else
 CFLAGS += -O2 -D_GNU_SOURCE $(INC_FLAGS)
-# CXXFLAGS += -O2
 endif
 
 ifeq ($(SANITIZER), 1)
 CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-# CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
 LDFLAGS += -fsanitize=address
 endif
 
 # Source Files
 
 PHYSFS_SRCS := $(wildcard $(PHYSFS_SRC_DIR)/*.c)
-ENGINE_SRCS := $(wildcard $(ENGINE_SRC_DIR)/*.c)
+BOXER_SRCS := $(wildcard $(BOXER_SRC_DIR)/*.c)
 GAME_SRCS := $(wildcard $(GAME_SRC_DIR)/*.c)
 
-ALL_SRCS = $(PHYSFS_SRCS) $(ENGINE_SRCS) $(GAME_SRCS)
-
-# ifeq ($(DEBUG), 1)
-# IMGUI_SRCS := $(wildcard $(IMGUI_SRC_DIR)/*.cpp)
-# DEBUG_SRCS := $(wildcard $(DEBUG_SRC_DIR)/*.c)
-
-# ALL_SRCS += $(IMGUI_SRCS) $(DEBUG_SRCS)
-# endif
+ALL_SRCS = $(PHYSFS_SRCS) $(BOXER_SRCS) $(GAME_SRCS)
 
 # Object Files
 
 PHYSFS_OBJS := $(patsubst $(PHYSFS_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(PHYSFS_SRCS))
-ENGINE_OBJS := $(patsubst $(ENGINE_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(ENGINE_SRCS))
+BOXER_OBJS := $(patsubst $(BOXER_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(BOXER_SRCS))
 GAME_OBJS := $(patsubst $(GAME_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(GAME_SRCS))
 
-ALL_OBJS = $(PHYSFS_OBJS) $(ENGINE_OBJS) $(GAME_OBJS)
-
-# ifeq ($(DEBUG), 1)
-# IMGUI_OBJS := $(patsubst $(IMGUI_SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(IMGUI_SRCS))
-# DEBUG_OBJS := $(patsubst $(DEBUG_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(DEBUG_SRCS))
-
-# ALL_OBJS += $(IMGUI_OBJS) $(DEBUG_OBJS)
-# endif
+ALL_OBJS = $(PHYSFS_OBJS) $(BOXER_OBJS) $(GAME_OBJS)
 
 # Targets
 
@@ -122,8 +97,8 @@ all: $(TARGET) data
 data:
 	zip -r data.zip $(DATA_DIR)
 
-# docs:
-# doxygen
+docs:
+	doxygen
 
 $(TARGET): $(ALL_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
@@ -132,17 +107,9 @@ $(TARGET): $(ALL_OBJS)
 $(BUILD_DIR)/%.o: $(PHYSFS_SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Dear ImGui (Debug only)
-# $(BUILD_DIR)/%.o: $(IMGUI_SRC_DIR)/%.cpp | $(BUILD_DIR)
-# $(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Engine
-$(BUILD_DIR)/%.o: $(ENGINE_SRC_DIR)/%.c | $(BUILD_DIR)
+# Boxer
+$(BUILD_DIR)/%.o: $(BOXER_SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
-
-# Debug Code (Debug only)
-# $(BUILD_DIR)/%.o: $(DEBUG_SRC_DIR)/%.c | $(BUILD_DIR)
-#	$(CC) $(CFLAGS) -c $< -o $@
 
 # Game (User Code)
 $(BUILD_DIR)/%.o: $(GAME_SRC_DIR)/%.c | $(BUILD_DIR)

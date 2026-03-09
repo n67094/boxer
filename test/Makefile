@@ -20,9 +20,9 @@ DATA_DIR := data
 TEST_SRC_DIR := src
 TEST_INC_DIR := src
 
-ENGINE_DIR := ../src
-ENGINE_SRC_DIR := $(ENGINE_DIR)
-ENGINE_INC_DIR := $(ENGINE_DIR)
+BOXER_DIR := ../src
+BOXER_SRC_DIR := $(BOXER_DIR)
+BOXER_INC_DIR := $(BOXER_DIR)
 
 # Libraries Directories
 
@@ -44,7 +44,7 @@ LDFLAGS = -lSDL3 -lSDL3_ttf -lm
 
 CFLAGS = -std=c99 -Wall
 
-INC_FLAGS := -I$(PHYSFS_INC_DIR) -I$(ENGINE_INC_DIR) -I$(TEST_INC_DIR)
+INC_FLAGS := -I$(PHYSFS_INC_DIR) -I$(BOXER_INC_DIR) -I$(TEST_INC_DIR)
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -O0 -DDEBUG -D_GNU_SOURCE  $(INC_FLAGS)
@@ -61,19 +61,18 @@ endif
 # Source Files
 
 PHYSFS_SRCS := $(wildcard $(PHYSFS_SRC_DIR)/*.c)
-ENGINE_SRCS := $(wildcard $(ENGINE_SRC_DIR)/*.c)
-# $(filter-out $(ENGINE_SRC_DIR)/engine.c, )
+BOXER_SRCS := $(wildcard $(BOXER_SRC_DIR)/*.c)
 TEST_SRCS := $(wildcard $(TEST_SRC_DIR)/*.c)
 
-ALL_SRCS = $(PHYSFS_SRCS) $(ENGINE_SRCS) $(TEST_SRCS)
+ALL_SRCS = $(PHYSFS_SRCS) $(BOXER_SRCS) $(TEST_SRCS)
 
 # Object Files
 
 PHYSFS_OBJS := $(patsubst $(PHYSFS_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(PHYSFS_SRCS))
-ENGINE_OBJS := $(patsubst $(ENGINE_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(ENGINE_SRCS))
+BOXER_OBJS := $(patsubst $(BOXER_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(BOXER_SRCS))
 TEST_OBJS := $(patsubst $(TEST_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(TEST_SRCS))
 
-ALL_OBJS = $(PHYSFS_OBJS) $(ENGINE_OBJS) $(TEST_OBJS)
+ALL_OBJS = $(PHYSFS_OBJS) $(BOXER_OBJS) $(TEST_OBJS)
 
 # Targets
 
@@ -92,8 +91,8 @@ $(TARGET): $(ALL_OBJS)
 $(BUILD_DIR)/%.o: $(PHYSFS_SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Engine
-$(BUILD_DIR)/%.o: $(ENGINE_SRC_DIR)/%.c | $(BUILD_DIR)
+# Boxer
+$(BUILD_DIR)/%.o: $(BOXER_SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Game (User Code)
