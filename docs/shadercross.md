@@ -46,7 +46,7 @@ git clone https://github.com/libsdl-org/SDL_shadercross
 cd SDL_shadercross
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
-sudo cmake --install build
+cp -r shadercross ~/.local/bin/
 ```
 
 You can now use `shadercross`.
