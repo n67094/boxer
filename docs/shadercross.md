@@ -5,12 +5,8 @@ Shader cross-compiler utility for SDL applications.
 
 **Link:** [https://github.com/libsdl-org/SDL_shadercross](https://github.com/libsdl-org/SDL_shadercross)
 
----
-
 Shadercross Setup (Linux)
 -----------------------------
-
-A quick guide SDL_shadercross on linux.
 
 To install the `SPIRV-Cross` dependencies:
 
@@ -42,8 +38,6 @@ $ sudo cmake --install build
 
 You can now use `shadercross`.
 
----
-
 How to Compile a shader
 -----------------------
 
@@ -62,8 +56,6 @@ shadercross shader.frag.spv -o shader.frag.dxil
 shadercross shader.vert.spv -o shader.frag.msl
 shadercross shader.frag.spv -o shader.frag.msl
 ```
-
----
 
 How to Setup RenderDoc
 ----------------------
