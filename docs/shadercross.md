@@ -27,6 +27,9 @@ cp -r include/* ~/.local/include/
 sudo ldconfig ~/.local/lib
 
 echo 'export PATH="$PATH:~/.local/bin"' >> ~/.bashrc
+echo 'export CMAKE_PREFIX_PATH="~/.local:$CMAKE_PREFIX_PATH" >> ~/.bashrc
+echo 'export PKG_CONFIG_PATH="~/.local/share/pkgconfig:$PKG_CONFIG_PATH" >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH="~/.local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
 source ~/.bashrc
  ```
 
