@@ -59,7 +59,7 @@ The project is organized as follows:
 data/  # Game assets such as textures, audio, etc.
 src/ # Core engine source code
 game/  # Your game source code
-test/  # Unit tests for the engine (take a look for examples of how to use the API)
+test/  # Unit tests for the engine (take a look to see examples on how to use the engine)
 ```
 
 # Project Filesystem
