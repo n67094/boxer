@@ -2,9 +2,12 @@
 
 #include "example_draw.h"
 
+static engine_image_t _image;
+
 void
 example_draw_setup(void)
 {
+  _image = engine_image_load("data/images/logo.png");
 }
 
 void
@@ -15,57 +18,211 @@ example_draw_update(Uint64 delta_time_ms)
 void
 example_draw_render(Uint64 alpha_time_ms)
 {
-  engine_vec2_t painter_dimensions = engine_painter_dimensions();
+  engine_vec2_t frame_size = engine_painter_get_frame_size();
+
+  float time = (float)SDL_GetTicks() / 1000.0f;
+
+  int hw = frame_size.x * 0.5f;
+  int hh = frame_size.y * 0.5f;
 
   // Quadrant 1
   {
-    engine_rect_t bounds = engine_rect_make(
-        0, 0, painter_dimensions.x / 2, painter_dimensions.y / 2);
+    engine_painter_viewport(0, 0, hw, hh);
 
-    engine_draw_rect_filled(bounds, engine_color_make(25, 25, 25, 255));
+    engine_painter_set_color(engine_color_make(20, 20, 20, 255));
+    engine_painter_clear();
 
-    engine_draw_line(
-        engine_line_make(
-            bounds.x, bounds.y, bounds.x + bounds.w, bounds.y + bounds.h),
-        engine_color_make(255, 0, 0, 255));
+    engine_vec2_t center = engine_vec2_make(hw * 0.5, hh * 0.5);
 
-    engine_draw_line_ex(
-        engine_line_make(
-            bounds.x + bounds.w, bounds.y, bounds.x, bounds.y + bounds.h),
-        engine_color_make(0, 255, 0, 255),
-        3.0f);
+    // Draw a red rectangle
+    engine_painter_set_color(engine_color_make(255, 0, 0, 255));
+
+    int rect_w  = 240;
+    int rect_h  = 120;
+    int rect_hw = rect_w * 0.5f;
+    int rect_hh = rect_h * 0.5f;
+
+    engine_vec2_t points[5];
+
+    points[0] = engine_vec2_make(center.x - rect_hw, center.y - rect_hh);
+    points[1] = engine_vec2_make(center.x + rect_hw, center.y - rect_hh);
+    points[2] = engine_vec2_make(center.x + rect_hw, center.y + rect_hh);
+    points[3] = engine_vec2_make(center.x - rect_hw, center.y + rect_hh);
+    points[4] = points[0]; // Close the rectangle
+
+    engine_painter_draw_lines_strip(points, 5);
+
+    // Draw white points
+    engine_painter_set_color(engine_color_make(255, 255, 255, 255));
+
+    int step = 10;
+
+    for (int y = center.y - rect_hh + step; y < center.y + rect_hh; y += step) {
+      for (int x = center.x - rect_hw + step; x < center.x + rect_hw;
+           x += step) {
+        engine_painter_draw_point(engine_vec2_make(x, y));
+      }
+    }
   }
+
   // Quadrant 2
   {
-    engine_rect_t bounds = engine_rect_make(painter_dimensions.x / 2,
-                                            0,
-                                            painter_dimensions.x / 2,
-                                            painter_dimensions.y / 2);
+    engine_painter_viewport(hw, 0, hw, hh);
 
-    engine_rect_t inner_bounds = engine_rect_make(
-        bounds.x + 10, bounds.y + 10, bounds.w - 20, bounds.h - 20);
+    engine_painter_set_color(engine_color_make(10, 10, 10, 255));
+    engine_painter_clear();
 
-    engine_draw_rect_ex(inner_bounds, engine_color_make(255, 0, 0, 255), 3.0f);
+    // Draw a pink triangle
+    {
+      engine_rect_t bounds_left = engine_rect_make(0, 0, hw * 0.5, hh);
+
+      engine_vec2_t center_left
+          = engine_vec2_make(bounds_left.x + bounds_left.w * 0.5f,
+                             bounds_left.y + bounds_left.h * 0.5f);
+
+      engine_triangle_t triangle = engine_triangle_make(center_left.x - 50,
+                                                        center_left.y - 50,
+                                                        center_left.x + 50,
+                                                        center_left.y - 50,
+                                                        center_left.x,
+                                                        center_left.y + 50);
+
+      engine_painter_set_color(engine_color_make(255, 0, 255, 255));
+
+      engine_painter_draw_triangle_filled(triangle);
+    }
+
+    // Draw a cyan rectangle
+    {
+      engine_rect_t bounds_right = engine_rect_make(hw * 0.5, 0, hw * 0.5, hh);
+
+      engine_vec2_t center_right
+          = engine_vec2_make(bounds_right.x + bounds_right.w * 0.5f,
+                             bounds_right.y + bounds_right.h * 0.5f);
+
+      engine_rect_t rect = engine_rect_make(
+          center_right.x - 50, center_right.y - 50, 100, 100);
+
+      engine_painter_set_color(engine_color_make(0, 255, 255, 255));
+
+      engine_painter_draw_rect_filled(rect);
+    }
   }
+
   // Quadrant 3
   {
-    engine_rect_t bounds = engine_rect_make(0,
-                                            painter_dimensions.y / 2,
-                                            painter_dimensions.x / 2,
-                                            painter_dimensions.y / 2);
-  }
-  // Quadrant 4
-  {
-    engine_rect_t bounds = engine_rect_make(painter_dimensions.x / 2,
-                                            painter_dimensions.y / 2,
-                                            painter_dimensions.x / 2,
-                                            painter_dimensions.y / 2);
+    engine_painter_viewport(0, hh, hw, hh);
 
-    engine_draw_rect_filled(bounds, engine_color_make(50, 50, 50, 255));
+    engine_painter_set_color(engine_color_make(10, 10, 10, 255));
+    engine_painter_clear();
+
+    // Draw a rectangle with custom color per corner
+    {
+      engine_rect_t bounds_left = engine_rect_make(0, 0, hw * 0.5, hh);
+
+      engine_vec2_t center_left
+          = engine_vec2_make(bounds_left.x + bounds_left.w * 0.5f,
+                             bounds_left.y + bounds_left.h * 0.5f);
+
+      static engine_color_t colors[4] = {
+        engine_color_make(255, 100, 100, 255), // Top-left: Soft red
+        engine_color_make(255, 180, 100, 255), // Top-right: Orange
+        engine_color_make(180, 100, 255, 255), // Bottom-left: Purple
+        engine_color_make(100, 180, 255, 255)  // Bottom-right: Sky blue
+      };
+
+      engine_vec2_t positions[4] = {
+        engine_vec2_make(center_left.x - 50, center_left.y - 50), // Top-left
+        engine_vec2_make(center_left.x + 50, center_left.y - 50), // Top-right
+        engine_vec2_make(center_left.x - 50,
+                         center_left.y + 50),                    // Bottom-right
+        engine_vec2_make(center_left.x + 50, center_left.y + 50) // Bottom-left
+      };
+
+      static engine_vertex_t vertex_buffer[4];
+
+      for (int i = 0; i < 4; ++i) {
+        vertex_buffer[i].position = positions[i];
+        vertex_buffer[i].color    = colors[i];
+      }
+
+      engine_painter_draw(ENGINE_PRIMITIVE_TRIANGLE_STRIP, vertex_buffer, 4);
+    }
+
+    // Draw a color wheel
+    {
+      engine_rect_t bounds_right = engine_rect_make(hw * 0.5, 0, hw * 0.5, hh);
+
+      engine_vec2_t center_right
+          = engine_vec2_make(bounds_right.x + bounds_right.w * 0.5f,
+                             bounds_right.y + bounds_right.h * 0.5f);
+
+      float step         = (2.0f * ENGINE_PI2) / 64.0f;
+      unsigned int count = 0;
+      static engine_vertex_t vertex_buffer[4096];
+
+      for (float theta = 0.0f; theta <= 2.0f * ENGINE_PI + step * 0.5f;
+           theta += step) {
+        engine_vec2_t v
+            = engine_vec2_make(center_right.x + 50 * engine_cos(theta),
+                               center_right.y + 50 * engine_sin(theta));
+
+        vertex_buffer[count].position = v;
+
+        vertex_buffer[count].color = (engine_color_t){
+          (engine_sin(theta + time * 1) + 1.0f) * 0.5f * 255.0f,
+          (engine_sin(theta + time * 2) + 1.0f) * 0.5f * 255.0f,
+          (engine_sin(theta + time * 4) + 1.0f) * 0.5f * 255.0f,
+          255
+        };
+        count++;
+
+        if (count % 3 == 1) {
+          engine_vec2_t u = engine_vec2_make(center_right.x, center_right.y);
+          vertex_buffer[count].position = u;
+          vertex_buffer[count].color = (engine_color_t){ 255, 255, 255, 255 };
+          count++;
+        }
+      }
+      engine_painter_draw(
+          ENGINE_PRIMITIVE_TRIANGLE_STRIP, vertex_buffer, count);
+    }
+  }
+
+  // Quadrant 4 Draw a rotating textured rectangle
+  {
+    engine_painter_viewport(hw, hh, hw, hh);
+
+    engine_painter_set_color(engine_color_make(20, 20, 20, 255));
+    engine_painter_clear();
+
+    int width  = engine_image_get_width(_image);
+    int height = engine_image_get_height(_image);
+
+    engine_rect_t img_src = engine_rect_make(0, 0, (float)width, (float)height);
+
+    engine_rect_t img_dst = engine_rect_make(hw * 0.5 - width * 0.5f,
+                                             hh * 0.5 - height * 0.5f,
+                                             (float)width,
+                                             (float)height);
+
+    engine_painter_set_image(_image);
+    engine_painter_set_color(engine_color_make(255, 255, 255, 255));
+
+    engine_painter_push_transform();
+
+    engine_painter_rotate_at(
+        -time, img_dst.x + img_dst.w * 0.5f, img_dst.y + img_dst.h * 0.5f);
+
+    engine_painter_draw_rect_textured(
+        engine_textured_rect_make(img_dst, img_src));
+
+    engine_painter_pop_transform();
   }
 }
 
 void
 example_draw_shutdown(void)
 {
+  engine_image_destroy(_image);
 }

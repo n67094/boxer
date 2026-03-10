@@ -34,8 +34,6 @@ void engine_painter_begin(int width, int height);
 void engine_painter_flush(void);
 void engine_painter_end(void);
 
-engine_vec2_t engine_painter_dimensions(void);
-
 void
 engine_painter_set_projection(float left, float right, float bottom, float top);
 void engine_painter_reset_projection(void);
@@ -59,14 +57,13 @@ void engine_painter_reset_blend_mode(void);
 void engine_painter_set_color(engine_color_t color);
 engine_color_t engine_painter_get_color(void);
 void engine_painter_reset_color(void);
-void engine_painter_set_thickness(float thickness);
-void engine_painter_reset_thickness(void);
 void engine_painter_set_image(engine_image_t image);
 engine_image_t engine_painter_get_image(void);
 void engine_painter_reset_image(void);
 void engine_painter_set_sampler(engine_sampler_e sampler);
 void engine_painter_reset_sampler(void);
-void engine_painter_viewport(int x, int y, int w, int h);
+engine_vec2_t engine_painter_get_frame_size(void);
+void engine_painter_viewport(float x, float y, float w, float h);
 void engine_painter_reset_viewport(void);
 void engine_painter_scissor(int x, int y, int w, int h);
 void engine_painter_reset_scissor(void);

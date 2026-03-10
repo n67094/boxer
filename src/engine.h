@@ -15,7 +15,6 @@
 #include "engine_config.h"
 #include "engine_context.h"
 #include "engine_defs.h"
-#include "engine_draw.h"
 #include "engine_error.h"
 #include "engine_font.h"
 #include "engine_game.h"

@@ -14,8 +14,8 @@
 
 typedef struct engine_line_s
 {
+  engine_vec2_t p0;
   engine_vec2_t p1;
-  engine_vec2_t p2;
 } engine_line_t;
 
 /**
@@ -29,9 +29,9 @@ typedef struct engine_line_s
 
 typedef struct engine_triangle_s
 {
+  engine_vec2_t p0;
   engine_vec2_t p1;
   engine_vec2_t p2;
-  engine_vec2_t p3;
 } engine_triangle_t;
 
 /**

@@ -88,6 +88,8 @@ typedef struct _engine_painter_state_s
   engine_pipeline_t pipeline;
 
   engine_blendmode_e blend_mode;
+
+  engine_vec2_t frame_size;
   engine_rect_t viewport;
   engine_rect_t scissor;
   engine_color_t color;
@@ -463,6 +465,7 @@ engine_painter_begin(int width, int height)
   // Save current state
   _painter.states[_painter.current_state++] = _painter.state;
 
+  _painter.state.frame_size = engine_vec2_make((float)width, (float)height);
   _painter.state.viewport   = (engine_rect_t){ 0, 0, width, height };
   _painter.state.scissor    = (engine_rect_t){ 0, 0, -1, -1 };
   _painter.state.color      = ENGINE_COLOR_WHITE;
@@ -638,10 +641,10 @@ engine_painter_flush()
     }
     case ENGINE_COMMAND_VIEWPORT:
       viewport = (SDL_GPUViewport){
-        .x = (float)cmd->args.viewport.x,
-        .y = (float)cmd->args.viewport.y,
-        .w = (float)cmd->args.viewport.w,
-        .h = (float)cmd->args.viewport.h,
+        .x = cmd->args.viewport.x,
+        .y = cmd->args.viewport.y,
+        .w = cmd->args.viewport.w,
+        .h = cmd->args.viewport.h,
       };
       SDL_SetGPUViewport(render_pass, &viewport);
       break;
@@ -668,15 +671,6 @@ engine_painter_end(void)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
   _painter.state = _painter.states[--_painter.current_state];
-}
-
-engine_vec2_t
-engine_painter_dimensions(void)
-{
-  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
-  SDL_assert(_painter.current_state > 0);
-
-  return engine_vec2_make(_painter.state.viewport.w, _painter.state.viewport.h);
 }
 
 void
@@ -940,25 +934,6 @@ engine_painter_reset_color(void)
 }
 
 void
-engine_painter_set_thickness(float thickness)
-{
-  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
-  SDL_assert(_painter.current_state > 0);
-
-  _painter.state.thickness = thickness;
-}
-
-void
-engine_painter_reset_thickness(void)
-{
-  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
-  SDL_assert(_painter.current_state > 0);
-
-  _painter.state.thickness = SDL_max(1.0f / _painter.state.viewport.w,
-                                     1.0f / _painter.state.viewport.h);
-}
-
-void
 engine_painter_set_image(engine_image_t image)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
@@ -1003,8 +978,17 @@ engine_painter_reset_sampler(void)
   _painter.state.sampler = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP];
 }
 
+engine_vec2_t
+engine_painter_get_frame_size(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.current_state > 0);
+
+  return _painter.state.frame_size;
+}
+
 void
-engine_painter_viewport(int x, int y, int w, int h)
+engine_painter_viewport(float x, float y, float w, float h)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
@@ -1020,26 +1004,27 @@ engine_painter_viewport(int x, int y, int w, int h)
   if (cmd && cmd->cmd != ENGINE_COMMAND_VIEWPORT) {
     cmd = _engine_painter_next_command();
   }
-
   if (!cmd) {
     return;
   }
 
-  engine_rect_t viewport
-      = engine_rect_make((float)x, (float)y, (float)w, (float)h);
-
   SDL_memset(&cmd->args.viewport, 0, sizeof(engine_rect_t));
+
+  engine_rect_t viewport = engine_rect_make(x, y, w, h);
 
   cmd->cmd           = ENGINE_COMMAND_VIEWPORT;
   cmd->args.viewport = viewport;
 
-  // TODO scissor
+  // When viewport changes, scissor needs to be updated to keep the same region
+  if (!(_painter.state.scissor.w < 0 && _painter.state.scissor.h < 0)) {
+    _painter.state.scissor.x += x - _painter.state.viewport.x;
+    _painter.state.scissor.y += y - _painter.state.viewport.y;
+  }
 
   _painter.state.viewport   = viewport;
   _painter.state.thickness  = ENGINE_MAX(1.0f / w, 1.0f / h);
-  _painter.state.projection = _engine_painter_default_projection(
-      (int)_painter.state.viewport.w, (int)_painter.state.viewport.h);
-  _painter.state.mvp = _engine_painter_mul_projection_transform(
+  _painter.state.projection = _engine_painter_default_projection(w, h);
+  _painter.state.mvp        = _engine_painter_mul_projection_transform(
       &_painter.state.projection, &_painter.state.transform);
 }
 
@@ -1049,8 +1034,10 @@ engine_painter_reset_viewport(void)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
 
-  engine_painter_viewport(
-      0, 0, (float)_context->config.width, (float)_context->config.height);
+  engine_painter_viewport(0,
+                          0,
+                          (float)_painter.state.frame_size.x,
+                          (float)_painter.state.frame_size.y);
 }
 
 void
@@ -1058,6 +1045,38 @@ engine_painter_scissor(int x, int y, int w, int h)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
+
+  // Skip if scissor is the same
+  if (_painter.state.scissor.x == x && _painter.state.scissor.y == y
+      && _painter.state.scissor.w == w && _painter.state.scissor.h == h) {
+    return;
+  }
+
+  // Try to reuse previous command
+  _engine_painter_command_t *cmd = _engine_painter_prev_command(1);
+  if (cmd && cmd->cmd != ENGINE_COMMAND_SCISSOR) {
+    cmd = _engine_painter_next_command();
+  }
+  if (!cmd) {
+    return;
+  }
+
+  // Coordinates scissor relative to viewport
+  engine_rect_t viewport_scissor = engine_rect_make(
+      _painter.state.viewport.x + x, _painter.state.viewport.y + y, w, h);
+
+  // Reset scissor
+  if (w < 0 && h < 0) {
+    viewport_scissor.x = 0;
+    viewport_scissor.y = 0;
+    viewport_scissor.w = _painter.state.frame_size.x;
+    viewport_scissor.h = _painter.state.frame_size.y;
+  }
+
+  SDL_memset(&cmd->args.scissor, 0, sizeof(engine_rect_t));
+
+  cmd->cmd          = ENGINE_COMMAND_SCISSOR;
+  cmd->args.scissor = viewport_scissor;
 
   _painter.state.scissor
       = engine_rect_make((float)x, (float)y, (float)w, (float)h);

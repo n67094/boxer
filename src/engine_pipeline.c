@@ -79,6 +79,7 @@ engine_pipeline_shutdown(void)
   _context     = NULL;
 }
 
+// FIXME this is tight to the painter not generics so move it !
 engine_pipeline_t
 engine_pipeline_make(engine_shader_t shader,
                      engine_primitive_e primitive_type,
@@ -104,7 +105,8 @@ engine_pipeline_make(engine_shader_t shader,
                      { .buffer_slot = 0,
                        .format      = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM,
                        .location    = 1,
-                       .offset      = ENGINE_OFFSET_OF(engine_vertex_t, color) }, } };
+                       .offset      = ENGINE_OFFSET_OF(engine_vertex_t, color) },
+                              } };
 
   SDL_GPUColorTargetBlendState blend_state
       = _engine_pipeline_blend_state(blend_mode);

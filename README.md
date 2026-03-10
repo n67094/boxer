@@ -64,12 +64,14 @@ test/  # Unit tests for the engine (take a look to see examples on how to use th
 
 # Project Filesystem
 
-Under its hood (or head cover since it's an engine), Boxer uses PhysFS for virtual filesystem management. By default, the following folders are mounted:
+Boxer uses PhysFS for virtual filesystem management.
 
-- `data.zip` (containing all your game data) is mounted as `data/` **(read-only)**. This is where the game should load assets from, such as textures, audio, etc.
-- `the system preferred path` is mounted as `/` **(read/write)**. This is where the game should save user data, such as save files, settings, etc.
+By default, the following folders are mounted:
 
-This means that files are read from both `data.zip` and `the system preferred path`, but are only written to `the system preferred path`. This allows the game to have a **read-only** assets folder and a separate **read/write** user data folder.
+- `data.zip` mounted as `data/` **(read-only)** - This is where the game should load assets from, such as textures, audio, etc.
+- `the system preferred path` mounted as `/` **(read/write)** - This is where the game should save user data, such as save files, settings, etc.
+
+This means that files are read from both `data.zip` and `the system preferred path`, but are only written to `the system preferred path`. 
 
 Depending on the operating system, the system preferred path is as follows:
 
