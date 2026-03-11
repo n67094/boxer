@@ -155,37 +155,50 @@ example_text_update(Uint64 delta_time_ms)
 void
 example_text_render(Uint64 alpha_time_ms)
 {
-  // TODO this is one way with total control over the rendering, the API should
-  // feater a fastest way of doing it
-  engine_painter_set_color(engine_color_make(0, 0, 0, 255));
-  engine_painter_clear();
+  engine_vec2_t frame_size = engine_painter_get_frame_size();
 
-  engine_painter_set_blend_mode(ENGINE_BLENDMODE_BLEND);
+  // TODO text should position itself but the user have to position it when
+  // drawing. text should only compute the quads and colors to render the font
+  // and some wrapping as well as alignment but the position should be set when
+  // drawing. This way we can reuse the same text with different positions and
+  // transformations.
 
-  engine_text_entry_t *entries
-      = (engine_text_entry_t *)engine_text_get_text_entries(_text);
-  size_t entries_count = engine_text_get_text_entries_count(_text);
+  engine_painter_push_transform();
+  {
+    engine_painter_set_color(engine_color_make(0, 0, 0, 255));
+    engine_painter_clear();
 
-  for (size_t i = 0; i < entries_count; ++i) {
-    /* FIXME check if still printing one more empty rect !
-    SDL_Log("Background r: %d g: %d b: %d a: %d",
-            entries[i].background.r,
-            entries[i].background.g,
-            entries[i].background.b,
-            entries[i].background.a);
-            */
+    // Move the origin to the top left corner
+    engine_painter_scale(2.0f, 2.0f);
 
-    engine_painter_reset_image();
+    engine_painter_set_blend_mode(ENGINE_BLENDMODE_BLEND);
 
-    engine_painter_set_color(entries[i].background);
-    engine_painter_draw_rect_filled(entries[i].rects.dst);
+    engine_text_entry_t *entries
+        = (engine_text_entry_t *)engine_text_get_text_entries(_text);
+    size_t entries_count = engine_text_get_text_entries_count(_text);
 
-    engine_painter_set_image(engine_font_get_image(_font));
+    for (size_t i = 0; i < entries_count; ++i) {
+      /* FIXME check if still printing one more empty rect !
+      SDL_Log("Background r: %d g: %d b: %d a: %d",
+              entries[i].background.r,
+              entries[i].background.g,
+              entries[i].background.b,
+              entries[i].background.a);
+              */
 
-    engine_painter_set_color(entries[i].foreground);
-    engine_painter_draw_rect_textured(
-        engine_textured_rect_make(entries[i].rects.dst, entries[i].rects.src));
+      engine_painter_reset_image();
+
+      engine_painter_set_color(entries[i].background);
+      engine_painter_draw_rect_filled(entries[i].rects.dst);
+
+      engine_painter_set_image(engine_font_get_image(_font));
+
+      engine_painter_set_color(entries[i].foreground);
+      engine_painter_draw_rect_textured(engine_textured_rect_make(
+          entries[i].rects.dst, entries[i].rects.src));
+    }
   }
+  engine_painter_pop_transform();
 }
 
 void

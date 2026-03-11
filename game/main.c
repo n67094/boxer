@@ -39,6 +39,9 @@ engine_game_render(Uint64 alpha_time_ms)
 {
   engine_painter_begin();
   {
+    engine_painter_set_color(engine_color_make(0, 0, 0, 255));
+    engine_painter_clear();
+
     engine_vec2_t frame_size = engine_painter_get_frame_size();
 
     float width  = frame_size.x;
