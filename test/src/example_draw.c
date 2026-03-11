@@ -233,10 +233,16 @@ example_draw_render(Uint64 alpha_time_ms)
 
       engine_painter_push_transform();
       {
-        /*
-        // engine_painter_translate(width * 0.5f, height * 0.5f);
+        // Move the origin to the center of the quadrant
+        engine_painter_translate(width * 0.5f, height * 0.5f);
+
         // Scale the entire quadrant by 2
-        // engine_painter_scale_at(2.0f, 2.0f, hw * 0.5f, hh * 0.5f);
+        engine_painter_scale_at(2.0f, 2.0f, 0.0f, 0.0f);
+
+        // Rotate the rectangle based on time
+        engine_painter_rotate_at(time, 0.0f, 0.0f);
+
+        engine_painter_set_color(engine_color_make(255, 255, 255, 255));
 
         int img_w = engine_image_get_width(_image);
         int img_h = engine_image_get_height(_image);
@@ -245,17 +251,12 @@ example_draw_render(Uint64 alpha_time_ms)
             = engine_rect_make(0, 0, (float)img_w, (float)img_h);
 
         engine_rect_t img_dst = engine_rect_make(
-            img_w * 0.5f, img_h * 0.5f, (float)img_w, (float)img_h);
+            -img_w * 0.5f, -img_h * 0.5f, (float)img_w, (float)img_h);
 
         engine_painter_set_image(_image);
-        engine_painter_set_color(engine_color_make(255, 255, 255, 255));
-
-        engine_painter_rotate_at(
-            -time, img_dst.x + img_dst.w * 0.5f, img_dst.y + img_dst.h * 0.5f);
 
         engine_painter_draw_rect_textured(
             engine_textured_rect_make(img_dst, img_src));
-            */
       }
       engine_painter_pop_transform();
     }
