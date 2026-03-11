@@ -19,21 +19,19 @@ typedef enum
   ENGINE_COMMAND_DRAW,
   ENGINE_COMMAND_VIEWPORT,
   ENGINE_COMMAND_SCISSOR
-} _engine_draw_command_type_e;
+} _engine_painter_draw_command_e;
 
-typedef struct _engine_mat2x3_s
+typedef struct _engine_painter_mat2x3_s
 {
   float m00, m01, m02;
   float m10, m11, m12;
-} _engine_mat2x3_t;
+} _engine_painter_mat2x3_t;
 
-#define engine_mat2x3_identity()                                               \
-  ((const _engine_mat2x3_t){ 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f })
+#define engine_painter_mat2x3_identity()                                       \
+  ((const _engine_painter_mat2x3_t){ 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f })
 
-#define engine_mat2x3_make(m00, m01, m02, m10, m11, m12)                       \
-  ((const _engine_mat2x3_t){ m00, m01, m02, m10, m11, m12 })
-
-// FIXME clean the code prefix with painter
+#define engine_painter_mat2x3_make(m00, m01, m02, m10, m11, m12)               \
+  ((const _engine_painter_mat2x3_t){ m00, m01, m02, m10, m11, m12 })
 
 typedef struct _engine_painter_draw_args_s
 {
@@ -54,7 +52,7 @@ typedef union _engine_painter_command_args_s
 
 typedef struct _engine_painter_command_s
 {
-  _engine_draw_command_type_e cmd;
+  _engine_painter_draw_command_e cmd;
   _engine_painter_command_args_t args;
 } _engine_painter_command_t;
 
@@ -79,9 +77,9 @@ typedef struct _engine_painter_uniform_s
 
 typedef struct _engine_painter_state_s
 {
-  _engine_mat2x3_t projection;
-  _engine_mat2x3_t transform;
-  _engine_mat2x3_t mvp;
+  _engine_painter_mat2x3_t projection;
+  _engine_painter_mat2x3_t transform;
+  _engine_painter_mat2x3_t mvp;
 
   _engine_painter_uniform_t uniform;
 
@@ -123,7 +121,7 @@ typedef struct _engine_painter_s
 
   // Transforms management
   Uint32 current_transform;
-  _engine_mat2x3_t
+  _engine_painter_mat2x3_t
       transforms[ENGINE_PAINTER_TRANSFORMS_MAX]; // save transforms for push/pop
 
   // Vertecies management
@@ -264,23 +262,24 @@ _engine_painter_prev_command(Uint32 count)
   }
 }
 
-ENGINE_INLINE _engine_mat2x3_t
+ENGINE_INLINE _engine_painter_mat2x3_t
 _engine_painter_default_projection(int width, int height)
 {
   float w = (float)width;
   float h = (float)height;
 
-  return engine_mat2x3_make(2.0f / w, 0.0f, -1.0f, 0.0f, -2.0f / h, 1.0f);
+  return engine_painter_mat2x3_make(
+      2.0f / w, 0.0f, -1.0f, 0.0f, -2.0f / h, 1.0f);
 }
 
-ENGINE_INLINE _engine_mat2x3_t
-_engine_painter_mul_projection_transform(_engine_mat2x3_t *projection,
-                                         _engine_mat2x3_t *transform)
+ENGINE_INLINE _engine_painter_mat2x3_t
+_engine_painter_mul_projection_transform(_engine_painter_mat2x3_t *projection,
+                                         _engine_painter_mat2x3_t *transform)
 {
   float x = projection->m00;
   float y = projection->m11;
 
-  _engine_mat2x3_t out = { 0 };
+  _engine_painter_mat2x3_t out = { 0 };
 
   out.m00 = x * transform->m00;
   out.m01 = x * transform->m01;
@@ -294,14 +293,15 @@ _engine_painter_mul_projection_transform(_engine_mat2x3_t *projection,
 }
 
 ENGINE_INLINE engine_vec2_t
-_engine_painter_mat3_mul_vec2(_engine_mat2x3_t *m, const engine_vec2_t *v)
+_engine_painter_mat3_mul_vec2(_engine_painter_mat2x3_t *m,
+                              const engine_vec2_t *v)
 {
   return engine_vec2_make(m->m00 * v->x + m->m01 * v->y + m->m02,
                           m->m10 * v->x + m->m11 * v->y + m->m12);
 }
 
 ENGINE_INLINE void
-_engine_painter_transform(_engine_mat2x3_t *matrix,
+_engine_painter_transform(_engine_painter_mat2x3_t *matrix,
                           engine_vec2_t *dst,
                           const engine_vec2_t *src,
                           Uint32 count)
@@ -458,19 +458,24 @@ engine_painter_shutdown()
 }
 
 void
-engine_painter_begin(int width, int height)
+engine_painter_begin(void)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+
+  engine_vec2_t dimension = engine_context_get_window_dimensions();
+
+  float width  = dimension.x;
+  float height = dimension.y;
 
   // Save current state
   _painter.states[_painter.current_state++] = _painter.state;
 
-  _painter.state.frame_size = engine_vec2_make((float)width, (float)height);
+  _painter.state.frame_size = engine_vec2_make(width, height);
   _painter.state.viewport   = (engine_rect_t){ 0, 0, width, height };
   _painter.state.scissor    = (engine_rect_t){ 0, 0, -1, -1 };
   _painter.state.color      = ENGINE_COLOR_WHITE;
   _painter.state.projection = _engine_painter_default_projection(width, height);
-  _painter.state.transform  = engine_mat2x3_identity();
+  _painter.state.transform  = engine_painter_mat2x3_identity();
   _painter.state.mvp        = _painter.state.projection;
   _painter.state.image      = _painter.white_image;
   _painter.state.sampler    = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP];
@@ -682,12 +687,13 @@ engine_painter_set_projection(float left, float right, float bottom, float top)
   float width  = right - left;
   float height = top - bottom;
 
-  _painter.state.projection = engine_mat2x3_make(2.0f / width,
-                                                 0.0f,
-                                                 -(right + left) / width,
-                                                 0.0f,
-                                                 2.0f / height,
-                                                 -(top + bottom) / height);
+  _painter.state.projection
+      = engine_painter_mat2x3_make(2.0f / width,
+                                   0.0f,
+                                   -(right + left) / width,
+                                   0.0f,
+                                   2.0f / height,
+                                   -(top + bottom) / height);
 
   _painter.state.mvp = _engine_painter_mul_projection_transform(
       &_painter.state.projection, &_painter.state.transform);
@@ -734,7 +740,7 @@ engine_painter_reset_transform(void)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
 
-  _painter.state.transform = engine_mat2x3_identity();
+  _painter.state.transform = engine_painter_mat2x3_identity();
   _painter.state.mvp       = _engine_painter_mul_projection_transform(
       &_painter.state.projection, &_painter.state.transform);
 }
@@ -771,7 +777,7 @@ engine_painter_rotate(float angle)
   //   c,   -s, 0.0f,
   //   s,    c, 0.0f,
 
-  _engine_mat2x3_t rotation = engine_mat2x3_make(
+  _engine_painter_mat2x3_t rotation = engine_painter_mat2x3_make(
       c * _painter.state.transform.m00 + s * _painter.state.transform.m01,
       -s * _painter.state.transform.m00 + c * _painter.state.transform.m01,
       _painter.state.transform.m02,
@@ -993,7 +999,7 @@ engine_painter_viewport(float x, float y, float w, float h)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
 
-  // No change
+  // If no change in viewport, skip
   if (_painter.state.viewport.x == x && _painter.state.viewport.y == y
       && _painter.state.viewport.w == w && _painter.state.viewport.h == h) {
     return;
@@ -1041,7 +1047,7 @@ engine_painter_reset_viewport(void)
 }
 
 void
-engine_painter_scissor(int x, int y, int w, int h)
+engine_painter_scissor(float x, float y, float w, float h)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
@@ -1078,8 +1084,7 @@ engine_painter_scissor(int x, int y, int w, int h)
   cmd->cmd          = ENGINE_COMMAND_SCISSOR;
   cmd->args.scissor = viewport_scissor;
 
-  _painter.state.scissor
-      = engine_rect_make((float)x, (float)y, (float)w, (float)h);
+  _painter.state.scissor = engine_rect_make(x, y, w, h);
 }
 
 void
@@ -1245,13 +1250,13 @@ _engine_painter_draw_solid(engine_primitive_e primitive_type,
     return;
   }
 
-  float thickness        = (primitive_type == ENGINE_PRIMITIVE_POINTS
+  float thickness              = (primitive_type == ENGINE_PRIMITIVE_POINTS
                      || primitive_type == ENGINE_PRIMITIVE_LINES
                      || primitive_type == ENGINE_PRIMITIVE_LINE_STRIP)
-                               ? _painter.state.thickness
-                               : 1.0f;
-  engine_color_t color   = _painter.state.color;
-  _engine_mat2x3_t mvp   = _painter.state.mvp;
+                                     ? _painter.state.thickness
+                                     : 1.0f;
+  engine_color_t color         = _painter.state.color;
+  _engine_painter_mat2x3_t mvp = _painter.state.mvp;
   engine_region_t region = { FLOAT_MAX, FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
 
   for (Uint32 i = 0; i < vertices_count; ++i) {
@@ -1351,12 +1356,12 @@ engine_painter_draw(engine_primitive_e primitive_type,
     return;
   }
 
-  float thickness        = (primitive_type == ENGINE_PRIMITIVE_POINTS
+  float thickness              = (primitive_type == ENGINE_PRIMITIVE_POINTS
                      || primitive_type == ENGINE_PRIMITIVE_LINES
                      || primitive_type == ENGINE_PRIMITIVE_LINE_STRIP)
-                               ? _painter.state.thickness
-                               : 1.0f;
-  _engine_mat2x3_t mvp   = _painter.state.mvp;
+                                     ? _painter.state.thickness
+                                     : 1.0f;
+  _engine_painter_mat2x3_t mvp = _painter.state.mvp;
   engine_region_t region = { FLOAT_MAX, FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
 
   for (Uint32 i = 0; i < vertices_count; ++i) {
@@ -1458,10 +1463,10 @@ engine_painter_draw_rects_filled(const engine_rect_t *rects, Uint32 count)
   }
 
   // Compute vertices
-  const engine_rect_t *rect = rects;
-  engine_color_t color      = _painter.state.color;
-  _engine_mat2x3_t mvp      = _painter.state.mvp;
-  engine_region_t region    = { FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX };
+  const engine_rect_t *rect    = rects;
+  engine_color_t color         = _painter.state.color;
+  _engine_painter_mat2x3_t mvp = _painter.state.mvp;
+  engine_region_t region       = { FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX };
 
   for (Uint32 i = 0; i < count; ++i, ++rect) {
     engine_vec2_t quad[4] = {
@@ -1557,9 +1562,9 @@ engine_painter_draw_rects_textured(const engine_textured_rect_t *rects,
   float ih = 1.0f / (float)height;
 
   // Compute vertices
-  _engine_mat2x3_t mvp   = _painter.state.mvp;
-  engine_color_t color   = _painter.state.color;
-  engine_region_t region = { FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX };
+  _engine_painter_mat2x3_t mvp = _painter.state.mvp;
+  engine_color_t color         = _painter.state.color;
+  engine_region_t region       = { FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX };
 
   for (Uint32 i = 0; i < count; ++i) {
     engine_vec2_t quad[4] = {

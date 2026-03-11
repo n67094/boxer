@@ -82,10 +82,7 @@ engine_game_update(Uint64 delta_time_ms)
 void
 engine_game_render(Uint64 alpha_time_ms)
 {
-  engine_vec2_t window_dimensions = engine_context_get_window_dimensions();
-
-  engine_painter_begin(window_dimensions.x * 0.5f,
-                       window_dimensions.y * 0.5); // zoom x2
+  engine_painter_begin();
   {
     switch (_current_test) {
     case EXAMPLE_DRAW:

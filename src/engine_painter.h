@@ -30,7 +30,7 @@ void engine_painter_shutdown();
 // Public API
 // ---------------------------------------------------
 
-void engine_painter_begin(int width, int height);
+void engine_painter_begin(void);
 void engine_painter_flush(void);
 void engine_painter_end(void);
 
@@ -63,9 +63,19 @@ void engine_painter_reset_image(void);
 void engine_painter_set_sampler(engine_sampler_e sampler);
 void engine_painter_reset_sampler(void);
 engine_vec2_t engine_painter_get_frame_size(void);
+
+/**
+ * @brief Set the viewport for subsequent draw calls. (Viewport is in screen
+ * pixels).
+ */
 void engine_painter_viewport(float x, float y, float w, float h);
 void engine_painter_reset_viewport(void);
-void engine_painter_scissor(int x, int y, int w, int h);
+
+/**
+ * @brief Set the scissor for subsequent draw calls. Scissor is in screen pixels
+ * relative to viewport). To reset scissor, set w and h to negative values.
+ */
+void engine_painter_scissor(float x, float y, float w, float h);
 void engine_painter_reset_scissor(void);
 
 void engine_painter_clear(void);
