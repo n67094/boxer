@@ -38,6 +38,51 @@ _engine_pipeline_blend_state(engine_blendmode_e blend_mode)
     blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
     blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
     break;
+  case ENGINE_BLENDMODE_BLEND_PREMULTIPLIED:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_ADD:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_SRC_ALPHA;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_ADD_PREMULTIPLIED:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_MOD:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_DST_COLOR;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_MUL:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_DST_COLOR;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_DST_ALPHA;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
   default: // ENGINE_BLENDMODE_NONE
     blend.enable_blend          = false;
     blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;

@@ -1,5 +1,6 @@
 #include "engine.h"
 
+#include "example_blend.h"
 #include "example_draw.h"
 #include "example_text.h"
 
@@ -12,6 +13,7 @@ typedef enum
 {
   EXAMPLE_DRAW = 0,
   EXAMPLE_FONT,
+  EXAMPLE_BLEND,
   EXAMPLE_SIZE,
 } example_e;
 
@@ -48,6 +50,7 @@ engine_game_setup(void)
 
   example_draw_setup();
   example_text_setup();
+  example_blend_setup();
 }
 
 void
@@ -74,6 +77,9 @@ engine_game_update(Uint64 delta_time_ms)
   case EXAMPLE_FONT:
     example_text_update(delta_time_ms);
     break;
+  case EXAMPLE_BLEND:
+    example_blend_update(delta_time_ms);
+    break;
   default:
     break;
   }
@@ -91,6 +97,8 @@ engine_game_render(Uint64 alpha_time_ms)
     case EXAMPLE_FONT:
       example_text_render(alpha_time_ms);
       break;
+    case EXAMPLE_BLEND:
+      example_blend_render(alpha_time_ms);
     default:
       break;
     }
@@ -105,4 +113,5 @@ engine_game_shutdown(void)
 {
   example_draw_shutdown();
   example_text_shutdown();
+  example_blend_shutdown();
 }
