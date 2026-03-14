@@ -253,10 +253,10 @@ example_draw_render(Uint64 alpha_time_ms)
         engine_rect_t img_dst = engine_rect_make(
             -img_w * 0.5f, -img_h * 0.5f, (float)img_w, (float)img_h);
 
-        engine_painter_set_image(_image);
+        engine_painter_set_image(0, _image);
 
         engine_painter_draw_rect_textured(
-            engine_textured_rect_make(img_dst, img_src));
+            0, engine_textured_rect_make(img_dst, img_src));
       }
       engine_painter_pop_transform();
     }

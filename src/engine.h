@@ -19,7 +19,6 @@
 #include "engine_font.h"
 #include "engine_game.h"
 #include "engine_gamepad.h"
-#include "engine_geometry.h"
 #include "engine_image.h"
 #include "engine_ini.h"
 #include "engine_io.h"

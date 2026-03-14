@@ -22,6 +22,8 @@
 
 // Max texture dimension (width or height) in pixels
 #define ENGINE_RESOURCES_TEXTURE_DIMENSION_MAX 1024
+// Max number of textures that can be bound at the same time (per draw call)
+#define ENGINE_PAINTER_TEXTURE_SLOTS_MAX 4
 // Max number of images that can be loaded at the same time
 #define ENGINE_RESOURCES_IMAGE_MAX 64
 // Max number of shaders that can be loaded at the same time

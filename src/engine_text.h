@@ -19,7 +19,7 @@
 
 #include "engine_color.h"
 #include "engine_font.h"
-#include "engine_geometry.h"
+#include "engine_math.h"
 
 typedef struct engine_text_entry_s
 {

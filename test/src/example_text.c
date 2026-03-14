@@ -186,16 +186,18 @@ example_text_render(Uint64 alpha_time_ms)
               entries[i].background.a);
               */
 
-      engine_painter_reset_image();
+      engine_painter_reset_image(0);
 
       engine_painter_set_color(entries[i].background);
       engine_painter_draw_rect_filled(entries[i].rects.dst);
 
-      engine_painter_set_image(engine_font_get_image(_font));
+      engine_painter_set_image(0, engine_font_get_image(_font));
 
       engine_painter_set_color(entries[i].foreground);
-      engine_painter_draw_rect_textured(engine_textured_rect_make(
-          entries[i].rects.dst, entries[i].rects.src));
+      engine_painter_draw_rect_textured(
+          0,
+          engine_textured_rect_make(entries[i].rects.dst,
+                                    entries[i].rects.src));
     }
   }
   engine_painter_pop_transform();

@@ -10,7 +10,6 @@
 #include "engine_math.h"
 #include "engine_painter.h"
 #include "engine_pipeline.h"
-#include "engine_pool.h"
 #include "engine_shader.h"
 
 typedef enum
@@ -33,29 +32,6 @@ typedef struct _engine_painter_mat2x3_s
 #define engine_painter_mat2x3_make(m00, m01, m02, m10, m11, m12)               \
   ((const _engine_painter_mat2x3_t){ m00, m01, m02, m10, m11, m12 })
 
-typedef struct _engine_painter_draw_args_s
-{
-  engine_pipeline_t pipeline;
-  engine_image_t image;
-  // TODO: add region for optimization
-  Uint32 uniform_index;
-  Uint32 vertex_index;
-  Uint32 vertices_count;
-} _engine_painter_draw_args_t;
-
-typedef union _engine_painter_command_args_s
-{
-  _engine_painter_draw_args_t draw;
-  engine_rect_t viewport;
-  engine_rect_t scissor;
-} _engine_painter_command_args_t;
-
-typedef struct _engine_painter_command_s
-{
-  _engine_painter_draw_command_e cmd;
-  _engine_painter_command_args_t args;
-} _engine_painter_command_t;
-
 typedef enum
 {
   ENGINE_PAINTER_UNIFORM_SLOT_VS = 0,
@@ -75,12 +51,45 @@ typedef struct _engine_painter_uniform_s
   _engine_painter_uniform_data_t data;
 } _engine_painter_uniform_t;
 
+typedef struct _engine_painter_texture_uniform_s
+{
+  Uint32 count;
+  engine_image_t images[ENGINE_PAINTER_TEXTURE_SLOTS_MAX];
+  SDL_GPUSampler *samplers[ENGINE_PAINTER_TEXTURE_SLOTS_MAX];
+} _engine_painter_texture_uniform_t;
+
+typedef struct _engine_painter_draw_args_s
+{
+  engine_pipeline_t pipeline;
+  engine_region_t region;
+
+  _engine_painter_texture_uniform_t texture;
+
+  Uint32 uniform_index;
+  Uint32 vertex_index;
+  Uint32 vertices_count;
+} _engine_painter_draw_args_t;
+
+typedef union _engine_painter_command_args_s
+{
+  _engine_painter_draw_args_t draw;
+  engine_rect_t viewport;
+  engine_rect_t scissor;
+} _engine_painter_command_args_t;
+
+typedef struct _engine_painter_command_s
+{
+  _engine_painter_draw_command_e cmd;
+  _engine_painter_command_args_t args;
+} _engine_painter_command_t;
+
 typedef struct _engine_painter_state_s
 {
   _engine_painter_mat2x3_t projection;
   _engine_painter_mat2x3_t transform;
   _engine_painter_mat2x3_t mvp;
 
+  _engine_painter_texture_uniform_t texture;
   _engine_painter_uniform_t uniform;
 
   engine_pipeline_t pipeline;
@@ -91,8 +100,6 @@ typedef struct _engine_painter_state_s
   engine_rect_t viewport;
   engine_rect_t scissor;
   engine_color_t color;
-  engine_image_t image;
-  SDL_GPUSampler *sampler;
   float thickness;
 
   Uint32 base_uniform;
@@ -144,6 +151,149 @@ static _engine_painter_t _painter = { 0 };
 static Uint32 _initialized        = 0;
 static engine_context_t *_context = NULL;
 
+static SDL_GPUColorTargetBlendState
+_engine_painter_pipeline_blend_state(engine_blendmode_e blend_mode)
+{
+  SDL_GPUColorTargetBlendState blend;
+
+  SDL_memset(&blend, 0, sizeof(SDL_GPUColorTargetBlendState));
+
+  switch (blend_mode) {
+  case ENGINE_BLENDMODE_BLEND:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_SRC_ALPHA;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_BLEND_PREMULTIPLIED:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_ADD:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_SRC_ALPHA;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_ADD_PREMULTIPLIED:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_MOD:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_DST_COLOR;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  case ENGINE_BLENDMODE_MUL:
+    blend.enable_blend          = true;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_DST_COLOR;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_DST_ALPHA;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  default: // ENGINE_BLENDMODE_NONE
+    blend.enable_blend          = false;
+    blend.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.color_blend_op        = SDL_GPU_BLENDOP_ADD;
+    blend.src_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
+    blend.dst_alpha_blendfactor = SDL_GPU_BLENDFACTOR_ZERO;
+    blend.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    break;
+  }
+
+  return blend;
+}
+
+engine_pipeline_t
+engine_painter_pipeline_make(engine_shader_t shader,
+                             engine_primitive_e primitive_type,
+                             engine_blendmode_e blend_mode)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+
+  SDL_GPUVertexInputState vertex_input_state =
+  {
+    .num_vertex_buffers = 1,
+    .vertex_buffer_descriptions = (SDL_GPUVertexBufferDescription []){
+      {
+        .slot               = 0,
+        .input_rate         = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+        .instance_step_rate = 0,
+        .pitch              = sizeof(engine_vertex_t)
+      },
+    },
+    .num_vertex_attributes = 2,
+    .vertex_attributes = (SDL_GPUVertexAttribute []){
+      {
+        .buffer_slot = 0,
+        .format      = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
+        .location    = 0,
+        .offset      = ENGINE_OFFSET_OF(engine_vertex_t,position)
+      },
+      {
+        .buffer_slot = 0,
+        .format      = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM,
+        .location    = 1,
+        .offset      = ENGINE_OFFSET_OF(engine_vertex_t, color)
+      }
+    }
+  };
+
+  SDL_GPUColorTargetBlendState blend_state
+      = _engine_painter_pipeline_blend_state(blend_mode);
+
+  SDL_GPUGraphicsPipelineTargetInfo target_info
+      = { .num_color_targets         = 1,
+          .color_target_descriptions = (SDL_GPUColorTargetDescription[]){
+              { .format = SDL_GetGPUSwapchainTextureFormat(_context->gpu_device,
+                                                           _context->window),
+                .blend_state = blend_state } } };
+
+  SDL_GPUGraphicsPipeline *pipeline = SDL_CreateGPUGraphicsPipeline(
+      _context->gpu_device,
+      &(SDL_GPUGraphicsPipelineCreateInfo){
+          .target_info        = target_info,
+          .primitive_type     = (SDL_GPUPrimitiveType)primitive_type,
+          .vertex_shader      = engine_shader_get_vertex(shader),
+          .fragment_shader    = engine_shader_get_fragment(shader),
+          .vertex_input_state = vertex_input_state,
+      });
+
+  if (pipeline == NULL) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to create graphics pipeline (error: %s)",
+                 SDL_GetError());
+
+    engine_set_error(ENGINE_ERROR_PIPELINE_MAKE);
+    return (engine_pipeline_t){ .id = ENGINE_INVALID_ID };
+  }
+
+  return engine_pipeline_attach(pipeline);
+}
+
 static engine_pipeline_t
 _engine_painter_lookup_pipeline(engine_primitive_e primitive_type,
                                 engine_blendmode_e blend_mode)
@@ -152,8 +302,8 @@ _engine_painter_lookup_pipeline(engine_primitive_e primitive_type,
       = _painter.pipelines[primitive_type * ENGINE_BLENDMODE_SIZE + blend_mode];
 
   if (pipeline.id == ENGINE_INVALID_ID) {
-    pipeline
-        = engine_pipeline_make(_painter.shader, primitive_type, blend_mode);
+    pipeline = engine_painter_pipeline_make(
+        _painter.shader, primitive_type, blend_mode);
     _painter.pipelines[primitive_type * ENGINE_BLENDMODE_SIZE + blend_mode]
         = pipeline;
   }
@@ -366,7 +516,7 @@ engine_painter_setup(engine_context_t *context)
                                .num_storage_buffers  = 0,
                                .num_storage_textures = 0 },
       &(engine_shader_desc_t){ .name         = "data/shaders/painter.frag",
-                               .num_samplers = 1,
+                               .num_samplers = ENGINE_PAINTER_TEXTURE_SLOTS_MAX,
                                .num_uniform_buffers  = 0,
                                .num_storage_buffers  = 0,
                                .num_storage_textures = 0 });
@@ -470,17 +620,34 @@ engine_painter_begin(void)
   // Save current state
   _painter.states[_painter.current_state++] = _painter.state;
 
+  _painter.state.projection = _engine_painter_default_projection(width, height);
+  _painter.state.transform  = engine_painter_mat2x3_identity();
+  _painter.state.mvp        = _painter.state.projection;
+
+  _painter.state.texture.count     = 1;
+  _painter.state.texture.images[0] = _painter.white_image;
+  _painter.state.texture.samplers[0]
+      = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP];
+
+  engine_image_t image = { .id = ENGINE_INVALID_ID };
+  for (int i = 1; i < ENGINE_PAINTER_TEXTURE_SLOTS_MAX; ++i) {
+    _painter.state.texture.images[i] = image;
+    _painter.state.texture.samplers[i]
+        = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP];
+  }
+
+  memset(&_painter.state.uniform, 0, sizeof(_engine_painter_uniform_t));
+  _painter.state.uniform
+      = (_engine_painter_uniform_t){ .vs_size = 0, .fs_size = 0 };
+
+  _painter.state.blend_mode = ENGINE_BLENDMODE_NONE;
+
   _painter.state.frame_size = engine_vec2_make(width, height);
   _painter.state.viewport   = (engine_rect_t){ 0, 0, width, height };
   _painter.state.scissor    = (engine_rect_t){ 0, 0, -1, -1 };
   _painter.state.color      = ENGINE_COLOR_WHITE;
-  _painter.state.projection = _engine_painter_default_projection(width, height);
-  _painter.state.transform  = engine_painter_mat2x3_identity();
-  _painter.state.mvp        = _painter.state.projection;
-  _painter.state.image      = _painter.white_image;
-  _painter.state.sampler    = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP];
-  _painter.state.blend_mode = ENGINE_BLENDMODE_NONE;
-  _painter.state.thickness  = SDL_max(1.0f / width, 1.0f / height);
+
+  _painter.state.thickness    = SDL_max(1.0f / width, 1.0f / height);
   _painter.state.base_vertex  = _painter.current_vertex;
   _painter.state.base_command = _painter.current_command;
 }
@@ -556,7 +723,10 @@ engine_painter_flush()
 
   Uint32 cur_pipeline_id   = ENGINE_IMPOSSIBLE_ID;
   Uint32 cur_uniform_index = ENGINE_IMPOSSIBLE_ID;
-  Uint32 cur_image_id      = ENGINE_IMPOSSIBLE_ID;
+  Uint32 cur_image_ids[ENGINE_PAINTER_TEXTURE_SLOTS_MAX];
+  for (int i = 0; i < ENGINE_PAINTER_TEXTURE_SLOTS_MAX; ++i) {
+    cur_image_ids[i] = ENGINE_IMPOSSIBLE_ID;
+  }
 
   // Flush commands
   for (Uint32 i = _painter.state.base_command; i < end_command; ++i) {
@@ -584,32 +754,40 @@ engine_painter_flush()
         rebind_texture  = true;
       }
 
-      if (cmd->args.draw.image.id != cur_image_id) {
-        cur_image_id = cmd->args.draw.image.id;
+      SDL_GPUTextureSamplerBinding
+          image_bindings[ENGINE_PAINTER_TEXTURE_SLOTS_MAX];
 
-        // When image changes we need to rebind textures
-        rebind_texture = true;
+      for (int j = 0; j < ENGINE_PAINTER_TEXTURE_SLOTS_MAX; ++j) {
+        Uint32 image_id = ENGINE_INVALID_ID;
+
+        if (j < cmd->args.draw.texture.count) {
+          image_id = cmd->args.draw.texture.images[j].id;
+        }
+
+        if (image_id != cur_image_ids[j]) {
+          cur_image_ids[j] = image_id;
+
+          if (image_id != ENGINE_INVALID_ID) {
+            image_bindings[j] = (SDL_GPUTextureSamplerBinding){
+              .texture
+              = engine_image_get_texture(cmd->args.draw.texture.images[j]),
+              .sampler = cmd->args.draw.texture.samplers[j]
+            };
+          } else {
+            image_bindings[j] = (SDL_GPUTextureSamplerBinding){
+              .texture = engine_image_get_texture(_painter.white_image),
+              .sampler = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP]
+            };
+          }
+
+          // When image changes we need to rebind textures
+          rebind_texture = true;
+        }
       }
 
-      if (cmd->args.draw.uniform_index != cur_uniform_index) {
-        cur_uniform_index = cmd->args.draw.uniform_index;
-
-        // When uniform index changes we need to rebind uniforms
-        rebind_uniforms = true;
-      }
-
-      // Rebind texture if needed
       if (rebind_texture) {
-        SDL_GPUTexture *texture
-            = engine_image_get_texture(cmd->args.draw.image);
-        // TODO check texture validity
-
         SDL_BindGPUFragmentSamplers(
-            render_pass,
-            0,
-            &(SDL_GPUTextureSamplerBinding){
-                .texture = texture, .sampler = _painter.state.sampler },
-            1);
+            render_pass, 0, image_bindings, ENGINE_PAINTER_TEXTURE_SLOTS_MAX);
       }
 
       // Rebind uniforms if needed
@@ -676,6 +854,15 @@ engine_painter_end(void)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
 
   _painter.state = _painter.states[--_painter.current_state];
+}
+
+engine_vec2_t
+engine_painter_get_frame_size(void)
+{
+  SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(_painter.current_state > 0);
+
+  return _painter.state.frame_size;
 }
 
 void
@@ -853,10 +1040,10 @@ engine_painter_reset_pipeline(void)
 }
 
 void
-engine_painter_set_uniforms(const void *vs_data,
-                            size_t vs_size,
-                            const void *fs_data,
-                            size_t fs_size)
+engine_painter_set_uniform(const void *vs_data,
+                           size_t vs_size,
+                           const void *fs_data,
+                           size_t fs_size)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.state.pipeline.id != ENGINE_INVALID_ID);
@@ -887,11 +1074,12 @@ engine_painter_set_uniforms(const void *vs_data,
 }
 
 void
-engine_painter_reset_uniforms(void)
+engine_painter_reset_uniform(void)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.state.pipeline.id != ENGINE_INVALID_ID);
-  engine_painter_set_uniforms(NULL, 0, NULL, 0);
+
+  engine_painter_set_uniform(NULL, 0, NULL, 0);
 }
 
 void
@@ -940,57 +1128,80 @@ engine_painter_reset_color(void)
 }
 
 void
-engine_painter_set_image(engine_image_t image)
+engine_painter_set_image(int channel, engine_image_t image)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(channel >= 0 && channel < ENGINE_PAINTER_TEXTURE_SLOTS_MAX);
   SDL_assert(_painter.current_state > 0);
 
-  _painter.state.image = image;
+  if (_painter.state.texture.images[channel].id == image.id) {
+    return;
+  }
+
+  _painter.state.texture.images[channel] = image;
+
+  // Recalculate texture count
+  int texture_count = _painter.state.texture.count;
+  for (int i = SDL_max(channel, texture_count - 1); i >= 0; --i) {
+    if (_painter.state.texture.images[i].id != ENGINE_INVALID_ID) {
+      texture_count = i + 1;
+      break;
+    }
+  }
+
+  _painter.state.texture.count = texture_count;
 }
 
 engine_image_t
-engine_painter_get_image(void)
+engine_painter_get_image(int channel)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(channel >= 0 && channel < ENGINE_PAINTER_TEXTURE_SLOTS_MAX);
   SDL_assert(_painter.current_state > 0);
 
-  return _painter.state.image;
+  return _painter.state.texture.images[channel];
 }
 
 void
-engine_painter_reset_image(void)
+engine_painter_unset_image(int channel)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(channel >= 0 && channel < ENGINE_PAINTER_TEXTURE_SLOTS_MAX);
   SDL_assert(_painter.current_state > 0);
 
-  _painter.state.image = _painter.white_image;
+  engine_painter_set_image(channel,
+                           (engine_image_t){ .id = ENGINE_INVALID_ID });
 }
 
 void
-engine_painter_set_sampler(engine_sampler_e sampler)
+engine_painter_reset_image(int channel)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(channel >= 0 && channel < ENGINE_PAINTER_TEXTURE_SLOTS_MAX);
   SDL_assert(_painter.current_state > 0);
 
-  _painter.state.sampler = _painter.samplers[sampler];
+  engine_painter_set_image(channel, _painter.white_image);
 }
 
 void
-engine_painter_reset_sampler(void)
+engine_painter_set_sampler(int channel, engine_sampler_e sampler)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(channel >= 0 && channel < ENGINE_PAINTER_TEXTURE_SLOTS_MAX);
   SDL_assert(_painter.current_state > 0);
 
-  _painter.state.sampler = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP];
+  _painter.state.texture.samplers[channel] = _painter.samplers[sampler];
 }
 
-engine_vec2_t
-engine_painter_get_frame_size(void)
+void
+engine_painter_reset_sampler(int channel)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
+  SDL_assert(channel >= 0 && channel < ENGINE_PAINTER_TEXTURE_SLOTS_MAX);
   SDL_assert(_painter.current_state > 0);
 
-  return _painter.state.frame_size;
+  _painter.state.texture.samplers[channel]
+      = _painter.samplers[ENGINE_SAMPLER_POINT_CLAMP];
 }
 
 void
@@ -1102,19 +1313,20 @@ engine_painter_reset_state(void)
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
 
+  engine_painter_reset_viewport();
+  engine_painter_reset_scissor();
   engine_painter_reset_projection();
   engine_painter_reset_transform();
   engine_painter_reset_blend_mode();
   engine_painter_reset_color();
-  engine_painter_reset_image();
-  engine_painter_reset_sampler();
-  engine_painter_reset_viewport();
-  engine_painter_reset_scissor();
+  engine_painter_reset_uniform();
+  engine_painter_reset_pipeline();
 }
 
 static bool
 _engine_painter_merge_draw_commands(SDL_GPUGraphicsPipeline *pipeline,
-                                    engine_image_t image,
+                                    _engine_painter_texture_uniform_t *texture,
+                                    _engine_painter_uniform_t *uniform,
                                     Uint32 vertex_index,
                                     Uint32 vertices_count,
                                     SDL_GPUPrimitiveType primitive_type)
@@ -1224,7 +1436,7 @@ _engine_painter_queue_draw(engine_pipeline_t pipeline,
 
   cmd->cmd                = ENGINE_COMMAND_DRAW;
   cmd->args.draw.pipeline = pipeline;
-  cmd->args.draw.image    = _painter.state.image;
+  cmd->args.draw.texture  = _painter.state.texture;
   // TODO region for optimization
   cmd->args.draw.uniform_index  = uniform_index;
   cmd->args.draw.vertex_index   = vertex_index;
@@ -1526,13 +1738,14 @@ engine_painter_draw_rects_filled(const engine_rect_t *rects, Uint32 count)
 }
 
 void
-engine_painter_draw_rect_textured(engine_textured_rect_t rect)
+engine_painter_draw_rect_textured(int channel, engine_textured_rect_t rect)
 {
-  engine_painter_draw_rects_textured(&rect, 1);
+  engine_painter_draw_rects_textured(channel, &rect, 1);
 }
 
 void
-engine_painter_draw_rects_textured(const engine_textured_rect_t *rects,
+engine_painter_draw_rects_textured(int channel,
+                                   const engine_textured_rect_t *rects,
                                    Uint32 count)
 {
   SDL_assert(_initialized == ENGINE_INIT_COOKIE);
@@ -1551,7 +1764,7 @@ engine_painter_draw_rects_textured(const engine_textured_rect_t *rects,
   }
 
   // Get image info
-  engine_image_t image = _painter.state.image;
+  engine_image_t image = _painter.state.texture.images[channel];
 
   int width  = engine_image_get_width(image);
   int height = engine_image_get_height(image);
