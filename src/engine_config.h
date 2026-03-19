@@ -36,7 +36,7 @@
 // Painter
 // ---------------------------------------------------------------------------
 
-// Max number of painters that can be created at the same time
+// Max number of painters that can be stacked in the same time (per frame)
 #define ENGINE_PAINTER_MAX 16
 // Max number of vertices that can be drawn in a single flush
 #define ENGINE_PAINTER_VERTICES_MAX 65536
@@ -48,5 +48,17 @@
 #define ENGINE_PAINTER_CONTENT_SLOTS_MAX 8
 // TDDO not implemented yet
 #define ENGINE_PAINTER_OPTIMIZE_MAX 0
+
+// UI
+// ---------------------------------------------------------------------------
+
+// Max number of UI that can be stacked in the same time (per frame)
+#define ENGINE_UI_MAX 16
+// Max number of root containers (e.g window without parent) that can be stacked
+// in the same time (per frame)
+#define ENGINE_UI_ROOT_MAX 32
+// Max number of containers (root and non-root) that can be created at the same
+// time (per frame)
+#define ENGINE_UI_CONTAINER_SLOTS_MAX 64
 
 #endif // ENGINE_CONFIG_H_

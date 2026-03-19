@@ -1,3 +1,4 @@
+/*
 #include <SDL3/SDL.h>
 
 #include "engine_color.h"
@@ -173,8 +174,7 @@ engine_text_icon_tag_validate(const char *cursor,
 }
 
 engine_text_t *
-engine_text_glyph_make(engine_vec2_t position,
-                       const engine_font_t *font,
+engine_text_glyph_make(const engine_font_t *font,
                        int glyphs_index,
                        engine_color_t background,
                        engine_color_t foreground)
@@ -206,8 +206,8 @@ engine_text_glyph_make(engine_vec2_t position,
   engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
   text->entries[0].rects.dst = (engine_rect_t){
-    .x = position.x,
-    .y = position.y,
+    .x = 0,
+    .y = 0,
     .w = glyph_rect.w,
     .h = glyph_rect.h,
   };
@@ -220,8 +220,7 @@ engine_text_glyph_make(engine_vec2_t position,
 }
 
 engine_text_t *
-engine_text_char_make(engine_vec2_t position,
-                      const engine_font_t *font,
+engine_text_char_make(const engine_font_t *font,
                       char c,
                       engine_color_t background,
                       engine_color_t foreground)
@@ -266,8 +265,8 @@ engine_text_char_make(engine_vec2_t position,
   engine_rect_t glyph_rect = engine_font_get_glyph_rect(font, glyphs_index);
 
   text->entries[0].rects.dst = (engine_rect_t){
-    .x = position.x,
-    .y = position.y,
+    .x = 0,
+    .y = 0,
     .w = glyph_rect.w,
     .h = glyph_rect.h,
   };
@@ -280,8 +279,7 @@ engine_text_char_make(engine_vec2_t position,
 }
 
 engine_text_t *
-engine_text_make(engine_vec2_t position,
-                 const engine_font_t *font,
+engine_text_make(const engine_font_t *font,
                  const char *rich_str,
                  engine_color_t background,
                  engine_color_t foreground)
@@ -313,7 +311,8 @@ engine_text_make(engine_vec2_t position,
     return NULL;
   }
 
-  int initial_pos_x = position.x;
+  int pos_x = 0;
+  int pos_y = 0;
 
   engine_color_t current_foreground = foreground;
   engine_color_t current_background = background;
@@ -334,8 +333,8 @@ engine_text_make(engine_vec2_t position,
   while (cursor < end && *cursor) {
     switch (*cursor) {
     case '\n':
-      position.y += (line_spacing);
-      position.x = initial_pos_x;
+      pos_y += (line_spacing);
+      pos_x = 0;
       cursor++;
       break;
     case '{': {
@@ -387,8 +386,8 @@ engine_text_make(engine_vec2_t position,
         text->entries[entry_index++] = (engine_text_entry_t){
           .rects = (engine_textured_rect_t){
             .dst  = (engine_rect_t){
-              .x = position.x,
-              .y = position.y,
+              .x = pos_x,
+              .y = pos_y,
               .w = icon_rect.w,
               .h = icon_rect.h,
             },
@@ -398,7 +397,7 @@ engine_text_make(engine_vec2_t position,
           .foreground = current_foreground,
         };
 
-        position.x += icon_rect.w + char_spacing;
+        pos_x += icon_rect.w + char_spacing;
 
         cursor += skip_length;
         break;
@@ -424,8 +423,8 @@ engine_text_make(engine_vec2_t position,
       text->entries[entry_index++] = (engine_text_entry_t){
         .rects     = (engine_textured_rect_t){
           .dst  = (engine_rect_t){
-            .x = position.x,
-            .y = position.y,
+            .x = pos_x,
+            .y = pos_y,
             .w = glyph_rect.w,
             .h = glyph_rect.h,
           },
@@ -435,7 +434,7 @@ engine_text_make(engine_vec2_t position,
         .foreground = current_foreground,
       };
 
-      position.x += glyph_rect.w + char_spacing;
+      pos_x += glyph_rect.w + char_spacing;
       cursor++;
     } break;
     }
@@ -455,18 +454,24 @@ engine_text_destroy(engine_text_t *text)
   }
 }
 
-const engine_text_entry_t *
-engine_text_get_text_entries(const engine_text_t *text)
+const engine_text_entry_t *engine_text_get_
 {
   SDL_assert(text);
   return text->entries;
 }
 
-size_t
-engine_text_get_text_entries_count(const engine_text_t *text)
+const engine_textured_rect_t *
+engine_text_get_textured_rects(const engine_text_t *text)
 {
   SDL_assert(text);
-  return text->entry_count;
+  return (const engine_textured_rect_t *)text->rects;
+}
+
+size_t
+engine_text_get_textured_rects_count(const engine_text_t *text)
+{
+  SDL_assert(text);
+  return text->rects_count;
 }
 
 char *
@@ -818,3 +823,4 @@ engine_text_wrap(const engine_font_t *font,
 
   return NULL;
 }
+*/

@@ -11,6 +11,7 @@
 #include "engine_painter.h"
 #include "engine_pipeline.h"
 #include "engine_shader.h"
+#include "engine_text.h"
 
 typedef enum
 {
@@ -120,23 +121,23 @@ typedef struct _engine_painter_s
 
   engine_image_t white_image;
 
-  // States management
+  // States stack
   Uint32 current_state;
   _engine_painter_state_t
       states[ENGINE_PAINTER_MAX]; // save states for push/pop
   _engine_painter_state_t state;  // current state
 
-  // Transforms management
+  // Transforms stack
   Uint32 current_transform;
   _engine_painter_mat2x3_t
       transforms[ENGINE_PAINTER_TRANSFORMS_MAX]; // save transforms for push/pop
 
-  // Vertecies management
+  // Vertecies stack
   Uint32 current_vertex;
   engine_vertex_t
       vertices[ENGINE_PAINTER_VERTICES_MAX]; // save vertecies for draw calls
 
-  // Uniforms management
+  // Uniforms stack
   Uint32 current_uniform;
   _engine_painter_uniform_t
       uniforms[ENGINE_PAINTER_COMMANDS_MAX]; // save uniforms for draw calls
@@ -1838,4 +1839,10 @@ engine_painter_draw_rects_textured(int channel,
                              vertex_index,
                              total_vertices,
                              ENGINE_PRIMITIVE_TRIANGLES);
+}
+
+void
+engine_painter_draw_text(engine_text_t *text)
+{
+  // TODO
 }

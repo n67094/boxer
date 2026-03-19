@@ -7,12 +7,12 @@
 #include "test_ini.h"
 #include "test_json.h"
 #include "test_math.h"
-#include "test_text.h"
+// #include "test_text.h"
 
 typedef enum
 {
   EXAMPLE_DRAW = 0,
-  EXAMPLE_FONT,
+  // EXAMPLE_FONT,
   EXAMPLE_BLEND,
   EXAMPLE_SIZE,
 } example_e;
@@ -46,10 +46,10 @@ engine_game_setup(void)
   ENGINE_UNIT_RUN_SUITE(suite_math);
   ENGINE_UNIT_RUN_SUITE(suite_json);
   ENGINE_UNIT_RUN_SUITE(suite_ini);
-  ENGINE_UNIT_RUN_SUITE(suite_text);
+  // ENGINE_UNIT_RUN_SUITE(suite_text);
 
   example_draw_setup();
-  example_text_setup();
+  // example_text_setup();
   example_blend_setup();
 }
 
@@ -74,9 +74,9 @@ engine_game_update(Uint64 delta_time_ms)
   case EXAMPLE_DRAW:
     example_draw_update(delta_time_ms);
     break;
-  case EXAMPLE_FONT:
-    example_text_update(delta_time_ms);
-    break;
+  // case EXAMPLE_FONT:
+  // example_text_update(delta_time_ms);
+  // break;
   case EXAMPLE_BLEND:
     example_blend_update(delta_time_ms);
     break;
@@ -94,9 +94,9 @@ engine_game_render(Uint64 alpha_time_ms)
     case EXAMPLE_DRAW:
       example_draw_render(alpha_time_ms);
       break;
-    case EXAMPLE_FONT:
-      example_text_render(alpha_time_ms);
-      break;
+      // case EXAMPLE_FONT:
+      // example_text_render(alpha_time_ms);
+      // break;
     case EXAMPLE_BLEND:
       example_blend_render(alpha_time_ms);
     default:
@@ -112,6 +112,6 @@ void
 engine_game_shutdown(void)
 {
   example_draw_shutdown();
-  example_text_shutdown();
+  // example_text_shutdown();
   example_blend_shutdown();
 }

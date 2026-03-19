@@ -31,7 +31,7 @@
 #include "engine_pipeline.h"
 #include "engine_pool.h"
 #include "engine_shader.h"
-#include "engine_text.h"
+// #include "engine_text.h"
 #include "engine_unit.h"
 
 void engine_quit(void);

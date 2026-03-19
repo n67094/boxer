@@ -66,9 +66,9 @@ engine_game_render(Uint64 alpha_time_ms)
           -width * 0.5f, -height * 0.5f, (float)width, (float)height);
 
       // Draw the image centered on the screen
-      engine_painter_set_image(_image);
+      engine_painter_set_image(0, _image);
       engine_painter_draw_rect_textured(
-          engine_textured_rect_make(img_dst, img_src));
+          0, engine_textured_rect_make(img_dst, img_src));
     }
     engine_painter_pop_transform();
 

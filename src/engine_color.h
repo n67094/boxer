@@ -26,8 +26,12 @@ typedef struct engine_color_s
 #define ENGINE_COLOR_GREEN                                                     \
   (engine_color_t){ .r = 0, .g = 255, .b = 0, .a = 255 }
 #define ENGINE_COLOR_BLUE (engine_color_t){ .r = 0, .g = 0, .b = 255, .a = 255 }
-#define ENGIEN_COLOR_PINK                                                      \
+#define ENGIEN_COLOR_MAGENTA                                                   \
   (engine_color_t){ .r = 255, .g = 0, .b = 255, .a = 255 }
+#define ENGINE_COLOR_CYAN                                                      \
+  (engine_color_t){ .r = 0, .g = 255, .b = 255, .a = 255 }
+#define ENGINE_COLOR_YELLOW                                                    \
+  (engine_color_t){ .r = 255, .g = 255, .b = 0, .a = 255 }
 #define ENGINE_COLOR_TRANSPARENT                                               \
   (engine_color_t){ .r = 0, .g = 0, .b = 0, .a = 0 }
 

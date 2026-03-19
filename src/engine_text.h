@@ -31,49 +31,48 @@ typedef struct engine_text_entry_s
 typedef struct engine_text_s
 {
   engine_text_entry_t *entries;
-  size_t entry_count;
+  size_t entries_count;
   const engine_font_t *font;
 } engine_text_t;
 
-engine_text_t *engine_text_glyph_make(engine_vec2_t position,
-                                      const engine_font_t *font,
-                                      int glyphs_index,
+typedef enum
+{
+  ENGINE_TEXT_ALIGN_LEFT = 0,
+  ENGINE_TEXT_ALIGN_CENTER,
+  ENGINE_TEXT_ALIGN_RIGHT,
+  ENGINE_TEXT_ALIGN_SIZE,
+} engine_text_align_e;
+
+engine_text_t *_engine_text_glyph_make(const engine_font_t *font,
+                                       int glyphs_index,
+                                       engine_color_t background,
+                                       engine_color_t foreground);
+
+engine_text_t *_engine_text_char_make(const engine_font_t *font,
+                                      char c,
                                       engine_color_t background,
                                       engine_color_t foreground);
 
-engine_text_t *engine_text_char_make(engine_vec2_t position,
-                                     const engine_font_t *font,
-                                     char c,
-                                     engine_color_t background,
-                                     engine_color_t foreground);
-
-/**
- * @brief Render the given text at the specified position using the provided
- * font and colors.
- *
- * @param position The position (in pixels) where the text should be rendered.
- * @param font The font to use for rendering the text.
- * @param text The text string to render.
- * @param background The background color to use when rendering the text.
- * @param foreground The foreground color to use when rendering the text.
- *
- * @note You need to be in between `engine_painter_begin()` and
- * `engine_painter_end()` to call this function.
- */
-engine_text_t *engine_text_make(engine_vec2_t position,
-                                const engine_font_t *font,
+engine_text_t *engine_text_make(const engine_font_t *font,
                                 const char *rich_str,
                                 engine_color_t background,
                                 engine_color_t foreground);
 
+engine_text_t *engine_text_make_ex(const engine_font_t *font,
+                                   const char *rich_str,
+                                   engine_color_t background,
+                                   engine_color_t foreground,
+                                   int max_width,
+                                   engine_text_align_e align,
+                                   bool ignore_newlines);
+
 void engine_text_destroy(engine_text_t *text);
 
-const engine_text_entry_t *
-engine_text_get_text_entries(const engine_text_t *text);
+const engine_text_entry_t *engine_text_get_entries(const engine_text_t *text);
 
-size_t engine_text_get_text_entries_count(const engine_text_t *text);
+size_t engine_text_get_entries_count(const engine_text_t *text);
 
-char *engine_text_without_tags(const char *rich_str);
+// char *engine_text_without_tags(const char *rich_str);
 
 /**
  * @brief Get the length of a text string without counting any formatting tags.
@@ -90,8 +89,8 @@ size_t engine_text_length(const char *rich_str);
  * @return An engine_vec2_t containing the width (x) and height (y) of the
  *         measured text.
  */
-engine_vec2_t engine_font_measure_text(const engine_font_t *font,
-                                       const char *rich_str);
+engine_vec2_t engine_text_measure(const engine_font_t *font,
+                                  const char *rich_str);
 
 /**
  * @brief Wrap the given text to fit within the specified maximum width when

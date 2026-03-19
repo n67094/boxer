@@ -21,6 +21,7 @@
 #include "engine_context.h"
 #include "engine_image.h"
 #include "engine_pipeline.h"
+#include "engine_text.h"
 
 // Internal API
 // ---------------------------------------------------
@@ -108,5 +109,7 @@ void engine_painter_draw_rect_textured(int channel,
 void engine_painter_draw_rects_textured(int channel,
                                         const engine_textured_rect_t *rects,
                                         Uint32 count);
+
+void engine_painter_draw_text(engine_text_t *text);
 
 #endif // ENGINE_PAINTER_H_
