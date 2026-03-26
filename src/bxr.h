@@ -29,7 +29,7 @@
 #include "bxr_mouse.h"
 #include "bxr_painter.h"
 #include "bxr_pipeline.h"
-#include "bxr_pool.h"
+#include "bxr_resource.h"
 #include "bxr_shader.h"
 // #include "bxr_text.h"
 #include "bxr_unit.h"

@@ -9,7 +9,7 @@
 #include "bxr_error.h"
 #include "bxr_image.h"
 #include "bxr_mem.h"
-#include "bxr_pool.h"
+#include "bxr_resource.h"
 
 typedef struct _bxr_image_s
 {
@@ -18,7 +18,7 @@ typedef struct _bxr_image_s
   int height;
 } _bxr_image_t;
 
-static bxr_pool_t *_image_pool;
+static bxr_resource_t *_image_resource;
 static _bxr_image_t *_images;
 
 static SDL_GPUTransferBuffer *_texture_transfer_buffer;
@@ -79,9 +79,9 @@ _bxr_image_load(SDL_Surface *surface)
 
   SDL_EndGPUCopyPass(copy_pass);
 
-  // Allocate image from pool
-  int image_slot = bxr_pool_acquire_slot(_image_pool);
-  if (image_slot == _BXR_INVALID_SLOT) {
+  // Allocate image from resource
+  int image_slot = bxr_resource_acquire_slot(_image_resource);
+  if (image_slot == _BXR_RESOURCE_INVALID_SLOT) {
     SDL_ReleaseGPUTexture(_context->gpu_device, texture);
     bxr_set_error(BXR_ERROR_IMAGE_LOAD);
     return (bxr_image_t){ .id = BXR_INVALID_ID };
@@ -93,7 +93,8 @@ _bxr_image_load(SDL_Surface *surface)
     .height  = surface->h,
   };
 
-  return (bxr_image_t){ .id = bxr_pool_gen_id(_image_pool, image_slot) };
+  return (bxr_image_t){ .id
+                        = bxr_resource_gen_id(_image_resource, image_slot) };
 }
 
 void
@@ -105,7 +106,7 @@ bxr_image_setup(bxr_context_t *context)
   _initialized = BXR_INIT_COOKIE;
   _context     = context;
 
-  _image_pool = bxr_pool_make(BXR_RESOURCES_IMAGE_MAX);
+  _image_resource = bxr_resource_make(BXR_RESOURCES_IMAGE_MAX);
   BXR_CALLOC(_images, BXR_RESOURCES_IMAGE_MAX, sizeof(_bxr_image_t));
 
   _texture_transfer_buffer = SDL_CreateGPUTransferBuffer(
@@ -128,7 +129,7 @@ bxr_image_shutdown(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  bxr_pool_destroy(_image_pool);
+  bxr_resource_destroy(_image_resource);
   BXR_FREE(_images);
 
   SDL_ReleaseGPUTransferBuffer(_context->gpu_device, _texture_transfer_buffer);
@@ -224,8 +225,8 @@ bxr_image_destroy(bxr_image_t image)
     return;
   }
 
-  int slot_index = bxr_pool_id_to_slot(image.id);
-  bxr_pool_release_slot(_image_pool, slot_index);
+  int slot_index = bxr_resource_id_to_slot(image.id);
+  bxr_resource_release_slot(_image_resource, slot_index);
 
   _bxr_image_t inner_image = _images[slot_index];
 
@@ -244,7 +245,7 @@ bxr_image_get_texture(bxr_image_t image)
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(image.id != BXR_INVALID_ID);
 
-  int slot_index = bxr_pool_id_to_slot(image.id);
+  int slot_index = bxr_resource_id_to_slot(image.id);
   return _images[slot_index].texture;
 }
 
@@ -254,7 +255,7 @@ bxr_image_get_width(bxr_image_t image)
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(image.id != BXR_INVALID_ID);
 
-  int slot_index = bxr_pool_id_to_slot(image.id);
+  int slot_index = bxr_resource_id_to_slot(image.id);
   return _images[slot_index].width;
 }
 
@@ -264,6 +265,6 @@ bxr_image_get_height(bxr_image_t image)
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(image.id != BXR_INVALID_ID);
 
-  int slot_index = bxr_pool_id_to_slot(image.id);
+  int slot_index = bxr_resource_id_to_slot(image.id);
   return _images[slot_index].height;
 }

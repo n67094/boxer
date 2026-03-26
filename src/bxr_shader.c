@@ -8,17 +8,17 @@
 #include "bxr_error.h"
 #include "bxr_io.h"
 #include "bxr_mem.h"
-#include "bxr_pool.h"
+#include "bxr_resource.h"
 #include "bxr_shader.h"
 
 typedef struct _bxr_shader_s
 {
   SDL_GPUShader *fragment;
   SDL_GPUShader *vertex;
-  // TODO add compute shader support ?
+  // TODO add compute shader support ? (investigate more)
 } _bxr_shader_t;
 
-static bxr_pool_t *_shader_pool;
+static bxr_resource_t *_shader_resource;
 static _bxr_shader_t *_shaders;
 
 static Uint32 _initialized = 0;
@@ -125,7 +125,7 @@ bxr_shader_setup(bxr_context_t *context)
   _initialized = BXR_INIT_COOKIE;
   _context     = context;
 
-  _shader_pool = bxr_pool_make(BXR_RESOURCES_SHADER_MAX);
+  _shader_resource = bxr_resource_make(BXR_RESOURCES_SHADER_MAX);
   BXR_CALLOC(_shaders, BXR_RESOURCES_SHADER_MAX, sizeof(_bxr_shader_t));
 }
 
@@ -134,7 +134,7 @@ bxr_shader_shutdown(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  bxr_pool_destroy(_shader_pool);
+  bxr_resource_destroy(_shader_resource);
   BXR_FREE(_shaders);
 
   _initialized = 0;
@@ -175,8 +175,8 @@ bxr_shader_make(bxr_shader_desc_t *vertex_desc,
     return (bxr_shader_t){ .id = BXR_INVALID_ID };
   }
 
-  int slot_index = bxr_pool_acquire_slot(_shader_pool);
-  if (slot_index == _BXR_INVALID_SLOT) {
+  int slot_index = bxr_resource_acquire_slot(_shader_resource);
+  if (slot_index == _BXR_RESOURCE_INVALID_SLOT) {
     bxr_set_error(BXR_ERROR_SHADER_MAKE);
     return (bxr_shader_t){ .id = BXR_INVALID_ID };
   }
@@ -186,7 +186,8 @@ bxr_shader_make(bxr_shader_desc_t *vertex_desc,
     .vertex   = vertex_shader,
   };
 
-  return (bxr_shader_t){ .id = bxr_pool_gen_id(_shader_pool, slot_index) };
+  return (bxr_shader_t){ .id
+                         = bxr_resource_gen_id(_shader_resource, slot_index) };
 }
 
 SDL_GPUShader *
@@ -194,7 +195,7 @@ bxr_shader_get_vertex(bxr_shader_t shader)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  int slot_index = bxr_pool_id_to_slot(shader.id);
+  int slot_index = bxr_resource_id_to_slot(shader.id);
   return _shaders[slot_index].vertex;
 }
 
@@ -203,7 +204,7 @@ bxr_shader_get_fragment(bxr_shader_t shader)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  int slot_index = bxr_pool_id_to_slot(shader.id);
+  int slot_index = bxr_resource_id_to_slot(shader.id);
   return _shaders[slot_index].fragment;
 }
 
@@ -212,8 +213,8 @@ bxr_shader_destroy(bxr_shader_t shader)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  int slot_index = bxr_pool_id_to_slot(shader.id);
-  bxr_pool_release_slot(_shader_pool, slot_index);
+  int slot_index = bxr_resource_id_to_slot(shader.id);
+  bxr_resource_release_slot(_shader_resource, slot_index);
 
   _bxr_shader_t inner_shader = _shaders[slot_index];
 

@@ -475,10 +475,10 @@ bxr_rect_area(bxr_rect_t rect)
 }
 
 /**
- * @brief Returns true if the rectangles intersect (overlap)
+ * @brief Returns true if the rectangles overlap
  */
 BXR_INLINE bool
-bxr_rect_intersect(bxr_rect_t r1, bxr_rect_t r2)
+bxr_rect_overlap(bxr_rect_t r1, bxr_rect_t r2)
 {
   if (r1.x + r1.w < r2.x)
     return false;
@@ -490,6 +490,27 @@ bxr_rect_intersect(bxr_rect_t r1, bxr_rect_t r2)
     return false;
 
   return true;
+}
+
+/**
+ * @brief Returns the intersection of the two rectangles. If they don't overlap,
+ * returns a rectangle starting at r2 x, y with zero width and height.
+ */
+BXR_INLINE bxr_rect_t
+bxr_rect_get_intersection(bxr_rect_t r1, bxr_rect_t r2)
+{
+  float x = bxr_max(r1.x, r2.x);
+  float y = bxr_max(r1.y, r2.y);
+  float w = bxr_min(r1.x + r1.w, r2.x + r2.w);
+  float h = bxr_min(r1.y + r1.h, r2.y + r2.h);
+
+  if (w < x)
+    w = x;
+
+  if (h < y)
+    h = y;
+
+  return bxr_rect_make(x, y, w - x, h - y);
 }
 
 /**
