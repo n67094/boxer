@@ -7,9 +7,9 @@
 #ifndef TEST_INI_H_
 #define TEST_INI_H_
 
-#include "engine.h"
+#include "bxr.h"
 
-ENGINE_UNIT_CASE(case_engine_ini_write)
+BXR_UNIT_CASE(case_bxr_ini_write)
 {
   // Example INI file (test_write.ini):
   // ---------------------------------
@@ -23,45 +23,45 @@ ENGINE_UNIT_CASE(case_engine_ini_write)
   // name="nsix test"
   //
 
-  engine_iniw_t *ini = engine_iniw();
-  ENGINE_UNIT_ASSERT(ini != NULL);
+  bxr_iniw_t *ini = bxr_iniw();
+  BXR_UNIT_ASSERT(ini != NULL);
 
-  ENGINE_UNIT_ASSERT(engine_iniw_section_begin(ini, "Window"));
+  BXR_UNIT_ASSERT(bxr_iniw_section_begin(ini, "Window"));
   {
-    ENGINE_UNIT_ASSERT(engine_iniw_key_str(ini, "title", "Test"));
-    ENGINE_UNIT_ASSERT(engine_iniw_key_number(ini, "width", 800));
-    ENGINE_UNIT_ASSERT(engine_iniw_key_number(ini, "height", 600));
+    BXR_UNIT_ASSERT(bxr_iniw_key_str(ini, "title", "Test"));
+    BXR_UNIT_ASSERT(bxr_iniw_key_number(ini, "width", 800));
+    BXR_UNIT_ASSERT(bxr_iniw_key_number(ini, "height", 600));
   }
-  ENGINE_UNIT_ASSERT(engine_iniw_section_end(ini));
+  BXR_UNIT_ASSERT(bxr_iniw_section_end(ini));
 
-  ENGINE_UNIT_ASSERT(engine_iniw_section_begin(ini, "Player"));
+  BXR_UNIT_ASSERT(bxr_iniw_section_begin(ini, "Player"));
   {
-    ENGINE_UNIT_ASSERT(engine_iniw_key_str(ini, "name", "nsix\ttest"));
+    BXR_UNIT_ASSERT(bxr_iniw_key_str(ini, "name", "nsix\ttest"));
   }
-  ENGINE_UNIT_ASSERT(engine_iniw_section_end(ini));
+  BXR_UNIT_ASSERT(bxr_iniw_section_end(ini));
 
-  ENGINE_UNIT_ASSERT(engine_iniw_save(ini, "test_write.ini"));
+  BXR_UNIT_ASSERT(bxr_iniw_save(ini, "test_write.ini"));
 
-  engine_iniw_destroy(ini);
+  bxr_iniw_destroy(ini);
 
   // read it back to verify
 
-  engine_inir_t *read_ini = engine_inir("test_write.ini");
+  bxr_inir_t *read_ini = bxr_inir("test_write.ini");
 
-  const char *title = engine_inir_str(read_ini, "Window", "title");
-  float width       = engine_inir_number(read_ini, "Window", "width");
-  float height      = engine_inir_number(read_ini, "Window", "height");
-  const char *name  = engine_inir_str(read_ini, "Player", "name");
+  const char *title = bxr_inir_str(read_ini, "Window", "title");
+  float width       = bxr_inir_number(read_ini, "Window", "width");
+  float height      = bxr_inir_number(read_ini, "Window", "height");
+  const char *name  = bxr_inir_str(read_ini, "Player", "name");
 
-  ENGINE_UNIT_ASSERT(SDL_strcmp(title, "Test") == 0);
-  ENGINE_UNIT_ASSERT(width == 800.0f);
-  ENGINE_UNIT_ASSERT(height == 600.0f);
-  ENGINE_UNIT_ASSERT(SDL_strcmp(name, "nsix\ttest") == 0);
+  BXR_UNIT_ASSERT(SDL_strcmp(title, "Test") == 0);
+  BXR_UNIT_ASSERT(width == 800.0f);
+  BXR_UNIT_ASSERT(height == 600.0f);
+  BXR_UNIT_ASSERT(SDL_strcmp(name, "nsix\ttest") == 0);
 
   return true;
 }
 
-ENGINE_UNIT_CASE(case_engine_ini_read)
+BXR_UNIT_CASE(case_bxr_ini_read)
 {
   // Example INI file (test_read.ini):
   // ---------------------------------
@@ -93,38 +93,38 @@ ENGINE_UNIT_CASE(case_engine_ini_read)
         "tab character\n"
         "test= ; this will be ignored\n";
 
-  engine_io_write("test_read.ini", ini_content, SDL_strlen(ini_content), false);
+  bxr_io_write("test_read.ini", ini_content, SDL_strlen(ini_content), false);
 
-  engine_inir_t *ini = engine_inir("test_read.ini");
-  ENGINE_UNIT_ASSERT(ini != NULL);
+  bxr_inir_t *ini = bxr_inir("test_read.ini");
+  BXR_UNIT_ASSERT(ini != NULL);
 
-  const char *title = engine_inir_str(ini, "Window", "title");
-  float width       = engine_inir_number(ini, "Window", "width");
-  float height      = engine_inir_number(ini, "Window", "height");
-  const char *name  = engine_inir_str(ini, "Player", "name");
-  float invalid     = engine_inir_number(ini, "Window", "invalid");
+  const char *title = bxr_inir_str(ini, "Window", "title");
+  float width       = bxr_inir_number(ini, "Window", "width");
+  float height      = bxr_inir_number(ini, "Window", "height");
+  const char *name  = bxr_inir_str(ini, "Player", "name");
+  float invalid     = bxr_inir_number(ini, "Window", "invalid");
   float default_invalid
-      = engine_inir_number_or_else(ini, "Window", "invalid", 500);
+      = bxr_inir_number_or_else(ini, "Window", "invalid", 500);
 
-  ENGINE_UNIT_ASSERT(SDL_strcmp(title, "Test") == 0);
-  ENGINE_UNIT_ASSERT(width == 800.0f);
-  ENGINE_UNIT_ASSERT(height == 600.0f);
-  ENGINE_UNIT_ASSERT(SDL_strcmp(name, "nsix\ttest") == 0);
-  ENGINE_UNIT_ASSERT(invalid == 0.0f);
-  ENGINE_UNIT_ASSERT(default_invalid == 500.0f);
+  BXR_UNIT_ASSERT(SDL_strcmp(title, "Test") == 0);
+  BXR_UNIT_ASSERT(width == 800.0f);
+  BXR_UNIT_ASSERT(height == 600.0f);
+  BXR_UNIT_ASSERT(SDL_strcmp(name, "nsix\ttest") == 0);
+  BXR_UNIT_ASSERT(invalid == 0.0f);
+  BXR_UNIT_ASSERT(default_invalid == 500.0f);
 
-  engine_inir_destroy(ini);
+  bxr_inir_destroy(ini);
 
   return true;
 }
 
-ENGINE_UNIT_SUITE(suite_ini)
+BXR_UNIT_SUITE(suite_ini)
 {
   // Writer cases
-  ENGINE_UNIT_RUN_CASE(case_engine_ini_write);
+  BXR_UNIT_RUN_CASE(case_bxr_ini_write);
 
   // Reader cases
-  ENGINE_UNIT_RUN_CASE(case_engine_ini_read);
+  BXR_UNIT_RUN_CASE(case_bxr_ini_read);
 }
 
 #endif // TEST_INI_H_

@@ -1,4 +1,4 @@
-#include "engine.h"
+#include "bxr.h"
 
 #include "example_blend.h"
 #include "example_draw.h"
@@ -19,12 +19,12 @@ typedef enum
 
 static example_e _current_test = EXAMPLE_DRAW;
 
-static engine_game_config_t _config = { 0 };
+static bxr_game_config_t _config = { 0 };
 
-engine_game_config_t *
-engine_game_config(void)
+bxr_game_config_t *
+bxr_game_config(void)
 {
-  _config.name  = "boxer_engine_test";
+  _config.name  = "boxer_bxr_test";
   _config.title = "Boxer Engine Test";
 
   _config.width  = 1280;
@@ -39,14 +39,14 @@ engine_game_config(void)
 }
 
 void
-engine_game_setup(void)
+bxr_game_setup(void)
 {
-  engine_unit_enable_colors(true);
+  bxr_unit_enable_colors(true);
 
-  ENGINE_UNIT_RUN_SUITE(suite_math);
-  ENGINE_UNIT_RUN_SUITE(suite_json);
-  ENGINE_UNIT_RUN_SUITE(suite_ini);
-  // ENGINE_UNIT_RUN_SUITE(suite_text);
+  BXR_UNIT_RUN_SUITE(suite_math);
+  BXR_UNIT_RUN_SUITE(suite_json);
+  BXR_UNIT_RUN_SUITE(suite_ini);
+  // BXR_UNIT_RUN_SUITE(suite_text);
 
   example_draw_setup();
   // example_text_setup();
@@ -54,19 +54,19 @@ engine_game_setup(void)
 }
 
 void
-engine_game_update(Uint64 delta_time_ms)
+bxr_game_update(Uint64 delta_time_ms)
 {
   // Cycle example left
-  if (engine_key_just_pressed(ENGINE_KEY_LEFT)
-      || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_LEFT)
-      || engine_mouse_just_pressed(ENGINE_MOUSE_LEFT)) {
+  if (bxr_key_just_pressed(BXR_KEY_LEFT)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_LEFT)
+      || bxr_mouse_just_pressed(BXR_MOUSE_LEFT)) {
     _current_test = (_current_test + EXAMPLE_SIZE - 1) % (EXAMPLE_SIZE);
   }
 
   // Cycle example right
-  if (engine_key_just_pressed(ENGINE_KEY_RIGHT)
-      || engine_gamepad_just_pressed(0, ENGINE_GAMEPAD_BUTTON_DPAD_RIGHT)
-      || engine_mouse_just_pressed(ENGINE_MOUSE_RIGHT)) {
+  if (bxr_key_just_pressed(BXR_KEY_RIGHT)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_RIGHT)
+      || bxr_mouse_just_pressed(BXR_MOUSE_RIGHT)) {
     _current_test = (_current_test + 1) % (EXAMPLE_SIZE);
   }
 
@@ -86,9 +86,9 @@ engine_game_update(Uint64 delta_time_ms)
 }
 
 void
-engine_game_render(Uint64 alpha_time_ms)
+bxr_game_render(Uint64 alpha_time_ms)
 {
-  engine_painter_begin();
+  bxr_painter_begin();
   {
     switch (_current_test) {
     case EXAMPLE_DRAW:
@@ -103,13 +103,13 @@ engine_game_render(Uint64 alpha_time_ms)
       break;
     }
 
-    engine_painter_flush();
+    bxr_painter_flush();
   }
-  engine_painter_end();
+  bxr_painter_end();
 }
 
 void
-engine_game_shutdown(void)
+bxr_game_shutdown(void)
 {
   example_draw_shutdown();
   // example_text_shutdown();

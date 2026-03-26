@@ -1,7 +1,7 @@
 #ifndef EXAMPLE_BLEND_H_
 #define EXAMPLE_BLEND_H_
 
-#include "engine.h"
+#include "bxr.h"
 
 void example_blend_setup(void);
 

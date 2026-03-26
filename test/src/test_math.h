@@ -7,16 +7,16 @@
 #ifndef TEST_MATH_H_
 #define TEST_MATH_H_
 
-#include "engine.h"
+#include "bxr.h"
 
-ENGINE_UNIT_CASE(case_engine_clamp) { return true; }
+BXR_UNIT_CASE(case_bxr_clamp) { return true; }
 
-ENGINE_UNIT_CASE(case_engine_sign) { return true; }
+BXR_UNIT_CASE(case_bxr_sign) { return true; }
 
-ENGINE_UNIT_SUITE(suite_math)
+BXR_UNIT_SUITE(suite_math)
 {
-  ENGINE_UNIT_RUN_CASE(case_engine_clamp);
-  ENGINE_UNIT_RUN_CASE(case_engine_sign);
+  BXR_UNIT_RUN_CASE(case_bxr_clamp);
+  BXR_UNIT_RUN_CASE(case_bxr_sign);
 }
 
 #endif // TEST_MATH_H_

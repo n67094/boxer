@@ -1,10 +1,10 @@
 /*
-#include "engine.h"
+#include "bxr.h"
 
 #include "example_text.h"
 
 const size_t _font_glyph_count     = 4 + 100; // 4 icons + 96 chars
-const engine_rect_t _font_glyphs[] = {
+const bxr_rect_t _font_glyphs[] = {
   // Icons (4)
   { 0, 0, 8, 8 },
   { 8, 0, 8, 8 },
@@ -114,8 +114,8 @@ const engine_rect_t _font_glyphs[] = {
   { 16, 48, 8, 8 }
 };
 
-static engine_font_t *_font = NULL;
-static engine_text_t *_text = NULL;
+static bxr_font_t *_font = NULL;
+static bxr_text_t *_text = NULL;
 
 static const char *_str_1 = "{b=00FF00FF}{f=FF0000FF}Hello, World!{/b}{/f}\n"
                             "This is an icon: {i=02}\n"
@@ -128,17 +128,17 @@ static const char *_str_3
 void
 example_text_setup(void)
 {
-  _font = engine_font_load("data/images/font.png",
+  _font = bxr_font_load("data/images/font.png",
                            _font_glyphs,
                            _font_glyph_count,
-                           (engine_vec2_t){ 0, 3 },
-                           (engine_vec2_t){ 4, 100 },
+                           (bxr_vec2_t){ 0, 3 },
+                           (bxr_vec2_t){ 4, 100 },
                            ' ',
                            0,
                            8);
 
-  _text = engine_text_make(
-      _font, _str_1, ENGIEN_COLOR_MAGENTA, ENGINE_COLOR_WHITE);
+  _text = bxr_text_make(
+      _font, _str_1, ENGIEN_COLOR_MAGENTA, BXR_COLOR_WHITE);
 }
 
 void
@@ -149,7 +149,7 @@ example_text_update(Uint64 delta_time_ms)
 void
 example_text_render(Uint64 alpha_time_ms)
 {
-  engine_vec2_t frame_size = engine_painter_get_frame_size();
+  bxr_vec2_t frame_size = bxr_painter_get_frame_size();
 
   float scale = 2.0f;
   int height  = frame_size.y / scale;
@@ -160,55 +160,55 @@ example_text_render(Uint64 alpha_time_ms)
   // drawing. This way we can reuse the same text with different positions and
   // transformations.
 
-  engine_painter_set_color(engine_color_make(0, 0, 0, 255));
-  engine_painter_clear();
+  bxr_painter_set_color(bxr_color_make(0, 0, 0, 255));
+  bxr_painter_clear();
 
-  engine_painter_push_transform();
+  bxr_painter_push_transform();
   {
-    engine_painter_scale(scale, scale);
-    engine_painter_translate(10.0f, 10.0f);
+    bxr_painter_scale(scale, scale);
+    bxr_painter_translate(10.0f, 10.0f);
 
     // Uncached (immediate) text print example
     {
-      engine_text_t *immediate_text
-          = engine_text_make(_font,
+      bxr_text_t *immediate_text
+          = bxr_text_make(_font,
                              "{f=000000FF}Immediate{/f} text example.",
-                             ENGINE_COLOR_CYAN,
-                             ENGINE_COLOR_WHITE);
+                             BXR_COLOR_CYAN,
+                             BXR_COLOR_WHITE);
 
-      engine_painter_set_blend_mode(ENGINE_BLENDMODE_BLEND);
+      bxr_painter_set_blend_mode(BXR_BLENDMODE_BLEND);
 
-      engine_text_entry_t *entries
-          = (engine_text_entry_t *)engine_text_get_entries(immediate_text);
-      size_t entries_count = engine_text_get_entries_count(immediate_text);
+      bxr_text_entry_t *entries
+          = (bxr_text_entry_t *)bxr_text_get_entries(immediate_text);
+      size_t entries_count = bxr_text_get_entries_count(immediate_text);
 
       for (size_t i = 0; i < entries_count; ++i) {
-        engine_painter_reset_image(0);
+        bxr_painter_reset_image(0);
 
-        engine_painter_set_color(entries[i].background);
-        engine_painter_draw_rect_filled(entries[i].rects.dst);
+        bxr_painter_set_color(entries[i].background);
+        bxr_painter_draw_rect_filled(entries[i].rects.dst);
 
-        engine_painter_set_image(0, engine_font_get_image(_font));
+        bxr_painter_set_image(0, bxr_font_get_image(_font));
 
-        engine_painter_set_color(entries[i].foreground);
-        engine_painter_draw_rect_textured(
+        bxr_painter_set_color(entries[i].foreground);
+        bxr_painter_draw_rect_textured(
             0,
-            engine_textured_rect_make(entries[i].rects.dst,
+            bxr_textured_rect_make(entries[i].rects.dst,
                                       entries[i].rects.src));
       }
 
-      engine_text_destroy(immediate_text);
+      bxr_text_destroy(immediate_text);
     }
 
-    engine_painter_translate(0.0f, height * 0.25f);
+    bxr_painter_translate(0.0f, height * 0.25f);
 
     // Custom and cached text print example
     {
-      engine_painter_set_blend_mode(ENGINE_BLENDMODE_BLEND);
+      bxr_painter_set_blend_mode(BXR_BLENDMODE_BLEND);
 
-      engine_text_entry_t *entries
-          = (engine_text_entry_t *)engine_text_get_entries(_text);
-      size_t entries_count = engine_text_get_entries_count(_text);
+      bxr_text_entry_t *entries
+          = (bxr_text_entry_t *)bxr_text_get_entries(_text);
+      size_t entries_count = bxr_text_get_entries_count(_text);
 
       for (size_t i = 0; i < entries_count; ++i) {
         SDL_Log("Background r: %d g: %d b: %d a: %d",
@@ -217,82 +217,82 @@ example_text_render(Uint64 alpha_time_ms)
                 entries[i].background.b,
                 entries[i].background.a);
 
-        engine_painter_reset_image(0);
+        bxr_painter_reset_image(0);
 
-        engine_painter_set_color(entries[i].background);
-        engine_painter_draw_rect_filled(entries[i].rects.dst);
+        bxr_painter_set_color(entries[i].background);
+        bxr_painter_draw_rect_filled(entries[i].rects.dst);
 
-        engine_painter_set_image(0, engine_font_get_image(_font));
+        bxr_painter_set_image(0, bxr_font_get_image(_font));
 
-        engine_painter_set_color(entries[i].foreground);
-        engine_painter_draw_rect_textured(
+        bxr_painter_set_color(entries[i].foreground);
+        bxr_painter_draw_rect_textured(
             0,
-            engine_textured_rect_make(entries[i].rects.dst,
+            bxr_textured_rect_make(entries[i].rects.dst,
                                       entries[i].rects.src));
       }
     }
 
-    engine_painter_translate(0.0f, height * 0.25f);
+    bxr_painter_translate(0.0f, height * 0.25f);
 
     // Cached text wrapping example
     {
-      char *wrapped_str = engine_text_wrap(_font, _str_3, 200.0f, NULL);
+      char *wrapped_str = bxr_text_wrap(_font, _str_3, 200.0f, NULL);
 
-      engine_text_t *wrapped_text = engine_text_make(
-          _font, wrapped_str, ENGINE_COLOR_CYAN, ENGINE_COLOR_YELLOW);
+      bxr_text_t *wrapped_text = bxr_text_make(
+          _font, wrapped_str, BXR_COLOR_CYAN, BXR_COLOR_YELLOW);
 
-      engine_painter_set_blend_mode(ENGINE_BLENDMODE_BLEND);
+      bxr_painter_set_blend_mode(BXR_BLENDMODE_BLEND);
 
-      engine_text_entry_t *entries
-          = (engine_text_entry_t *)engine_text_get_entries(wrapped_text);
-      size_t entries_count = engine_text_get_entries_count(wrapped_text);
+      bxr_text_entry_t *entries
+          = (bxr_text_entry_t *)bxr_text_get_entries(wrapped_text);
+      size_t entries_count = bxr_text_get_entries_count(wrapped_text);
 
       for (size_t i = 0; i < entries_count; ++i) {
-        engine_painter_reset_image(0);
+        bxr_painter_reset_image(0);
 
-        engine_painter_set_color(entries[i].background);
-        engine_painter_draw_rect_filled(entries[i].rects.dst);
+        bxr_painter_set_color(entries[i].background);
+        bxr_painter_draw_rect_filled(entries[i].rects.dst);
 
-        engine_painter_set_image(0, engine_font_get_image(_font));
+        bxr_painter_set_image(0, bxr_font_get_image(_font));
 
-        engine_painter_set_color(entries[i].foreground);
-        engine_painter_draw_rect_textured(
+        bxr_painter_set_color(entries[i].foreground);
+        bxr_painter_draw_rect_textured(
             0,
-            engine_textured_rect_make(entries[i].rects.dst,
+            bxr_textured_rect_make(entries[i].rects.dst,
                                       entries[i].rects.src));
 
-        engine_text_destroy(wrapped_text);
-        ENGINE_FREE(wrapped_str);
+        bxr_text_destroy(wrapped_text);
+        BXR_FREE(wrapped_str);
       }
 
-      engine_text_destroy(wrapped_text);
+      bxr_text_destroy(wrapped_text);
     }
   }
-  engine_painter_pop_transform();
+  bxr_painter_pop_transform();
 
-  engine_painter_tanslate(1.0f, 1.0f);
+  bxr_painter_tanslate(1.0f, 1.0f);
 
   static const char *first_str = "Hello, World!\nIcon:[i=0]";
 
-  engine_rect_t first_str_box = engine_text_measure(_font, first_str);
-  engine_painter_draw_rect_filled(first_str_box);
+  bxr_rect_t first_str_box = bxr_text_measure(_font, first_str);
+  bxr_painter_draw_rect_filled(first_str_box);
 
-  engine_painter_draw_text(first_str, _font, ENGINE_COLOR_MAGENTA);
+  bxr_painter_draw_text(first_str, _font, BXR_COLOR_MAGENTA);
 
-  engine_painter_tanslate(-1.0f, -1.0f);
+  bxr_painter_tanslate(-1.0f, -1.0f);
 
-  engine_painter_draw_text(first_str, _font, ENGINE_COLOR_WHITE);
+  bxr_painter_draw_text(first_str, _font, BXR_COLOR_WHITE);
 
   static const char *second_str
       = "This is a [bgnd=FF0000FF][fgnd=00FF00FF]multi color text[end] and "
         "this is the an colorized icon: [fngd=<0000FFFF>][icon=1][end].";
 
-  engine_painter_draw_text_ex(second_str, _font, 200, ENGINE_TEXT_ALIGN_CENTER);
+  bxr_painter_draw_text_ex(second_str, _font, 200, BXR_TEXT_ALIGN_CENTER);
 }
 
 void
 example_text_shutdown(void)
 {
-  engine_text_destroy(_text);
+  bxr_text_destroy(_text);
 }
 */
