@@ -97,7 +97,7 @@ typedef struct _bxr_painter_state_s
 
   bxr_blendmode_e blend_mode;
 
-  bxr_vec2_t frame_size;
+  bxr_vec2_t frame_dimension;
   bxr_rect_t viewport;
   bxr_rect_t scissor;
   bxr_color_t color;
@@ -641,10 +641,10 @@ bxr_painter_begin(void)
 
   _painter.state.blend_mode = BXR_BLENDMODE_NONE;
 
-  _painter.state.frame_size = bxr_vec2_make(width, height);
-  _painter.state.viewport   = (bxr_rect_t){ 0, 0, width, height };
-  _painter.state.scissor    = (bxr_rect_t){ 0, 0, -1, -1 };
-  _painter.state.color      = BXR_COLOR_WHITE;
+  _painter.state.frame_dimension = bxr_vec2_make(width, height);
+  _painter.state.viewport        = (bxr_rect_t){ 0, 0, width, height };
+  _painter.state.scissor         = (bxr_rect_t){ 0, 0, -1, -1 };
+  _painter.state.color           = BXR_COLOR_WHITE;
 
   _painter.state.thickness    = SDL_max(1.0f / width, 1.0f / height);
   _painter.state.base_vertex  = _painter.current_vertex;
@@ -856,12 +856,12 @@ bxr_painter_end(void)
 }
 
 bxr_vec2_t
-bxr_painter_get_frame_size(void)
+bxr_painter_get_frame_dimension(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(_painter.current_state > 0);
 
-  return _painter.state.frame_size;
+  return _painter.state.frame_dimension;
 }
 
 void
@@ -1250,8 +1250,8 @@ bxr_painter_reset_viewport(void)
 
   bxr_painter_viewport(0,
                        0,
-                       (float)_painter.state.frame_size.x,
-                       (float)_painter.state.frame_size.y);
+                       (float)_painter.state.frame_dimension.x,
+                       (float)_painter.state.frame_dimension.y);
 }
 
 void
@@ -1283,8 +1283,8 @@ bxr_painter_scissor(float x, float y, float w, float h)
   if (w < 0 && h < 0) {
     viewport_scissor.x = 0;
     viewport_scissor.y = 0;
-    viewport_scissor.w = _painter.state.frame_size.x;
-    viewport_scissor.h = _painter.state.frame_size.y;
+    viewport_scissor.w = _painter.state.frame_dimension.x;
+    viewport_scissor.h = _painter.state.frame_dimension.y;
   }
 
   SDL_memset(&cmd->args.scissor, 0, sizeof(bxr_rect_t));
@@ -1824,10 +1824,4 @@ bxr_painter_draw_rects_textured(int channel,
       BXR_PRIMITIVE_TRIANGLES, _painter.state.blend_mode);
   _bxr_painter_queue_draw(
       pipeline, region, vertex_index, total_vertices, BXR_PRIMITIVE_TRIANGLES);
-}
-
-void
-bxr_painter_draw_text(bxr_text_t *text)
-{
-  // TODO
 }

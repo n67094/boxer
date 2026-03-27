@@ -42,10 +42,10 @@ bxr_game_render(Uint64 alpha_time_ms)
     bxr_painter_set_color(bxr_color_make(0, 0, 0, 255));
     bxr_painter_clear();
 
-    bxr_vec2_t frame_size = bxr_painter_get_frame_size();
+    bxr_vec2_t frame_dimension = bxr_painter_get_frame_dimension();
 
-    float width  = frame_size.x;
-    float height = frame_size.y;
+    float width  = frame_dimension.x;
+    float height = frame_dimension.y;
 
     bxr_painter_push_transform();
     {

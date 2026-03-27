@@ -47,11 +47,9 @@ void bxr_mouse_wheel_motion(float x, float y);
 // Public API
 // -----------------------------------------------------------------
 
-float bxr_mouse_x(void);
-float bxr_mouse_y(void);
+bxr_vec2_t bxr_mouse_pos(void);
 
-float bxr_mouse_prev_x(void);
-float bxr_mouse_prev_y(void);
+bxr_vec2_t bxr_mouse_prev_pos(void);
 
 bool bxr_mouse_held(bxr_mouse_e button);
 
@@ -62,8 +60,7 @@ bool bxr_mouse_double_clicked(bxr_mouse_e button);
 
 Uint64 bxr_mouse_held_time(bxr_mouse_e button);
 
-float bxr_mouse_wheel_motion_x(void);
-float bxr_mouse_wheel_motion_y(void);
+bxr_vec2_t bxr_mouse_wheel(void);
 
 void bxr_mouse_hide(bool hide);
 bool bxr_mouse_is_hidden(void);

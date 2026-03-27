@@ -3,7 +3,11 @@
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_font.h"
+#include "bxr_keyboard.h"
 #include "bxr_math.h"
+#include "bxr_mouse.h"
+#include "bxr_painter.h"
+#include "bxr_text.h"
 #include "bxr_ui.h"
 
 typedef enum
@@ -17,7 +21,7 @@ typedef enum
 
 typedef struct _bxr_ui_base_command_s
 {
-  int type, size;
+  int type;
 } _bxr_ui_base_command_t;
 
 typedef struct _bxr_ui_jump_command_s
@@ -48,15 +52,27 @@ typedef struct _bxr_ui_text_command_s
   char str[1];
 } _bxr_ui_text_command_t;
 
-typedef union _bxr_ui_command_u
+typedef union _bxr_ui_command_args_u
 {
-  int type;
   _bxr_ui_base_command_t base;
   _bxr_ui_jump_command_t jump;
   _bxr_ui_clip_command_t clip;
   _bxr_ui_rect_command_t rect;
   _bxr_ui_text_command_t text;
+
+} _bxr_ui_command_args_t;
+
+typedef struct _bxr_ui_command_s
+{
+  _bxr_ui_command_e type;
+  _bxr_ui_command_args_t args;
 } _bxr_ui_command_t;
+
+typedef struct _bxr_ui_pool_item_s
+{
+  Uint32 id;
+  int last_update;
+} _bxr_ui_pool_item_t;
 
 typedef struct _bxr_ui_layout_s
 {
@@ -89,6 +105,8 @@ typedef struct _bxr_ui_state_s
   bxr_ui_style_t _style;
   bxr_ui_style_t *style; // style pointer for modification
 
+  bxr_rect_t viewport;
+
   Uint32 last_id; // last generated ID
   int last_zindex;
 
@@ -110,20 +128,27 @@ typedef struct _bxr_ui_state_s
   Uint32 current_container;
   _bxr_ui_container_t *containers[BXR_UI_CONTAINER_SLOTS_MAX];
 
-  // Clip stack
-  Uint32 current_clip;
-  bxr_rect_t clips[BXR_UI_CLIP_MAX];
-
   // Layout stack
   Uint32 current_layout;
   _bxr_ui_layout_t layouts[BXR_UI_STATE_MAX];
 
+  // Clip stack
+  Uint32 current_clip;
+  bxr_rect_t clips[BXR_UI_CLIP_MAX];
+
   // Containers data
   _bxr_ui_container_t containers_data[BXR_UI_CONTAINER_SLOTS_MAX];
 
-  // TODO pool
+  _bxr_ui_pool_item_t container_pool[BXR_UI_CONTAINER_SLOTS_MAX];
+
+  _bxr_ui_pool_item_t treenode_pool[BXR_UI_CONTAINER_SLOTS_MAX];
 
   // TODO missing members
+
+  bxr_vec2_t mouse_delta;
+  bxr_vec2_t scroll_delta;
+
+  char text_input[32];
 
   int frame;
 } _bxr_ui_state_t;
@@ -135,12 +160,6 @@ typedef struct _bxr_ui_s
   _bxr_ui_state_t states[BXR_UI_STATE_MAX];
   _bxr_ui_state_t state; // current state
 } _bxr_ui_t;
-
-typedef struct _bxr_ui_pool_item_s
-{
-  Uint32 id;
-  int last_update;
-} _bxr_ui_pool_item_t;
 
 static bxr_ui_style_t default_style = {
   NULL,       // font
@@ -217,6 +236,91 @@ _bxr_ui_pool_get(_bxr_ui_pool_item_t *items, int len, Uint32 id)
   return -1;
 }
 
+// Push a new layout to the layout stack with the given body and scroll offset.
+static void
+_bxr_ui_push_layout(bxr_rect_t body, bxr_vec2_t scroll)
+{
+  _bxr_ui_layout_t layout;
+  int width = 0;
+  memset(&layout, 0, sizeof(layout));
+  layout.body
+      = bxr_rect_make(body.x - scroll.x, body.y - scroll.y, body.w, body.h);
+  layout.max = bxr_vec2_make(-0x1000000, -0x1000000);
+
+  _ui.state.layouts[_ui.state.current_layout] = layout;
+  _ui.state.current_layout++;
+
+  // TODO
+  // bxr_ui_layout_row(1, &width, 0);
+}
+
+// Get the current layout from the top of the layout stack.
+static _bxr_ui_layout_t *
+_bxr_ui_get_layout()
+{
+  return &_ui.state.layouts[_ui.state.current_layout - 1];
+}
+
+static void
+_bxr_ui_bring_to_front(_bxr_ui_container_t *cnt)
+{
+  cnt->zindex = ++_ui.state.last_zindex;
+}
+
+// Get a container by its ID or init a new one and update it if it's open.
+static _bxr_ui_container_t *
+_bxr_ui_get_container(Uint32 id, int opt)
+{
+  _bxr_ui_container_t *cnt = NULL;
+
+  // Try to find the container in the pool using its ID.
+  int idx = _bxr_ui_pool_get(
+      _ui.state.container_pool, BXR_UI_CONTAINER_SLOTS_MAX, id);
+
+  // The containe is found in the pool
+  if (idx >= 0) {
+    // If the container is open, update the container
+    if (_ui.state.containers_data[idx].open || ~opt & BXR_UI_OPT_CLOSED) {
+      _bxr_ui_pool_update(_ui.state.container_pool, idx);
+    }
+
+    // Return the container found in the pool.
+    return &_ui.state.containers_data[idx];
+  }
+
+  // The container is not found in the pool and the  container is closed.
+  if (opt & BXR_UI_OPT_CLOSED) {
+    return NULL;
+  }
+
+  // Container not found in pool, init new container
+  idx = _bxr_ui_pool_init(
+      _ui.state.container_pool, BXR_UI_CONTAINER_SLOTS_MAX, id);
+  cnt = &_ui.state.containers_data[idx];
+  memset(cnt, 0, sizeof(*cnt));
+  cnt->open = 1;
+
+  // Bring the container to the front
+  _bxr_ui_bring_to_front(cnt);
+  return cnt;
+}
+
+// Get the current container from the top of the container stack
+static _bxr_ui_container_t *
+_bxr_ui_get_current_container()
+{
+  SDL_assert(_ui.current_state > 0);
+  return _ui.state.containers[_ui.state.current_container];
+}
+
+// Get a container by its name
+static _bxr_ui_container_t *
+_bxr_ui_get_container_by_name(const char *name)
+{
+  Uint32 id = bxr_ui_get_id(name, strlen(name));
+  return _bxr_ui_get_container(id, 0);
+}
+
 void
 bxr_ui_setup(void)
 {
@@ -237,20 +341,34 @@ bxr_ui_begin()
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(_ui.current_state < BXR_UI_STATE_MAX);
 
-  // TODO handle inputs
-
   // Save current state
   _ui.states[_ui.current_state++] = _ui.state;
 
   _ui.state._style = default_style;
   _ui.state.style  = &_ui.state._style;
 
+  // TODO get the viewport bounds from the painter.
+  // This will be used to calculate mouse position relative to the viewport.
+  // _ui.state.viewport = viewport;
+
+  bxr_vec2_t mouse_wheel   = bxr_mouse_wheel();
+  _ui.state.scroll_delta.x = mouse_wheel.x;
+  _ui.state.scroll_delta.y = mouse_wheel.y;
+
+  bxr_vec2_t mouse_pos      = bxr_mouse_pos();
+  bxr_vec2_t mouse_prev_pos = bxr_mouse_prev_pos();
+  _ui.state.mouse_delta.x   = mouse_pos.x - mouse_prev_pos.x;
+  _ui.state.mouse_delta.y   = mouse_pos.y - mouse_prev_pos.y;
+
   _ui.state.current_id      = 0;
   _ui.state.current_command = 0;
 
   // TODO scroll target
+
   // TODO hover root
+
   // TODO next_hover_root
+
   // TODO mouse_delta
 
   _ui.state.frame++;
@@ -262,13 +380,19 @@ bxr_ui_end(void)
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(_ui.current_state > 0);
 
-  // TODO Check stack
-  // TODO handle scroll input
+  SDL_assert(_ui.state.current_id == 0);
+  SDL_assert(_ui.state.current_container == 0);
+  SDL_assert(_ui.state.current_layout == 0);
+  SDL_assert(_ui.state.current_clip == 0);
+
+  _ui.state.scroll_delta = bxr_vec2_make(0, 0);
+
   // TODO unset focus
+
   // TODO bring hover root to font
-  // TODO Reset input state
 
   // TODO sort containers
+
   // TODO set root container jumps commands
 
   // TODO process commands
@@ -381,66 +505,141 @@ bxr_ui_check_clip(bxr_rect_t rect)
   }
 }
 
-// Get a container by its ID and update it if it's open or the `MU_OPT_CLOSED`
-// flag is not set. If the container is not found in the pool and the
-// `MU_OPT_CLOSED` flag is set, return NULL. Otherwise, initialize a new
-// container and return it.
-static _bxr_ui_container_t *
-_bxr_ui_get_container(Uint32 id, int opt)
+// Push a new command to the command list and return a pointer to it.
+static _bxr_ui_command_t *
+_bxr_ui_command_push(int type)
 {
-  _bxr_ui_container_t *cnt = NULL;
+  SDL_assert(_ui.state.current_command < BXR_UI_COMMAND_MAX);
+  _bxr_ui_command_t *cmd = _ui.state.commands + _ui.state.current_command;
 
-  /*
-  // Try to find the container in the pool using its ID.
-  int idx = mu_pool_get(ctx, ctx->container_pool, MU_CONTAINERPOOL_SIZE, id);
+  cmd->args.base.type = type;
 
-  // The containe is found in the pool
-  if (idx >= 0) {
-    // If the container is open or the `MU_OPT_CLOSED` flag is not set, update
-    // the container
-    if (ctx->containers[idx].open || ~opt & MU_OPT_CLOSED) {
-      mu_pool_update(ctx, ctx->container_pool, idx);
+  _ui.state.current_command++;
+
+  return cmd;
+}
+
+// Iterate through the command list and move the pointer to the next command
+// that is not a jump command. Return true if such a command is found, false
+// otherwise.
+static bool
+_bxr_ui_command_next(_bxr_ui_command_t **cmd)
+{
+  if (*cmd) {
+    // cmd is not NULL move to the next command
+    *cmd = (*cmd) + 1;
+  } else {
+    // cmd is NULL, start from the first command
+    *cmd = _ui.state.commands;
+  }
+
+  while (*cmd != _ui.state.commands + _ui.state.current_command) {
+    if ((*cmd)->args.base.type != BXR_UI_COMMAND_JUMP) {
+      return true;
     }
 
-    // Return the container found in the pool.
-    return &ctx->containers[idx];
+    *cmd = (*cmd)->args.jump.dst;
   }
 
-  // The container is not found in the pool and the `MU_OPT_CLOSED` flag is set,
-  // return NULL.
-  if (opt & MU_OPT_CLOSED) {
-    return NULL;
+  return false;
+}
+
+// Push a jump command to the command list and return a pointer to it.
+static _bxr_ui_command_t *
+_bxr_ui_command_push_jump(_bxr_ui_command_t *dst)
+{
+  _bxr_ui_command_t *cmd = _bxr_ui_command_push(BXR_UI_COMMAND_JUMP);
+  cmd->args.jump.dst     = dst;
+  return cmd;
+}
+
+// Set the current clipping rectangle by pushing a new clip command.
+static void
+_bxr_ui_set_clip(bxr_rect_t rect)
+{
+  _bxr_ui_command_t *cmd;
+  cmd                 = _bxr_ui_command_push(BXR_UI_COMMAND_CLIP);
+  cmd->args.clip.rect = rect;
+}
+
+// Draw a filled rectangle by pushing a new rect command.
+static void
+_bxr_ui_draw_rect(bxr_rect_t rect, bxr_color_t color)
+{
+  _bxr_ui_command_t *cmd;
+
+  rect = bxr_rect_get_intersection(rect, bxr_ui_get_clip_rect());
+
+  if (rect.w > 0 && rect.h > 0) {
+    cmd                  = _bxr_ui_command_push(BXR_UI_COMMAND_RECT);
+    cmd->args.rect.rect  = rect;
+    cmd->args.rect.color = color;
+  }
+}
+
+// Draw a border by drawing four rectangles around the edges of the given
+// rectangle.
+static void
+_bxr_ui_draw_box(bxr_rect_t rect, bxr_color_t color)
+{
+  _bxr_ui_draw_rect(bxr_rect_make(rect.x + 1, rect.y, rect.w - 2, 1), color);
+  _bxr_ui_draw_rect(
+      bxr_rect_make(rect.x + 1, rect.y + rect.h - 1, rect.w - 2, 1), color);
+  _bxr_ui_draw_rect(bxr_rect_make(rect.x, rect.y, 1, rect.h), color);
+  _bxr_ui_draw_rect(bxr_rect_make(rect.x + rect.w - 1, rect.y, 1, rect.h),
+                    color);
+}
+
+// Draw text by pushing a new text command.
+static void
+_bxr_ui_draw_text(bxr_font_t *font,
+                  const char *str,
+                  int len,
+                  bxr_vec2_t pos,
+                  bxr_color_t color)
+{
+  if (str == NULL || *str == '\0') {
+    return;
   }
 
-  // Container not found in pool: init new container
-  idx = mu_pool_init(ctx, ctx->container_pool, MU_CONTAINERPOOL_SIZE, id);
-  cnt = &ctx->containers[idx];
-  memset(cnt, 0, sizeof(*cnt));
-  cnt->open = 1;
-  mu_bring_to_front(ctx, cnt);
+  _bxr_ui_command_t *cmd;
+
+  bxr_vec2_t text_size = bxr_text_measure(font, str);
+  bxr_rect_t rect      = bxr_rect_make(pos.x, pos.y, text_size.x, text_size.y);
+
+  bxr_ui_clip_e clipped = bxr_ui_check_clip(rect);
+
+  // If the text is fully outside the clipping rectangle, skip drawing it.
+  if (clipped == BXR_UI_CLIP_OUT) {
+    return;
+  }
+
+  // If the text is partially inside the clipping rectangle, set the clipping
+  if (clipped == BXR_UI_CLIP_PARTIAL) {
+    _bxr_ui_set_clip(bxr_ui_get_clip_rect());
+  }
+
+  // Add command
+  if (len < 0) {
+    len = strlen(str);
+  }
+
+  // TODO add command with text (the text should be a pointer to a string
+  // stash).
+
+  /*
+  cmd = mu_push_command(ctx, MU_COMMAND_TEXT, sizeof(mu_TextCommand) + len);
+  memcpy(cmd->text.str, str, len);
+  cmd->text.str[len] = '\0';
+  cmd->text.pos      = pos;
+  cmd->text.color    = color;
+  cmd->text.font     = font;
   */
 
-  return cnt;
-}
-
-// Get the current container from the top of the container stack
-static _bxr_ui_container_t *
-_bxr_ui_get_current_container()
-{
-  SDL_assert(_ui.current_state > 0);
-  return _ui.state.containers[_ui.state.current_container];
-}
-
-// Get a container by its name
-static _bxr_ui_container_t *
-_bxr_ui_get_container_by_name(const char *name)
-{
-  Uint32 id = bxr_ui_get_id(name, strlen(name));
-  return _bxr_ui_get_container(id, 0);
-}
-
-static void
-_bxr_ui_bring_to_front(_bxr_ui_container_t *cnt)
-{
-  cnt->zindex = ++_ui.state.last_zindex;
+  // Reset clipping if it was set for this text
+  if (clipped) {
+    bxr_vec2_t frame_dimension = bxr_painter_get_frame_dimension();
+    bxr_rect_t unclipped_rect  = { 0, 0, frame_dimension.x, frame_dimension.y };
+    _bxr_ui_set_clip(unclipped_rect);
+  }
 }

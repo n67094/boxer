@@ -1,5 +1,5 @@
-#include "bxr_defs.h"
 #include "bxr_mouse.h"
+#include "bxr_defs.h"
 
 typedef struct _bxr_mouse_button_state_s
 {
@@ -112,36 +112,20 @@ bxr_mouse_wheel_motion(float x, float y)
   _mouse.wheel_y = y;
 }
 
-float
-bxr_mouse_x(void)
+bxr_vec2_t
+bxr_mouse_pos(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  return _mouse.x;
+  return bxr_vec2_make(_mouse.x, _mouse.y);
 }
 
-float
-bxr_mouse_y(void)
+bxr_vec2_t
+bxr_mouse_prev_pos(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  return _mouse.y;
-}
-
-float
-bxr_mouse_prev_x(void)
-{
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
-
-  return _mouse.x_prev;
-}
-
-float
-bxr_mouse_prev_y(void)
-{
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
-
-  return _mouse.y_prev;
+  return bxr_vec2_make(_mouse.x_prev, _mouse.y_prev);
 }
 
 bool
@@ -193,18 +177,11 @@ bxr_mouse_held_time(bxr_mouse_e button)
   return SDL_GetTicks() - _mouse.buttons[button].pressed_at;
 }
 
-float
-bxr_mouse_wheel_motion_x(void)
+bxr_vec2_t
+bxr_mouse_wheel(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
-  return _mouse.wheel_x;
-}
-
-float
-bxr_mouse_wheel_motion_y(void)
-{
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
-  return _mouse.wheel_y;
+  return bxr_vec2_make(_mouse.wheel_x, _mouse.wheel_y);
 }
 
 void

@@ -1,4 +1,58 @@
-/*
+#include <SDL3/SDL.h>
+
+#include "bxr_font.h"
+#include "bxr_math.h"
+#include "bxr_text.h"
+
+bxr_vec2_t
+bxr_text_measure(const bxr_font_t *font, const char *str)
+{
+  SDL_assert(font);
+
+  if (str == NULL || *str == '\0') {
+    return (bxr_vec2_t){ 0, 0 };
+  }
+
+  char base_char        = bxr_font_get_base(font);
+  int line_spacing      = bxr_font_get_line_spacing(font);
+  int char_spacing      = bxr_font_get_char_spacing(font);
+  bxr_vec2_t char_range = bxr_font_get_char_range(font);
+
+  bxr_vec2_t measure = { 0, 0 };
+
+  char *cursor = (char *)str;
+
+  while (*cursor) {
+
+    switch (*cursor) {
+    case '\n':
+      measure.y += line_spacing;
+      cursor++;
+      break;
+    default: {
+      int glyphs_index = (int)*cursor - (int)base_char;
+      if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
+        SDL_LogWarn(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Invalid character '%c' in text string. Valid characters are "
+            "from %d to %d.",
+            *cursor,
+            (int)char_range.x,
+            (int)char_range.y);
+        cursor++;
+        continue;
+      }
+      bxr_rect_t glyph_rect = bxr_font_get_glyph_rect(font, glyphs_index);
+      measure.x += (glyph_rect.w + char_spacing);
+      cursor++;
+    } break;
+    }
+  }
+
+  return measure;
+}
+
+/* FIXME what to do with this ? Trash I guess
 #include <SDL3/SDL.h>
 
 #include "bxr_color.h"
@@ -94,11 +148,9 @@ bxr_text_color_tag_validate(const char *cursor,
   }
 
   // Closing tag: {/b} or {/f}
-  if (*(cursor + 1) == '/' && (*(cursor + 2) == 'b' || *(cursor + 2) == 'f')) {
-    if (out_tag_type) {
-      *out_tag_type = (*(cursor + 2) == 'b')
-                          ? BXR_TEXT_TAG_CLOSE_COLOR_BACKGROUND
-                          : BXR_TEXT_TAG_CLOSE_COLOR_FOREGROUND;
+  if (*(cursor + 1) == '/' && (*(cursor + 2) == 'b' || *(cursor + 2) == 'f'))
+{ if (out_tag_type) { *out_tag_type = (*(cursor + 2) == 'b') ?
+BXR_TEXT_TAG_CLOSE_COLOR_BACKGROUND : BXR_TEXT_TAG_CLOSE_COLOR_FOREGROUND;
     }
 
     if (cursor + BXR_TEXT_TAG_COLOR_CLOSE_LENGTH > end) {
@@ -595,7 +647,7 @@ bxr_text_measure(const bxr_font_t *font, const char *rich_str)
   bxr_vec2_t icon_range = bxr_font_get_icon_range(font);
   bxr_vec2_t char_range = bxr_font_get_char_range(font);
 
-  int line_spacing = bxr_font_get_line_spacing(font);
+int line_spacing = bxr_font_get_line_spacing(font);
   int char_spacing = bxr_font_get_char_spacing(font);
 
   char base_char = bxr_font_get_base(font);
@@ -735,7 +787,8 @@ bxr_text_wrap(const bxr_font_t *font,
         bxr_rect_t icon_rect = bxr_font_get_glyph_rect(font, icon_index);
 
         int next_width = width + icon_rect.w + char_spacing; // Calculate the
-                                                             // width if we add
+                                                             // width if we
+add
                                                              // the next icon
 
         // Add a line break if adding the next icon would exceed the

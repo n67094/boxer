@@ -3,18 +3,18 @@
  *
  * @brief Text utilities.
  *
- * @details To render:
- *
- * - An icons{i=FF}.
- * - Change Background color  {b=RRGGBBAA}text{/b}.
- * - Change Foreground color {f=RRGGBBAA}text{/f}.
- *
  * @copyright Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_TEXT_H_
 #define BXR_TEXT_H_
 
+#include "bxr_font.h"
+#include "bxr_math.h"
+
+bxr_vec2_t bxr_text_measure(const bxr_font_t *font, const char *str);
+
+/*
 #include <SDL3/SDL.h>
 
 #include "bxr_color.h"
@@ -73,11 +73,12 @@ const bxr_text_entry_t *bxr_text_get_entries(const bxr_text_t *text);
 size_t bxr_text_get_entries_count(const bxr_text_t *text);
 
 // char *bxr_text_without_tags(const char *rich_str);
+*/
 
 /**
  * @brief Get the length of a text string without counting any formatting tags.
  */
-size_t bxr_text_length(const char *rich_str);
+// size_t bxr_text_length(const char *rich_str);
 
 /**
  * @brief Measure the width and height of the given text when rendered with the
@@ -89,7 +90,7 @@ size_t bxr_text_length(const char *rich_str);
  * @return An bxr_vec2_t containing the width (x) and height (y) of the
  *         measured text.
  */
-bxr_vec2_t bxr_text_measure(const bxr_font_t *font, const char *rich_str);
+// bxr_vec2_t bxr_text_measure(const bxr_font_t *font, const char *rich_str);
 
 /**
  * @brief Wrap the given text to fit within the specified maximum width when
@@ -110,9 +111,11 @@ bxr_vec2_t bxr_text_measure(const bxr_font_t *font, const char *rich_str);
  *
  * @note The caller is responsible for freeing the returned value.
  */
+/*
 char *bxr_text_wrap(const bxr_font_t *font,
                     const char *rich_str,
                     float max_width,
                     float *height);
+                    */
 
 #endif // BXR_TEXT_H_

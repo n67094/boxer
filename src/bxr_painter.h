@@ -36,7 +36,7 @@ void bxr_painter_begin(void);
 void bxr_painter_flush(void);
 void bxr_painter_end(void);
 
-bxr_vec2_t bxr_painter_get_frame_size(void);
+bxr_vec2_t bxr_painter_get_frame_dimension(void);
 
 void
 bxr_painter_set_projection(float left, float right, float bottom, float top);
@@ -106,7 +106,5 @@ void bxr_painter_draw_rect_textured(int channel, bxr_textured_rect_t rect);
 void bxr_painter_draw_rects_textured(int channel,
                                      const bxr_textured_rect_t *rects,
                                      Uint32 count);
-
-void bxr_painter_draw_text(bxr_text_t *text);
 
 #endif // BXR_PAINTER_H_
