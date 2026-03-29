@@ -52,7 +52,7 @@ void bxr_unit_run_suite(const char *const name, bxr_unit_suite_cb suite_cb);
 /**
  * @brief Runs a test case function.
  *
- * @param test_cb The test callback function to execute
+ * @param test_cb The test callback function to execute.
  */
 #define BXR_UNIT_RUN_CASE(test_cb) (bxr_unit_run_case(#test_cb, test_cb))
 
@@ -66,7 +66,7 @@ void bxr_unit_run_suite(const char *const name, bxr_unit_suite_cb suite_cb);
 /**
  * @brief Runs a series of unit tests.
  *
- * @param suite_cb The test suite callback function to run
+ * @param suite_cb The test suite callback function to run.
  */
 #define BXR_UNIT_RUN_SUITE(suite_cb) bxr_unit_run_suite(#suite_cb, suite_cb)
 

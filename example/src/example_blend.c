@@ -58,8 +58,8 @@ example_blend_render(Uint64 alpha_time_ms)
 
   bxr_painter_set_blend_mode(BXR_BLENDMODE_NONE);
 
-  bxr_vec2_t frame_size = bxr_painter_get_frame_size();
-  example_blend_draw_checkboard(frame_size.x, frame_size.y);
+  bxr_vec2_t frame_dimension = bxr_painter_get_frame_dimension();
+  example_blend_draw_checkboard(frame_dimension.x, frame_dimension.y);
 
   bxr_painter_set_blend_mode(BXR_BLENDMODE_NONE);
   bxr_painter_push_transform();

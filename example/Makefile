@@ -9,7 +9,7 @@
 # Authors: nsix
 #
 
-TARGET := test
+TARGET := example
 
 BUILD_DIR := build
 

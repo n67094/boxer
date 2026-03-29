@@ -69,4 +69,10 @@
 // Max number of items in a layout row
 #define BXR_UI_LAYOUT_SLOTS_MAX 32
 
+// Atom
+// ---------------------------------------------------------------------------
+
+// Max number of unique strings
+#define BXR_ATOM_MAX 2048
+
 #endif // BXR_CONFIG_H_

@@ -16,6 +16,8 @@
  * @copyright Copyright (c) 2026 nsix. All rights reserved.
  */
 
+// TODO add a default font (better in .c files).
+
 #ifndef BXR_FONT_H_
 #define BXR_FONT_H_
 

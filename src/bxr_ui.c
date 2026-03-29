@@ -16,6 +16,7 @@ typedef enum
   BXR_UI_COMMAND_CLIP,
   BXR_UI_COMMAND_RECT,
   BXR_UI_COMMAND_TEXT,
+  BXR_UI_COMMAND_ICON,
   BXR_UI_COMMAND_SIZE
 } _bxr_ui_command_e;
 
@@ -52,6 +53,14 @@ typedef struct _bxr_ui_text_command_s
   char str[1];
 } _bxr_ui_text_command_t;
 
+typedef struct _bxr_ui_icon_command_s
+{
+  _bxr_ui_base_command_t base;
+  bxr_font_t *font;
+  bxr_rect_t rect;
+  int icon_index;
+} _bxr_ui_icon_command_t;
+
 typedef union _bxr_ui_command_args_u
 {
   _bxr_ui_base_command_t base;
@@ -59,6 +68,7 @@ typedef union _bxr_ui_command_args_u
   _bxr_ui_clip_command_t clip;
   _bxr_ui_rect_command_t rect;
   _bxr_ui_text_command_t text;
+  _bxr_ui_icon_command_t icon;
 
 } _bxr_ui_command_args_t;
 
@@ -624,8 +634,9 @@ _bxr_ui_draw_text(bxr_font_t *font,
     len = strlen(str);
   }
 
-  // TODO add command with text (the text should be a pointer to a string
-  // stash).
+  // TODO command, currentrly the text is part of the command buffer, but
+  // it would be better to store the text in a separate buffer and reference it
+  // from the command.
 
   /*
   cmd = mu_push_command(ctx, MU_COMMAND_TEXT, sizeof(mu_TextCommand) + len);
@@ -635,6 +646,39 @@ _bxr_ui_draw_text(bxr_font_t *font,
   cmd->text.color    = color;
   cmd->text.font     = font;
   */
+
+  // Reset clipping if it was set for this text
+  if (clipped) {
+    bxr_vec2_t frame_dimension = bxr_painter_get_frame_dimension();
+    bxr_rect_t unclipped_rect  = { 0, 0, frame_dimension.x, frame_dimension.y };
+    _bxr_ui_set_clip(unclipped_rect);
+  }
+}
+
+// Draw an icon by pushing a new icon command.
+void
+mu_draw_icon(bxr_font_t *font,
+             int icon_index,
+             bxr_rect_t rect,
+             bxr_color_t color)
+{
+
+  bxr_ui_clip_e clipped = bxr_ui_check_clip(rect);
+
+  // If the text is fully outside the clipping rectangle, skip drawing it.
+  if (clipped == BXR_UI_CLIP_OUT) {
+    return;
+  }
+
+  // If the text is partially inside the clipping rectangle, set the clipping
+  if (clipped == BXR_UI_CLIP_PARTIAL) {
+    _bxr_ui_set_clip(bxr_ui_get_clip_rect());
+  }
+
+  _bxr_ui_command_t *cmd    = _bxr_ui_command_push(BXR_UI_COMMAND_ICON);
+  cmd->args.icon.font       = _ui.state.style->font;
+  cmd->args.icon.icon_index = icon_index;
+  cmd->args.icon.rect       = rect;
 
   // Reset clipping if it was set for this text
   if (clipped) {

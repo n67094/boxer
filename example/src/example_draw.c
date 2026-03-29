@@ -18,7 +18,7 @@ example_draw_update(Uint64 delta_time_ms)
 void
 example_draw_render(Uint64 alpha_time_ms)
 {
-  bxr_vec2_t frame_size = bxr_painter_get_frame_size();
+  bxr_vec2_t frame_dimension = bxr_painter_get_frame_dimension();
 
   // Seconds since start
   float time = (float)SDL_GetTicks() / 1000.0f;
@@ -27,8 +27,8 @@ example_draw_render(Uint64 alpha_time_ms)
   float osc_1 = bxr_sin(time * BXR_PI);
 
   // Math for quadrants
-  int hw = frame_size.x * 0.5f;
-  int hh = frame_size.y * 0.5f;
+  int hw = frame_dimension.x * 0.5f;
+  int hh = frame_dimension.y * 0.5f;
 
   // Quadrant 1
   // ===============================================================

@@ -11,6 +11,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_atom.h"
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_context.h"
@@ -31,7 +32,7 @@
 #include "bxr_pipeline.h"
 #include "bxr_resource.h"
 #include "bxr_shader.h"
-// #include "bxr_text.h"
+#include "bxr_text.h"
 #include "bxr_unit.h"
 
 void bxr_quit(void);

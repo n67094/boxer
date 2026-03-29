@@ -9,37 +9,18 @@
 
 #include "bxr.h"
 
-static const char *_str_1 = "Hello, World!";
-
-static const char *_str_2 = "{b=00FF00FF}{f=FF0000FF}Hello, World!{/b}{/f}";
-static const char _str_2_expected_len
-    = 13; // "Hello, World!" length without tags
-
-static const char *_str_3
-    = "{b=00FF00FF}{f=FF0000FF}Hello, World!{i=00}{/b}{/f}";
-static const char _str_3_expected_len
-    = 14; // "Hello, World!" length without tags + 1 icon
-
-BXR_UNIT_CASE(case_bxr_text)
+BXR_UNIT_CASE(case_bxr_text_measure)
 {
-  /*
-   char *_str_1_no_tags = bxr_text_without_tags(_str_1);
-  BXR_UNIT_ASSERT(SDL_strcmp(_str_1, _str_1_no_tags) == 0);
+  const char *str = "Hello World!";
 
-  int _str_2_len = bxr_text_length(_str_2);
-  BXR_UNIT_ASSERT(_str_2_len == _str_2_expected_len);
+  // bxr_vec2_t size = bxr_text_measure(font, str);
 
-  int _str_3_len = bxr_text_length(_str_3);
-  BXR_UNIT_ASSERT(_str_3_len == _str_3_expected_len);
-
-  // TODO test measure
-
-  // TODO test text wrape
-  */
+  // BXR_UNIT_ASSERT(size.x > 0);
+  // BXR_UNIT_ASSERT(size.y > 0);
 
   return true;
 }
 
-BXR_UNIT_SUITE(suite_text) { BXR_UNIT_RUN_CASE(case_bxr_text); }
+BXR_UNIT_SUITE(suite_text) { BXR_UNIT_RUN_CASE(case_bxr_text_measure); }
 
 #endif // TEST_TEXT_H_
