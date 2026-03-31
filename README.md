@@ -64,6 +64,8 @@ test/  # Unit tests for the engine (take a look to see examples on how to use th
 
 # Project Filesystem
 
+//TODO in debug mode mount the data folder as read-write.
+
 Boxer uses PhysFS for virtual filesystem management.
 
 By default, the following folders are mounted:

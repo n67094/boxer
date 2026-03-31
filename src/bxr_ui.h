@@ -63,19 +63,6 @@ typedef enum
   BXR_UI_COLOR_MAX
 } bxr_ui_color_e;
 
-typedef struct bxr_ui_style_s
-{
-  bxr_font_t *font;
-  bxr_vec2_t size;    // default layout size
-  int padding;        // Padding for elements
-  int spacing;        // Spacing between layout elements
-  int indent;         // Indent for nested tree nodes
-  int title_height;   // Title bar height
-  int scrollbar_size; // Scrollbar width
-  int thumb_size;     // Slider thumb size
-  bxr_color_t colors[BXR_UI_COLOR_MAX];
-} bxr_ui_style_t;
-
 void bxr_ui_setup(void);
 
 void bxr_ui_shutdown(void);
@@ -146,5 +133,39 @@ bxr_rect_t bxr_ui_get_clip_rect(void);
  * @return an enum value indicating the clipping status of the rectangle.
  */
 bxr_ui_clip_e bxr_ui_check_clip(bxr_rect_t rect);
+
+/**
+ * @brief Begin a new layout.
+ */
+void bxr_ui_layout_begin_column(void);
+
+/**
+ * @brief End the current layout.
+ */
+void bxr_ui_layout_end_column(void);
+
+/**
+ * @brief Set the width of the current layout element.
+ */
+void bxr_ui_layout_set_width(int width);
+
+/**
+ * @brief Set the height of the current layout element.
+ */
+void bxr_ui_layout_set_height(int height);
+
+/**
+ * @brief Set the next layout rectangle for the current layout.
+ *
+ * @param rect The rectangle to set as the next layout position.
+ * @param relative If true, the rect is relative to the current layout position;
+ * if false, it is an absolute position in the UI coordinate space.
+ */
+void bxr_ui_layout_set_next(bxr_rect_t rect, bool relative);
+
+/**
+ * @brief Get the next layout rectangle for the current layout.
+ */
+bxr_rect_t bxr_ui_layout_next(void);
 
 #endif // BXR_UI_H_
