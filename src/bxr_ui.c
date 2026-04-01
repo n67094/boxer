@@ -4,12 +4,15 @@
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_font.h"
-#include "bxr_keyboard.h"
 #include "bxr_math.h"
 #include "bxr_mouse.h"
 #include "bxr_painter.h"
 #include "bxr_text.h"
 #include "bxr_ui.h"
+
+// TODO for controller and keyboard navigation support store a stack of
+// focusable containers. So the stack can be iterate forward and backward to
+// find the next focusable container. ?
 
 typedef enum
 {
@@ -121,7 +124,7 @@ typedef struct _bxr_ui_layout_s
 
 typedef struct _bxr_ui_container_s
 {
-  _bxr_ui_command_t *head, *tail; // Commands
+  _bxr_ui_command_t *head, *tail; // Commands linked list
   bxr_rect_t rect;
   bxr_rect_t body;
   bxr_vec2_t content_size;
@@ -135,10 +138,20 @@ typedef struct _bxr_ui_state_s
   _bxr_ui_style_t _style;
   _bxr_ui_style_t *style; // style pointer for modification
 
+  // Container state
+  bxr_ui_id_t focused_id;
+  bxr_ui_id_t hovered_id;
+
+  // Whether the focus was updated in the current frame.
+  bool update_focus;
+
   bxr_rect_t viewport;
 
-  Uint32 last_id; // last generated ID
+  bxr_ui_id_t last_id; // last generated ID
   int last_zindex;
+
+  // The hovered root container
+  _bxr_ui_container_t *hovered_root;
 
   // TODO missing members
 
@@ -332,7 +345,7 @@ _bxr_ui_command_rect(bxr_rect_t rect, bxr_color_t color)
 {
   _bxr_ui_command_t *cmd;
 
-  rect = bxr_rect_get_intersection(rect, bxr_ui_get_clip_rect());
+  rect = bxr_rect_get_intersection(rect, bxr_ui_clip_rect_get());
 
   if (rect.w > 0 && rect.h > 0) {
     cmd                  = _bxr_ui_command_push(BXR_UI_COMMAND_RECT);
@@ -356,11 +369,11 @@ _bxr_ui_command_box(bxr_rect_t rect, bxr_color_t color)
 
 // Draw text by pushing a new text command.
 static void
-_bxr_ui_draw_text(bxr_font_t *font,
-                  const char *str,
-                  int len,
-                  bxr_vec2_t pos,
-                  bxr_color_t color)
+_bxr_ui_command_text(bxr_font_t *font,
+                     const char *str,
+                     int len,
+                     bxr_vec2_t pos,
+                     bxr_color_t color)
 {
   if (str == NULL || *str == '\0') {
     return;
@@ -380,7 +393,7 @@ _bxr_ui_draw_text(bxr_font_t *font,
 
   // If the text is partially inside the clipping rectangle, set the clipping
   if (clipped == BXR_UI_CLIP_PARTIAL) {
-    _bxr_ui_command_clip(bxr_ui_get_clip_rect());
+    _bxr_ui_command_clip(bxr_ui_clip_rect_get());
   }
 
   // Add command
@@ -420,7 +433,7 @@ _bxr_ui_command_icon(bxr_font_t *font,
 
   // If the text is partially inside the clipping rectangle, set the clipping
   if (clipped == BXR_UI_CLIP_PARTIAL) {
-    _bxr_ui_command_clip(bxr_ui_get_clip_rect());
+    _bxr_ui_command_clip(bxr_ui_clip_rect_get());
   }
 
   _bxr_ui_command_t *cmd    = _bxr_ui_command_push(BXR_UI_COMMAND_ICON);
@@ -436,13 +449,36 @@ _bxr_ui_command_icon(bxr_font_t *font,
   }
 }
 
+// Draw a frame (e.g. window, button) with the appropriate color and border
+// based on the colorid. The border is not drawn for scrollbars and title bars.
+static void
+_bxr_ui_draw_frame(bxr_rect_t rect, int color_id)
+{
+  _bxr_ui_command_rect(rect, _ui.state.style->colors[color_id]);
+
+  if (color_id == BXR_UI_COLOR_SCROLLBASE
+      || color_id == BXR_UI_COLOR_SCROLLTHUMB
+      || color_id == BXR_UI_COLOR_TITLEBG) {
+    return;
+  }
+
+  // draw border
+  if (_ui.state.style->colors[BXR_UI_COLOR_BORDER].a) {
+    _bxr_ui_command_box(bxr_rect_expand(rect, 1),
+                        _ui.state.style->colors[BXR_UI_COLOR_BORDER]);
+  }
+}
+
 // Push a new layout to the layout stack with the given body and scroll offset.
 static void
 _bxr_ui_layout_push(bxr_rect_t body, bxr_vec2_t scroll)
 {
   _bxr_ui_layout_t layout;
+
   int width = 0;
+
   memset(&layout, 0, sizeof(layout));
+
   layout.body
       = bxr_rect_make(body.x - scroll.x, body.y - scroll.y, body.w, body.h);
   layout.max = bxr_vec2_make(-0x1000000, -0x1000000);
@@ -527,6 +563,139 @@ _bxr_ui_container_get_by_name(const char *name)
   return _bxr_ui_container_get(id, 0);
 }
 
+// Check if the current container is in the hovered root container by iterating
+// through the container stack from the top to the bottom until we find the
+// hovered root container or reach the current root container.
+static bool
+_bxr_ui_container_is_in_hovered_root()
+{
+  int i = _ui.state.current_container;
+  while (i--) {
+    if (_ui.state.containers[i] == _ui.state.hovered_root) {
+      return true;
+    }
+
+    // Only root containres have thier `head` memeber set.
+    // Stop searching if we've reached the current root container.
+    if (_ui.state.hovered_root[i].head) {
+      break;
+    }
+  }
+
+  return false;
+}
+
+// Check if the mouse is over the given rectangle
+static bool
+_bxr_ui_is_mouse_over(bxr_rect_t rect)
+{
+  bxr_vec2_t mouse_pos = bxr_mouse_pos();
+
+  // Is the mouse position within the given rectangle
+  // Is the mouse position within the current clipping rectangle
+  // Is the current container within the hovered root container
+  return bxr_rect_contains_point(rect, mouse_pos)
+         && bxr_rect_contains_point(bxr_ui_clip_rect_get(), mouse_pos)
+         && _bxr_ui_container_is_in_hovered_root();
+}
+
+static void
+_bxr_ui_draw_control_frame(bxr_ui_id_t id,
+                           bxr_rect_t rect,
+                           bxr_ui_color_e color_id,
+                           bxr_ui_opt_e opt)
+{
+  if (opt & BXR_UI_OPT_NOFRAME) {
+    return;
+  }
+
+  if (_ui.state.focused_id == id) {
+    color_id = BXR_UI_COLOR_BUTTONFOCUS;
+  } else if (_ui.state.hovered_id == id) {
+    color_id = BXR_UI_COLOR_BUTTONHOVER;
+  }
+
+  _bxr_ui_draw_frame(rect, color_id);
+}
+
+static void
+_bxr_ui_draw_control_text(const char *str,
+                          bxr_rect_t rect,
+                          bxr_ui_color_e color_id,
+                          bxr_ui_opt_e opt)
+{
+  bxr_ui_clip_rect_push(rect);
+
+  bxr_vec2_t position  = { 0, 0 };
+  bxr_vec2_t text_size = bxr_text_measure(_ui.state.style->font, str);
+
+  position.y = rect.y + (rect.h - text_size.y) * 0.5f;
+
+  if (opt & BXR_UI_OPT_ALIGNCENTER) {
+    position.x = rect.x + (rect.w - text_size.x) * 0.5f;
+  } else if (opt & BXR_UI_OPT_ALIGNRIGHT) {
+    position.x = rect.x + rect.w - text_size.x - _ui.state.style->padding;
+  } else { // default is left align
+    position.x = rect.x + _ui.state.style->padding;
+  }
+
+  bxr_ui_clip_rect_pop();
+}
+
+void
+bxr_ui_update_control(bxr_ui_id_t id, bxr_rect_t rect, bxr_ui_opt_e opt)
+{
+  int mouse_over = _bxr_ui_is_mouse_over(rect);
+
+  // Handle focuse update before handling no interact option.
+  if (_ui.state.focused_id == id) {
+    _ui.state.update_focus = true;
+  }
+
+  if (opt & BXR_UI_OPT_NOINTERACT) {
+    return;
+  }
+
+  bool any_mouse_pressed = bxr_mouse_just_pressed(BXR_MOUSE_LEFT)
+                           || bxr_mouse_just_pressed(BXR_MOUSE_RIGHT)
+                           || bxr_mouse_just_pressed(BXR_MOUSE_MIDDLE);
+
+  if (mouse_over && any_mouse_pressed) {
+    _ui.state.hovered_id = id;
+  }
+
+  // Handle focus update
+  if (_ui.state.focused_id == id) {
+    // Lose focus if the mouse is just pressed outside the control
+    if (any_mouse_pressed && !mouse_over) {
+      _ui.state.focused_id   = 0;
+      _ui.state.update_focus = true;
+    }
+
+    // Lose focus if the mouse is not pressed and the option to hold focus is
+    // not enabled
+    if (!any_mouse_pressed && ~opt & BXR_UI_OPT_HOLDFOCUS) {
+      _ui.state.focused_id   = 0;
+      _ui.state.update_focus = true;
+    }
+  }
+
+  // Handle hovered update
+  if (_ui.state.hovered_id == id) {
+    // Set focus to the control if the mouse is just pressed on it
+    if (any_mouse_pressed) {
+      _ui.state.focused_id   = id;
+      _ui.state.update_focus = true;
+    }
+    // Lose hovered if the mouse is just pressed outside the control
+    else if (!mouse_over) {
+      _ui.state.hovered_id = 0;
+    }
+  }
+
+  // TODO update gamepad and keyboard navigation here
+}
+
 void
 bxr_ui_setup(void)
 {
@@ -542,7 +711,7 @@ bxr_ui_shutdown(void)
 }
 
 void
-bxr_ui_begin()
+bxr_ui_begin(bxr_rect_t viewport)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(_ui.current_state < BXR_UI_STATE_MAX);
@@ -553,9 +722,7 @@ bxr_ui_begin()
   _ui.state._style = default_style;
   _ui.state.style  = &_ui.state._style;
 
-  // TODO get the viewport bounds from the painter.
-  // This will be used to calculate mouse position relative to the viewport.
-  // _ui.state.viewport = viewport;
+  _ui.state.viewport = viewport;
 
   bxr_vec2_t mouse_wheel   = bxr_mouse_wheel();
   _ui.state.scroll_delta.x = mouse_wheel.x;
@@ -676,7 +843,7 @@ bxr_ui_clip_rect_push(bxr_rect_t rect)
   SDL_assert(_ui.current_state > 0);
   SDL_assert(_ui.state.current_clip < BXR_UI_CLIP_MAX);
 
-  bxr_rect_t last = bxr_ui_get_clip_rect();
+  bxr_rect_t last = bxr_ui_clip_rect_get();
 
   bxr_rect_t intersected = bxr_rect_get_intersection(rect, last);
 
@@ -701,7 +868,7 @@ bxr_ui_clip_check(bxr_rect_t rect)
   SDL_assert(_initialized == BXR_INIT_COOKIE);
   SDL_assert(_ui.current_state > 0);
 
-  bxr_rect_t clip_rect = bxr_ui_get_clip_rect();
+  bxr_rect_t clip_rect = bxr_ui_clip_rect_get();
 
   if (bxr_rect_overlap(rect, clip_rect)) {
     if (bxr_rect_contains(clip_rect, rect)) {
@@ -735,7 +902,8 @@ bxr_ui_layout_end_column(void)
 
   current = _bxr_ui_layout_get();
 
-  // Pop the current layout from the stack (don't overwrite it)
+  // Pop the current layout from the stack (don't overwrite it, we need it to
+  // update the parent layout with the dimensions of the current layout).
   _ui.state.current_layout--;
 
   parent = _bxr_ui_layout_get();
@@ -816,8 +984,8 @@ bxr_ui_layout_next(void)
     // Set the height of the layout row
     retval.h = style->layout_dimensions.y;
 
-    // Ensure that dimensions are not zero or negative, if they are set them to
-    // the default size
+    // Ensure that dimensions are not zero or negative, if they are set them
+    // to the default size
     if (retval.w == 0) {
       retval.w = style->layout_dimensions.x + style->padding * 2;
     }

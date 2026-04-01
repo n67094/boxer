@@ -63,14 +63,20 @@ typedef enum
   BXR_UI_COLOR_MAX
 } bxr_ui_color_e;
 
+typedef Uint32 bxr_ui_id_t;
+
 void bxr_ui_setup(void);
 
 void bxr_ui_shutdown(void);
 
 /**
  * @brief Begin a new UI frame.
+ *
+ * @param viewport The viewport rectangle defining the area for the UI. This is
+ * typically the size of the window or a specific region where the UI should be
+ * rendered in case of multiple viewports.
  */
-void bxr_ui_begin(void);
+void bxr_ui_begin(bxr_rect_t viewport);
 
 /**
  * @brief End the current UI frame and submit draw commands.
@@ -89,7 +95,7 @@ void bxr_ui_end(void);
  *
  * @return A unique Uint32 ID for the UI element.
  */
-Uint32 bxr_ui_get_id(const void *data, int size);
+bxr_ui_id_t bxr_ui_get_id(const void *data, int size);
 
 /**
  * @brief Push a new ID onto the ID stack for nested UI elements.
@@ -110,19 +116,19 @@ void bxr_ui_pop_id(void);
  *
  * @param rect The new clipping rectangle to push onto the stack.
  */
-void bxr_ui_push_clip_rect(bxr_rect_t rect);
+void bxr_ui_clip_rect_push(bxr_rect_t rect);
 
 /**
  * @brief Pop the last clipping rectangle from the clip stack.
  */
-void bxr_ui_pop_clip_rect(void);
+void bxr_ui_clip_rect_pop(void);
 
 /**
  * @brief Get the current clipping rectangle from the top of the clip stack.
  *
  * @return The current clipping rectangle.
  */
-bxr_rect_t bxr_ui_get_clip_rect(void);
+bxr_rect_t bxr_ui_clip_rect_get(void);
 
 /**
  * @brief Check if a rectangle is inside, outside, or partially inside the

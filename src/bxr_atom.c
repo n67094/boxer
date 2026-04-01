@@ -87,7 +87,11 @@ bxr_atom_length(const char *str)
     atom = atom->link;
   }
 
-  // Fallback: full scan (handles embedded NULs/collisions)
+  SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+              "String not found in atom table, performing full scan.");
+
+  // Fallback: full scan of the atom table if the hash lookup fails (should be
+  // rare)
   for (int i = 0; i < BXR_ATOM_MAX; ++i) {
     for (atom = _buckets[i]; atom; atom = atom->link) {
       if (atom->str == str)

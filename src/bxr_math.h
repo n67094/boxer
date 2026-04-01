@@ -480,13 +480,13 @@ bxr_rect_area(bxr_rect_t rect)
 BXR_INLINE bool
 bxr_rect_overlap(bxr_rect_t r1, bxr_rect_t r2)
 {
-  if (r1.x + r1.w < r2.x)
+  if (r1.x + r1.w < r2.x) // Check if r1 is fully to the left of r2
     return false;
-  if (r2.x + r2.w < r1.x)
+  if (r2.x + r2.w < r1.x) // Check if r1 is fully to the right of r2
     return false;
-  if (r1.y + r1.h < r2.y)
+  if (r1.y + r1.h < r2.y) // Check if r1 is fully above r2
     return false;
-  if (r2.y + r2.h < r1.y)
+  if (r2.y + r2.h < r1.y) // Check if r1 is fully below r2
     return false;
 
   return true;
@@ -526,6 +526,24 @@ bxr_rect_contains(bxr_rect_t r1, bxr_rect_t r2)
   if (r2.y < r1.y)
     return false;
   if (r2.y + r2.h > r1.y + r1.h)
+    return false;
+
+  return true;
+}
+
+/**
+ * @brief Returns true if the rectangle contains the point
+ */
+BXR_INLINE bool
+bxr_rect_contains_point(bxr_rect_t rect, bxr_vec2_t point)
+{
+  if (point.x < rect.x)
+    return false;
+  if (point.x > rect.x + rect.w)
+    return false;
+  if (point.y < rect.y)
+    return false;
+  if (point.y > rect.y + rect.h)
     return false;
 
   return true;
