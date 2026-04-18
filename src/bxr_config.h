@@ -1,10 +1,12 @@
 /**
- * @file bxr_config.h
+ * file `bxr_config.h`
  *
- * @brief Boxer configuration.
+ * copyright Copyright (c) 2025 nsix. All rights reserved.
  *
- * @copyright Copyright (c) 2025 nsix. All rights reserved.
+ * # Boxer configuration.
  */
+
+// TODO SDL_gp config override ?
 
 #ifndef BXR_CONFIG_H_
 #define BXR_CONFIG_H_

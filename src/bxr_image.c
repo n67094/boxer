@@ -31,7 +31,7 @@ bxr_image_shutdown(void)
 }
 
 bxr_image_t
-bxr_image_load(const char *path)
+bxr_image_make(const char *path)
 {
   SDL_assert(path);
 
@@ -101,7 +101,7 @@ bxr_image_get_height(bxr_image_t image)
 }
 
 void
-bxr_destroy_image(bxr_image_t image)
+bxr_image_destroy(bxr_image_t image)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 

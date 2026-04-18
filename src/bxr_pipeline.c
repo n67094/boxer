@@ -12,7 +12,7 @@ bxr_pipeline_make(bxr_shader_t shader,
 };
 
 void
-bxr_destroy_pipeline(bxr_pipeline_t pipeline)
+bxr_pipeline_destroy(bxr_pipeline_t pipeline)
 {
   SDL_GPDestroyPipeline((SDL_GPPipeline)pipeline);
 };

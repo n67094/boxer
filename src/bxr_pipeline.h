@@ -63,6 +63,6 @@ bxr_pipeline_t bxr_pipeline_make(bxr_shader_t shader,
  *
  * `pipeline` is the pipeline to destroy.
  */
-void bxr_destroy_pipeline(bxr_pipeline_t pipeline);
+void bxr_pipeline_destroy(bxr_pipeline_t pipeline);
 
 #endif // BXR_PIPELINE_H_

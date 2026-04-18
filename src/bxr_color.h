@@ -1,9 +1,9 @@
 /**
- * @file bxr_color.h
+ * file `bxr_color.h`
  *
- * @brief Color utilities.
+ * copyright Copyright (c) 2025 nsix. All rights reserved.
  *
- * @copyright Copyright (c) 2025 nsix. All rights reserved.
+ * # Color utilities.
  */
 
 #ifndef BXR_COLOR_H_

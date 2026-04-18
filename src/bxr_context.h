@@ -1,4 +1,5 @@
 /**
+ * // TODO refactro doc, add window height and width.
  * @file bxr_context.h
  *
  * @brief Boxer context.

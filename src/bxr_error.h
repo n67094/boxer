@@ -1,9 +1,9 @@
 /**
- * @file bxr_error.h
+ * file `bxr_error.h`
  *
- * @brief The bxr error handling system.
+ * copyright Copyright (c) 2025 nsix. All rights reserved.
  *
- * @copyright Copyright (c) 2025 nsix. All rights reserved.
+ * # Error handling system.
  */
 
 #ifndef BXR_ERROR_H_
@@ -30,12 +30,35 @@ typedef enum
   BXR_ERROR_SIZE,
 } bxr_erro_code_e;
 
-bxr_erro_code_e bxr_get_error(void);
+/**
+ * ## Internal API
+ */
 
+/**
+ * Set the last error code.
+ *
+ * `error` is the error code to set.
+ */
 void bxr_set_error(bxr_erro_code_e error);
 
-void bxr_set_error_info(bxr_erro_code_e error, const char *info);
+/**
+ * ## Public API
+ */
 
+/**
+ * Get the last error code.
+ *
+ * `return` the last error code.
+ */
+bxr_erro_code_e bxr_get_error(void);
+
+/**
+ * Get the error message corresponding to the given error code.
+ *
+ * `error` is the error code to get the message for.
+ *
+ * `return` the error message corresponding to the given error code.
+ */
 const char *bxr_get_error_msg(bxr_erro_code_e error);
 
 #endif // BXR_ERROR_H_

@@ -1,4 +1,5 @@
 /**
+ * // TODO refactor documentation, add bxr_text.h function here
  * @file bxr_font.h
  *
  * @brief Font utilities.

@@ -1,9 +1,9 @@
 /**
- * @file bxr_defs.h
+ * file `bxr_defs.h`
  *
- * @brief Common definitions and macros.
+ * copyright Copyright (c) 2026 nsix. All rights reserved.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * # Common definitions and macros.
  */
 
 #ifndef BXR_DEFS_H_
@@ -19,9 +19,18 @@
 #define INLINE
 #endif
 
-#define BXR_INIT_COOKIE                                                        \
-  0xC0DED1ED // Magic value to indicate that a subsystem has been initialized
+// Magic value to indicate that a subsystem has been initialized
+#define BXR_INIT_COOKIE 0xC0DED1ED
 
+/**
+ * Get the offset of a struct member in bytes.
+ *
+ * `TYPE` is the type of the struct.
+ *
+ * `ELEMENT` is the name of the struct member.
+ *
+ * `return` the offset of the struct member in bytes.
+ */
 #define BXR_OFFSET_OF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
 
 #endif // BXR_DEFS_H_

@@ -64,8 +64,7 @@ bxr_image_t bxr_image_make(const char *path);
  *
  * `height` is the height of the image in pixels.
  *
- * `pixels` is a pointer to the pixel data in memory. The pixel format must
- * match the pixel format of the context's target texture.
+ * `pixels` is a pointer to the pixel data in memory.
  *
  * `return` the created image, or an invalid image if the image could not be
  * created.
@@ -96,6 +95,6 @@ int bxr_image_get_height(bxr_image_t image);
  *
  * `image` is the image to destroy.
  */
-void bxr_destroy_image(bxr_image_t image);
+void bxr_image_destroy(bxr_image_t image);
 
 #endif // BXR_IMAGE_H_
