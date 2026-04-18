@@ -15,18 +15,11 @@
 
 typedef enum
 {
-  BXR_FONT_ALIGN_LEFT,
-  BXR_FONT_ALIGN_CENTER,
-  BXR_FONT_ALIGN_RIGHT,
-} bxr_font_align_e;
-
-typedef enum
-{
   BXR_SAMPLER_POINT_CLAMP = 0,
   BXR_SAMPLER_POINT_WRAP,
   BXR_SAMPLER_LINEAR_CLAMP,
   BXR_SAMPLER_LINEAR_WRAP,
-  BXR_SAMPLE_SIZE,
+  BXR_SAMPLER_SIZE,
 } bxr_sampler_e;
 
 typedef struct bxr_image_s

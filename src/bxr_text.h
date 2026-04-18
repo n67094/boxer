@@ -1,4 +1,5 @@
 /**
+ * TODO  move to bxr_font.h
  * @file bxr_text.h
  *
  * @brief Text utilities.

@@ -1,5 +1,4 @@
 #include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 
 #include <SDL3/SDL_init.h>
 #define SDL_MAIN_USE_CALLBACKS
@@ -164,11 +163,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     return SDL_APP_FAILURE;
   }
 
-  if (!TTF_Init()) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL_ttf.");
-    return SDL_APP_FAILURE;
-  }
-
   int flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
   flags |= context->config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
@@ -310,7 +304,7 @@ SDL_AppIterate(void *appstate)
                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
-
+  // TODO can assigne context cmd_buffer above
   context->cmd_buffer = cmd_buffer;
 
   SDL_GPUTexture *swapchain_texture = NULL;
@@ -322,6 +316,7 @@ SDL_AppIterate(void *appstate)
                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
+  // TODO same as above for swapchain
   context->target_texture = swapchain_texture;
 
   context->alpha_ms = context->lag_ms / context->delta_ms;
@@ -439,6 +434,5 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 
   PHYSFS_deinit();
 
-  TTF_Quit();
   SDL_Quit();
 }

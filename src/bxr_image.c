@@ -243,6 +243,7 @@ SDL_GPUTexture *
 bxr_image_get_texture(bxr_image_t image)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
+  // TODO return NULL instead of asserting
   SDL_assert(image.id != BXR_INVALID_ID);
 
   int slot_index = bxr_resource_id_to_slot(image.id);
@@ -253,6 +254,7 @@ int
 bxr_image_get_width(bxr_image_t image)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
+  // TODO return NULL instead of asserting
   SDL_assert(image.id != BXR_INVALID_ID);
 
   int slot_index = bxr_resource_id_to_slot(image.id);
@@ -263,6 +265,7 @@ int
 bxr_image_get_height(bxr_image_t image)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
+  // TODO return NULL instead of asserting
   SDL_assert(image.id != BXR_INVALID_ID);
 
   int slot_index = bxr_resource_id_to_slot(image.id);

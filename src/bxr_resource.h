@@ -1,4 +1,5 @@
 /**
+ * TODO re-rename as pool
  * @file bxr_resource.h
  *
  * @brief Pool structure definition for managing reusable IDs (resource
@@ -29,10 +30,10 @@
 
 typedef struct bxr_resource_s
 {
-  size_t size;
-  int queue_top;
+  size_t size;      // total number of slots in the resource
+  int queue_top;    // index of the top of the free slot stack
   Uint32 *counters; // incrementing generation counters for each slot
-  int *free_queue;
+  int *free_queue;  // stack of free slot indices for efficient reuse
 } bxr_resource_t;
 
 bxr_resource_t *bxr_resource_make(size_t number_of_ids);

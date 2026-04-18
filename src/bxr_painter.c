@@ -11,7 +11,6 @@
 #include "bxr_painter.h"
 #include "bxr_pipeline.h"
 #include "bxr_shader.h"
-#include "bxr_text.h"
 
 typedef enum
 {
@@ -117,7 +116,7 @@ typedef struct _bxr_painter_s
 
   bxr_pipeline_t pipelines[BXR_PRIMITIVE_SIZE * BXR_BLENDMODE_SIZE];
 
-  SDL_GPUSampler *samplers[BXR_SAMPLE_SIZE];
+  SDL_GPUSampler *samplers[BXR_SAMPLER_SIZE];
 
   bxr_image_t white_image;
 
@@ -560,7 +559,7 @@ bxr_painter_setup(bxr_context_t *context)
     return;
   }
 
-  for (int i = 0; i < BXR_SAMPLE_SIZE; ++i) {
+  for (int i = 0; i < BXR_SAMPLER_SIZE; ++i) {
     SDL_GPUSamplerCreateInfo sampler_info
         = _bxr_painter_sampler((bxr_sampler_e)i);
     SDL_GPUSampler *sampler
@@ -596,7 +595,7 @@ bxr_painter_shutdown()
 
   bxr_shader_destroy(_painter.shader);
 
-  for (int i = 0; i < BXR_SAMPLE_SIZE; ++i) {
+  for (int i = 0; i < BXR_SAMPLER_SIZE; ++i) {
     SDL_ReleaseGPUSampler(_context->gpu_device, _painter.samplers[i]);
   }
 
@@ -648,6 +647,7 @@ bxr_painter_begin(void)
 
   _painter.state.thickness    = SDL_max(1.0f / width, 1.0f / height);
   _painter.state.base_vertex  = _painter.current_vertex;
+  _painter.state.base_uniform = _painter.current_uniform;
   _painter.state.base_command = _painter.current_command;
 }
 
@@ -720,6 +720,8 @@ bxr_painter_flush()
                                1,
                                NULL);
 
+  // Flush commands
+
   Uint32 cur_pipeline_id   = BXR_IMPOSSIBLE_ID;
   Uint32 cur_uniform_index = BXR_IMPOSSIBLE_ID;
   Uint32 cur_image_ids[BXR_PAINTER_TEXTURE_SLOTS_MAX];
@@ -727,7 +729,6 @@ bxr_painter_flush()
     cur_image_ids[i] = BXR_IMPOSSIBLE_ID;
   }
 
-  // Flush commands
   for (Uint32 i = _painter.state.base_command; i < end_command; ++i) {
     _bxr_painter_command_t *cmd = &_painter.commands[i];
 
@@ -1822,6 +1823,7 @@ bxr_painter_draw_rects_textured(int channel,
   // Queue draw
   bxr_pipeline_t pipeline = _bxr_painter_lookup_pipeline(
       BXR_PRIMITIVE_TRIANGLES, _painter.state.blend_mode);
+
   _bxr_painter_queue_draw(
       pipeline, region, vertex_index, total_vertices, BXR_PRIMITIVE_TRIANGLES);
 }
