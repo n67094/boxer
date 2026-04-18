@@ -43,6 +43,8 @@ LIB_DIR := lib
 PHYSFS_SRC_DIR := $(LIB_DIR)/physfs
 PHYSFS_INC_DIR := $(LIB_DIR)/physfs
 
+SDL_GP_INC_DIR := $(LIB_DIR)/SDL_gp
+
 # Options
 
 DEBUG ?= 0
@@ -58,7 +60,7 @@ LDFLAGS = -lSDL3 -lSDL3_ttf -lm
 CFLAGS = -std=c99 -Wall
 CXXFLAGS = -std=c++11 -Wall
 
-INC_FLAGS := -I$(PHYSFS_INC_DIR) -I$(BOXER_INC_DIR) -I$(GAME_INC_DIR)
+INC_FLAGS := -I$(PHYSFS_INC_DIR) -I$(SDL_GP_INC_DIR) -I$(BOXER_INC_DIR) -I$(GAME_INC_DIR)
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -O0 -DDEBUG -D_GNU_SOURCE $(INC_FLAGS)

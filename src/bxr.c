@@ -1,3 +1,5 @@
+// TODO add SDL_gp init
+
 #include <SDL3/SDL.h>
 
 #include <SDL3/SDL_init.h>
@@ -24,8 +26,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
   if (!PHYSFS_init(NULL)) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to init PhysFS (error code: %d)",
-                 PHYSFS_getLastErrorCode());
+                 "Failed to init PhysFS (error: %s)",
+                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return SDL_APP_FAILURE;
   }
 
@@ -33,9 +35,9 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   const char *write_dir = PHYSFS_getPrefDir("boxer_bxr", config->name);
   if (!PHYSFS_setWriteDir(write_dir)) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to set write dir to %s: (error code: %d)",
+                "Failed to set write dir to %s: (error: %s)",
                 write_dir,
-                PHYSFS_getLastErrorCode());
+                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return SDL_APP_FAILURE;
   }
 
@@ -45,9 +47,9 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   // PHYSFS mounts directory (write dir)
   if (!PHYSFS_mount(write_dir, NULL, 1)) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to mount write dir %s: (error code: %d)",
+                "Failed to mount write dir %s: (error: %s)",
                 write_dir,
-                PHYSFS_getLastErrorCode());
+                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return SDL_APP_FAILURE;
   }
   SDL_LogInfo(
@@ -60,9 +62,9 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
   if (!PHYSFS_mount(mount_dir, "data/", 1)) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to mount %s: (error code: %d)",
+                "Failed to mount %s: (error: %s)",
                 mount_dir,
-                PHYSFS_getLastErrorCode());
+                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return SDL_APP_FAILURE;
   }
   SDL_LogInfo(
@@ -244,8 +246,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   bxr_gamepad_setup();
   bxr_image_setup(context);
   bxr_shader_setup(context);
-  bxr_pipeline_setup(context);
-  bxr_painter_setup(context);
 
   // Call user setup
   bxr_game_setup();
@@ -413,10 +413,8 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
   bxr_keyboard_shutdown();
   bxr_mouse_shutdown();
   bxr_gamepad_shutdown();
-  bxr_painter_shutdown();
-  bxr_pipeline_shutdown();
-  bxr_shader_shutdown();
   bxr_image_shutdown();
+  bxr_shader_shutdown();
 
   if (context) {
     if (context->gpu_device && context->window) {

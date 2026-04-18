@@ -44,29 +44,20 @@ bxr_get_error_msg(bxr_erro_code_e error)
   case BXR_ERROR_FILE_NOT_FOUND:
     return "File not found.";
   // bxr_shader.c errors
-  case BXR_ERROR_SHADER_LOAD:
-    return "Shader load error.";
+  case BXR_ERROR_SHADER_NAME:
+    return "Shader name error.";
+  case BXR_ERROR_SHADER_FORMAT:
+    return "Shader format error.";
   case BXR_ERROR_SHADER_LOAD_BYTECODE:
     return "Shader load bytecode error.";
-  // bxr_image.c errors
-  case BXR_ERROR_IMAGE_SETUP:
-    return "Image setup error.";
-  case BXR_ERROR_IMAGE_LOAD:
-    return "Image load error.";
+    // bxr_image.c errors
+  case BXR_ERROR_IMAGE_FILE:
+    return "Image open file error.";
+  case BXR_ERROR_IMAGE_MAKE:
+    return "Image make error.";
   case BXR_ERROR_IMAGE_MAKE_MEM:
-    return "Image from memory error.";
-  // bxr_painter.c errors
-  case BXR_ERROR_PAINTER_SETUP:
-    return "Painter setup error.";
-  case BXR_ERROR_PAINTER_VERTICES_FULL:
-    return "Painter vertices buffer full.";
-  case BXR_ERROR_PAINTER_COMMANDS_FULL:
-    return "Painter commands buffer full.";
-  case BXR_ERROR_PAINTER_UNIFORMS_FULL:
-    return "Painter uniforms buffer full.";
-  case BXR_ERROR_PAINTER_FLUSH:
-    return "Painter flush error.";
-  // bxr_io.c errors
+    return "Image make from memory error.";
+    // bxr_io.c errors
   case BXR_ERROR_IO_READ:
     return "IO read error.";
   case BXR_ERROR_IO_WRITE:

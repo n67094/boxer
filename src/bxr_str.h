@@ -11,6 +11,8 @@
 
 #include "bxr_defs.h"
 
+// TODO proxy other SDL string functions if needed.
+
 BXR_INLINE char *
 bxr_strtrim(char *str)
 {

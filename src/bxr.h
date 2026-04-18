@@ -1,9 +1,9 @@
 /**
- * @file bxr.h
+ * file bxr.h
  *
- * @brief The main header file for the Boxer Engine.
+ * The main header file for the Boxer Engine.
  *
- * @copyright Copyright (c) 2025 nsix. All rights reserved.
+ * copyright Copyright (c) 2025 nsix. All rights reserved.
  */
 
 #ifndef BXR_H_
@@ -11,7 +11,6 @@
 
 #include <SDL3/SDL.h>
 
-#include "bxr_atom.h"
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_context.h"
@@ -30,7 +29,7 @@
 #include "bxr_mouse.h"
 #include "bxr_painter.h"
 #include "bxr_pipeline.h"
-#include "bxr_resource.h"
+#include "bxr_pool.h"
 #include "bxr_shader.h"
 #include "bxr_text.h"
 #include "bxr_unit.h"

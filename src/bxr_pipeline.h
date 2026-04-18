@@ -1,66 +1,68 @@
 /**
- * @file bxr_pipeline.h
+ * file bxr_pipeline.h
  *
- * @brief Graphics pipeline management and utilities.
+ * copyright Copyright (c) 2026 nsix. All rights reserved.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * # Graphics pipeline management.
  */
 
 #ifndef BXR_PIPELINE_H_
 #define BXR_PIPELINE_H_
 
-#include <SDL3/SDL_gpu.h>
+#include <SDL_gp.h>
 
-#include "bxr_color.h"
-#include "bxr_context.h"
-#include "bxr_math.h"
+#include "bxr_shader.h"
+
+typedef SDL_GPPipeline bxr_pipeline_t;
 
 typedef enum
 {
-  BXR_BLENDMODE_NONE                = SDL_BLENDMODE_NONE,
-  BXR_BLENDMODE_BLEND               = SDL_BLENDMODE_BLEND,
-  BXR_BLENDMODE_BLEND_PREMULTIPLIED = SDL_BLENDMODE_BLEND_PREMULTIPLIED,
-  BXR_BLENDMODE_ADD                 = SDL_BLENDMODE_ADD,
-  BXR_BLENDMODE_ADD_PREMULTIPLIED   = SDL_BLENDMODE_ADD_PREMULTIPLIED,
-  BXR_BLENDMODE_MOD                 = SDL_BLENDMODE_MOD,
-  BXR_BLENDMODE_MUL                 = SDL_BLENDMODE_MUL,
-  BXR_BLENDMODE_SIZE                = 7,
+  BXR_BLENDMODE_NONE                = SDL_GP_BLENDMODE_NONE,
+  BXR_BLENDMODE_BLEND               = SDL_GP_BLENDMODE_BLEND,
+  BXR_BLENDMODE_BLEND_PREMULTIPLIED = SDL_GP_BLENDMODE_BLEND_PREMULTIPLIED,
+  BXR_BLENDMODE_ADD                 = SDL_GP_BLENDMODE_ADD,
+  BXR_BLENDMODE_ADD_PREMULTIPLIED   = SDL_GP_BLENDMODE_ADD_PREMULTIPLIED,
+  BXR_BLENDMODE_MOD                 = SDL_GP_BLENDMODE_MOD,
+  BXR_BLENDMODE_MUL                 = SDL_GP_BLENDMODE_MUL,
+  BXR_BLENDMODE_SIZE                = SDL_GP_BLENDMODE_SIZE,
 } bxr_blendmode_e;
 
 typedef enum
 {
-  BXR_PRIMITIVE_TRIANGLES      = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
-  BXR_PRIMITIVE_TRIANGLE_STRIP = SDL_GPU_PRIMITIVETYPE_TRIANGLESTRIP,
-  BXR_PRIMITIVE_LINES          = SDL_GPU_PRIMITIVETYPE_LINELIST,
-  BXR_PRIMITIVE_LINE_STRIP     = SDL_GPU_PRIMITIVETYPE_LINESTRIP,
-  BXR_PRIMITIVE_POINTS         = SDL_GPU_PRIMITIVETYPE_POINTLIST,
-  BXR_PRIMITIVE_SIZE           = 5,
+  BXR_PRIMITIVE_TRIANGLES      = SDL_GP_PRIMITIVE_TRIANGLES,
+  BXR_PRIMITIVE_TRIANGLE_STRIP = SDL_GP_PRIMITIVE_TRIANGLE_STRIP,
+  BXR_PRIMITIVE_LINES          = SDL_GP_PRIMITIVE_LINES,
+  BXR_PRIMITIVE_LINE_STRIP     = SDL_GP_PRIMITIVE_LINE_STRIP,
+  BXR_PRIMITIVE_POINTS         = SDL_GP_PRIMITIVE_POINTS,
+  BXR_PRIMITIVE_SIZE           = SDL_GP_PRIMITIVE_SIZE,
 } bxr_primitive_e;
 
-typedef struct bxr_vertex_s
-{
-  bxr_vec2_t position;
-  bxr_vec2_t texcoord;
-  bxr_color_t color;
-} bxr_vertex_t;
-
-typedef struct bxr_pipeline_s
-{
-  Uint32 id;
-} bxr_pipeline_t;
-
-void bxr_pipeline_setup(bxr_context_t *context);
-
-void bxr_pipeline_shutdown(void);
+/**
+ * ## Public API
+ */
 
 /**
- * @brief Attach an SDL pipeline to an bxr pipeline. Usefull to use custom
- * pipelines with the painter.
+ * Create a graphics pipeline with the given shader, primitive type, and blend
+ * mode.
+ *
+ * `shader` is the shader to use for the pipeline.
+ *
+ * `primitive_type` is the type of primitives to render with the pipeline.
+ *
+ * `blend_mode` is the blend mode to use for rendering with the pipeline.
+ *
+ * `return` the created pipeline, or an invalid pipeline if the pipeline could
+ * not be created.
  */
-bxr_pipeline_t bxr_pipeline_attach(SDL_GPUGraphicsPipeline *pipeline);
+bxr_pipeline_t bxr_pipeline_make(bxr_shader_t shader,
+                                 bxr_primitive_e primitive_type,
+                                 bxr_blendmode_e blend_mode);
 
-SDL_GPUGraphicsPipeline *bxr_pipeline_get(bxr_pipeline_t pipeline);
-
-void bxr_pipeline_destroy(bxr_pipeline_t pipeline);
+/**
+ * Destroy a graphics pipeline.
+ *
+ * `pipeline` is the pipeline to destroy.
+ */
+void bxr_destroy_pipeline(bxr_pipeline_t pipeline);
 
 #endif // BXR_PIPELINE_H_

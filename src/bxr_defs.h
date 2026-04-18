@@ -9,6 +9,8 @@
 #ifndef BXR_DEFS_H_
 #define BXR_DEFS_H_
 
+#include <SDL_gp.h>
+
 #if defined(_MSC_VER)
 #define INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__)
@@ -16,9 +18,6 @@
 #else
 #define INLINE
 #endif
-
-#define BXR_INVALID_ID 0
-#define BXR_IMPOSSIBLE_ID 0xFFFFFFFF
 
 #define BXR_INIT_COOKIE                                                        \
   0xC0DED1ED // Magic value to indicate that a subsystem has been initialized
