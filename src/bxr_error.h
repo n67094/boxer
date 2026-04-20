@@ -21,6 +21,8 @@ typedef enum
   BXR_ERROR_IMAGE_FILE,
   BXR_ERROR_IMAGE_MAKE,
   BXR_ERROR_IMAGE_MAKE_MEM,
+  // bxr_sampler.c errors
+  BXR_ERROR_SAMPLER_MAKE,
   // bxr_io.c errors
   BXR_ERROR_IO_READ,
   BXR_ERROR_IO_WRITE,

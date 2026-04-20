@@ -1,11 +1,9 @@
 /**
- * @file bxr_math.h
+ * file `bxr_math.h`
  *
- * Thanks to empyreanx (pico_headers) for the math utilities inspiration.
+ * Copyright Copyright (c) 2025 nsix. All rights reserved.
  *
- * @brief Mathematical utilities.
- *
- * @copyright Copyright (c) 2025 nsix. All rights reserved.
+ * # Mathematical and Geometric utilities.
  */
 
 #ifndef BXR_MATH_H_
@@ -48,19 +46,31 @@ typedef struct bxr_vec2_s
   float x, y;
 } bxr_vec2_t;
 
-typedef struct bxr_vec3_s
-{
-  float x, y, z;
-} bxr_vec3_t;
+typedef bxr_vec2_t bxr_point_t;
 
-// Scalar functions and macros
-// -------------------------------------------------------------------------
+/**
+ * ## Scalar functions and macros
+ */
 
+/**
+ * `return` the minimum of `a` and `b`.
+ */
 #define BXR_MIN(a, b) (((a) < (b)) ? (a) : (b))
+
+/**
+ * `return` the maximum of `a` and `b`.
+ */
 #define BXR_MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 /**
- * @brief Clamps the value to the given range
+ * Clamps the value to the given range.
+ *
+ * `val` is the value to clamp.
+ *
+ * `min` is the minimum value of the range.
+ *
+ * `max` is the maximum value of the range.
+ *
  */
 inline float
 bxr_clamp(float val, float min, float max)
@@ -69,12 +79,13 @@ bxr_clamp(float val, float min, float max)
 }
 
 /**
- * @brief Computes the sign of the number
+ * Computes the sign of the number.
  *
- * @returns:
- * -1 if `val` is less than zero
- *  0 if `val` is equal to zero
- *  1 if `val` is greater than zero
+ * `return`:
+ *
+ * - -1 if `val` is less than zero;
+ * - 0 if `val` is equal to zero;
+ * - 1 if `val` is greater than zero.
  */
 BXR_INLINE float
 bxr_sign(float val)
@@ -83,7 +94,7 @@ bxr_sign(float val)
 }
 
 /**
- * @brief Returns `true` if the values are within epsilon of one another
+ * `return` `true` if the values are within epsilon of one another.
  */
 BXR_INLINE bool
 bxr_equal(float c1, float c2)
@@ -92,10 +103,11 @@ bxr_equal(float c1, float c2)
 }
 
 /**
- * @brief Linearly interpolates the two values
+ * Linearly interpolates the two values.
  *
- * @param step A number in [0, 1] that specifies the position between the values
+ * `step` a number in [0, 1] that specifies the position between the values.
  *
+ * `return` the interpolated value.
  */
 BXR_INLINE float
 bxr_lerp(float a, float b, float step)
@@ -104,12 +116,16 @@ bxr_lerp(float a, float b, float step)
 }
 
 /**
- * @brief Linearly interpolates between two angles
+ * Linearly interpolates between two angles.
  *
- * @param angle1 The first angle in radians
- * @param angle2 The second angle in radians
- * @param step A number in [0, 1] that specifies the position between the
- * angles
+ * `angle1` The first angle in radians.
+ *
+ * `angle2` The second angle in radians.
+ *
+ * `step` a number in [0, 1] that specifies the position between the
+ * angles.
+ *
+ * `return` the interpolated angle in radians.
  */
 BXR_INLINE float
 bxr_lerp_angle(float angle1, float angle2, float step)
@@ -125,9 +141,11 @@ bxr_lerp_angle(float angle1, float angle2, float step)
 }
 
 /**
- * @brief Clamps the angle to be in [0, 2 * BXR_PI]
+ * Clamps the angle to be in [0, 2 * BXR_PI].
  *
- * @param angle The angle in radians
+ * `angle` The angle in radians.
+ *
+ * `return` the normalized angle in radians.
  */
 BXR_INLINE float
 bxr_normalize_angle(float angle)
@@ -141,16 +159,26 @@ bxr_normalize_angle(float angle)
   return angle;
 }
 
-// Vectors 2
-// -------------------------------------------------------------------------
+/**
+ * ## Point
+ */
 
 /**
- * @brief Constructs a vector
+ * Constructs a point.
+ */
+#define bxr_point_make(x, y) ((const bxr_point_t){ x, y })
+
+/**
+ * Vectors 2
+ */
+
+/**
+ * Constructs a vector.
  */
 #define bxr_vec2_make(x, y) ((const bxr_vec2_t){ x, y })
 
 /**
- * @brief Returns true if the vectors are equal (within epsilon)
+ * `returns` true if the vectors are equal (within epsilon).
  */
 BXR_INLINE bool
 bxr_vec2_equal(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -159,7 +187,7 @@ bxr_vec2_equal(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Adds two vectors
+ * `retrurn` the sum of two vectors.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_add(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -168,7 +196,7 @@ bxr_vec2_add(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Subtracts two vectors
+ * `return` the difference of two vectors.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_sub(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -177,7 +205,8 @@ bxr_vec2_sub(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Multiplies two vectors component-wise
+ *
+ * `return` the product of two vectors.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_mul(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -186,7 +215,7 @@ bxr_vec2_mul(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Divides two vectors component-wise
+ * `return` the quotient of two vectors.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_div(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -195,7 +224,7 @@ bxr_vec2_div(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Scales a vector
+ * `return` the vector scaled by the specified scalar.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_scale(bxr_vec2_t v, float c)
@@ -204,7 +233,7 @@ bxr_vec2_scale(bxr_vec2_t v, float c)
 }
 
 /**
- * @brief Dot product
+ * `return` the dot product of two vectors.
  */
 BXR_INLINE float
 bxr_vec2_dot(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -213,7 +242,7 @@ bxr_vec2_dot(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Returns the square of the length of the vector
+ * `return` the squared length of the vector.
  */
 BXR_INLINE float
 bxr_vec2_len2(bxr_vec2_t v)
@@ -222,7 +251,7 @@ bxr_vec2_len2(bxr_vec2_t v)
 }
 
 /**
- * @brief Returns the length of the vector
+ * `return` the length of the vector (magnitude).
  */
 BXR_INLINE float
 bxr_vec2_len(bxr_vec2_t v)
@@ -231,7 +260,8 @@ bxr_vec2_len(bxr_vec2_t v)
 }
 
 /**
- * @brief Normalizes a vector (sets its length to one)
+ * `return` the normalized vector (vector with length 1). If the vector has zero
+ * length, the zero vector is returned.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_normalize(bxr_vec2_t v)
@@ -245,7 +275,7 @@ bxr_vec2_normalize(bxr_vec2_t v)
 }
 
 /**
- * @brief Negates a vector (scales it by -1.0)
+ * `return` the negation of the vector.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_reflect(bxr_vec2_t v)
@@ -254,7 +284,7 @@ bxr_vec2_reflect(bxr_vec2_t v)
 }
 
 /**
- * @brief Construct a vector that is perpendicular to the specified vector
+ * `return` a vector that is perpendicular to the specified vector.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_perp(bxr_vec2_t v)
@@ -263,7 +293,7 @@ bxr_vec2_perp(bxr_vec2_t v)
 }
 
 /**
- * @brief A 2D analog of the 3D cross product
+ * `return` A 2D analog of the 3D cross product.
  */
 BXR_INLINE float
 bxr_vec2_cross(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -273,7 +303,7 @@ bxr_vec2_cross(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Returns the angle the vector with respect to the current basis
+ * `return` the angle the vector with respect to the current basis.
  */
 BXR_INLINE float
 bxr_vec2_angle(bxr_vec2_t v)
@@ -282,7 +312,7 @@ bxr_vec2_angle(bxr_vec2_t v)
 }
 
 /**
- * @brief Projects a vector onto another
+ * `return` the projection of `v1` onto `v2`.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_proj(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -293,7 +323,7 @@ bxr_vec2_proj(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Returns the distance between the two vectors
+ * `return` the distance between the two vectors.
  */
 BXR_INLINE float
 bxr_vec2_dist(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -304,7 +334,7 @@ bxr_vec2_dist(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Linearly interpolates between two vectors
+ * `return` the linearly interpolates between two vectors.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_lerp(bxr_vec2_t v1, bxr_vec2_t v2, float step)
@@ -318,12 +348,12 @@ bxr_vec2_lerp(bxr_vec2_t v1, bxr_vec2_t v2, float step)
 }
 
 /**
- * @brief Returns the zero vector
+ * `returns` the zero vector.
  */
 #define bxr_vec2_t_zero() (bxr_vec2_make(0.0f, 0.0f))
 
 /**
- * @brief Contructs a vector in polar coordinates
+ * `return` a vector in polar coordinates.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_polar(float angle, float len)
@@ -332,7 +362,7 @@ bxr_vec2_polar(float angle, float len)
 }
 
 /**
- * @brief Computes the component-wise minimum of two vectors
+ * `return` the component-wise minimum of two vectors.
  */
 BXR_INLINE bxr_vec2_t
 vec2_min(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -341,7 +371,7 @@ vec2_min(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Computes the component-wise maximum of two vectors
+ * `return` the component-wise maximum of two vectors.
  */
 BXR_INLINE bxr_vec2_t
 vec2_max(bxr_vec2_t v1, bxr_vec2_t v2)
@@ -350,7 +380,7 @@ vec2_max(bxr_vec2_t v1, bxr_vec2_t v2)
 }
 
 /**
- * @brief Computes the component-wise floor of the specified vector
+ * `return` the component-wise floor of the specified vector.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_floor(bxr_vec2_t v)
@@ -359,7 +389,7 @@ bxr_vec2_floor(bxr_vec2_t v)
 }
 
 /**
- * @brief Computes the component-wise ceiling of the specified vector
+ * `return` the component-wise ceiling of the specified vector.
  */
 BXR_INLINE bxr_vec2_t
 bxr_vec2_ceil(bxr_vec2_t v)
@@ -367,93 +397,42 @@ bxr_vec2_ceil(bxr_vec2_t v)
   return bxr_vec2_make(bxr_ceil(v.x), bxr_ceil(v.y));
 }
 
-// Vectors 3
-// -------------------------------------------------------------------------
-
 /**
- * @brief Constructs a vector
+ * ## Line
  */
-#define bxr_vec3_make(x, y, z) ((const bxr_vec3_t){ x, y, z })
-
-/**
- * @brief Returns true if the vectors are equal (within epsilon)
- */
-BXR_INLINE bool
-bxr_vec3_equal(bxr_vec3_t v1, bxr_vec3_t v2)
-{
-  return bxr_equal(v1.x, v2.x) && bxr_equal(v1.y, v2.y)
-         && bxr_equal(v1.z, v2.z);
-}
-
-/**
- * @brief Adds two vectors
- */
-BXR_INLINE bxr_vec3_t
-bxr_vec3_add(bxr_vec3_t v1, bxr_vec3_t v2)
-{
-  return bxr_vec3_make(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
-}
-
-/**
- * @brief Subtracts two vectors
- */
-BXR_INLINE bxr_vec3_t
-bxr_vec3_sub(bxr_vec3_t v1, bxr_vec3_t v2)
-{
-  return bxr_vec3_make(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
-}
-
-/**
- * @brief Multiplies two vectors component-wise
- */
-BXR_INLINE bxr_vec3_t
-bxr_vec3_mul(bxr_vec3_t v1, bxr_vec3_t v2)
-{
-  return bxr_vec3_make(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
-}
-
-/**
- * @brief Divides two vectors component-wise
- */
-BXR_INLINE bxr_vec3_t
-bxr_vec3_div(bxr_vec3_t v1, bxr_vec3_t v2)
-{
-  return bxr_vec3_make(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
-}
-
-// Line
-// --------------------------------------------------------------------------
 
 typedef struct bxr_line_s
 {
-  bxr_vec2_t p0;
-  bxr_vec2_t p1;
+  bxr_vec2_t a;
+  bxr_vec2_t b;
 } bxr_line_t;
 
 /**
- * @brief Construct a line
+ * Construct a line
  */
 #define bxr_line_make(ax, ay, bx, by)                                          \
   ((const bxr_line_t){ { ax, ay }, { bx, by } })
 
-// Triangle
-// --------------------------------------------------------------------------
+/**
+ * ## Triangle
+ */
 
 typedef struct bxr_triangle_s
 {
-  bxr_vec2_t p0;
-  bxr_vec2_t p1;
-  bxr_vec2_t p2;
+  bxr_vec2_t a;
+  bxr_vec2_t b;
+  bxr_vec2_t c;
 } bxr_triangle_t;
 
 /**
- * @brief Construct a triangle
+ * Construct a triangle
  */
 #define bxr_triangle_make(ax, ay, bx, by, cx, cy)                              \
   ((const bxr_triangle_t){ { ax, ay }, { bx, by }, { cx, cy } })
 
-// Rectangle
-// --------------------------------------------------------------------------
+/**
+ * ## Rectangle
+ */
 
 typedef struct bxr_rect_s
 {
@@ -461,12 +440,12 @@ typedef struct bxr_rect_s
 } bxr_rect_t;
 
 /**
- * @brief Construct a rectangle
+ * Construct a rectangle
  */
 #define bxr_rect_make(x, y, w, h) ((const bxr_rect_t){ x, y, w, h })
 
 /**
- * @brief Returns the area of the rectangle
+ * `returns` the area of the rectangle
  */
 BXR_INLINE float
 bxr_rect_area(bxr_rect_t rect)
@@ -475,7 +454,7 @@ bxr_rect_area(bxr_rect_t rect)
 }
 
 /**
- * @brief Returns true if the rectangles overlap
+ * `returns` true if the rectangles overlap
  */
 BXR_INLINE bool
 bxr_rect_overlap(bxr_rect_t r1, bxr_rect_t r2)
@@ -493,8 +472,10 @@ bxr_rect_overlap(bxr_rect_t r1, bxr_rect_t r2)
 }
 
 /**
- * @brief Returns the intersection of the two rectangles. If they don't overlap,
- * returns a rectangle starting at r2 x, y with zero width and height.
+ * `returns` the intersection of the two rectangles.
+ *
+ * If they don't overlap, `return` a rectangle starting at r2 x, y with zero
+ * width and height.
  */
 BXR_INLINE bxr_rect_t
 bxr_rect_get_intersection(bxr_rect_t r1, bxr_rect_t r2)
@@ -514,7 +495,7 @@ bxr_rect_get_intersection(bxr_rect_t r1, bxr_rect_t r2)
 }
 
 /**
- * @brief Returns true if r1 completely contains r2
+ * `return` true if r1 completely contains r2.
  */
 BXR_INLINE bool
 bxr_rect_contains(bxr_rect_t r1, bxr_rect_t r2)
@@ -532,7 +513,7 @@ bxr_rect_contains(bxr_rect_t r1, bxr_rect_t r2)
 }
 
 /**
- * @brief Returns true if the rectangle contains the point
+ * `return` true if the rectangle contains the point.
  */
 BXR_INLINE bool
 bxr_rect_contains_point(bxr_rect_t rect, bxr_vec2_t point)
@@ -550,7 +531,7 @@ bxr_rect_contains_point(bxr_rect_t rect, bxr_vec2_t point)
 }
 
 /**
- * @brief Returns true if the rectangles are adjacent (share a side)
+ * `return` true if the rectangles are adjacent (share a side).
  */
 BXR_INLINE bool
 bxr_rect_adjacent(bxr_rect_t r1, bxr_rect_t r2)
@@ -562,8 +543,8 @@ bxr_rect_adjacent(bxr_rect_t r1, bxr_rect_t r2)
 }
 
 /**
- * @brief Return a rectangle that is expanded by the specified amount in all
- * directions
+ * `return` a rectangle that is expanded by the specified amount in all
+ * directions.
  */
 BXR_INLINE bxr_rect_t
 bxr_rect_expand(bxr_rect_t rect, float amount)
@@ -575,8 +556,8 @@ bxr_rect_expand(bxr_rect_t rect, float amount)
 }
 
 /**
- * @brief Return a rectangle that is contracted by the specified amount in all
- * directions
+ * `return` a rectangle that is contracted by the specified amount in all
+ * directions.
  */
 bxr_rect_t BXR_INLINE
 bxr_rect_contract(bxr_rect_t rect, float amount)
@@ -587,8 +568,9 @@ bxr_rect_contract(bxr_rect_t rect, float amount)
                        rect.h - 2 * amount);
 }
 
-// Textured rectangle
-// --------------------------------------------------------------------------
+/**
+ * ## Textured rectangle
+ */
 
 typedef struct bxr_textured_rect_s
 {
@@ -597,13 +579,14 @@ typedef struct bxr_textured_rect_s
 } bxr_textured_rect_t;
 
 /**
- * @brief Construct a textured rectangle
+ * Construct a textured rectangle.
  */
 #define bxr_textured_rect_make(dst, src)                                       \
   ((const bxr_textured_rect_t){ dst, src })
 
-// Region
-// --------------------------------------------------------------------------
+/**
+ * ## Region
+ */
 
 typedef struct bxr_region_s
 {
@@ -611,7 +594,7 @@ typedef struct bxr_region_s
 } bxr_region_t;
 
 /**
- * @brief Construct a region
+ * Construct a region
  */
 #define bxr_region_make(x0, y0, x1, y1) ((const bxr_region_t){ x0, y0, x1, y1 })
 
