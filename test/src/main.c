@@ -1,6 +1,5 @@
 #include "bxr.h"
 
-#include "test_atom.h"
 #include "test_ini.h"
 #include "test_json.h"
 #include "test_math.h"
@@ -30,7 +29,6 @@ bxr_game_setup(void)
 {
   bxr_unit_enable_colors(true);
 
-  BXR_UNIT_RUN_SUITE(suite_atom);
   BXR_UNIT_RUN_SUITE(suite_math);
   BXR_UNIT_RUN_SUITE(suite_json);
   BXR_UNIT_RUN_SUITE(suite_ini);

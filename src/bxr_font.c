@@ -39,7 +39,7 @@ bxr_font_load(const char *path,
     return NULL;
   }
 
-  font->image        = bxr_image_load(path);
+  font->image        = bxr_image_make(path);
   font->glyphs       = glyphs;
   font->glyph_count  = glyph_count;
   font->icon_range   = icon_range;
@@ -77,7 +77,7 @@ bxr_font_mem(unsigned int width,
     return NULL;
   }
 
-  font->image        = bxr_image_load_mem(width, height, (void *)data);
+  font->image        = bxr_image_make_mem(width, height, (void *)data);
   font->glyphs       = glyphs;
   font->glyph_count  = glyph_count;
   font->icon_range   = icon_range;

@@ -25,7 +25,7 @@ void
 bxr_game_setup(void)
 {
   // Load an image
-  _image = bxr_image_load("data/images/logo.png");
+  _image = bxr_image_make("data/images/logo.png");
 }
 
 void
@@ -37,15 +37,15 @@ bxr_game_update(Uint64 delta_time_ms)
 void
 bxr_game_render(Uint64 alpha_time_ms)
 {
-  bxr_painter_begin();
+  bxr_vec2_t window_size = bxr_context_get_window_dimensions();
+
+  bxr_painter_begin(window_size.x, window_size.y);
   {
     bxr_painter_set_color(bxr_color_make(0, 0, 0, 255));
     bxr_painter_clear();
 
-    bxr_vec2_t frame_dimension = bxr_painter_get_frame_dimension();
-
-    float width  = frame_dimension.x;
-    float height = frame_dimension.y;
+    float width  = window_size.x;
+    float height = window_size.y;
 
     bxr_painter_push_transform();
     {
@@ -66,7 +66,7 @@ bxr_game_render(Uint64 alpha_time_ms)
 
       // Draw the image centered on the screen
       bxr_painter_set_image(0, _image);
-      bxr_painter_draw_rect_textured(0,
+      bxr_painter_draw_textured_rect(0,
                                      bxr_textured_rect_make(img_dst, img_src));
     }
     bxr_painter_pop_transform();

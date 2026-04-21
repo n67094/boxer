@@ -15,8 +15,8 @@
 
 typedef struct bxr_game_config_s
 {
-  const char *name; // application name
-  const char *title;
+  const char *name;  // application name
+  const char *title; // window title
 
   unsigned int width;
   unsigned int height;

@@ -1,5 +1,3 @@
-// TODO add SDL_gp init
-
 #include <SDL3/SDL.h>
 
 #include <SDL3/SDL_init.h>
@@ -9,6 +7,11 @@
 #include <physfs.h>
 
 #include "bxr.h"
+
+// Defined and included here so others SDL_gp.h includes inside bxr file don't
+// re-include the implementation.
+#define SDL_GP_IMPLEMENTATION
+#include <SDL_gp.h>
 
 SDL_AppResult
 SDL_AppInit(void **appstate, int argc, char **argv)
@@ -221,6 +224,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
   context->texture_format
       = SDL_GetGPUSwapchainTextureFormat(context->gpu_device, context->window);
+
   context->pixel_format
       = SDL_GetPixelFormatFromGPUTextureFormat(context->texture_format);
 
@@ -237,8 +241,18 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     return SDL_APP_FAILURE;
   }
   context->cmd_buffer = cmd_buffer;
+  bxr_painter_update_command_buffer(context->cmd_buffer);
 
   context->last_time_ms = SDL_GetTicks();
+
+  bxr_painter_desc_t painter_desc = {
+    .max_vertices = 0, // will use default
+    .max_commands = 0, // will use default
+    .window       = context->window,
+    .gpu_device   = context->gpu_device,
+  };
+
+  bxr_painter_setup(&painter_desc);
 
   // Setup subsystems
   bxr_keyboard_setup();
@@ -296,28 +310,29 @@ SDL_AppIterate(void *appstate)
   }
 
   // Render Game (variable timestep)
-  SDL_GPUCommandBuffer *cmd_buffer
-      = SDL_AcquireGPUCommandBuffer(context->gpu_device);
-  if (cmd_buffer == NULL) {
+
+  // Get the command buffer
+  context->cmd_buffer = SDL_AcquireGPUCommandBuffer(context->gpu_device);
+  if (context->cmd_buffer == NULL) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to acquire GPU command buffer (error: %s)",
                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  // TODO can assigne context cmd_buffer above
-  context->cmd_buffer = cmd_buffer;
+  bxr_painter_update_command_buffer(context->cmd_buffer);
 
-  SDL_GPUTexture *swapchain_texture = NULL;
-
-  if (!SDL_WaitAndAcquireGPUSwapchainTexture(
-          cmd_buffer, context->window, &swapchain_texture, NULL, NULL)) {
+  // Get the tagert texture
+  if (!SDL_WaitAndAcquireGPUSwapchainTexture(context->cmd_buffer,
+                                             context->window,
+                                             &context->target_texture,
+                                             NULL,
+                                             NULL)) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to acquire swapchain texture (error: %s)",
                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  // TODO same as above for swapchain
-  context->target_texture = swapchain_texture;
+  bxr_painter_update_swapchain_texture(context->target_texture);
 
   context->alpha_ms = context->lag_ms / context->delta_ms;
 
@@ -327,7 +342,8 @@ SDL_AppIterate(void *appstate)
 
   SDL_SubmitGPUCommandBuffer(context->cmd_buffer);
 
-  if (fps_timer_ms >= 1000) { // Calculate FPS and UPS every second (1000 ms)
+  // Calculate FPS and UPS every second (1000 ms)
+  if (fps_timer_ms >= 1000) {
     context->fps = frame_count;
     context->ups = update_count;
 

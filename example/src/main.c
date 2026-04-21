@@ -1,6 +1,5 @@
 #include "bxr.h"
 
-#include "example_blend.h"
 #include "example_draw.h"
 #include "example_text.h"
 
@@ -8,7 +7,6 @@ typedef enum
 {
   EXAMPLE_DRAW = 0,
   // EXAMPLE_FONT,
-  EXAMPLE_BLEND,
   EXAMPLE_SIZE,
 } example_e;
 
@@ -40,7 +38,6 @@ bxr_game_setup(void)
 
   example_draw_setup();
   // example_text_setup();
-  example_blend_setup();
 }
 
 void
@@ -67,9 +64,6 @@ bxr_game_update(Uint64 delta_time_ms)
   // case EXAMPLE_FONT:
   // example_text_update(delta_time_ms);
   // break;
-  case EXAMPLE_BLEND:
-    example_blend_update(delta_time_ms);
-    break;
   default:
     break;
   }
@@ -78,7 +72,9 @@ bxr_game_update(Uint64 delta_time_ms)
 void
 bxr_game_render(Uint64 alpha_time_ms)
 {
-  bxr_painter_begin();
+  bxr_vec2_t window_size = bxr_context_get_window_dimensions();
+
+  bxr_painter_begin(window_size.x, window_size.y);
   {
     switch (_current_test) {
     case EXAMPLE_DRAW:
@@ -87,8 +83,6 @@ bxr_game_render(Uint64 alpha_time_ms)
       // case EXAMPLE_FONT:
       // example_text_render(alpha_time_ms);
       // break;
-    case EXAMPLE_BLEND:
-      example_blend_render(alpha_time_ms);
     default:
       break;
     }
@@ -103,5 +97,4 @@ bxr_game_shutdown(void)
 {
   example_draw_shutdown();
   // example_text_shutdown();
-  example_blend_shutdown();
 }

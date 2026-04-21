@@ -7,7 +7,7 @@ static bxr_image_t _image;
 void
 example_draw_setup(void)
 {
-  _image = bxr_image_load("data/images/logo.png");
+  _image = bxr_image_make("data/images/logo.png");
 }
 
 void
@@ -18,7 +18,7 @@ example_draw_update(Uint64 delta_time_ms)
 void
 example_draw_render(Uint64 alpha_time_ms)
 {
-  bxr_vec2_t frame_dimension = bxr_painter_get_frame_dimension();
+  bxr_vec2_t window_size = bxr_context_get_window_dimensions();
 
   // Seconds since start
   float time = (float)SDL_GetTicks() / 1000.0f;
@@ -27,8 +27,8 @@ example_draw_render(Uint64 alpha_time_ms)
   float osc_1 = bxr_sin(time * BXR_PI);
 
   // Math for quadrants
-  int hw = frame_dimension.x * 0.5f;
-  int hh = frame_dimension.y * 0.5f;
+  int hw = window_size.x * 0.5f;
+  int hh = window_size.y * 0.5f;
 
   // Quadrant 1
   // ===============================================================
@@ -114,7 +114,7 @@ example_draw_render(Uint64 alpha_time_ms)
         bxr_triangle_t triangle = bxr_triangle_make(
             -half_shape, -half_shape, half_shape, -half_shape, 0, half_shape);
 
-        bxr_painter_draw_triangle_filled(triangle);
+        bxr_painter_draw_filled_triangle(triangle);
       }
       bxr_painter_pop_transform();
 
@@ -130,7 +130,7 @@ example_draw_render(Uint64 alpha_time_ms)
         bxr_rect_t rect = bxr_rect_make(
             -half_shape, -half_shape, half_shape * 2, half_shape * 2);
 
-        bxr_painter_draw_rect_filled(rect);
+        bxr_painter_draw_filled_rect(rect);
       }
       bxr_painter_pop_transform();
     }
@@ -253,7 +253,7 @@ example_draw_render(Uint64 alpha_time_ms)
 
         bxr_painter_set_image(0, _image);
 
-        bxr_painter_draw_rect_textured(
+        bxr_painter_draw_textured_rect(
             0, bxr_textured_rect_make(img_dst, img_src));
       }
       bxr_painter_pop_transform();
