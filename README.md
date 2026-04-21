@@ -6,7 +6,7 @@ _The logo's left and right ends evoke the horizontally opposed pistons of the bo
 
 > As long as I can remember, I've always wanted to make games. Somehow I ended up doing it, and a good way for me to enjoy this journey is to build my own game engine and share it with you, hoping it will help you too.
 
-# Boxer
+# Boxer (Work in Progress)
 
 _"The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form."_
 
@@ -16,11 +16,11 @@ A minimal and efficient 2D game engine written in C99, designed so you can easil
 
 Install the following development dependencies (via your package manager or from source):
 
-  - GNUMake.
-  - C compiler.
-  - SDL3 (>= 3.4.2).
-  - SDL3_image (>= 3.0.0).
-  - SDL3_mixer (>= 3.0.0).
+- GNUMake.
+- C compiler.
+- SDL3 (>= 3.4.2).
+- SDL3_image (>= 3.0.0).
+- SDL3_mixer (>= 3.0.0).
 
 ## Build and Run
 
@@ -73,7 +73,7 @@ By default, the following folders are mounted:
 - `data.zip` mounted as `data/` **(read-only)** - This is where the game should load assets from, such as textures, audio, etc.
 - `the system preferred path` mounted as `/` **(read/write)** - This is where the game should save user data, such as save files, settings, etc.
 
-This means that files are read from both `data.zip` and `the system preferred path`, but are only written to `the system preferred path`. 
+This means that files are read from both `data.zip` and `the system preferred path`, but are only written to `the system preferred path`.
 
 Depending on the operating system, the system preferred path is as follows:
 
