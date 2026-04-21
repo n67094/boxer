@@ -1,7 +1,7 @@
 /**
  * file `bxr_gamepad.h`
  *
- * copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright Copyright (c) 2026 nsix. All rights reserved.
  *
  * # Gamepad input handling.
  */

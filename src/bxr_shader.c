@@ -89,8 +89,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
   char shader_path[BXR_PATH_MAX];
   SDL_snprintf(shader_path, BXR_PATH_MAX, "%s%s", name, file_ext);
 
-  shader_bytecode->data
-      = (Uint8 *)bxr_io_read(shader_path, &shader_bytecode->size);
+  shader_bytecode->data = bxr_io_read(shader_path, &shader_bytecode->size);
 
   if (shader_bytecode->data == NULL) {
     BXR_FREE(shader_bytecode);

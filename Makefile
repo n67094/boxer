@@ -55,7 +55,7 @@ SANITIZER ?= 0
 CC = gcc
 CXX = g++
 
-LDFLAGS = -lSDL3 -lSDL3_ttf -lm
+LDFLAGS = -lSDL3 -lm
 
 CFLAGS = -std=c99 -Wall
 CXXFLAGS = -std=c++11 -Wall

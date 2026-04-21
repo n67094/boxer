@@ -1,6 +1,5 @@
 #include "bxr.h"
 
-#include "example_draw.h"
 #include "example_text.h"
 
 typedef enum
@@ -36,7 +35,6 @@ bxr_game_setup(void)
 {
   bxr_unit_enable_colors(true);
 
-  example_draw_setup();
   // example_text_setup();
 }
 
@@ -58,10 +56,7 @@ bxr_game_update(Uint64 delta_time_ms)
   }
 
   switch (_current_test) {
-  case EXAMPLE_DRAW:
-    example_draw_update(delta_time_ms);
-    break;
-  // case EXAMPLE_FONT:
+    // case EXAMPLE_FONT:
   // example_text_update(delta_time_ms);
   // break;
   default:
@@ -78,8 +73,6 @@ bxr_game_render(Uint64 alpha_time_ms)
   {
     switch (_current_test) {
     case EXAMPLE_DRAW:
-      example_draw_render(alpha_time_ms);
-      break;
       // case EXAMPLE_FONT:
       // example_text_render(alpha_time_ms);
       // break;
@@ -95,6 +88,5 @@ bxr_game_render(Uint64 alpha_time_ms)
 void
 bxr_game_shutdown(void)
 {
-  example_draw_shutdown();
   // example_text_shutdown();
 }

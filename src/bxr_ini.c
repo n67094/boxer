@@ -3,6 +3,7 @@
 #include <physfs.h>
 #include <physfssdl3.h>
 
+#include "bxr_config.h"
 #include "bxr_ini.h"
 #include "bxr_io.h"
 #include "bxr_mem.h"
@@ -189,14 +190,21 @@ bxr_inir(const char *path)
   }
 
   size_t length = 0;
-  ini->data     = bxr_io_read(path, &length);
+  Uint8 *data   = bxr_io_read(path, &length);
 
+  BXR_ALLOC(ini->data, length + 1); // +1 for null-terminator
   if (!ini->data) {
+    BXR_FREE(data);
     BXR_FREE(ini);
     return NULL;
   }
 
-  ini->end = ini->data + length;
+  SDL_memcpy(ini->data, data, length);
+
+  BXR_FREE(data);
+
+  ini->data[length] = '\0'; // Null-terminate for simplify parsing
+  ini->end          = ini->data + length;
 
   bxr_inir_parse(ini);
 

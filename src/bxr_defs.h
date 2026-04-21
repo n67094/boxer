@@ -1,7 +1,7 @@
 /**
  * file `bxr_defs.h`
  *
- * copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright Copyright (c) 2026 nsix. All rights reserved.
  *
  * # Common definitions and macros.
  */

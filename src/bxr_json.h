@@ -1,15 +1,13 @@
 /**
- * @file bxr_json.h
+ * @file `bxr_json.h`
  *
- * Thanks to rxi (sj.h) for the reader inspiration.
+ * Copyright Copyright (c) 2026 nsix. All rights reserved.
  *
- * @brief JSON file reader and writer.
+ * # JSON file reader and writer.
  *
  * Support objects, arrays, strings, numbers and booleans.
  *
  * File extension doesn't matter, but recommended to use ".json".
- *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_JSON_H_

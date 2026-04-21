@@ -10,7 +10,7 @@ _The logo's left and right ends evoke the horizontally opposed pistons of the bo
 
 _"The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form."_
 
-A minimal and efficient 2D game engine written in C99, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
+A minimal and high-performance 2D game engine written in C99, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
 
 ## Prerequisites
 
@@ -19,8 +19,6 @@ Install the following development dependencies (via your package manager or from
 - GNUMake.
 - C compiler.
 - SDL3 (>= 3.4.2).
-- SDL3_image (>= 3.0.0).
-- SDL3_mixer (>= 3.0.0).
 
 ## Build and Run
 
@@ -62,24 +60,14 @@ game/  # Your game source code
 test/  # Unit tests for the engine (take a look to see examples on how to use the engine)
 ```
 
-# Project Filesystem
+# Sponsors
 
-//TODO in debug mode mount the data folder as read-write.
+Hi everyone, I'm nsix, an indie game developer and open source contributor trying to make a living from my work.
 
-Boxer uses PhysFS for virtual filesystem management.
+If you enjoy what I create and want to support me, consider becoming a sponsor on [GitHub Sponsors](https://github.com/sponsors/n67094).
+Every bit of support means a lot and is greatly appreciated!
 
-By default, the following folders are mounted:
-
-- `data.zip` mounted as `data/` **(read-only)** - This is where the game should load assets from, such as textures, audio, etc.
-- `the system preferred path` mounted as `/` **(read/write)** - This is where the game should save user data, such as save files, settings, etc.
-
-This means that files are read from both `data.zip` and `the system preferred path`, but are only written to `the system preferred path`.
-
-Depending on the operating system, the system preferred path is as follows:
-
-- **Linux:** `~/.local/share/<config->name>/`
-- **Windows:** `C:\Users\<username>\AppData\Roaming\<config->name>\`
-- **macOS:** `~/Library/Application Support/<config->name>/`
+You can also check out my blog at www.nsix.blog.
 
 # License
 

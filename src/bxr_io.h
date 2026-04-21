@@ -1,3 +1,19 @@
+/**
+ * @file `bxr_io.h`
+ *
+ * Copyright Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # IO utilities for reading and writing files.
+ *
+ * File are `read` from `BXR_DATA_DIR` first then the system preferred path.
+ *
+ * Depending on the operating system, the `system preferred path` is as follows:
+ *
+ * - **Linux:** `~/.local/share/<config->name>/`
+ * - **Windows:** `C:\Users\<username>\AppData\Roaming\<config->name>\`
+ * - **macOS:** `~/Library/Application Support/<config->name>/`
+ */
+
 #ifndef BXR_IO_H_
 #define BXR_IO_H_
 
@@ -9,7 +25,17 @@
 #include "bxr_error.h"
 #include "bxr_mem.h"
 
-BXR_INLINE char *
+/**
+ * Read a file from the given path and return its contents.
+ *
+ * `path` is the path to the file to read, relative to the data directory.
+ *
+ * `length` is an optional output parameter to store the length of the returned
+ * data.
+ *
+ * `return` the contents of the file or NULL if the file could not be read.
+ */
+BXR_INLINE Uint8 *
 bxr_io_read(const char *path, size_t *length)
 {
   SDL_assert(path);
@@ -37,15 +63,11 @@ bxr_io_read(const char *path, size_t *length)
     return NULL;
   }
 
-  if (length) {
-    *length = len;
-  }
-
-  char *buffer = NULL;
-  BXR_ALLOC(buffer, *length);
+  Uint8 *buffer = NULL;
+  BXR_ALLOC(buffer, len);
 
   Sint64 read_size = PHYSFS_readBytes(file, buffer, len);
-  if (read_size != (Sint64)*length) {
+  if (read_size != len) {
     SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
                 "Failed to read file: %s (error: %s)",
                 path,
@@ -57,11 +79,27 @@ bxr_io_read(const char *path, size_t *length)
 
   PHYSFS_close(file);
 
-  buffer[*length - 1] = '\0';
+  if (length) {
+    *length = len;
+  }
 
   return buffer;
 }
 
+/**
+ * Write data to a file at the given path.
+ *
+ * `path` is the path to the file to write, relative to the data directory.
+ *
+ * `data` is a pointer to the data to write.
+ *
+ * `length` is the length of the data in bytes.
+ *
+ * `append` is a boolean flag indicating whether to append to the file (if true)
+ * or overwrite it (if false).
+ *
+ * `return` true if the write operation was successful, false otherwise.
+ */
 BXR_INLINE bool
 bxr_io_write(const char *path, const void *data, size_t length, bool append)
 {

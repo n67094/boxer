@@ -6,6 +6,24 @@
 
 #include <physfs.h>
 
+// Override SDL_gp configuration.
+
+#define SDL_GP_PATH_MAX BXR_PATH_MAX
+#define SDL_GP_TEXTURE_DIMENSION_MAX BXR_PAINTER_TEXTURE_DIMENSION_MAX
+#define SDL_GP_IMAGE_MAX BXR_PAINTER_IMAGE_MAX
+#define SDL_GP_SHADER_MAX BXR_PAINTER_SHADER_MAX
+#define SDL_GP_PIPELINE_MAX BXR_PAINTER_PIPELINE_MAX
+#define SDL_GP_STATE_MAX BXR_PAINTER_STATE_MAX
+#define SDL_GP_TEXTURE_SLOTS_MAX BXR_PAINTER_TEXTURE_SLOTS_MAX
+#define SDL_GP_TRANSFORMS_MAX BXR_PAINTER_TRANSFORMS_MAX
+#define SDL_GP_UNIFORM_FLOATS_MAX BXR_PAINTER_UNIFORM_FLOATS_MAX
+
+// Max number of commands that are looked back and batched together for
+// optimization
+#ifndef SDL_GP_OPTIMIZER_DEPTH
+#define SDL_GP_OPTIMIZER_DEPTH 8
+#endif
+
 #include "bxr.h"
 
 // Defined and included here so others SDL_gp.h includes inside bxr file don't
@@ -34,8 +52,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     return SDL_APP_FAILURE;
   }
 
-  // PHYSFS set write directory (system specific)
-  const char *write_dir = PHYSFS_getPrefDir("boxer_bxr", config->name);
+  // PHYSFS get write directory (system specific)
+  const char *write_dir = PHYSFS_getPrefDir("boxer_engine", config->name);
   if (!PHYSFS_setWriteDir(write_dir)) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                 "Failed to set write dir to %s: (error: %s)",
@@ -47,7 +65,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_LogInfo(
       SDL_LOG_CATEGORY_APPLICATION, "PhysFS write directory: %s", write_dir);
 
-  // PHYSFS mounts directory (write dir)
+  // PHYSFS mounts write directory (system specific)
   if (!PHYSFS_mount(write_dir, NULL, 1)) {
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                 "Failed to mount write dir %s: (error: %s)",
@@ -58,7 +76,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_LogInfo(
       SDL_LOG_CATEGORY_APPLICATION, "PhysFS mount directory: %s", write_dir);
 
-  // PHYSFS mounts directory (from base dir + BXR_DATA_DIR)
+  // PHYSFS mounts read directory (BXR_DATA_DIR)
   const char *base_dir = PHYSFS_getBaseDir();
   char mount_dir[BXR_PATH_MAX];
   SDL_snprintf(mount_dir, BXR_PATH_MAX, "%s%s", base_dir, BXR_DATA_DIR);
@@ -298,6 +316,7 @@ SDL_AppIterate(void *appstate)
   }
 
   // Update Logic (fixed timestep)
+
   while (context->lag_ms >= context->delta_ms) {
     bxr_keyboard_begin_frame();
     bxr_mouse_begin_frame();

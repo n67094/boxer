@@ -1,7 +1,7 @@
 /**
  * file `bxr_color.h`
  *
- * copyright Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright Copyright (c) 2025 nsix. All rights reserved.
  *
  * # Color utilities.
  */
