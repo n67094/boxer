@@ -1,9 +1,9 @@
 /**
- * file `bxr_image.h`
+ * File `bxr_image.h`.
  *
- * copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Image management and utilities.
+ * # Image Management and Utilities
  */
 
 #ifndef BXR_IMAGE_H_

@@ -1,9 +1,9 @@
-/*
- * file bxr_shader.h
+/**
+ * File `bxr_shader.h`.
  *
- * copyright Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 nsix. All rights reserved.
  *
- * # Shader management system.
+ * # Shader Management System.
  *
  */
 

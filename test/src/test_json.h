@@ -100,11 +100,11 @@ BXR_UNIT_CASE(case_bxr_json_read)
   // functions, but using eq functions makes the test more readable and also
   // tests the eq functions themselves.
 
-  bxr_jsonr_t *json       = bxr_jsonr("test.json");
+  bxr_jsonr_t *json       = bxr_jsonr_make("test.json");
   bxr_jsonr_token_t token = bxr_jsonr_read(json);
 
   bxr_jsonr_token_t key, value;
-  while (bxr_jsonr_iter_object(json, &token, &key, &value)) {
+  while (bxr_jsonr_iter_object(json, &token, &key, &value) == 1) {
     if (bxr_jsonr_eq_str(&key, "name")) {
       BXR_UNIT_ASSERT(bxr_jsonr_eq_str(&value, "nsix"));
     } else if (bxr_jsonr_eq_str(&key, "id")) {
@@ -126,7 +126,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
     } else if (bxr_jsonr_eq_str(&key, "scores")) {
       bxr_jsonr_token_t score;
       int score_index = 0;
-      while (bxr_jsonr_iter_array(json, &value, &score)) {
+      while (bxr_jsonr_iter_array(json, &value, &score) == 1) {
         if (score_index == 0) {
           BXR_UNIT_ASSERT(
               bxr_jsonr_eq_str(&score, "10")); // intentionally using eq_str
@@ -139,7 +139,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
     } else if (bxr_jsonr_eq_str(&key, "flags")) {
       bxr_jsonr_token_t flag;
       int flag_index = 0;
-      while (bxr_jsonr_iter_array(json, &value, &flag)) {
+      while (bxr_jsonr_iter_array(json, &value, &flag) == 1) {
         if (flag_index == 0) {
           BXR_UNIT_ASSERT(
               bxr_jsonr_eq_str(&flag, "true")); // intentionally using eq_str
@@ -152,7 +152,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
     } else if (bxr_jsonr_eq_str(&key, "mixed")) {
       bxr_jsonr_token_t mixed_value;
       int mixed_index = 0;
-      while (bxr_jsonr_iter_array(json, &value, &mixed_value)) {
+      while (bxr_jsonr_iter_array(json, &value, &mixed_value) == 1) {
         if (mixed_index == 0) {
           BXR_UNIT_ASSERT(bxr_jsonr_eq_str(&mixed_value, "string"));
         } else if (mixed_index == 1) {
@@ -166,7 +166,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
     } else if (bxr_jsonr_eq_str(&key, "players")) {
       bxr_jsonr_token_t player;
       int player_index = 0;
-      while (bxr_jsonr_iter_array(json, &value, &player)) {
+      while (bxr_jsonr_iter_array(json, &value, &player) == 1) {
         bxr_jsonr_token_t player_key, player_value;
         if (player_index == 0) {
           BXR_UNIT_ASSERT(

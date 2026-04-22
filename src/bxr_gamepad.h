@@ -1,9 +1,9 @@
 /**
- * file `bxr_gamepad.h`
+ * File `bxr_gamepad.h`.
  *
- * Copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Gamepad input handling.
+ * # Gamepad Input Handling
  */
 
 #ifndef BXR_GAMEPAD_H_
@@ -69,7 +69,8 @@ typedef enum
 void bxr_gamepad_setup(void);
 
 /**
- * Shuts down the gamepad subsystem.
+ * Shuts down the gamepad subsystem. Must be called when the application is
+ * shutting down.
  */
 void bxr_gamepad_shutdown(void);
 
@@ -80,14 +81,14 @@ void bxr_gamepad_shutdown(void);
 void bxr_gamepad_listen(void);
 
 /**
- * Resets the just pressed and just released states of the gamepad buttons.
- * Must be called at the beginning of each frame after listening for gamepad
- * events.
+ * Update the gamepad state for the current frame. Must be called at the
+ * beginning of each frame before processing input.
  */
 void bxr_gamepad_begin_frame(void);
 
 /**
- * Handles a gamepad button down event.
+ * Handles a gamepad button down event. Must be called when a gamepad button
+ * down event is received from SDL.
  *
  * `index` is the index of the gamepad that the event occurred on.
  *
@@ -96,7 +97,8 @@ void bxr_gamepad_begin_frame(void);
 void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
 
 /**
- * Handles a gamepad button up event.
+ * Handles a gamepad button up event. Must be called when a gamepad button up
+ * event is received from SDL.
  *
  * `index` is the index of the gamepad that the event occurred on.
  *
@@ -105,7 +107,8 @@ void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
 void bxr_gamepad_button_up(int index, bxr_gamepad_button_e button);
 
 /**
- * Handles a gamepad axis motion event.
+ * Handles a gamepad axis motion event. Must be called when a gamepad axis
+ * motion event is received from SDL.
  *
  * `index` is the index of the gamepad that the event occurred on.
  *
@@ -202,7 +205,7 @@ bool bxr_gamepad_just_pressed(int index, bxr_gamepad_button_e button);
 bool bxr_gamepad_just_released(int index, bxr_gamepad_button_e button);
 
 /**
- * Get the amount of time a gamepad button has been held down in milliseconds.
+ * Get the amount of time a gamepad button has been held down.
  *
  * `index` is the index of the gamepad to check.
  *

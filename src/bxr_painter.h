@@ -1,9 +1,9 @@
 /**
- * file `bxr_painter.h`
+ * File `bxr_painter.h`.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Painter system for rendering graphics.
+ * # Painter System for Rendering Graphics
  *
  * **Usage:** make sure to call `bxr_painter_begin`, `bxr_painter_flush`, and
  * `bxr_painter_end` in the correct order for each frame to issue draw calls.

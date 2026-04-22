@@ -92,7 +92,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
       SDL_LOG_CATEGORY_APPLICATION, "PhysFS mount directory: %s", mount_dir);
 
   // Try to read the config file (if exists) to override default configuration
-  bxr_inir_t *config_ini = bxr_inir("config.ini");
+  bxr_inir_t *config_ini = bxr_inir_make("config.ini");
 
   if (config_ini) {
     // Read width from ini

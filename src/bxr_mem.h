@@ -1,9 +1,9 @@
 /**
- * @file bxr_mem.h
+ * File `bxr_mem.h`.
  *
- * @brief Memory allocation macros.
+ * Copyright (c) 2025 nsix. All rights reserved.
  *
- * @copyright Copyright (c) 2025 nsix. All rights reserved.
+ * # Memory allocation macros
  */
 
 #ifndef BXR_MEM_H_

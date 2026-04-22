@@ -1,9 +1,9 @@
 /**
- * file `bxr_config.h`
+ * File `bxr_config.h`.
  *
- * Copyright Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 nsix. All rights reserved.
  *
- * # Boxer configuration.
+ * # Boxer Configuration
  */
 
 #ifndef BXR_CONFIG_H_

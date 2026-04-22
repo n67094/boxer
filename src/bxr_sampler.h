@@ -1,7 +1,9 @@
 /**
- * @file bxr_sampler.h
+ * File `bxr_sampler.h`.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Sampler Management for Texture Sampling in Shaders
  */
 
 #ifndef BXR_SAMPLER_H_

@@ -1,9 +1,9 @@
 /**
- * file `bxr_game.h`
+ * File `bxr_game.h`.
  *
- * Copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Game lifecycle management.
+ * # Game lifecycle management
  */
 
 #ifndef BXR_GAME_H_
