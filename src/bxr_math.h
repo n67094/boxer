@@ -1,9 +1,9 @@
 /**
- * file `bxr_math.h`
+ * File `bxr_math.h`.
  *
- * Copyright Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 nsix. All rights reserved.
  *
- * # Mathematical and Geometric utilities.
+ * # Mathematical and Geometric Utilities
  */
 
 #ifndef BXR_MATH_H_
@@ -49,7 +49,7 @@ typedef struct bxr_vec2_s
 typedef bxr_vec2_t bxr_point_t;
 
 /**
- * ## Scalar functions and macros
+ * ## Scalar Functions and Macros
  */
 
 /**
@@ -569,7 +569,7 @@ bxr_rect_contract(bxr_rect_t rect, float amount)
 }
 
 /**
- * ## Textured rectangle
+ * ## Textured Rectangle
  */
 
 typedef struct bxr_textured_rect_s

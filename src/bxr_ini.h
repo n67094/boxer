@@ -1,11 +1,12 @@
 /**
- * file `bxr_ini.h`
+ * File `bxr_ini.h`.
  *
- * Copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # INI file reader (inir) and writer (iniw).
+ * # INI File Reader `inir` and Writer `iniw`
  *
- * Support strings and numbers (float, int, etc).
+ * Support strings and numbers. Booleans are not supported, but you can use `0`
+ * and `1` to represent false and true respectively.
  *
  * File extension doesn't matter, but recommended to use `.ini`.
  *
@@ -45,7 +46,7 @@ typedef struct bxr_inir_s bxr_inir_t;
  * `return` a reader for the loaded INI file, or NULL if the file could not be
  * loaded.
  */
-bxr_inir_t *bxr_inir(const char *path);
+bxr_inir_t *bxr_inir_make(const char *path);
 
 /**
  * Destroy an INI reader and free its resources.
@@ -124,10 +125,6 @@ float bxr_inir_number_or_else(bxr_inir_t *ini,
                               const char *key,
                               float default_value);
 
-// TODO add section exist
-
-// TODO add key exist
-
 /**
  * ## Writer API
  */
@@ -139,7 +136,7 @@ typedef struct bxr_iniw_s bxr_iniw_t;
  *
  * `return` a new INI writer, or NULL if the writer could not be created.
  */
-bxr_iniw_t *bxr_iniw(void);
+bxr_iniw_t *bxr_iniw_make(void);
 
 /**
  * Destroy an INI writer and free its resources.

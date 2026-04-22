@@ -1,9 +1,9 @@
 /**
- * file `bxr_defs.h`
+ * File `bxr_defs.h`.
  *
- * Copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Common definitions and macros.
+ * # Common definitions and macros
  */
 
 #ifndef BXR_DEFS_H_

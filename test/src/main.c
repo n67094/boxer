@@ -33,6 +33,8 @@ bxr_game_setup(void)
   BXR_UNIT_RUN_SUITE(suite_json);
   BXR_UNIT_RUN_SUITE(suite_ini);
   // BXR_UNIT_RUN_SUITE(suite_text);
+
+  bxr_unit_report();
 }
 
 void

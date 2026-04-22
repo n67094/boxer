@@ -179,7 +179,7 @@ bxr_inir_parse(bxr_inir_t *ini)
 }
 
 bxr_inir_t *
-bxr_inir(const char *path)
+bxr_inir_make(const char *path)
 {
   SDL_assert(path);
 
@@ -190,7 +190,7 @@ bxr_inir(const char *path)
   }
 
   size_t length = 0;
-  Uint8 *data   = bxr_io_read(path, &length);
+  char *data    = (char *)bxr_io_read(path, &length);
 
   BXR_ALLOC(ini->data, length + 1); // +1 for null-terminator
   if (!ini->data) {
@@ -258,10 +258,11 @@ bxr_inir_str(bxr_inir_t *ini, const char *section, const char *key)
 void
 bxr_inir_destroy(bxr_inir_t *ini)
 {
-  if (ini) {
+  if (ini->data) {
     BXR_FREE(ini->data);
-    BXR_FREE(ini);
   }
+
+  BXR_FREE(ini);
 }
 
 float
@@ -286,6 +287,10 @@ bxr_inir_str_or_else(bxr_inir_t *ini,
                      const char *key,
                      const char *default_value)
 {
+  SDL_assert(ini);
+  SDL_assert(section);
+  SDL_assert(key);
+
   const char *value = bxr_inir_str(ini, section, key);
 
   return value ? value : default_value;
@@ -297,6 +302,10 @@ bxr_inir_number_or_else(bxr_inir_t *ini,
                         const char *key,
                         float default_value)
 {
+  SDL_assert(ini);
+  SDL_assert(section);
+  SDL_assert(key);
+
   const char *str_value = bxr_inir_str(ini, section, key);
 
   if (!str_value) {
@@ -395,7 +404,7 @@ bxr_iniw_append_escaped(bxr_iniw_t *ini, const char *str)
 }
 
 bxr_iniw_t *
-bxr_iniw(void)
+bxr_iniw_make()
 {
   bxr_iniw_t *ini = NULL;
   BXR_NEW(ini);

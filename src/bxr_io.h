@@ -1,9 +1,9 @@
 /**
- * @file `bxr_io.h`
+ * File `bxr_io.h`.
  *
- * Copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # IO utilities for reading and writing files.
+ * # IO Utilities for Reading and Writing Files
  *
  * File are `read` from `BXR_DATA_DIR` first then the system preferred path.
  *

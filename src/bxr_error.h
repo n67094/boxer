@@ -1,9 +1,9 @@
 /**
- * file `bxr_error.h`
+ * File `bxr_error.h`.
  *
- * copyright Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 nsix. All rights reserved.
  *
- * # Error handling system.
+ * # Error handling system
  */
 
 #ifndef BXR_ERROR_H_

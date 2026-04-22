@@ -1,9 +1,9 @@
 /**
- * file bxr_pipeline.h
+ * File `bxr_pipeline.h`.
  *
- * copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Graphics pipeline management.
+ * # Graphics Pipeline Management
  */
 
 #ifndef BXR_PIPELINE_H_

@@ -1,7 +1,9 @@
 /**
- * @file bxr_str.h
+ * File `bxr_str.h`.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # String Utilities
  */
 
 #ifndef BXR_STR_H_
@@ -13,6 +15,13 @@
 
 // TODO proxy other SDL string functions if needed.
 
+/**
+ * Trim leading and trailing whitespace from the given string.
+ *
+ * `str` is the string to trim. The string is modified in-place.
+ *
+ * `return` the trimmed string, or NULL if the input string is NULL.
+ */
 BXR_INLINE char *
 bxr_strtrim(char *str)
 {
@@ -31,6 +40,17 @@ bxr_strtrim(char *str)
   return str;
 }
 
+/**
+ * Get the length of the initial segment of `str` which consists entirely of
+ * characters not in `reject`.
+ *
+ * `str` is the string to search through.
+ *
+ * `reject` is the string containing the characters to reject.
+ *
+ * `return` the length of the initial segment of `str` which consists entirely
+ * of characters not in `reject`.
+ */
 BXR_INLINE size_t
 bxr_strcspn(const char *str, const char *reject)
 {

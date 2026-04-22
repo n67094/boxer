@@ -1,9 +1,9 @@
 /**
- * file `bxr_pool.h`
+ * File `bxr_pool.h`.
  *
- * A pool for managing resources.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * copyright Copyright (c) 2026 nsix. All rights reserved.
+ * # Pool for Managing Resources
  */
 
 #ifndef BXR_POOL_H_

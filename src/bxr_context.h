@@ -1,9 +1,9 @@
 /**
- * file `bxr_context.h`
+ * File `bxr_context.h`.
  *
- * Copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Boxer context.
+ * # Boxer context
  */
 
 #ifndef BXR_CONTEXT_H_

@@ -1,9 +1,9 @@
 /**
- * file `bxr.h`
+ * File `bxr.h`.
  *
- * Copyright Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 nsix. All rights reserved.
  *
- * # Boxer main header file.
+ * # Boxer Main Header File
  */
 
 #ifndef BXR_H_
