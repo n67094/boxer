@@ -51,7 +51,7 @@ bxr_io_read(const char *path, size_t *length)
                 "Failed to open file: %s (error: %s)",
                 path,
                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_set_error(BXR_ERROR_IO_READ);
+    bxr_error_set(BXR_ERROR_IO_READ);
     return NULL;
   }
 
@@ -59,7 +59,7 @@ bxr_io_read(const char *path, size_t *length)
   if (len == 0) {
     SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "File is empty: %s", path);
     PHYSFS_close(file);
-    bxr_set_error(BXR_ERROR_IO_READ);
+    bxr_error_set(BXR_ERROR_IO_READ);
     return NULL;
   }
 
@@ -73,7 +73,7 @@ bxr_io_read(const char *path, size_t *length)
                 path,
                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_set_error(BXR_ERROR_IO_READ);
+    bxr_error_set(BXR_ERROR_IO_READ);
     return NULL;
   }
 
@@ -117,7 +117,7 @@ bxr_io_write(const char *path, const void *data, size_t length, bool append)
                 "Failed to open file for writing: %s (error: %s)",
                 path,
                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_set_error(BXR_ERROR_IO_WRITE);
+    bxr_error_set(BXR_ERROR_IO_WRITE);
     return false;
   }
 
@@ -131,7 +131,7 @@ bxr_io_write(const char *path, const void *data, size_t length, bool append)
                 path,
                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_set_error(BXR_ERROR_IO_WRITE);
+    bxr_error_set(BXR_ERROR_IO_WRITE);
     return false;
   }
 

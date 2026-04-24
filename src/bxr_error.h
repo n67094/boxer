@@ -41,7 +41,7 @@ typedef enum
  *
  * `error` is the error code to set.
  */
-void bxr_set_error(bxr_erro_code_e error);
+void bxr_error_set(bxr_erro_code_e error);
 
 /**
  * ## Public API
@@ -52,7 +52,7 @@ void bxr_set_error(bxr_erro_code_e error);
  *
  * `return` the last error code.
  */
-bxr_erro_code_e bxr_get_error(void);
+bxr_erro_code_e bxr_error_get(void);
 
 /**
  * Get the error message corresponding to the given error code.
@@ -61,6 +61,6 @@ bxr_erro_code_e bxr_get_error(void);
  *
  * `return` the error message corresponding to the given error code.
  */
-const char *bxr_get_error_msg(bxr_erro_code_e error);
+const char *bxr_error_get_msg(bxr_erro_code_e error);
 
 #endif // BXR_ERROR_H_

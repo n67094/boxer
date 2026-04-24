@@ -5,18 +5,18 @@
 static bxr_erro_code_e _last_error = BXR_ERROR_NONE;
 
 bxr_erro_code_e
-bxr_get_error(void)
+bxr_error_get(void)
 {
   return _last_error;
 }
 
 void
-bxr_set_error(bxr_erro_code_e error)
+bxr_error_set(bxr_erro_code_e error)
 {
   SDL_assert(error >= BXR_ERROR_NONE && error < BXR_ERROR_SIZE);
 
   SDL_LogError(
-      SDL_LOG_CATEGORY_APPLICATION, "[%d] %s", error, bxr_get_error_msg(error));
+      SDL_LOG_CATEGORY_APPLICATION, "[%d] %s", error, bxr_error_get_msg(error));
   _last_error = error;
 }
 
@@ -28,13 +28,13 @@ bxr_set_error_info(bxr_erro_code_e error, const char *info)
   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                "[%d] %s - INFO: %s",
                error,
-               bxr_get_error_msg(error),
+               bxr_error_get_msg(error),
                info);
   _last_error = error;
 }
 
 const char *
-bxr_get_error_msg(bxr_erro_code_e error)
+bxr_error_get_msg(bxr_erro_code_e error)
 {
   SDL_assert(error >= BXR_ERROR_NONE && error < BXR_ERROR_SIZE);
 

@@ -92,12 +92,12 @@ SDL_AppInit(void **appstate, int argc, char **argv)
       SDL_LOG_CATEGORY_APPLICATION, "PhysFS mount directory: %s", mount_dir);
 
   // Try to read the config file (if exists) to override default configuration
-  bxr_inir_t *config_ini = bxr_inir_make("config.ini");
+  bxr_ini_reader_t *config_ini = bxr_ini_make_reader("config.ini");
 
   if (config_ini) {
     // Read width from ini
-    int width
-        = bxr_inir_number_or_else(config_ini, "window", "width", config->width);
+    int width = bxr_ini_read_number_or_else(
+        config_ini, "window", "width", config->width);
     if (width != config->width) {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                   "Overriding config width from %d to %d",
@@ -107,7 +107,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     }
 
     // Read height from ini
-    int height = bxr_inir_number_or_else(
+    int height = bxr_ini_read_number_or_else(
         config_ini, "window", "height", config->height);
     if (height != config->height) {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
@@ -119,7 +119,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
     // Read fullscreen from ini
     bool fullscreen
-        = bxr_inir_number_or_else(
+        = bxr_ini_read_number_or_else(
               config_ini, "window", "fullscreen", config->fullscreen)
           != 0;
     if (fullscreen != config->fullscreen) {
@@ -131,7 +131,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     }
 
     // Read resizable from ini
-    bool resizable = bxr_inir_number_or_else(
+    bool resizable = bxr_ini_read_number_or_else(
                          config_ini, "window", "resizable", config->resizable)
                      != 0;
     if (resizable != config->resizable) {
@@ -143,7 +143,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     }
 
     // Read target_ups from ini
-    int target_ups = bxr_inir_number_or_else(
+    int target_ups = bxr_ini_read_number_or_else(
         config_ini, "window", "target_ups", config->target_ups);
     if (target_ups != config->target_ups) {
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
@@ -153,7 +153,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
       config->target_ups = target_ups;
     }
 
-    bxr_inir_destroy(config_ini);
+    bxr_ini_destroy_reader(config_ini);
   }
 
   bxr_context_t *context = bxr_context_get();

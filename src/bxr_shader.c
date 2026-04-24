@@ -61,7 +61,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
   } else if (SDL_strstr(name, ".frag") != NULL) {
     stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
   } else {
-    bxr_set_error(BXR_ERROR_SHADER_NAME);
+    bxr_error_set(BXR_ERROR_SHADER_NAME);
     return NULL;
   }
 
@@ -82,7 +82,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
     shader_bytecode->format = SDL_GPU_SHADERFORMAT_DXBC;
     file_ext                = ".dxbc";
   } else {
-    bxr_set_error(BXR_ERROR_SHADER_FORMAT);
+    bxr_error_set(BXR_ERROR_SHADER_FORMAT);
     return NULL;
   }
 
@@ -93,7 +93,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 
   if (shader_bytecode->data == NULL) {
     BXR_FREE(shader_bytecode);
-    bxr_set_error(BXR_ERROR_SHADER_LOAD_BYTECODE);
+    bxr_error_set(BXR_ERROR_SHADER_LOAD_BYTECODE);
     return NULL;
   }
 

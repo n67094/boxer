@@ -43,14 +43,14 @@ bxr_image_make(const char *path)
                 "Failed to open image file: %s (error: %s)",
                 path,
                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_set_error(BXR_ERROR_IMAGE_FILE);
+    bxr_error_set(BXR_ERROR_IMAGE_FILE);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
   SDL_Surface *surface = SDL_LoadPNG_IO(stream, true);
   if (!surface) {
     SDL_CloseIO(stream);
-    bxr_set_error(BXR_ERROR_IMAGE_MAKE);
+    bxr_error_set(BXR_ERROR_IMAGE_MAKE);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
@@ -73,7 +73,7 @@ bxr_image_make_mem(unsigned int width, unsigned int height, void *pixels)
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to create surface from memory (error: %s)",
                  SDL_GetError());
-    bxr_set_error(BXR_ERROR_IMAGE_MAKE_MEM);
+    bxr_error_set(BXR_ERROR_IMAGE_MAKE_MEM);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 

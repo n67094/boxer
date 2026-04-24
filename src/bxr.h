@@ -31,7 +31,6 @@
 #include "bxr_pipeline.h"
 #include "bxr_pool.h"
 #include "bxr_shader.h"
-#include "bxr_text.h"
 #include "bxr_unit.h"
 
 void bxr_quit(void);
