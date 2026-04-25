@@ -4,6 +4,9 @@
  * Copyright (c) 2026 nsix. All rights reserved.
  *
  * # Boxer context
+ *
+ * TODO improve context API, add more functions to set/get context state (e.g.
+ * window title, icon, etc.).
  */
 
 #ifndef BXR_CONTEXT_H_

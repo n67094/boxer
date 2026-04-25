@@ -4,6 +4,7 @@
 
 #include "bxr_context.h"
 #include "bxr_error.h"
+#include "bxr_mem.h"
 #include "bxr_sampler.h"
 
 static Uint32 _initialized     = 0;
@@ -32,7 +33,7 @@ _bxr_painter_sampler(bxr_sampler_e sampler_type)
 {
   SDL_GPUSamplerCreateInfo sampler_info;
 
-  SDL_memset(&sampler_info, 0, sizeof(SDL_GPUSamplerCreateInfo));
+  BXR_MEMSET(&sampler_info, 0, sizeof(SDL_GPUSamplerCreateInfo));
 
   switch (sampler_type) {
   case BXR_SAMPLER_POINT_WRAP:

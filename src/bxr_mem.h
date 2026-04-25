@@ -22,4 +22,16 @@
 
 #define BXR_RESIZE(ptr, nbytes) ((ptr) = SDL_realloc((ptr), (size_t)(nbytes)))
 
+#define BXR_MEMSET(ptr, value, nbytes)                                         \
+  SDL_memset((ptr), (value), (size_t)(nbytes))
+
+#define BXR_MEMCPY(dest, src, nbytes)                                          \
+  SDL_memcpy((dest), (src), (size_t)(nbytes))
+
+#define BXR_MEMMOVE(dest, src, nbytes)                                         \
+  SDL_memmove((dest), (src), (size_t)(nbytes))
+
+#define BXR_MEMCMP(ptr1, ptr2, nbytes)                                         \
+  SDL_memcmp((ptr1), (ptr2), (size_t)(nbytes))
+
 #endif // BXR_MEM_H_

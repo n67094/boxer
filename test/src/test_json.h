@@ -1,7 +1,7 @@
 /**
- * @file test_json.h
+ * File `test_json.h`.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef TEST_JSON_H_
@@ -208,10 +208,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
 
 BXR_UNIT_SUITE(suite_json)
 {
-  // Writer cases
   BXR_UNIT_RUN_CASE(case_bxr_json_write);
-
-  // Reader cases
   BXR_UNIT_RUN_CASE(case_bxr_json_read);
 }
 

@@ -10,36 +10,69 @@
 #define BXR_MATH_H_
 
 #include <float.h>
-#include <math.h>
 
 #include <SDL3/SDL.h>
 
 #include "bxr_defs.h"
 
-#define BXR_EPSILON 1e-5f
+#define BXR_PI_D SDL_PI_D
+#define BXR_PI_F SDL_PI_F
+#define BXR_PI2_F (2.0f * SDL_PI_F)
+#define BXR_PI2_D (2.0f * SDL_PI_D)
 
-#define BXR_PI 3.14159265359f
-#define BXR_PI2 (2.0f * BXR_PI)
-#define BXR_E 2.71828182845f
+#define BXR_EPSILON SDL_FLT_EPSILON
+#define BXR_FLOAT_MIN FLT_MIN
+#define BXR_FLOAT_MAX FLT_MAX
 
-#define FLOAT_MIN FLT_MIN
-#define FLOAT_MAX FLT_MAX
-
-#define bxr_sqrt sqrtf
-#define bxr_cos cosf
-#define bxr_sin sinf
-#define bxr_acos acosf
-#define bxr_asin asinf
-#define bxr_atan2 atan2f
-#define bxr_abs fabsf
-#define bxr_fmod fmodf
-#define bxr_exp expf
-#define bxr_pow powf
-#define bxr_floor floorf
-#define bxr_ceil ceilf
-#define bxr_log2 log2f
-#define bxr_max fmaxf
-#define bxr_min fminf
+#define bxr_abs SDL_abs
+#define bxr_min SDL_min
+#define bxr_max SDL_max
+#define bxr_clamp SDL_clamp
+#define bxr_acos SDL_acos
+#define bxr_acosf SDL_acosf
+#define bxr_asin SDL_asin
+#define bxr_asinf SDL_asinf
+#define bxr_atan SDL_atan
+#define bxr_atanf SDL_atanf
+#define bxr_atan2 SDL_atan2
+#define bxr_atan2f SDL_atan2f
+#define bxr_ceil SDL_ceil
+#define bxr_ceilf SDL_ceilf
+#define bxr_copysign SDL_copysign
+#define bxr_copysignf SDL_copysignf
+#define bxr_cos SDL_cos
+#define bxr_cosf SDL_cosf
+#define bxr_exp SDL_exp
+#define bxr_expf SDL_expf
+#define bxr_fabs SDL_fabs
+#define bxr_fabsf SDL_fabsf
+#define bxr_floor SDL_floor
+#define bxr_floorf SDL_floorf
+#define bxr_trunc SDL_trunc
+#define bxr_truncf SDL_truncf
+#define bxr_fmod SDL_fmod
+#define bxr_fmodf SDL_fmodf
+#define bxr_fmodf SDL_fmodf
+#define bxr_isinf SDL_isinf
+#define bxr_isinff SDL_isinff
+#define bxr_isnan SDL_isnan
+#define bxr_isnanf SDL_isnanf
+#define bxr_modf SDL_modf
+#define bxr_modff SDL_modff
+#define bxr_pow SDL_pow
+#define bxr_powf SDL_powf
+#define bxr_round SDL_round
+#define bxr_roundf SDL_roundf
+#define bxr_lround SDL_lround
+#define bxr_lroundf SDL_lroundf
+#define bxr_scalbn SDL_scalbn
+#define bxr_scalbnf SDL_scalbnf
+#define bxr_sin SDL_sin
+#define bxr_sinf SDL_sinf
+#define bxr_sqrt SDL_sqrt
+#define bxr_sqrtf SDL_sqrtf
+#define bxr_tan SDL_tan
+#define bxr_tanf SDL_tanf
 
 typedef struct bxr_vec2_s
 {
@@ -51,32 +84,6 @@ typedef bxr_vec2_t bxr_point_t;
 /**
  * ## Scalar Functions and Macros
  */
-
-/**
- * `return` the minimum of `a` and `b`.
- */
-#define BXR_MIN(a, b) (((a) < (b)) ? (a) : (b))
-
-/**
- * `return` the maximum of `a` and `b`.
- */
-#define BXR_MAX(a, b) (((a) > (b)) ? (a) : (b))
-
-/**
- * Clamps the value to the given range.
- *
- * `val` is the value to clamp.
- *
- * `min` is the minimum value of the range.
- *
- * `max` is the maximum value of the range.
- *
- */
-inline float
-bxr_clamp(float val, float min, float max)
-{
-  return ((val < min) ? min : ((val > max) ? max : val));
-}
 
 /**
  * Computes the sign of the number.
@@ -132,10 +139,10 @@ bxr_lerp_angle(float angle1, float angle2, float step)
 {
   float diff = angle2 - angle1;
 
-  if (diff < -BXR_PI)
-    diff += BXR_PI2;
-  else if (diff > BXR_PI)
-    diff -= BXR_PI2;
+  if (diff < -BXR_PI_F)
+    diff += BXR_PI2_F;
+  else if (diff > BXR_PI_F)
+    diff -= BXR_PI2_F;
 
   return angle1 + diff * step;
 }
@@ -150,11 +157,11 @@ bxr_lerp_angle(float angle1, float angle2, float step)
 BXR_INLINE float
 bxr_normalize_angle(float angle)
 {
-  while (angle >= BXR_PI2)
-    angle -= BXR_PI2;
+  while (angle >= BXR_PI2_F)
+    angle -= BXR_PI2_F;
 
   while (angle < 0.0f)
-    angle += BXR_PI2;
+    angle += BXR_PI2_F;
 
   return angle;
 }
@@ -308,7 +315,7 @@ bxr_vec2_cross(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE float
 bxr_vec2_angle(bxr_vec2_t v)
 {
-  return atan2(v.y, v.x);
+  return bxr_atan2(v.y, v.x);
 }
 
 /**

@@ -5,6 +5,15 @@
  *
  * # Shader Management System.
  *
+ * Shader bytecode are loaded from `BXR_DATA_DIR`.
+ *
+ * Shader should be name like this `<name>.<stage>.<format>`, where:
+ *
+ * - `<name>` is the name of the shader (e.g. "basic", "sprite", etc.).
+ * - `<stage>` is the shader stage (e.g. "vert" for vertex shader, "frag" for
+ * fragment shader).
+ * - `<format>` is the shader bytecode format (e.g. "spv" for SPIR-V, "msl" for
+ * Metal Shading Language, etc.).
  */
 
 #ifndef BXR_SHADER_H_

@@ -58,7 +58,7 @@ bxr_json_make_reader(const char *path)
     return NULL;
   }
 
-  SDL_memcpy(json->data, data, length);
+  BXR_MEMCPY(json->data, data, length);
 
   BXR_FREE(data);
 
@@ -286,7 +286,7 @@ bxr_json_reader_eq_str(bxr_json_token_t *key, const char *expected)
   SDL_assert(expected);
 
   size_t len = key->end - key->start;
-  return SDL_strlen(expected) == len && !SDL_memcmp(expected, key->start, len);
+  return SDL_strlen(expected) == len && !BXR_MEMCMP(expected, key->start, len);
 }
 
 bool
@@ -355,7 +355,7 @@ bxr_json_writer_append(bxr_json_writer_t *json, const char *str)
     if (new_data == NULL) {
       return false;
     }
-    SDL_memcpy(new_data, json->data, json->size);
+    BXR_MEMCPY(new_data, json->data, json->size);
     BXR_FREE(json->data);
 
     json->data     = new_data;

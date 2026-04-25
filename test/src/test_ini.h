@@ -1,7 +1,7 @@
 /**
- * @file test_ini.h
+ * File `test_ini.h`.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef TEST_INI_H_
@@ -122,10 +122,7 @@ BXR_UNIT_CASE(case_bxr_ini_read)
 
 BXR_UNIT_SUITE(suite_ini)
 {
-  // Writer cases
   BXR_UNIT_RUN_CASE(case_bxr_ini_write);
-
-  // Reader cases
   BXR_UNIT_RUN_CASE(case_bxr_ini_read);
 }
 

@@ -3,7 +3,7 @@
 #include "test_ini.h"
 #include "test_json.h"
 #include "test_math.h"
-// #include "test_text.h"
+#include "test_sparse_set.h"
 
 static bxr_game_config_t _config = { 0 };
 
@@ -32,7 +32,7 @@ bxr_game_setup(void)
   BXR_UNIT_RUN_SUITE(suite_math);
   BXR_UNIT_RUN_SUITE(suite_json);
   BXR_UNIT_RUN_SUITE(suite_ini);
-  // BXR_UNIT_RUN_SUITE(suite_text);
+  BXR_UNIT_RUN_SUITE(suite_sparse_set);
 
   bxr_unit_report();
 }

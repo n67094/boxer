@@ -1,7 +1,9 @@
 /**
- * @file test_math.c
+ * File `test_math.c`.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * TODO add test cases for math functions.
  */
 
 #ifndef TEST_MATH_H_

@@ -2,6 +2,7 @@
 
 #include "bxr_defs.h"
 #include "bxr_gamepad.h"
+#include "bxr_mem.h"
 
 typedef struct _bxr_gamepad_button_state_s
 {
@@ -104,9 +105,9 @@ bxr_gamepad_listen(void)
         _gamepads[j].id      = id;
         _gamepads[j].serial  = SDL_GetGamepadSerial(gamepad);
 
-        SDL_memset(_gamepads[j].buttons, 0, sizeof(_gamepads[j].buttons));
-        SDL_memset(_gamepads[j].axis, 0, sizeof(_gamepads[j].axis));
-        SDL_memset(_gamepads[j].axis_prev, 0, sizeof(_gamepads[j].axis_prev));
+        BXR_MEMSET(_gamepads[j].buttons, 0, sizeof(_gamepads[j].buttons));
+        BXR_MEMSET(_gamepads[j].axis, 0, sizeof(_gamepads[j].axis));
+        BXR_MEMSET(_gamepads[j].axis_prev, 0, sizeof(_gamepads[j].axis_prev));
         break;
       }
     }
@@ -135,7 +136,7 @@ bxr_gamepad_begin_frame(void)
     }
 
     // Update previous axis values
-    SDL_memcpy(_gamepads[i].axis_prev,
+    BXR_MEMCPY(_gamepads[i].axis_prev,
                _gamepads[i].axis,
                sizeof(_gamepads[i].axis_prev));
   }

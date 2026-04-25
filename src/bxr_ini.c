@@ -199,7 +199,7 @@ bxr_ini_make_reader(const char *path)
     return NULL;
   }
 
-  SDL_memcpy(ini->data, data, length);
+  BXR_MEMCPY(ini->data, data, length);
 
   BXR_FREE(data);
 
@@ -339,7 +339,7 @@ bxr_ini_writer_append(bxr_ini_writer_t *ini, const char *str)
     if (new_data == NULL) {
       return false;
     }
-    SDL_memcpy(new_data, ini->data, ini->size);
+    BXR_MEMCPY(new_data, ini->data, ini->size);
     BXR_FREE(ini->data);
 
     ini->data     = new_data;
