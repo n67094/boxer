@@ -1,11 +1,11 @@
 /**
- * File `test_json.h`.
+ * File `json.h`.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
 
-#ifndef TEST_JSON_H_
-#define TEST_JSON_H_
+#ifndef JSON_H_
+#define JSON_H_
 
 #include "bxr.h"
 
@@ -212,4 +212,4 @@ BXR_UNIT_SUITE(suite_json)
   BXR_UNIT_RUN_CASE(case_bxr_json_read);
 }
 
-#endif // TEST_JSON_H_
+#endif // JSON_H_

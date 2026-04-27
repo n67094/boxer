@@ -72,6 +72,9 @@ void bxr_shader_shutdown(void);
  *
  * `return` the created shader, or an invalid shader if the shader could not
  * be created.
+ *
+ * The caller is responsible for destroying the returned shader using
+ * `bxr_shader_destroy` when it is no longer needed.
  */
 bxr_shader_t bxr_shader_make(bxr_shader_desc_t *desc);
 

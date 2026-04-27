@@ -11,6 +11,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_bitset.h"
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_context.h"

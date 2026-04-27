@@ -45,6 +45,9 @@ void bxr_image_shutdown(void);
  *
  * `return` the loaded image, or an invalid image if the image could not be
  * loaded.
+ *
+ * The caller is responsible for destroying the returned image using
+ * `bxr_image_destroy` when it is no longer needed.
  */
 bxr_image_t bxr_image_make(const char *path);
 
@@ -59,6 +62,9 @@ bxr_image_t bxr_image_make(const char *path);
  *
  * `return` the created image, or an invalid image if the image could not be
  * created.
+ *
+ * The caller is responsible for destroying the returned image using
+ * `bxr_image_destroy` when it is no longer needed.
  */
 bxr_image_t
 bxr_image_make_mem(unsigned int width, unsigned int height, void *pixels);

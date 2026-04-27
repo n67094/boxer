@@ -48,6 +48,9 @@ typedef struct bxr_sparse_set_s
  *
  * `return` a pointer to the created sparse set, or NULL if the sparse set
  * could not be created.
+ *
+ * The caller is responsible for destroying the returned sparse set using
+ * `bxr_sparse_set_destroy` when it is no longer needed.
  */
 bxr_sparse_set_t *bxr_sparse_set_make(size_t default_capacity);
 

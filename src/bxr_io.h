@@ -34,6 +34,9 @@
  * data.
  *
  * `return` the contents of the file or NULL if the file could not be read.
+ *
+ * The caller is responsible for freeing the returned data using `SDL_free` when
+ * it is no longer needed.
  */
 BXR_INLINE Uint8 *
 bxr_io_read(const char *path, size_t *length)

@@ -12,11 +12,12 @@
 typedef Uint32 bxr_ecs_entity_t;
 typedef Uint32 bxr_ecs_component_t;
 typedef Uint32 bxr_ecs_system_t;
+
 typedef Uint64 bxr_ecs_mask_t;
 
 typedef struct bxr_ecs_desc_s
 {
-  Uint32 max_entity;
+  Uint32 max_entities;
   Uint32 max_component;
   Uint32 max_system;
 } bxr_ecs_desc_t;

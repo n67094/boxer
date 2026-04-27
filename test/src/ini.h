@@ -1,11 +1,11 @@
 /**
- * File `test_ini.h`.
+ * File `ini.h`.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
 
-#ifndef TEST_INI_H_
-#define TEST_INI_H_
+#ifndef INI_H_
+#define INI_H_
 
 #include "bxr.h"
 
@@ -126,4 +126,4 @@ BXR_UNIT_SUITE(suite_ini)
   BXR_UNIT_RUN_CASE(case_bxr_ini_read);
 }
 
-#endif // TEST_INI_H_
+#endif // INI_H_

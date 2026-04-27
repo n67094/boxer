@@ -54,6 +54,9 @@ typedef struct bxr_json_token_s
  *
  * `return` a reader for the loaded JSON file, or NULL if the file could not be
  * loaded.
+ *
+ * The caller is responsible for destroying the returned reader using
+ * `bxr_json_destroy_reader` when it is no longer needed.
  */
 bxr_json_reader_t *bxr_json_make_reader(const char *path);
 
@@ -71,6 +74,9 @@ void bxr_json_destroy_reader(bxr_json_reader_t *reader);
  *
  * `return` the next token read from the JSON reader, or a token with type
  * `BXR_JSON_ERROR` if an error occurred while reading.
+ *
+ * The caller should not modify or free these pointers, as they are owned by the
+ * JSON reader.
  */
 bxr_json_token_t bxr_json_read_token(bxr_json_reader_t *reader);
 
@@ -200,6 +206,9 @@ typedef struct bxr_json_writer_s bxr_json_writer_t;
  *
  * `return` a pointer to the newly created JSON writer, or NULL if the writer
  * could not be created.
+ *
+ * The caller is responsible for destroying the returned JSON writer using
+ * `bxr_json_destroy_writer` when it is no longer needed.
  */
 bxr_json_writer_t *bxr_json_make_writer(void);
 

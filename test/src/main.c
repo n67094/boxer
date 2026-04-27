@@ -1,9 +1,10 @@
 #include "bxr.h"
 
-#include "test_ini.h"
-#include "test_json.h"
-#include "test_math.h"
-#include "test_sparse_set.h"
+#include "bitset.h"
+#include "ini.h"
+#include "json.h"
+#include "math.h"
+#include "sparse_set.h"
 
 static bxr_game_config_t _config = { 0 };
 
@@ -33,6 +34,7 @@ bxr_game_setup(void)
   BXR_UNIT_RUN_SUITE(suite_json);
   BXR_UNIT_RUN_SUITE(suite_ini);
   BXR_UNIT_RUN_SUITE(suite_sparse_set);
+  BXR_UNIT_RUN_SUITE(suite_bitset);
 
   bxr_unit_report();
 }

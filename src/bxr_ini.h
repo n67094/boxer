@@ -45,6 +45,9 @@ typedef struct bxr_ini_reader_s bxr_ini_reader_t;
  *
  * `return` a reader for the loaded INI file, or NULL if the file could not be
  * loaded.
+ *
+ * The caller is responsible for destroying the returned reader using
+ * `bxr_ini_destroy_reader` when it is no longer needed.
  */
 bxr_ini_reader_t *bxr_ini_make_reader(const char *path);
 
@@ -138,6 +141,9 @@ typedef struct bxr_ini_writer_s bxr_ini_writer_t;
  * Create a new INI writer.
  *
  * `return` a new INI writer, or NULL if the writer could not be created.
+ *
+ * The caller is responsible for destroying the returned writer using
+ * `bxr_ini_destroy_writer` when it is no longer needed.
  */
 bxr_ini_writer_t *bxr_ini_make_writer(void);
 

@@ -1,11 +1,11 @@
 /**
- * File `test_sparse_set.h`.
+ * File `sparse_et.h`.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
 
-#ifndef TEST_SPARSE_SET_H_
-#define TEST_SPARSE_SET_H_
+#ifndef SPARSE_SET_H_
+#define SPARSE_SET_H_
 
 #include "bxr.h"
 
@@ -87,4 +87,4 @@ BXR_UNIT_SUITE(suite_sparse_set)
   BXR_UNIT_RUN_CASE(case_sparse_set_double);
 }
 
-#endif // TEST_SPARSE_SET_H_
+#endif // SPARSE_SET_H_

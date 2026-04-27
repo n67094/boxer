@@ -9,8 +9,6 @@
 #ifndef BXR_DEFS_H_
 #define BXR_DEFS_H_
 
-#include <SDL_gp.h>
-
 #if defined(_MSC_VER)
 #define INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__)

@@ -26,31 +26,7 @@
 #define BXR_PATH_MAX 512
 
 /**
- * ## Painter Resources
- */
-
-/**
- * Max texture dimension in pixels
- */
-#define BXR_PAINTER_TEXTURE_DIMENSION_MAX 4096
-
-/**
- * Max number of images that can be loaded at the same time
- */
-#define BXR_PAINTER_IMAGE_MAX 64
-
-/**
- * Max number of shaders that can be loaded at the same time
- */
-#define BXR_PAINTER_SHADER_MAX 8
-
-/**
- * Max number of pipelines that can be created at the same time
- */
-#define BXR_PAINTER_PIPELINE_MAX 64
-
-/**
- * ## Painter Limitations
+ * ## Painter Configuration
  */
 
 /**
@@ -80,7 +56,31 @@
 #define BXR_PAINTER_OPTIMIZER_DEPTH 8
 
 /**
- * INI Reader/Writer Limitations
+ * ## Painter Resources Configuration
+ */
+
+/**
+ * Max texture dimension in pixels
+ */
+#define BXR_PAINTER_TEXTURE_DIMENSION_MAX 4096
+
+/**
+ * Max number of images that can be loaded at the same time
+ */
+#define BXR_PAINTER_IMAGE_MAX 64
+
+/**
+ * Max number of shaders that can be loaded at the same time
+ */
+#define BXR_PAINTER_SHADER_MAX 8
+
+/**
+ * Max number of pipelines that can be created at the same time
+ */
+#define BXR_PAINTER_PIPELINE_MAX 64
+
+/**
+ * ## INI Reader/Writer Configuration
  */
 
 /**
@@ -96,7 +96,14 @@
 #define BXR_INI_DEFAULT_DATA_CAPACITY 512
 
 /**
- * UI Limitations
+ * ## ECS Configuration
+ */
+
+#define BXR_ECS_COMPONENT_DEFAULT 32
+#define BXR_ECS_SYSTEM_DEFAULT 32
+
+/**
+ * ## UI Configuration
  */
 
 /* TODO re-add UI implementation
