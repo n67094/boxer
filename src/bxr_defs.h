@@ -21,6 +21,18 @@
 #define BXR_INIT_COOKIE 0xC0DED1ED
 
 /**
+ * This is useful for providing default values for function parameters that are
+ * passed as 0.
+ *
+ * `val` is the value to check.
+ *
+ * `def` is the default value to return if `val` is 0.
+ *
+ * `return` `def` if `val` is 0, otherwise return `val`.
+ */
+#define BXR_DEFAULT(val, def) (((val) == 0) ? (def) : (val))
+
+/**
  * Get the offset of a struct member in bytes.
  *
  * `TYPE` is the type of the struct.

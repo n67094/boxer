@@ -78,6 +78,28 @@ BXR_UNIT_CASE(case_sparse_set_double)
   return true;
 }
 
+BXR_UNIT_CASE(case_sparse_clear)
+{
+
+  bxr_sparse_set_t *set = bxr_sparse_set_make(4);
+
+  BXR_UNIT_ASSERT(bxr_sparse_set_insert(set, 1));
+  BXR_UNIT_ASSERT(bxr_sparse_set_insert(set, 2));
+  BXR_UNIT_ASSERT(bxr_sparse_set_insert(set, 3));
+  BXR_UNIT_ASSERT(bxr_sparse_set_insert(set, 4));
+
+  bxr_sparse_set_clear(set);
+
+  BXR_UNIT_ASSERT(!bxr_sparse_set_contains(set, 1, NULL));
+  BXR_UNIT_ASSERT(!bxr_sparse_set_contains(set, 2, NULL));
+  BXR_UNIT_ASSERT(!bxr_sparse_set_contains(set, 3, NULL));
+  BXR_UNIT_ASSERT(!bxr_sparse_set_contains(set, 4, NULL));
+
+  bxr_sparse_set_destroy(set);
+
+  return true;
+}
+
 BXR_UNIT_SUITE(suite_sparse_set)
 {
   BXR_UNIT_RUN_CASE(case_sparse_set_insert);
@@ -85,6 +107,8 @@ BXR_UNIT_SUITE(suite_sparse_set)
   BXR_UNIT_RUN_CASE(case_sparse_set_remove);
 
   BXR_UNIT_RUN_CASE(case_sparse_set_double);
+
+  BXR_UNIT_RUN_CASE(case_sparse_clear);
 }
 
 #endif // SPARSE_SET_H_

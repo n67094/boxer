@@ -116,3 +116,11 @@ bxr_sparse_set_contains(const bxr_sparse_set_t *set,
     return false;
   }
 }
+
+void
+bxr_sparse_set_clear(bxr_sparse_set_t *set)
+{
+  SDL_assert(set);
+
+  set->count = 0;
+}

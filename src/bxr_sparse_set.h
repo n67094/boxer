@@ -99,4 +99,6 @@ bool bxr_sparse_set_contains(const bxr_sparse_set_t *set,
                              Uint32 handle,
                              Uint32 *found);
 
+void bxr_sparse_set_clear(bxr_sparse_set_t *set);
+
 #endif // BXR_SPARSE_SET_H_

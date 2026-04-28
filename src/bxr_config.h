@@ -16,14 +16,18 @@
  */
 
 /**
+ * Max path length in characters
+ */
+#define BXR_PATH_MAX_LENGTH 512
+
+/**
+ * ## Filesystem Configuration
+ */
+
+/**
  * The directory where game assets are located (relative to the executable)
  */
 #define BXR_DATA_DIR "data"
-
-/**
- * Max path length in characters
- */
-#define BXR_PATH_MAX 512
 
 /**
  * ## Painter Configuration
@@ -32,22 +36,22 @@
 /**
  * Max number of painters state that can be used simultaneously (per frame)
  */
-#define BXR_PAINTER_STATE_MAX 16
+#define BXR_PAINTER_MAX_STATE 16
 
 /**
  * Max number of textures that can be bound at the same time (per draw call)
  */
-#define BXR_PAINTER_TEXTURE_SLOTS_MAX 4
+#define BXR_PAINTER_MAX_TEXTURE_SLOTS 4
 
 /**
  * Max number of transforms that can be pushed at the same time (per frame)
  */
-#define BXR_PAINTER_TRANSFORMS_MAX 64
+#define BXR_PAINTER_MAX_TRANSFORMS 64
 
 /**
  * Max number of float (4-bytes) uniforms that can be set in a shader
  */
-#define BXR_PAINTER_UNIFORM_FLOATS_MAX 8
+#define BXR_PAINTER_MAX_UNIFORM_FLOATS 8
 
 /**
  * Max number of commands that are looked back and batched together for
@@ -62,22 +66,22 @@
 /**
  * Max texture dimension in pixels
  */
-#define BXR_PAINTER_TEXTURE_DIMENSION_MAX 4096
+#define BXR_PAINTER_MAX_TEXTURE_DIMENSION 4096
 
 /**
  * Max number of images that can be loaded at the same time
  */
-#define BXR_PAINTER_IMAGE_MAX 64
+#define BXR_PAINTER_MAX_IMAGE 64
 
 /**
  * Max number of shaders that can be loaded at the same time
  */
-#define BXR_PAINTER_SHADER_MAX 8
+#define BXR_PAINTER_MAX_SHADER 8
 
 /**
  * Max number of pipelines that can be created at the same time
  */
-#define BXR_PAINTER_PIPELINE_MAX 64
+#define BXR_PAINTER_MAX_PIPELINE 64
 
 /**
  * ## INI Reader/Writer Configuration
@@ -99,8 +103,20 @@
  * ## ECS Configuration
  */
 
-#define BXR_ECS_COMPONENT_DEFAULT 32
-#define BXR_ECS_SYSTEM_DEFAULT 32
+/**
+ * Default number of entities that can be created at the same time.
+ */
+#define BXR_ECS_DEFAULT_ENTITY 64
+
+/**
+ * Default number of components that can be defined at the same time.
+ */
+#define BXR_ECS_DEFAULT_COMPONENT 32
+
+/**
+ * Default number of systems that can be defined at the same time.
+ */
+#define BXR_ECS_DEFAULT_SYSTEM 16
 
 /**
  * ## UI Configuration
