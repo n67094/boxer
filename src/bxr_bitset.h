@@ -120,6 +120,6 @@ bxr_bitset_t *bxr_bitset_not(const bxr_bitset_t *bitset);
  * `a` The first bitset.
  * `b` The second bitset.
  */
-bool bxr_bitset_equals(const bxr_bitset_t *a, const bxr_bitset_t *b);
+bool bxr_bitset_equal(const bxr_bitset_t *a, const bxr_bitset_t *b);
 
 #endif // BXR_BITSET_H_

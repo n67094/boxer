@@ -157,3 +157,11 @@ bxr_sparse_set_clear(bxr_sparse_set_t *set)
 
   set->count = 0;
 }
+
+Uint32 *
+bxr_sparse_set_get_dense(const bxr_sparse_set_t *set)
+{
+  SDL_assert(set);
+
+  return set->dense;
+}

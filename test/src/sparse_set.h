@@ -103,11 +103,8 @@ BXR_UNIT_CASE(case_sparse_clear)
 BXR_UNIT_SUITE(suite_sparse_set)
 {
   BXR_UNIT_RUN_CASE(case_sparse_set_insert);
-
   BXR_UNIT_RUN_CASE(case_sparse_set_remove);
-
   BXR_UNIT_RUN_CASE(case_sparse_set_double);
-
   BXR_UNIT_RUN_CASE(case_sparse_clear);
 }
 

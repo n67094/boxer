@@ -99,4 +99,6 @@ size_t bxr_sparse_set_count(const bxr_sparse_set_t *set);
  */
 void bxr_sparse_set_clear(bxr_sparse_set_t *set);
 
+Uint32 *bxr_sparse_set_get_dense(const bxr_sparse_set_t *set);
+
 #endif // BXR_SPARSE_SET_H_

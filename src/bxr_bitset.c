@@ -180,7 +180,7 @@ bxr_bitset_not(const bxr_bitset_t *bitset)
 }
 
 bool
-bxr_bitset_equals(const bxr_bitset_t *a, const bxr_bitset_t *b)
+bxr_bitset_equal(const bxr_bitset_t *a, const bxr_bitset_t *b)
 {
   SDL_assert(a);
   SDL_assert(b);
