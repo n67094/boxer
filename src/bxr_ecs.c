@@ -35,13 +35,30 @@ typedef struct _bxr_ecs_system_data_s
   bxr_sparse_set_t *entity_ids;
   bxr_ecs_mask_t mask;
   bxr_ecs_logic_cb logic_cb;
-  bxr_ecs_system_added_cb added_cb;
-  bxr_ecs_system_removed_cb removed_cb;
+  bxr_ecs_system_add_cb add_cb;
+  bxr_ecs_system_remove_cb remove_cb;
   bxr_bitset_t *require_bits;
   bxr_bitset_t *exclude_bits;
   void *udata;
 } _bxr_ecs_system_data_t;
 
+/**
+ * Ecs data structure.
+ *
+ * `max_entities`
+ *
+ * `max_components`
+ *
+ * `max_systems`
+ *
+ * `entity_free_stack`
+ *
+ * `entity_add_stack`
+ *
+ * `entity_remove_stack`
+ *
+ * `entity_destroy_stack`
+ */
 struct bxr_ecs_s
 {
   size_t max_entities;
@@ -305,8 +322,8 @@ bxr_ecs_system_t
 bxr_ecs_define_system(bxr_ecs_t *ecs,
                       bxr_ecs_mask_t mask,
                       bxr_ecs_logic_cb logic_cb,
-                      bxr_ecs_system_added_cb added_cb,
-                      bxr_ecs_system_removed_cb removed_cb,
+                      bxr_ecs_system_add_cb add_cb,
+                      bxr_ecs_system_remove_cb remove_cb,
                       void *udata)
 {
   SDL_assert(ecs);
@@ -320,8 +337,8 @@ bxr_ecs_define_system(bxr_ecs_t *ecs,
   system_data->mask         = mask;
   system_data->entity_ids   = bxr_sparse_set_make(ecs->max_entities);
   system_data->logic_cb     = logic_cb;
-  system_data->added_cb     = added_cb;
-  system_data->removed_cb   = removed_cb;
+  system_data->add_cb       = add_cb;
+  system_data->remove_cb    = remove_cb;
   system_data->require_bits = bxr_bitset_make(ecs->max_components);
   system_data->exclude_bits = bxr_bitset_make(ecs->max_components);
   system_data->udata        = udata;
@@ -389,8 +406,8 @@ void
 bxr_ecs_set_system_callback(bxr_ecs_t *ecs,
                             bxr_ecs_system_t system,
                             bxr_ecs_logic_cb logic_cb,
-                            bxr_ecs_system_added_cb added_cb,
-                            bxr_ecs_system_removed_cb removed_cb)
+                            bxr_ecs_system_add_cb add_cb,
+                            bxr_ecs_system_remove_cb remove_cb)
 {
   SDL_assert(ecs);
   SDL_assert(system < ecs->max_systems);
@@ -398,9 +415,9 @@ bxr_ecs_set_system_callback(bxr_ecs_t *ecs,
 
   _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
 
-  system_data->logic_cb   = logic_cb;
-  system_data->added_cb   = added_cb;
-  system_data->removed_cb = removed_cb;
+  system_data->logic_cb  = logic_cb;
+  system_data->add_cb    = add_cb;
+  system_data->remove_cb = remove_cb;
 }
 
 void
@@ -452,7 +469,7 @@ bxr_ecs_get_system_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system)
   SDL_assert(system < ecs->max_systems);
   SDL_assert(system < ecs->system_count);
 
-  return ecs->system_data[system].entity_ids->count;
+  return bxr_sparse_set_count(ecs->system_data[system].entity_ids);
 }
 
 bxr_ecs_entity_t
@@ -527,9 +544,125 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
   SDL_assert(component < ecs->max_components);
   SDL_assert(component < ecs->component_count);
 
-  // TODO
+  // Get the entity
+  _bxr_ecs_entity_data_t *entity_data = &ecs->entity_data[entity];
 
-  return NULL;
+  // Get the component data and it's array of component
+  _bxr_ecs_component_data_t *component_data = &ecs->component_data[component];
+  _bxr_ecs_component_array_t *component_array
+      = &ecs->component_arrays[component];
+
+  // Grow component_array if needed
+  if (entity >= component_array->length) {
+    do {
+      component_array->length = component_array->length * 2;
+    } while (entity >= component_array->length);
+    BXR_RESIZE(component_array,
+               component_array->length * component_array->size);
+  }
+
+  // Get a pointer to the component's data and set it to zero
+  void *component_ptr = bxr_ecs_get_component(ecs, entity, component);
+  BXR_MEMSET(component_ptr, 0, component_array->size);
+
+  if (component_data->make_cb)
+    component_data->make_cb(ecs, entity, component_ptr, args);
+
+  // Set the entity's component bit
+  bxr_bitset_set(entity_data->component_bits, component);
+
+  // Add or remove entity from system (non running ones)
+  for (_bxr_ecs_id_t system_id = 0; system_id < ecs->system_count;
+       system_id++) {
+    // Running system will be handled below
+    if (ecs->active_system == (int)system_id)
+      continue;
+
+    _bxr_ecs_system_data_t *system_data = &ecs->system_data[system_id];
+
+    bxr_bitset_t *exclude_overlap = bxr_bitset_and(entity_data->component_bits,
+                                                   system_data->exclude_bits);
+
+    bxr_bitset_t *require_overlap = bxr_bitset_and(entity_data->component_bits,
+                                                   system_data->require_bits);
+
+    // If not excluded and required add it
+    if (!bxr_bitset_true(exclude_overlap) && bxr_bitset_true(require_overlap)) {
+      if (bxr_sparse_set_insert(system_data->entity_ids, entity)) {
+        if (system_data->add_cb)
+          system_data->add_cb(ecs, entity, system_data->udata);
+      } else {
+        // FREE bitset
+        // TODO error
+      }
+    }
+    // Optimization: If excluded, check if it was in the system and remove it
+    else if (bxr_bitset_true(exclude_overlap)) {
+      if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
+        if (system_data->remove_cb)
+          system_data->remove_cb(ecs, entity, system_data->udata);
+      } else {
+        // FREE bitset
+        // TODO error
+      }
+    }
+
+    bxr_bitset_destroy(exclude_overlap);
+    bxr_bitset_destroy(require_overlap);
+  }
+
+  // If a system is running, manage entity's stacks accordingly
+  if (ecs->active_system >= 0) {
+    _bxr_ecs_system_data_t *system_data = &ecs->system_data[ecs->active_system];
+
+    bxr_bitset_t *exclude_overlap = bxr_bitset_and(entity_data->component_bits,
+                                                   system_data->exclude_bits);
+
+    bxr_bitset_t *require_overlap = bxr_bitset_and(entity_data->component_bits,
+                                                   system_data->require_bits);
+
+    bxr_sparse_set_t *set = system_data->entity_ids;
+
+    if (!bxr_bitset_true(exclude_overlap) && bxr_bitset_true(require_overlap)) {
+      size_t count    = bxr_sparse_set_capacity(set);
+      size_t capacity = bxr_sparse_set_count(set);
+
+      // Add the entity to the system directly
+      if (count < capacity) {
+        if (bxr_sparse_set_insert(system_data->entity_ids, entity)) {
+          if (system_data->add_cb)
+            system_data->add_cb(ecs, entity, system_data->udata);
+        } else {
+          // FREE bitset
+          // TODO error
+        }
+      }
+      // Add the entity using the derefered stack
+      else {
+        if (!bxr_sparse_set_contains(set, entity, NULL)) {
+          if (system_data->add_cb)
+            system_data->add_cb(ecs, entity, system_data->udata);
+
+          _bxr_ecs_push_add_entity(ecs, entity);
+        }
+      }
+    }
+    // Optimization: If excluded, check if it was in the system and remove it
+    else if (bxr_bitset_true(exclude_overlap)) {
+      // Add the entity using the derefered stack
+      if (bxr_sparse_set_contains(set, entity, NULL)) {
+        if (system_data->remove_cb)
+          system_data->remove_cb(ecs, entity, system_data->udata);
+
+        _bxr_ecs_push_remove_entity(ecs, entity);
+      }
+    }
+
+    bxr_bitset_destroy(exclude_overlap);
+    bxr_bitset_destroy(require_overlap);
+  }
+
+  return component_ptr;
 }
 
 void *
@@ -546,4 +679,76 @@ bxr_ecs_get_component(const bxr_ecs_t *ecs,
       = &ecs->component_arrays[component];
 
   return (Uint8 *)component_array->data + (component_array->size * entity);
+}
+
+void
+bxr_ecs_remove_component(bxr_ecs_t *ecs,
+                         bxr_ecs_entity_t entity,
+                         bxr_ecs_component_t component)
+{
+  SDL_assert(ecs);
+  SDL_assert(entity < ecs->max_entities);
+  SDL_assert(component < ecs->max_components);
+  SDL_assert(component < ecs->component_count);
+
+  _bxr_ecs_entity_data_t *entity_data = &ecs->entity_data[entity];
+
+  bxr_bitset_t *component_bits = bxr_bitset_make(ecs->max_components);
+  bxr_bitset_set(component_bits, component);
+
+  for (_bxr_ecs_id_t system_id = 0; system_id < ecs->system_count;
+       system_id++) {
+
+    // Running system will be handled below
+    if (ecs->active_system == (int)system_id)
+      continue;
+
+    _bxr_ecs_system_data_t *system_data = &ecs->system_data[system_id];
+
+    bxr_bitset_t *exclude_overlap
+        = bxr_bitset_and(component_bits, system_data->exclude_bits);
+    bxr_bitset_t *require_overlap
+        = bxr_bitset_and(component_bits, system_data->require_bits);
+
+    if (!bxr_bitset_true(exclude_overlap) && bxr_bitset_true(require_overlap)) {
+      if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
+        if (system_data->remove_cb)
+          system_data->remove_cb(ecs, entity, system_data->udata);
+      } else {
+        // FREE bitset
+        // TODO error
+      }
+    }
+    // Minor optimization that take advantage of this loop, check if the system
+    // excludes components
+    else {
+      if (!bxr_bitset_is_zero(system_data->exclude_bits)) {
+        // Remove the entity from the sparse set if its components no longer
+        // match
+
+        bxr_bitset_destroy(exclude_overlap);
+        bxr_bitset_destroy(require_overlap);
+      }
+    }
+  }
+
+  bxr_bitset_destroy(component_bits);
+}
+
+void
+bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
+{
+  //
+}
+
+int
+bxr_ecs_run_system(bxr_ecs_t *ecs, bxr_ecs_system_t system, bxr_ecs_mask_t mask)
+{
+  //
+}
+
+int
+ecs_run_systems(bxr_ecs_t *ecs, bxr_ecs_mask_t mask)
+{
+  //
 }

@@ -134,9 +134,9 @@ typedef int (*bxr_ecs_logic_cb)(bxr_ecs_t *ecs,
  *
  * `udata` is the user data associated with the system.
  */
-typedef void (*bxr_ecs_system_added_cb)(bxr_ecs_t *ecs,
-                                        bxr_ecs_entity_t entity,
-                                        void *udata);
+typedef void (*bxr_ecs_system_add_cb)(bxr_ecs_t *ecs,
+                                      bxr_ecs_entity_t entity,
+                                      void *udata);
 
 /**
  * Callback called when an entity is removed from a system.
@@ -147,9 +147,9 @@ typedef void (*bxr_ecs_system_added_cb)(bxr_ecs_t *ecs,
  *
  * `udata` is the user data associated with the system.
  */
-typedef void (*bxr_ecs_system_removed_cb)(bxr_ecs_t *ecs,
-                                          bxr_ecs_entity_t entity,
-                                          void *udata);
+typedef void (*bxr_ecs_system_remove_cb)(bxr_ecs_t *ecs,
+                                         bxr_ecs_entity_t entity,
+                                         void *udata);
 
 /**
  * Define a new system in the ECS instance.
@@ -160,9 +160,9 @@ typedef void (*bxr_ecs_system_removed_cb)(bxr_ecs_t *ecs,
  *
  * `logic_cb` is the callback to call when the system is run.
  *
- * `added_cb` is the callback to call when an entity is added to the system.
+ * `add_cb` is the callback to call when an entity is added to the system.
  *
- * `removed_cb` is the callback to call when an entity is removed from the
+ * `remove_cb` is the callback to call when an entity is removed from the
  * system.
  *
  * `udata` is the user data to associate with the system (can be NULL).
@@ -173,8 +173,8 @@ typedef void (*bxr_ecs_system_removed_cb)(bxr_ecs_t *ecs,
 bxr_ecs_system_t bxr_ecs_define_system(bxr_ecs_t *ecs,
                                        bxr_ecs_mask_t mask,
                                        bxr_ecs_logic_cb logic_cb,
-                                       bxr_ecs_system_added_cb added_cb,
-                                       bxr_ecs_system_removed_cb removed_cb,
+                                       bxr_ecs_system_add_cb add_cb,
+                                       bxr_ecs_system_remove_cb remove_cb,
                                        void *udata);
 
 /**
@@ -232,16 +232,16 @@ void bxr_ecs_disable_system(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  *
  * `logic_cb` is the callback to call when the system is run.
  *
- * `added_cb` is the callback to call when an entity is added to the system.
+ * `add_cb` is the callback to call when an entity is added to the system.
  *
- * `removed_cb` is the callback to call when an entity is removed from the
+ * `remove_cb` is the callback to call when an entity is removed from the
  * system.
  */
 void bxr_ecs_set_system_callback(bxr_ecs_t *ecs,
                                  bxr_ecs_system_t system,
                                  bxr_ecs_logic_cb logic_cb,
-                                 bxr_ecs_system_added_cb added_cb,
-                                 bxr_ecs_system_removed_cb removed_cb);
+                                 bxr_ecs_system_add_cb add_cb,
+                                 bxr_ecs_system_remove_cb remove_cb);
 
 /**j
  * Set the user data for a system.
@@ -390,6 +390,8 @@ void *bxr_ecs_get_component(const bxr_ecs_t *ecs,
 void bxr_ecs_remove_component(bxr_ecs_t *ecs,
                               bxr_ecs_entity_t entity,
                               bxr_ecs_component_t component);
+
+void bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
 
 /**
  * Call a system logic on required component, but not exclueded ones.

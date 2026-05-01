@@ -20,22 +20,7 @@
 
 #include <SDL3/SDL.h>
 
-/**
- * Data structure for sparse set.
- *
- * `sparse` store indices of handles in the dense array.
- * `dense` store the actual handles.
- * `count` is the number of handles stored in the sparse set.
- * `capacity` is the total capacity of the sparse set (the max number of handles
- * that can be stored in the sparse set without resizing).
- */
-typedef struct bxr_sparse_set_s
-{
-  Uint32 *sparse;
-  Uint32 *dense;
-  size_t count;
-  size_t capacity;
-} bxr_sparse_set_t;
+typedef struct bxr_sparse_set_s bxr_sparse_set_t;
 
 /**
  * Create a new sparse set with the given default capacity.
@@ -99,6 +84,19 @@ bool bxr_sparse_set_contains(const bxr_sparse_set_t *set,
                              Uint32 handle,
                              Uint32 *found);
 
+/**
+ * TODO docs
+ */
+size_t bxr_sparse_set_capacity(const bxr_sparse_set_t *set);
+
+/**
+ * TODO docs
+ */
+size_t bxr_sparse_set_count(const bxr_sparse_set_t *set);
+
+/**
+ * TODO docs
+ */
 void bxr_sparse_set_clear(bxr_sparse_set_t *set);
 
 #endif // BXR_SPARSE_SET_H_
