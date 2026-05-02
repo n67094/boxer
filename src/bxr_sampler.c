@@ -74,7 +74,7 @@ _bxr_painter_sampler(bxr_sampler_e sampler_type)
 }
 
 bxr_sampler_t
-bxr_sampler_make(bxr_sampler_e sampler_type)
+bxr_sampler_create(bxr_sampler_e sampler_type)
 {
   bxr_sampler_t sampler;
 

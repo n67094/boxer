@@ -38,7 +38,7 @@ bxr_json_reader_discard_until(bxr_json_reader_t *json, int depth)
 }
 
 bxr_json_reader_t *
-bxr_json_make_reader(const char *path)
+bxr_json_create_reader(const char *path)
 {
   SDL_assert(path);
 
@@ -53,6 +53,7 @@ bxr_json_make_reader(const char *path)
 
   BXR_ALLOC(json->data, length + 1); // +1 for null-terminator
   if (!json->data) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(data);
     BXR_FREE(json);
     return NULL;
@@ -352,7 +353,7 @@ bxr_json_writer_append(bxr_json_writer_t *json, const char *str)
     size_t new_capacity = json->capacity * 2;
     char *new_data      = NULL;
     BXR_ALLOC(new_data, new_capacity);
-    if (new_data == NULL) {
+    if (!new_data) {
       return false;
     }
     BXR_MEMCPY(new_data, json->data, json->size);
@@ -435,15 +436,20 @@ bxr_json_writer_append_escaped(bxr_json_writer_t *json, const char *str)
 }
 
 bxr_json_writer_t *
-bxr_json_make_writer()
+bxr_json_create_writer()
 {
   bxr_json_writer_t *json = NULL;
   BXR_NEW(json);
+  if (!json) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    return NULL;
+  }
 
   json->data = NULL;
   BXR_ALLOC(json->data, BXR_JSON_DEFAULT_DATA_CAPACITY);
 
   if (json->data == NULL) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(json);
     return NULL;
   }

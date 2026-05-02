@@ -25,7 +25,7 @@ void
 bxr_game_setup(void)
 {
   // Load an image
-  _image = bxr_image_make("data/images/logo.png");
+  _image = bxr_image_create("data/images/logo.png");
 }
 
 void

@@ -31,7 +31,7 @@ bxr_image_shutdown(void)
 }
 
 bxr_image_t
-bxr_image_make(const char *path)
+bxr_image_create(const char *path)
 {
   SDL_assert(path);
 
@@ -39,10 +39,10 @@ bxr_image_make(const char *path)
 
   SDL_IOStream *stream = PHYSFSSDL3_openRead(path);
   if (!stream) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to open image file: %s (error: %s)",
-                path,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to open image file: %s (error: %s)",
+                 path,
+                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     bxr_error_set(BXR_ERROR_IMAGE_FILE);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
@@ -62,14 +62,14 @@ bxr_image_make(const char *path)
 }
 
 bxr_image_t
-bxr_image_make_mem(unsigned int width, unsigned int height, void *pixels)
+bxr_image_create_mem(unsigned int width, unsigned int height, void *pixels)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
   SDL_Surface *surface = SDL_CreateSurfaceFrom(
       width, height, _context->pixel_format, pixels, width * 4);
 
-  if (surface == NULL) {
+  if (!surface) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to create surface from memory (error: %s)",
                  SDL_GetError());

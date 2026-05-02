@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 
+#include "bxr_error.h"
 #include "bxr_font.h"
 #include "bxr_image.h"
 #include "bxr_mem.h"
@@ -18,14 +19,14 @@ struct bxr_font_s
 };
 
 bxr_font_t *
-bxr_font_make(const char *path,
-              const bxr_rect_t *glyphs,
-              size_t glyph_count,
-              bxr_vec2_t icon_range,
-              bxr_vec2_t char_range,
-              char first_char,
-              int char_spacing,
-              int line_spacing)
+bxr_font_create(const char *path,
+                const bxr_rect_t *glyphs,
+                size_t glyph_count,
+                bxr_vec2_t icon_range,
+                bxr_vec2_t char_range,
+                char first_char,
+                int char_spacing,
+                int line_spacing)
 {
   SDL_assert(path);
   SDL_assert(glyphs);
@@ -34,13 +35,11 @@ bxr_font_make(const char *path,
   bxr_font_t *font = NULL;
   BXR_NEW(font);
   if (!font) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for atlas font");
-    // TODO add error
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
-  font->image        = bxr_image_make(path);
+  font->image        = bxr_image_create(path);
   font->glyphs       = glyphs;
   font->glyph_count  = glyph_count;
   font->icon_range   = icon_range;
@@ -53,16 +52,16 @@ bxr_font_make(const char *path,
 }
 
 bxr_font_t *
-bxr_font_make_mem(unsigned int width,
-                  unsigned int height,
-                  const void *data,
-                  const bxr_rect_t *glyphs,
-                  size_t glyph_count,
-                  bxr_vec2_t icon_range,
-                  bxr_vec2_t char_range,
-                  char first_char,
-                  int char_spacing,
-                  int line_spacing)
+bxr_font_create_mem(unsigned int width,
+                    unsigned int height,
+                    const void *data,
+                    const bxr_rect_t *glyphs,
+                    size_t glyph_count,
+                    bxr_vec2_t icon_range,
+                    bxr_vec2_t char_range,
+                    char first_char,
+                    int char_spacing,
+                    int line_spacing)
 {
   SDL_assert(data);
   SDL_assert(width > 0);
@@ -73,13 +72,11 @@ bxr_font_make_mem(unsigned int width,
   bxr_font_t *font = NULL;
   BXR_NEW(font);
   if (!font) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for atlas font");
-    // TODO add error
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
-  font->image        = bxr_image_make_mem(width, height, (void *)data);
+  font->image        = bxr_image_create_mem(width, height, (void *)data);
   font->glyphs       = glyphs;
   font->glyph_count  = glyph_count;
   font->icon_range   = icon_range;

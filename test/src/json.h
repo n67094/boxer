@@ -11,7 +11,7 @@
 
 BXR_UNIT_CASE(case_bxr_json_write)
 {
-  bxr_json_writer_t *json = bxr_json_make_writer();
+  bxr_json_writer_t *json = bxr_json_create_writer();
 
   BXR_UNIT_ASSERT(bxr_json_writer_object_begin(json));
   {
@@ -100,7 +100,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
   // functions, but using eq functions makes the test more readable and also
   // tests the eq functions themselves.
 
-  bxr_json_reader_t *json = bxr_json_make_reader("test.json");
+  bxr_json_reader_t *json = bxr_json_create_reader("test.json");
   bxr_json_token_t token  = bxr_json_read_token(json);
 
   bxr_json_token_t key, value;

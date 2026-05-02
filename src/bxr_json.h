@@ -52,13 +52,13 @@ typedef struct bxr_json_token_s
  * `path` is the path to the JSON file to load. (c.f `bxr_io_read` for path
  * resolution).
  *
- * `return` a reader for the loaded JSON file, or NULL if the file could not be
- * loaded.
+ * `return` a reader for the loaded JSON file, or NULL if an error occurred. Use
+ * `bxr_error_get` to get more information about the error.
  *
  * The caller is responsible for destroying the returned reader using
  * `bxr_json_destroy_reader` when it is no longer needed.
  */
-bxr_json_reader_t *bxr_json_make_reader(const char *path);
+bxr_json_reader_t *bxr_json_create_reader(const char *path);
 
 /**
  * Destroy a JSON reader and free its resources.
@@ -73,7 +73,8 @@ void bxr_json_destroy_reader(bxr_json_reader_t *reader);
  * `reader` is the JSON reader to read from.
  *
  * `return` the next token read from the JSON reader, or a token with type
- * `BXR_JSON_ERROR` if an error occurred while reading.
+ * `BXR_JSON_ERROR` if an error occurred while reading. Use `bxr_error_get` to
+ * get more information about the error.
  *
  * The caller should not modify or free these pointers, as they are owned by the
  * JSON reader.
@@ -205,12 +206,13 @@ typedef struct bxr_json_writer_s bxr_json_writer_t;
  * Create a new JSON writer.
  *
  * `return` a pointer to the newly created JSON writer, or NULL if the writer
- * could not be created.
+ * could not be created. Use `bxr_error_get` to get more information about the
+ * error.
  *
  * The caller is responsible for destroying the returned JSON writer using
  * `bxr_json_destroy_writer` when it is no longer needed.
  */
-bxr_json_writer_t *bxr_json_make_writer(void);
+bxr_json_writer_t *bxr_json_create_writer(void);
 
 /**
  * Destroy a JSON writer and free its resources.

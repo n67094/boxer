@@ -9,11 +9,13 @@
 
 #include <SDL3/SDL.h>
 
-typedef Uint32 bxr_ecs_entity_t;
-typedef Uint32 bxr_ecs_component_t;
-typedef Uint32 bxr_ecs_system_t;
+typedef size_t bxr_ecs_entity_t;
+typedef size_t bxr_ecs_component_t;
+typedef size_t bxr_ecs_system_t;
 
-typedef Uint64 bxr_ecs_mask_t;
+typedef size_t bxr_ecs_mask_t;
+
+#define BXR_ECS_INVALID_ENTITY ((bxr_ecs_entity_t)(-1))
 
 /**
  * Description for creating an ECS instance.
@@ -23,9 +25,9 @@ typedef Uint64 bxr_ecs_mask_t;
  */
 typedef struct bxr_ecs_desc_s
 {
-  Uint32 max_entities;
-  Uint32 max_components;
-  Uint32 max_systems;
+  size_t max_entities;
+  size_t max_components;
+  size_t max_systems;
 } bxr_ecs_desc_t;
 
 typedef struct bxr_ecs_s bxr_ecs_t;
@@ -35,13 +37,13 @@ typedef struct bxr_ecs_s bxr_ecs_t;
  *
  * `desc` is the description of the ECS instance to create.
  *
- * `return` a pointer to the created ECS instance, or NULL if the ECS instance
- * could not be created.
+ * `return` a pointer to the created ECS instance, or NULL if an error occurred.
+ * Use `bxr_error_get` to get more information about the error.
  *
  * The caller is responsible for destroying the returned ECS instance using
  * `bxr_ecs_destroy` when it is no longer needed.
  */
-bxr_ecs_t *bxr_ecs_make(const bxr_ecs_desc_t *desc);
+bxr_ecs_t *bxr_ecs_create(const bxr_ecs_desc_t *desc);
 
 /**
  * Destroy the given ECS instance and free its memory.
@@ -301,8 +303,9 @@ size_t bxr_ecs_get_system_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  *
  * `ecs` is the ECS instance to create the entity in.
  *
- * `return` the ID of the created entity, or an invalid ID if the entity could
- * not be created.
+ * `return` the ID of the created entity, or BXR_ECS_INVALID_ENTITY if the
+ * entity could not be created. Use `bxr_error_get` to get more information
+ * about the error.
  */
 bxr_ecs_entity_t bxr_ecs_make_entity(bxr_ecs_t *ecs);
 
@@ -353,8 +356,8 @@ bool bxr_ecs_has_component(const bxr_ecs_t *ecs,
  * `args` is the arguments to pass to the component's make callback when
  * creating the component data for the entity (can be NULL).
  *
- * `return` a pointer to the created component data, or NULL if the component
- * could not be added to the entity.
+ * `return` a pointer to the created component data, or NULL if an error
+ * occurred. Use `bxr_error_get` to get more information about the error.
  */
 void *bxr_ecs_add_component(bxr_ecs_t *ecs,
                             bxr_ecs_entity_t entity,
@@ -385,7 +388,6 @@ void *bxr_ecs_get_component(const bxr_ecs_t *ecs,
  * `entity` is the entity to remove the component from.
  *
  * `component` is the component to remove from the entity.
- *
  */
 void bxr_ecs_remove_component(bxr_ecs_t *ecs,
                               bxr_ecs_entity_t entity,

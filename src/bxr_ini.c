@@ -179,13 +179,14 @@ bxr_ini_reader_parse(bxr_ini_reader_t *ini)
 }
 
 bxr_ini_reader_t *
-bxr_ini_make_reader(const char *path)
+bxr_ini_create_reader(const char *path)
 {
   SDL_assert(path);
 
   bxr_ini_reader_t *ini = NULL;
   BXR_NEW(ini);
   if (!ini) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
@@ -194,6 +195,7 @@ bxr_ini_make_reader(const char *path)
 
   BXR_ALLOC(ini->data, length + 1); // +1 for null-terminator
   if (!ini->data) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(data);
     BXR_FREE(ini);
     return NULL;
@@ -337,6 +339,7 @@ bxr_ini_writer_append(bxr_ini_writer_t *ini, const char *str)
     char *new_data      = NULL;
     BXR_ALLOC(new_data, new_capacity);
     if (new_data == NULL) {
+      bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
       return false;
     }
     BXR_MEMCPY(new_data, ini->data, ini->size);
@@ -405,7 +408,7 @@ bxr_ini_writer_append_escaped(bxr_ini_writer_t *ini, const char *str)
 }
 
 bxr_ini_writer_t *
-bxr_ini_make_writer()
+bxr_ini_create_writer()
 {
   bxr_ini_writer_t *ini = NULL;
   BXR_NEW(ini);
@@ -413,6 +416,7 @@ bxr_ini_make_writer()
   ini->data = NULL;
   BXR_ALLOC(ini->data, BXR_INI_DEFAULT_DATA_CAPACITY);
   if (ini->data == NULL) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(ini);
     return NULL;
   }
@@ -445,6 +449,7 @@ bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
   char *line      = NULL;
   BXR_ALLOC(line, line_len);
   if (line == NULL) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
@@ -486,7 +491,8 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value)
   size_t left_len = SDL_strlen(key) + 2; // + 1 for = and + 1 for \n
   char *left      = NULL;
   BXR_ALLOC(left, left_len + 2);
-  if (left == NULL) {
+  if (!left) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
@@ -522,7 +528,8 @@ bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
       = SDL_strlen(key) + SDL_strlen(number_str) + 3; // + 2 for = \n and \0
   char *line = NULL;
   BXR_ALLOC(line, line_len);
-  if (line == NULL) {
+  if (!line) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 

@@ -29,7 +29,7 @@ typedef struct bxr_bitset_s bxr_bitset_t;
  * The caller is responsible for destroying the returned bitset using
  * `bxr_bitset_destroy` when it is no longer needed.
  */
-bxr_bitset_t *bxr_bitset_make(size_t bit_count);
+bxr_bitset_t *bxr_bitset_create(size_t bit_count);
 
 /**
  * Destroy a bitset and free its associated memory.

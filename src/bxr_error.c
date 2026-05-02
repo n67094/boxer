@@ -41,6 +41,8 @@ bxr_error_get_msg(bxr_erro_code_e error)
   switch (error) {
   case BXR_ERROR_NONE:
     return "No error.";
+  case BXR_ERROR_OUT_OF_MEMORY:
+    return "Out of memory.";
   case BXR_ERROR_FILE_NOT_FOUND:
     return "File not found.";
   // bxr_shader.c errors

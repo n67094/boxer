@@ -43,13 +43,13 @@ typedef struct bxr_ini_reader_s bxr_ini_reader_t;
  * `path` is the path to the INI file to load. (c.f `bxr_io_read` for path
  * resolution).
  *
- * `return` a reader for the loaded INI file, or NULL if the file could not be
- * loaded.
+ * `return` a reader for the loaded INI file, or NULL if an error occurred. Use
+ * `bxr_error_get` to get more information about the error.
  *
  * The caller is responsible for destroying the returned reader using
  * `bxr_ini_destroy_reader` when it is no longer needed.
  */
-bxr_ini_reader_t *bxr_ini_make_reader(const char *path);
+bxr_ini_reader_t *bxr_ini_create_reader(const char *path);
 
 /**
  * Destroy an INI reader and free its resources.
@@ -140,12 +140,13 @@ typedef struct bxr_ini_writer_s bxr_ini_writer_t;
 /**
  * Create a new INI writer.
  *
- * `return` a new INI writer, or NULL if the writer could not be created.
+ * `return` a new INI writer, or NULL an error occurred. Use `bxr_error_get` to
+ * get more information about the error.
  *
  * The caller is responsible for destroying the returned writer using
  * `bxr_ini_destroy_writer` when it is no longer needed.
  */
-bxr_ini_writer_t *bxr_ini_make_writer(void);
+bxr_ini_writer_t *bxr_ini_create_writer(void);
 
 /**
  * Destroy an INI writer and free its resources.
@@ -162,7 +163,7 @@ void bxr_ini_destroy_writer(bxr_ini_writer_t *ini);
  * `section` is the name of the section to begin.
  *
  * `return` true if the section was successfully begun, or false if an error
- * occurred.
+ * occurred. Use `bxr_error_get` to get more information about the error.
  */
 bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section);
 
@@ -172,7 +173,7 @@ bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section);
  * `ini` is the INI writer to use.
  *
  * `return` true if the section was successfully ended, or false if an error
- * occurred.
+ * occurred. Use `bxr_error_get` to get more information about the error.
  */
 bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini);
 
@@ -187,7 +188,7 @@ bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini);
  * `value` is the string value to associate with the key.
  *
  * `return` true if the key-value pair was successfully added, or false if an
- * error occurred.
+ * error occurred. Use `bxr_error_get` to get more information about the error.
  */
 bool
 bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
@@ -203,7 +204,7 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
  * `number` is the number value to associate with the key.
  *
  * `return` true if the key-value pair was successfully added, or false if an
- * error occurred.
+ * error occurred. Use `bxr_error_get` to get more information about the error.
  */
 bool bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number);
 
@@ -216,7 +217,7 @@ bool bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number);
  * resolution).
  *
  * `return` true if the INI data was successfully saved, or false if an error
- * occurred.
+ * occurred. Use `bxr_error_get` to get more information about the error.
  */
 bool bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path);
 

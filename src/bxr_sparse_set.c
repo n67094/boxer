@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 
+#include "bxr_error.h"
 #include "bxr_mem.h"
 #include "bxr_sparse_set.h"
 
@@ -7,21 +8,21 @@
  * Data structure for sparse set.
  *
  * `sparse` store indices of handles in the dense array.
- * `dense` store the actual handles.
+ * `dense` store the actual handles in a contiguous manner.
  * `count` is the number of handles stored in the sparse set.
  * `capacity` is the total capacity of the sparse set (the max number of handles
  * that can be stored in the sparse set without resizing).
  */
 struct bxr_sparse_set_s
 {
-  Uint32 *sparse;
-  Uint32 *dense;
+  size_t *sparse;
+  size_t *dense;
   size_t count;
   size_t capacity;
 };
 
 bxr_sparse_set_t *
-bxr_sparse_set_make(size_t default_capacity)
+bxr_sparse_set_create(size_t default_capacity)
 {
   if (default_capacity == 0) {
     return NULL;
@@ -30,22 +31,45 @@ bxr_sparse_set_make(size_t default_capacity)
   bxr_sparse_set_t *set = NULL;
   BXR_NEW(set);
   if (!set) {
-    return NULL;
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto error;
   }
 
   set->dense = NULL;
-  BXR_ALLOC(set->dense, default_capacity * sizeof(Uint32));
+  BXR_ALLOC(set->dense, default_capacity * sizeof(size_t));
+  if (!set->dense) {
+    bxr_sparse_set_destroy(set);
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto error;
+  }
 
   set->sparse = NULL;
-  BXR_ALLOC(set->sparse, default_capacity * sizeof(Uint32));
+  BXR_ALLOC(set->sparse, default_capacity * sizeof(size_t));
+  if (!set->sparse) {
+    bxr_sparse_set_destroy(set);
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto error;
+  }
 
   // Set to zero since it can be read before being written to.
-  BXR_MEMSET(set->sparse, 0, default_capacity * sizeof(Uint32));
+  BXR_MEMSET(set->sparse, 0, default_capacity * sizeof(size_t));
+  if (!set->sparse) {
+    bxr_sparse_set_destroy(set);
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto error;
+  }
 
   set->count    = 0;
   set->capacity = default_capacity;
 
   return set;
+
+error:
+  BXR_FREE(set->dense);
+  BXR_FREE(set->sparse);
+  BXR_FREE(set);
+
+  return NULL;
 }
 
 void
@@ -60,7 +84,7 @@ bxr_sparse_set_destroy(bxr_sparse_set_t *set)
 }
 
 bool
-bxr_sparse_set_insert(bxr_sparse_set_t *set, Uint32 handle)
+bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle)
 {
   SDL_assert(set);
 
@@ -77,8 +101,8 @@ bxr_sparse_set_insert(bxr_sparse_set_t *set, Uint32 handle)
       new_capacity *= 2;
     }
 
-    BXR_RESIZE(set->dense, new_capacity * sizeof(Uint32));
-    BXR_RESIZE(set->sparse, new_capacity * sizeof(Uint32));
+    BXR_RESIZE(set->dense, new_capacity * sizeof(size_t));
+    BXR_RESIZE(set->sparse, new_capacity * sizeof(size_t));
 
     set->capacity = new_capacity;
   }
@@ -92,7 +116,7 @@ bxr_sparse_set_insert(bxr_sparse_set_t *set, Uint32 handle)
 }
 
 bool
-bxr_sparse_set_remove(bxr_sparse_set_t *set, Uint32 handle)
+bxr_sparse_set_remove(bxr_sparse_set_t *set, size_t handle)
 {
   SDL_assert(set);
 
@@ -115,8 +139,8 @@ bxr_sparse_set_remove(bxr_sparse_set_t *set, Uint32 handle)
 
 bool
 bxr_sparse_set_contains(const bxr_sparse_set_t *set,
-                        Uint32 handle,
-                        Uint32 *found)
+                        size_t handle,
+                        size_t *found)
 {
   SDL_assert(set);
 
@@ -158,7 +182,7 @@ bxr_sparse_set_clear(bxr_sparse_set_t *set)
   set->count = 0;
 }
 
-Uint32 *
+size_t *
 bxr_sparse_set_get_dense(const bxr_sparse_set_t *set)
 {
   SDL_assert(set);

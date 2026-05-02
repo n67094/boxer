@@ -23,7 +23,7 @@ BXR_UNIT_CASE(case_bxr_ini_write)
   // name="nsix test"
   //
 
-  bxr_ini_writer_t *ini = bxr_ini_make_writer();
+  bxr_ini_writer_t *ini = bxr_ini_create_writer();
   BXR_UNIT_ASSERT(ini != NULL);
 
   BXR_UNIT_ASSERT(bxr_ini_writer_section_begin(ini, "Window"));
@@ -46,7 +46,7 @@ BXR_UNIT_CASE(case_bxr_ini_write)
 
   // read it back to verify
 
-  bxr_ini_reader_t *read_ini = bxr_ini_make_reader("test_write.ini");
+  bxr_ini_reader_t *read_ini = bxr_ini_create_reader("test_write.ini");
 
   const char *title = bxr_ini_read_str(read_ini, "Window", "title");
   float width       = bxr_ini_read_number(read_ini, "Window", "width");
@@ -97,7 +97,7 @@ BXR_UNIT_CASE(case_bxr_ini_read)
 
   bxr_io_write("test_read.ini", ini_content, SDL_strlen(ini_content), false);
 
-  bxr_ini_reader_t *ini = bxr_ini_make_reader("test_read.ini");
+  bxr_ini_reader_t *ini = bxr_ini_create_reader("test_read.ini");
   BXR_UNIT_ASSERT(ini != NULL);
 
   const char *title = bxr_ini_read_str(ini, "Window", "title");

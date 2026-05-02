@@ -29,25 +29,25 @@
 
 typedef struct bxr_font_s bxr_font_t;
 
-bxr_font_t *bxr_font_make(const char *path,
-                          const bxr_rect_t *glyphs,
-                          size_t glyph_count,
-                          bxr_vec2_t icon_range,
-                          bxr_vec2_t char_range,
-                          char first_char,
-                          int char_spacing,
-                          int line_spacing);
+bxr_font_t *bxr_font_create(const char *path,
+                            const bxr_rect_t *glyphs,
+                            size_t glyph_count,
+                            bxr_vec2_t icon_range,
+                            bxr_vec2_t char_range,
+                            char first_char,
+                            int char_spacing,
+                            int line_spacing);
 
-bxr_font_t *bxr_font_make_mem(unsigned int width,
-                              unsigned int height,
-                              const void *data,
-                              const bxr_rect_t *glyphs,
-                              size_t glyph_count,
-                              bxr_vec2_t icon_range,
-                              bxr_vec2_t char_range,
-                              char first_char,
-                              int char_spacing,
-                              int line_spacing);
+bxr_font_t *bxr_font_make_create(unsigned int width,
+                                 unsigned int height,
+                                 const void *data,
+                                 const bxr_rect_t *glyphs,
+                                 size_t glyph_count,
+                                 bxr_vec2_t icon_range,
+                                 bxr_vec2_t char_range,
+                                 char first_char,
+                                 int char_spacing,
+                                 int line_spacing);
 
 void bxr_font_destroy(bxr_font_t *font);
 

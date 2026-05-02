@@ -52,6 +52,10 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 
   _bxr_shader_bytecode_t *shader_bytecode = NULL;
   BXR_NEW(shader_bytecode);
+  if (!shader_bytecode) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    return NULL;
+  }
 
   // Determine the shader stage/type based on the file extension
   SDL_GPUShaderStage stage;
@@ -101,15 +105,23 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 }
 
 bxr_shader_t
-bxr_shader_make(bxr_shader_desc_t *desc)
+bxr_shader_create(bxr_shader_desc_t *desc)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
   _bxr_shader_bytecode_t *vert_bytecode
       = _be_shader_load_bytecode(_context->gpu_device, desc->vert_name, NULL);
+  if (!vert_bytecode) {
+    return (bxr_shader_t){ .id = BXR_SHADER_INVALID_ID };
+  }
 
   _bxr_shader_bytecode_t *frag_bytecode
       = _be_shader_load_bytecode(_context->gpu_device, desc->frag_name, NULL);
+  if (!frag_bytecode) {
+    BXR_FREE(vert_bytecode->data);
+    BXR_FREE(vert_bytecode);
+    return (bxr_shader_t){ .id = BXR_SHADER_INVALID_ID };
+  }
 
   SDL_GPShaderDesc shader_desc = {
     // Vertex shader description

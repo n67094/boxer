@@ -11,7 +11,7 @@
 
 BXR_UNIT_CASE(case_bitset_is_zero)
 {
-  bxr_bitset_t *bitset = bxr_bitset_make(32);
+  bxr_bitset_t *bitset = bxr_bitset_create(32);
 
   BXR_UNIT_ASSERT(bxr_bitset_is_zero(bitset));
 
@@ -28,7 +28,7 @@ BXR_UNIT_CASE(case_bitset_is_zero)
 
 BXR_UNIT_CASE(case_bitset_true)
 {
-  bxr_bitset_t *bitset = bxr_bitset_make(32);
+  bxr_bitset_t *bitset = bxr_bitset_create(32);
 
   BXR_UNIT_ASSERT(bxr_bitset_true(bitset) == false);
 
@@ -45,7 +45,7 @@ BXR_UNIT_CASE(case_bitset_true)
 
 BXR_UNIT_CASE(case_bitset_test)
 {
-  bxr_bitset_t *bitset = bxr_bitset_make(32);
+  bxr_bitset_t *bitset = bxr_bitset_create(32);
 
   BXR_UNIT_ASSERT(bxr_bitset_test(bitset, 0) == false);
 
@@ -62,7 +62,7 @@ BXR_UNIT_CASE(case_bitset_test)
 
 BXR_UNIT_CASE(case_bitset_set)
 {
-  bxr_bitset_t *bitset = bxr_bitset_make(96);
+  bxr_bitset_t *bitset = bxr_bitset_create(96);
 
   bxr_bitset_set(bitset, 0);
   bxr_bitset_set(bitset, 31);
@@ -77,7 +77,7 @@ BXR_UNIT_CASE(case_bitset_set)
 
 BXR_UNIT_CASE(case_bitset_unset)
 {
-  bxr_bitset_t *bitset = bxr_bitset_make(96);
+  bxr_bitset_t *bitset = bxr_bitset_create(96);
 
   bxr_bitset_set(bitset, 0);
   bxr_bitset_set(bitset, 31);
@@ -94,8 +94,8 @@ BXR_UNIT_CASE(case_bitset_unset)
 
 BXR_UNIT_CASE(case_bitset_and)
 {
-  bxr_bitset_t *bitset_a = bxr_bitset_make(96);
-  bxr_bitset_t *bitset_b = bxr_bitset_make(96);
+  bxr_bitset_t *bitset_a = bxr_bitset_create(96);
+  bxr_bitset_t *bitset_b = bxr_bitset_create(96);
 
   bxr_bitset_set(bitset_a, 0);
   bxr_bitset_set(bitset_a, 31);
@@ -113,8 +113,8 @@ BXR_UNIT_CASE(case_bitset_and)
 
 BXR_UNIT_CASE(case_bitset_or)
 {
-  bxr_bitset_t *bitset_a = bxr_bitset_make(96);
-  bxr_bitset_t *bitset_b = bxr_bitset_make(96);
+  bxr_bitset_t *bitset_a = bxr_bitset_create(96);
+  bxr_bitset_t *bitset_b = bxr_bitset_create(96);
 
   bxr_bitset_set(bitset_a, 0);
   bxr_bitset_set(bitset_a, 31);
@@ -133,7 +133,7 @@ BXR_UNIT_CASE(case_bitset_or)
 
 BXR_UNIT_CASE(case_bitset_not)
 {
-  bxr_bitset_t *bitset = bxr_bitset_make(96);
+  bxr_bitset_t *bitset = bxr_bitset_create(96);
 
   bxr_bitset_set(bitset, 0);
   bxr_bitset_set(bitset, 31);
@@ -150,8 +150,8 @@ BXR_UNIT_CASE(case_bitset_not)
 
 BXR_UNIT_CASE(case_bitset_equal)
 {
-  bxr_bitset_t *bitset_a = bxr_bitset_make(96);
-  bxr_bitset_t *bitset_b = bxr_bitset_make(96);
+  bxr_bitset_t *bitset_a = bxr_bitset_create(96);
+  bxr_bitset_t *bitset_b = bxr_bitset_create(96);
 
   BXR_UNIT_ASSERT(bxr_bitset_equal(bitset_a, bitset_b) == true);
 

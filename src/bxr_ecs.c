@@ -4,10 +4,11 @@
 #include "bxr_config.h"
 #include "bxr_defs.h"
 #include "bxr_ecs.h"
+#include "bxr_error.h"
 #include "bxr_mem.h"
 #include "bxr_sparse_set.h"
 
-typedef Uint32 _bxr_ecs_id_t;
+typedef size_t _bxr_ecs_id_t;
 
 typedef struct _bxr_ecs_component_array_s
 {
@@ -42,23 +43,6 @@ typedef struct _bxr_ecs_system_data_s
   void *udata;
 } _bxr_ecs_system_data_t;
 
-/**
- * Ecs data structure.
- *
- * `max_entities`
- *
- * `max_components`
- *
- * `max_systems`
- *
- * `entity_free_stack`
- *
- * `entity_add_stack`
- *
- * `entity_remove_stack`
- *
- * `entity_destroy_stack`
- */
 struct bxr_ecs_s
 {
   size_t max_entities;
@@ -67,11 +51,11 @@ struct bxr_ecs_s
 
   _bxr_ecs_id_t *entity_free_stack;
   size_t entity_free_current;
-  _bxr_ecs_id_t *entity_add_stack;
+  _bxr_ecs_id_t *entity_add_queue;
   size_t entity_add_current;
-  _bxr_ecs_id_t *entity_remove_stack;
+  _bxr_ecs_id_t *entity_remove_queue;
   size_t entity_remove_current;
-  _bxr_ecs_id_t *entity_destroy_stack;
+  _bxr_ecs_id_t *entity_destroy_queue;
   size_t entity_destroy_current;
 
   size_t next_entity_id;
@@ -105,12 +89,6 @@ _bxr_ecs_push_free_entity(bxr_ecs_t *ecs, _bxr_ecs_id_t entity)
   ecs->entity_free_stack[ecs->entity_free_current++] = entity;
 }
 
-static inline _bxr_ecs_id_t
-_bxr_ecs_pop_add_entity(bxr_ecs_t *ecs)
-{
-  return ecs->entity_add_stack[--ecs->entity_add_current];
-}
-
 static inline void
 _bxr_ecs_push_add_entity(bxr_ecs_t *ecs, _bxr_ecs_id_t entity)
 {
@@ -118,13 +96,18 @@ _bxr_ecs_push_add_entity(bxr_ecs_t *ecs, _bxr_ecs_id_t entity)
     return;
   }
 
-  ecs->entity_add_stack[ecs->entity_add_current++] = entity;
+  ecs->entity_add_queue[ecs->entity_add_current++] = entity;
 }
 
-static inline _bxr_ecs_id_t
-_bxr_ecs_pop_remove_entity(bxr_ecs_t *ecs)
+static void
+_bxr_ecs_flush_add_entity(bxr_ecs_t *ecs, bxr_ecs_system_t system)
 {
-  return ecs->entity_remove_stack[--ecs->entity_remove_current];
+  for (size_t i = 0; i < ecs->entity_add_current; ++i) {
+    _bxr_ecs_id_t entity = ecs->entity_add_queue[i];
+    bxr_sparse_set_insert(ecs->system_data[system].entity_ids, entity);
+  }
+
+  ecs->entity_add_current = 0;
 }
 
 static inline void
@@ -134,13 +117,18 @@ _bxr_ecs_push_remove_entity(bxr_ecs_t *ecs, _bxr_ecs_id_t entity)
     return;
   }
 
-  ecs->entity_remove_stack[ecs->entity_remove_current++] = entity;
+  ecs->entity_remove_queue[ecs->entity_remove_current++] = entity;
 }
 
-static inline _bxr_ecs_id_t
-_bxr_ecs_pop_destroy_entity(bxr_ecs_t *ecs)
+static void
+_bxr_ecs_flush_remove_entity(bxr_ecs_t *ecs, bxr_ecs_system_t system)
 {
-  return ecs->entity_destroy_stack[--ecs->entity_destroy_current];
+  for (size_t i = 0; i < ecs->entity_remove_current; ++i) {
+    _bxr_ecs_id_t entity = ecs->entity_remove_queue[i];
+    bxr_sparse_set_remove(ecs->system_data[system].entity_ids, entity);
+  }
+
+  ecs->entity_remove_current = 0;
 }
 
 static inline void
@@ -150,19 +138,56 @@ _bxr_ecs_push_destroy_entity(bxr_ecs_t *ecs, _bxr_ecs_id_t entity)
     return;
   }
 
-  ecs->entity_destroy_stack[ecs->entity_destroy_current++] = entity;
+  ecs->entity_destroy_queue[ecs->entity_destroy_current++] = entity;
+}
+
+static void
+_bxr_ecs_flush_destroy_entity(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+{
+  for (size_t i = 0; i < ecs->entity_destroy_current; ++i) {
+    _bxr_ecs_id_t entity = ecs->entity_destroy_queue[i];
+
+    SDL_assert(ecs->entity_data[entity].active);
+    bxr_sparse_set_remove(ecs->system_data[system].entity_ids, entity);
+
+    // Push the entity ID to the free stack for reuse
+    _bxr_ecs_push_free_entity(ecs, entity);
+
+    BXR_MEMSET(&ecs->entity_data[entity], 0, sizeof(_bxr_ecs_entity_data_t));
+  }
+
+  ecs->entity_destroy_current = 0;
+}
+
+static void
+_bxr_ecs_destruct(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
+{
+  _bxr_ecs_entity_data_t *entity_data = &ecs->entity_data[entity];
+
+  // Call component destroy callbacks
+  for (bxr_ecs_component_t component = 0; component < ecs->component_count;
+       component++) {
+    if (bxr_bitset_test(entity_data->component_bits, component)) {
+      _bxr_ecs_component_data_t *component_data
+          = &ecs->component_data[component];
+      if (component_data->destroy_cb) {
+        void *component_ptr = bxr_ecs_get_component(ecs, entity, component);
+        component_data->destroy_cb(ecs, entity, component_ptr);
+      }
+    }
+  }
 }
 
 bxr_ecs_t *
-bxr_ecs_make(const bxr_ecs_desc_t *desc)
+bxr_ecs_create(const bxr_ecs_desc_t *desc)
 {
   SDL_assert(desc);
 
   bxr_ecs_t *ecs = NULL;
   BXR_NEW(ecs);
-  if (ecs == NULL) {
-    // TODO handle error
-    return NULL;
+  if (!ecs) {
+    goto free;
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
   }
 
   BXR_MEMSET(ecs, 0, sizeof(bxr_ecs_t));
@@ -176,14 +201,33 @@ bxr_ecs_make(const bxr_ecs_desc_t *desc)
 
   // Allocate entity ID stacks and initialize them to zero (no entities created)
   BXR_CALLOC(ecs->entity_free_stack, ecs->max_entities, sizeof(_bxr_ecs_id_t));
+  if (!ecs->entity_free_stack) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   ecs->entity_free_current = 0;
-  BXR_CALLOC(ecs->entity_add_stack, ecs->max_entities, sizeof(_bxr_ecs_id_t));
+
+  BXR_CALLOC(ecs->entity_add_queue, ecs->max_entities, sizeof(_bxr_ecs_id_t));
+  if (!ecs->entity_add_queue) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   ecs->entity_add_current = 0;
+
   BXR_CALLOC(
-      ecs->entity_remove_stack, ecs->max_entities, sizeof(_bxr_ecs_id_t));
+      ecs->entity_remove_queue, ecs->max_entities, sizeof(_bxr_ecs_id_t));
+  if (!ecs->entity_remove_queue) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   ecs->entity_remove_current = 0;
+
   BXR_CALLOC(
-      ecs->entity_destroy_stack, ecs->max_entities, sizeof(_bxr_ecs_id_t));
+      ecs->entity_destroy_queue, ecs->max_entities, sizeof(_bxr_ecs_id_t));
+  if (!ecs->entity_destroy_queue) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   ecs->entity_destroy_current = 0;
 
   ecs->next_entity_id = 0;
@@ -193,6 +237,10 @@ bxr_ecs_make(const bxr_ecs_desc_t *desc)
   BXR_CALLOC(ecs->component_arrays,
              ecs->max_components,
              sizeof(_bxr_ecs_component_array_t));
+  if (!ecs->component_arrays) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   BXR_MEMSET(ecs->component_arrays,
              0,
              ecs->max_components * sizeof(_bxr_ecs_component_array_t));
@@ -202,6 +250,10 @@ bxr_ecs_make(const bxr_ecs_desc_t *desc)
   BXR_CALLOC(ecs->component_data,
              ecs->max_components,
              sizeof(_bxr_ecs_component_data_t));
+  if (!ecs->component_data) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   BXR_MEMSET(ecs->component_data,
              0,
              ecs->max_components * sizeof(_bxr_ecs_component_data_t));
@@ -211,6 +263,10 @@ bxr_ecs_make(const bxr_ecs_desc_t *desc)
   // with no components)
   BXR_CALLOC(
       ecs->entity_data, ecs->max_entities, sizeof(_bxr_ecs_entity_data_t));
+  if (!ecs->entity_data) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   BXR_MEMSET(
       ecs->entity_data, 0, ecs->max_entities * sizeof(_bxr_ecs_entity_data_t));
   ecs->entity_data_count = 0;
@@ -219,6 +275,10 @@ bxr_ecs_make(const bxr_ecs_desc_t *desc)
   // no entities)
   BXR_CALLOC(
       ecs->system_data, ecs->max_systems, sizeof(_bxr_ecs_system_data_t));
+  if (!ecs->system_data) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    goto free;
+  }
   BXR_MEMSET(
       ecs->system_data, 0, ecs->max_systems * sizeof(_bxr_ecs_system_data_t));
   ecs->system_count = 0;
@@ -226,6 +286,23 @@ bxr_ecs_make(const bxr_ecs_desc_t *desc)
   ecs->active_system = -1;
 
   return ecs;
+
+free:
+  BXR_FREE(ecs);
+
+  BXR_FREE(ecs->entity_free_stack);
+  BXR_FREE(ecs->entity_add_queue);
+  BXR_FREE(ecs->entity_remove_queue);
+  BXR_FREE(ecs->entity_destroy_queue);
+
+  BXR_FREE(ecs->component_arrays);
+  BXR_FREE(ecs->component_data);
+
+  BXR_FREE(ecs->entity_data);
+
+  BXR_FREE(ecs->system_data);
+
+  return NULL;
 }
 
 void
@@ -267,11 +344,11 @@ bxr_ecs_destroy(bxr_ecs_t *ecs)
   BXR_FREE(ecs->component_arrays);
   BXR_FREE(ecs->component_data);
 
-  // Free entity ID stacks
+  // Free entity ID stack and queues
   BXR_FREE(ecs->entity_free_stack);
-  BXR_FREE(ecs->entity_add_stack);
-  BXR_FREE(ecs->entity_remove_stack);
-  BXR_FREE(ecs->entity_destroy_stack);
+  BXR_FREE(ecs->entity_add_queue);
+  BXR_FREE(ecs->entity_remove_queue);
+  BXR_FREE(ecs->entity_destroy_queue);
 
   // Free ECS instance
   BXR_FREE(ecs);
@@ -335,12 +412,12 @@ bxr_ecs_define_system(bxr_ecs_t *ecs,
 
   system_data->active       = true;
   system_data->mask         = mask;
-  system_data->entity_ids   = bxr_sparse_set_make(ecs->max_entities);
+  system_data->entity_ids   = bxr_sparse_set_create(ecs->max_entities);
   system_data->logic_cb     = logic_cb;
   system_data->add_cb       = add_cb;
   system_data->remove_cb    = remove_cb;
-  system_data->require_bits = bxr_bitset_make(ecs->max_components);
-  system_data->exclude_bits = bxr_bitset_make(ecs->max_components);
+  system_data->require_bits = bxr_bitset_create(ecs->max_components);
+  system_data->exclude_bits = bxr_bitset_create(ecs->max_components);
   system_data->udata        = udata;
 
   ecs->system_count++;
@@ -493,6 +570,10 @@ bxr_ecs_make_entity(bxr_ecs_t *ecs)
       size_t new_count = old_count * 2;
 
       BXR_RESIZE(ecs->entity_data, new_count * sizeof(_bxr_ecs_entity_data_t));
+      if (!ecs->entity_data) {
+        bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+        return BXR_ECS_INVALID_ENTITY;
+      }
       BXR_MEMSET(ecs->entity_data + old_count,
                  0,
                  (new_count - old_count) * sizeof(_bxr_ecs_entity_data_t));
@@ -502,7 +583,7 @@ bxr_ecs_make_entity(bxr_ecs_t *ecs)
   }
 
   ecs->entity_data[entity_id].component_bits
-      = bxr_bitset_make(ecs->max_components);
+      = bxr_bitset_create(ecs->max_components);
   ecs->entity_data[entity_id].active = true;
   ecs->entity_data[entity_id].ready  = true;
 
@@ -561,6 +642,10 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
     } while (entity >= component_array->length);
     BXR_RESIZE(component_array,
                component_array->length * component_array->size);
+    if (!component_array->data) {
+      bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+      return NULL;
+    }
   }
 
   // Get a pointer to the component's data and set it to zero
@@ -594,9 +679,6 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
       if (bxr_sparse_set_insert(system_data->entity_ids, entity)) {
         if (system_data->add_cb)
           system_data->add_cb(ecs, entity, system_data->udata);
-      } else {
-        // FREE bitset
-        // TODO error
       }
     }
     // If the added component causes the entity to be excluded, check if it was
@@ -605,9 +687,6 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
       if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
         if (system_data->remove_cb)
           system_data->remove_cb(ecs, entity, system_data->udata);
-      } else {
-        // FREE bitset
-        // TODO error
       }
     }
 
@@ -637,9 +716,6 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
         if (bxr_sparse_set_insert(system_data->entity_ids, entity)) {
           if (system_data->add_cb)
             system_data->add_cb(ecs, entity, system_data->udata);
-        } else {
-          // FREE bitset
-          // TODO error
         }
       }
       // Add the entity using the derefered stack
@@ -701,10 +777,10 @@ bxr_ecs_remove_component(bxr_ecs_t *ecs,
 
   _bxr_ecs_entity_data_t *entity_data = &ecs->entity_data[entity];
 
-  bxr_bitset_t *component_bits = bxr_bitset_make(ecs->max_components);
+  bxr_bitset_t *component_bits = bxr_bitset_create(ecs->max_components);
   bxr_bitset_set(component_bits, component);
 
-  bxr_bitset_t *entity_component_bits = bxr_bitset_make(ecs->max_components);
+  bxr_bitset_t *entity_component_bits = bxr_bitset_create(ecs->max_components);
   bxr_bitset_or(entity_component_bits, entity_data->component_bits);
   bxr_bitset_unset(entity_component_bits, component);
 
@@ -727,20 +803,13 @@ bxr_ecs_remove_component(bxr_ecs_t *ecs,
       if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
         if (system_data->remove_cb)
           system_data->remove_cb(ecs, entity, system_data->udata);
-      } else {
-        // FREE bitset
-        // TODO error
-      }
-      // If the entity with the removed component is equal the the system's
+      } // If the entity with the removed component is equal the the system's
       // required components, add it to the system
     } else if (bxr_bitset_equal(entity_component_bits,
                                 system_data->require_bits)) {
       if (bxr_sparse_set_insert(system_data->entity_ids, entity)) {
         if (system_data->add_cb)
           system_data->add_cb(ecs, entity, system_data->udata);
-      } else {
-        // FREE bitset
-        // TODO error
       }
     }
 
@@ -775,9 +844,6 @@ bxr_ecs_remove_component(bxr_ecs_t *ecs,
         if (bxr_sparse_set_insert(system_data->entity_ids, entity)) {
           if (system_data->add_cb)
             system_data->add_cb(ecs, entity, system_data->udata);
-        } else {
-          // FREE bitset
-          // TODO error
         }
       } else {
         if (!bxr_sparse_set_contains(set, entity, NULL)) {
@@ -836,9 +902,6 @@ bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
       if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
         if (system_data->remove_cb)
           system_data->remove_cb(ecs, entity, system_data->udata);
-      } else {
-        // FREE bitset
-        // TODO error
       }
     }
 
@@ -866,7 +929,7 @@ bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
     bxr_bitset_destroy(require_overlap);
   }
 
-  // TODO _bxr_ecs_destruct();
+  _bxr_ecs_destruct(ecs, entity);
 
   // If no system is running, clean up the entity immediately and push it to the
   // free stack for re-use
@@ -892,13 +955,15 @@ bxr_ecs_run_system(bxr_ecs_t *ecs, bxr_ecs_system_t system, bxr_ecs_mask_t mask)
 
   ecs->active_system = system;
 
-  Uint32 *entities      = bxr_sparse_set_get_dense(system_data->entity_ids);
-  Uint32 entities_count = bxr_sparse_set_count(system_data->entity_ids);
+  size_t *entities      = bxr_sparse_set_get_dense(system_data->entity_ids);
+  size_t entities_count = bxr_sparse_set_count(system_data->entity_ids);
 
   int retval = system_data->logic_cb(
       ecs, entities, entities_count, system_data->udata);
 
-  // TODO _bxr_ecs_flush_stacks(); add, remove, destroy
+  _bxr_ecs_flush_add_entity(ecs, system);
+  _bxr_ecs_flush_remove_entity(ecs, system);
+  _bxr_ecs_flush_destroy_entity(ecs, system);
 
   ecs->active_system = -1;
 

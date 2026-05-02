@@ -12,6 +12,7 @@
 typedef enum
 {
   BXR_ERROR_NONE = 0,
+  BXR_ERROR_OUT_OF_MEMORY,
   BXR_ERROR_FILE_NOT_FOUND,
   // bxr_shader.c errors
   BXR_ERROR_SHADER_NAME,

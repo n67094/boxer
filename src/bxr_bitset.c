@@ -1,6 +1,7 @@
 #include <SDL3/SDL.h>
 
 #include "bxr_bitset.h"
+#include "bxr_error.h"
 #include "bxr_mem.h"
 
 struct bxr_bitset_s
@@ -10,14 +11,12 @@ struct bxr_bitset_s
 };
 
 bxr_bitset_t *
-bxr_bitset_make(size_t bit_count)
+bxr_bitset_create(size_t bit_count)
 {
   bxr_bitset_t *bitset = NULL;
   BXR_NEW(bitset);
   if (!bitset) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for bitset");
-    // TODO add error
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
@@ -26,9 +25,7 @@ bxr_bitset_make(size_t bit_count)
   size_t byte_count = (bit_count + 7) / 8; // Round up to the nearest byte
   BXR_CALLOC(bitset->bits, byte_count, sizeof(Uint8));
   if (!bitset->bits) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for bitset bits");
-    // TODO add error
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(bitset);
     return NULL;
   }
@@ -125,7 +122,7 @@ bxr_bitset_and(const bxr_bitset_t *a, const bxr_bitset_t *b)
   SDL_assert(b);
   SDL_assert(a->count == b->count);
 
-  bxr_bitset_t *result = bxr_bitset_make(a->count);
+  bxr_bitset_t *result = bxr_bitset_create(a->count);
   if (!result) {
     return NULL;
   }
@@ -146,7 +143,7 @@ bxr_bitset_or(const bxr_bitset_t *a, const bxr_bitset_t *b)
   SDL_assert(b);
   SDL_assert(a->count == b->count);
 
-  bxr_bitset_t *result = bxr_bitset_make(a->count);
+  bxr_bitset_t *result = bxr_bitset_create(a->count);
   if (!result) {
     return NULL;
   }
@@ -165,7 +162,7 @@ bxr_bitset_not(const bxr_bitset_t *bitset)
 {
   SDL_assert(bitset);
 
-  bxr_bitset_t *result = bxr_bitset_make(bitset->count);
+  bxr_bitset_t *result = bxr_bitset_create(bitset->count);
   if (!result) {
     return NULL;
   }
