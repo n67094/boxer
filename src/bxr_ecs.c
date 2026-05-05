@@ -472,6 +472,7 @@ bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
   SDL_assert(entity < ecs->max_entities);
   SDL_assert(component < ecs->max_components);
   SDL_assert(component < ecs->component_count);
+
   SDL_assert(ecs->entity_data[entity].ready);
 
   _bxr_ecs_entity_data_t *entity_data = &ecs->entity_data[entity];
@@ -489,6 +490,7 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
   SDL_assert(entity < ecs->max_entities);
   SDL_assert(component < ecs->max_components);
   SDL_assert(component < ecs->component_count);
+
   SDL_assert(ecs->entity_data[entity].ready);
 
   // Get the entity
@@ -498,12 +500,6 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
   _bxr_ecs_component_data_t *component_data = &ecs->component_data[component];
   _bxr_ecs_component_array_t *component_array
       = &ecs->component_arrays[component];
-
-  SDL_Log("entity: %zu component array length: %zu",
-          entity,
-          component_array->capacity);
-
-  // TODO fixme capacity is 0
 
   // Grow component_array if needed
   if (entity >= component_array->capacity) {
@@ -651,9 +647,9 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
   bxr_bitset_t *component_bits = bxr_bitset_create(ecs->max_components);
   bxr_bitset_set(component_bits, component);
 
-  bxr_bitset_t *entity_component_bits = bxr_bitset_create(ecs->max_components);
-  bxr_bitset_or(entity_component_bits, entity_data->component_bits);
-  bxr_bitset_unset(entity_component_bits, component);
+  bxr_bitset_t *next_component_bits
+      = bxr_bitset_copy(entity_data->component_bits);
+  bxr_bitset_unset(next_component_bits, component);
 
   for (_bxr_ecs_id_t system_id = 0; system_id < ecs->system_count;
        system_id++) {
@@ -676,7 +672,7 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
           system_data->remove_cb(ecs, entity, system_data->udata);
       } // If the entity with the removed component is equal the the system's
       // required components, add it to the system
-    } else if (bxr_bitset_equal(entity_component_bits,
+    } else if (bxr_bitset_equal(next_component_bits,
                                 system_data->require_bits)) {
       if (bxr_sparse_set_insert(system_data->entity_ids, entity)) {
         if (system_data->add_cb)
@@ -708,8 +704,7 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
     }
     // If the entity with the removed component is equal the the system's
     // required components, add it to the system
-    else if (bxr_bitset_equal(entity_component_bits,
-                              system_data->require_bits)) {
+    else if (bxr_bitset_equal(next_component_bits, system_data->require_bits)) {
       bxr_sparse_set_t *set = system_data->entity_ids;
 
       size_t count    = bxr_sparse_set_capacity(set);
@@ -735,7 +730,7 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
   }
 
   bxr_bitset_destroy(component_bits);
-  bxr_bitset_destroy(entity_component_bits);
+  bxr_bitset_destroy(next_component_bits);
 
   _bxr_ecs_component_data_t *component_data = &ecs->component_data[component];
 

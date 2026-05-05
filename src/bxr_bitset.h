@@ -39,6 +39,19 @@ bxr_bitset_t *bxr_bitset_create(size_t bit_count);
 void bxr_bitset_destroy(bxr_bitset_t *bitset);
 
 /**
+ * Create a copy of a bitset.
+ *
+ * `bitset` The bitset to copy.
+ *
+ * `return` A pointer to the newly created copy of the bitset, or `NULL` if an
+ * error occurs (e.g., if memory allocation fails).
+ *
+ * The caller is responsible for destroying the returned bitset using
+ * `bxr_bitset_destroy` when it is no longer needed.
+ */
+bxr_bitset_t *bxr_bitset_copy(const bxr_bitset_t *bitset);
+
+/**
  * `return` `true` if all bits in the bitset are 0, `false` otherwise.
  */
 bool bxr_bitset_is_zero(const bxr_bitset_t *bitset);

@@ -123,7 +123,7 @@ typedef void (*bxr_unit_setup_cb)(void);
 /**
  * Sets the current setup and teardown functions.
  *
- * The setup function is called prior to each unit test and the teardown
+ * The setup function is called prior to each unit test case and the teardown
  * function after. Either of these functions can be `NULL`.
  *
  * `setup_cb` The setup callback function.

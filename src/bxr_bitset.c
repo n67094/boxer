@@ -49,6 +49,22 @@ bxr_bitset_destroy(bxr_bitset_t *bitset)
   }
 }
 
+bxr_bitset_t *
+bxr_bitset_copy(const bxr_bitset_t *bitset)
+{
+  SDL_assert(bitset);
+
+  bxr_bitset_t *copy = bxr_bitset_create(bitset->count);
+  if (!copy) {
+    return NULL;
+  }
+
+  size_t byte_count = (bitset->count + 7) / 8; // Round up to the nearest byte
+  BXR_MEMCPY(copy->bits, bitset->bits, byte_count * sizeof(Uint8));
+
+  return copy;
+}
+
 bool
 bxr_bitset_is_zero(const bxr_bitset_t *bitset)
 {

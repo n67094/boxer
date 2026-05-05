@@ -178,6 +178,9 @@ BXR_UNIT_CASE(case_bitset_equal)
   bxr_bitset_set(bitset_a, 31);
   bxr_bitset_set(bitset_b, 31);
 
+  bxr_bitset_destroy(bitset_a);
+  bxr_bitset_destroy(bitset_b);
+
   return true;
 }
 
