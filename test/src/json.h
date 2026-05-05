@@ -203,6 +203,8 @@ BXR_UNIT_CASE(case_bxr_json_read)
     }
   }
 
+  bxr_json_destroy_reader(json);
+
   return true;
 }
 

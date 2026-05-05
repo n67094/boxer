@@ -451,6 +451,8 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
   bxr_image_shutdown();
   bxr_shader_shutdown();
 
+  bxr_painter_shutdown();
+
   if (context) {
     if (context->gpu_device && context->window) {
       SDL_ReleaseWindowFromGPUDevice(context->gpu_device, context->window);

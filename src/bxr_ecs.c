@@ -270,7 +270,7 @@ bxr_ecs_create(const bxr_ecs_desc_t *desc)
   }
   BXR_MEMSET(
       ecs->entity_data, 0, ecs->max_entities * sizeof(_bxr_ecs_entity_data_t));
-  ecs->entity_data_count = 0;
+  ecs->entity_data_count = ecs->max_entities;
 
   // Allocate system data array and initialize it to zero (inactive systems with
   // no entities)
@@ -697,6 +697,7 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
     bxr_bitset_t *require_overlap
         = bxr_bitset_and(component_bits, system_data->require_bits);
 
+    // If not excluded and required remove it
     if (!bxr_bitset_true(exclude_overlap) && bxr_bitset_true(require_overlap)) {
       if (bxr_sparse_set_contains(system_data->entity_ids, entity, NULL)) {
         if (system_data->remove_cb)
@@ -704,8 +705,11 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
 
         _bxr_ecs_push_remove_entity(ecs, entity);
       }
-    } else if (bxr_bitset_equal(entity_component_bits,
-                                system_data->require_bits)) {
+    }
+    // If the entity with the removed component is equal the the system's
+    // required components, add it to the system
+    else if (bxr_bitset_equal(entity_component_bits,
+                              system_data->require_bits)) {
       bxr_sparse_set_t *set = system_data->entity_ids;
 
       size_t count    = bxr_sparse_set_capacity(set);
@@ -789,6 +793,9 @@ bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
             system_data->remove_cb(ecs, entity, system_data->udata);
 
           _bxr_ecs_push_destroy_entity(ecs, entity);
+
+          bxr_bitset_destroy(entity_data->component_bits);
+          entity_data->component_bits = NULL;
 
           entity_data->ready  = false;
           entity_data->active = true;

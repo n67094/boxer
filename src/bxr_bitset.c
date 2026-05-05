@@ -13,6 +13,8 @@ struct bxr_bitset_s
 bxr_bitset_t *
 bxr_bitset_create(size_t bit_count)
 {
+  SDL_assert(bit_count > 0);
+
   bxr_bitset_t *bitset = NULL;
   BXR_NEW(bitset);
   if (!bitset) {

@@ -21,8 +21,6 @@ BXR_UNIT_CASE(case_ecs_reset)
 
   bxr_ecs_t *ecs = bxr_ecs_create(&desc);
 
-  SDL_Log("1");
-
   bxr_ecs_component_t c1
       = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
   bxr_ecs_component_t c2
@@ -41,6 +39,8 @@ BXR_UNIT_CASE(case_ecs_reset)
   bxr_ecs_entity_add_component(ecs, e1, c1, NULL);
   bxr_ecs_entity_add_component(ecs, e1, c2, NULL);
   bxr_ecs_entity_add_component(ecs, e1, c3, NULL);
+
+  bxr_ecs_reset(ecs);
 
   bxr_ecs_destroy(ecs);
 
