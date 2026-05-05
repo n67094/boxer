@@ -41,7 +41,7 @@ bxr_game_render(Uint64 alpha_time_ms)
 
   bxr_painter_begin(window_size.x, window_size.y);
   {
-    bxr_painter_set_color(bxr_color_make(0, 0, 0, 255));
+    bxr_painter_set_color(bxr_color_create(0, 0, 0, 255));
     bxr_painter_clear();
 
     float width  = window_size.x;
@@ -55,19 +55,19 @@ bxr_game_render(Uint64 alpha_time_ms)
       // Scale the image by 2
       bxr_painter_scale(2.0f, 2.0f);
 
-      bxr_painter_set_color(bxr_color_make(255, 255, 255, 255));
+      bxr_painter_set_color(bxr_color_create(255, 255, 255, 255));
 
       int width  = bxr_image_get_width(_image);
       int height = bxr_image_get_height(_image);
 
-      bxr_rect_t img_src = bxr_rect_make(0, 0, (float)width, (float)height);
-      bxr_rect_t img_dst = bxr_rect_make(
+      bxr_rect_t img_src = bxr_rect_create(0, 0, (float)width, (float)height);
+      bxr_rect_t img_dst = bxr_rect_create(
           -width * 0.5f, -height * 0.5f, (float)width, (float)height);
 
       // Draw the image centered on the screen
       bxr_painter_set_image(0, _image);
-      bxr_painter_draw_textured_rect(0,
-                                     bxr_textured_rect_make(img_dst, img_src));
+      bxr_painter_draw_textured_rect(
+          0, bxr_textured_rect_create(img_dst, img_src));
     }
     bxr_painter_pop_transform();
 

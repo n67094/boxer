@@ -173,7 +173,7 @@ bxr_normalize_angle(float angle)
 /**
  * Constructs a point.
  */
-#define bxr_point_make(x, y) ((const bxr_point_t){ x, y })
+#define bxr_point_create(x, y) ((const bxr_point_t){ x, y })
 
 /**
  * Vectors 2
@@ -182,7 +182,7 @@ bxr_normalize_angle(float angle)
 /**
  * Constructs a vector.
  */
-#define bxr_vec2_make(x, y) ((const bxr_vec2_t){ x, y })
+#define bxr_vec2_create(x, y) ((const bxr_vec2_t){ x, y })
 
 /**
  * `returns` true if the vectors are equal (within epsilon).
@@ -199,7 +199,7 @@ bxr_vec2_equal(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_add(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x + v2.x, v1.y + v2.y);
+  return bxr_vec2_create(v1.x + v2.x, v1.y + v2.y);
 }
 
 /**
@@ -208,7 +208,7 @@ bxr_vec2_add(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_sub(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x - v2.x, v1.y - v2.y);
+  return bxr_vec2_create(v1.x - v2.x, v1.y - v2.y);
 }
 
 /**
@@ -218,7 +218,7 @@ bxr_vec2_sub(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_mul(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x * v2.x, v1.y * v2.y);
+  return bxr_vec2_create(v1.x * v2.x, v1.y * v2.y);
 }
 
 /**
@@ -227,7 +227,7 @@ bxr_vec2_mul(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_div(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x / v2.x, v1.y / v2.y);
+  return bxr_vec2_create(v1.x / v2.x, v1.y / v2.y);
 }
 
 /**
@@ -236,7 +236,7 @@ bxr_vec2_div(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_scale(bxr_vec2_t v, float c)
 {
-  return bxr_vec2_make(v.x * c, v.y * c);
+  return bxr_vec2_create(v.x * c, v.y * c);
 }
 
 /**
@@ -276,7 +276,7 @@ bxr_vec2_normalize(bxr_vec2_t v)
   float c = bxr_vec2_len(v);
 
   if (c < BXR_EPSILON)
-    return bxr_vec2_make(0.0f, 0.0f);
+    return bxr_vec2_create(0.0f, 0.0f);
   else
     return bxr_vec2_scale(v, 1.0f / c);
 }
@@ -296,7 +296,7 @@ bxr_vec2_reflect(bxr_vec2_t v)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_perp(bxr_vec2_t v)
 {
-  return bxr_vec2_make(-v.y, v.x);
+  return bxr_vec2_create(-v.y, v.x);
 }
 
 /**
@@ -357,7 +357,7 @@ bxr_vec2_lerp(bxr_vec2_t v1, bxr_vec2_t v2, float step)
 /**
  * `returns` the zero vector.
  */
-#define bxr_vec2_t_zero() (bxr_vec2_make(0.0f, 0.0f))
+#define bxr_vec2_t_zero() (bxr_vec2_create(0.0f, 0.0f))
 
 /**
  * `return` a vector in polar coordinates.
@@ -365,7 +365,7 @@ bxr_vec2_lerp(bxr_vec2_t v1, bxr_vec2_t v2, float step)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_polar(float angle, float len)
 {
-  return bxr_vec2_make(len * bxr_cos(angle), len * bxr_sin(angle));
+  return bxr_vec2_create(len * bxr_cos(angle), len * bxr_sin(angle));
 }
 
 /**
@@ -374,7 +374,7 @@ bxr_vec2_polar(float angle, float len)
 BXR_INLINE bxr_vec2_t
 vec2_min(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(bxr_min(v1.x, v2.x), bxr_min(v1.y, v2.y));
+  return bxr_vec2_create(bxr_min(v1.x, v2.x), bxr_min(v1.y, v2.y));
 }
 
 /**
@@ -383,7 +383,7 @@ vec2_min(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 vec2_max(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(bxr_max(v1.x, v2.x), bxr_max(v1.y, v2.y));
+  return bxr_vec2_create(bxr_max(v1.x, v2.x), bxr_max(v1.y, v2.y));
 }
 
 /**
@@ -392,7 +392,7 @@ vec2_max(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_floor(bxr_vec2_t v)
 {
-  return bxr_vec2_make(bxr_floor(v.x), bxr_floor(v.y));
+  return bxr_vec2_create(bxr_floor(v.x), bxr_floor(v.y));
 }
 
 /**
@@ -401,7 +401,7 @@ bxr_vec2_floor(bxr_vec2_t v)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_ceil(bxr_vec2_t v)
 {
-  return bxr_vec2_make(bxr_ceil(v.x), bxr_ceil(v.y));
+  return bxr_vec2_create(bxr_ceil(v.x), bxr_ceil(v.y));
 }
 
 /**
@@ -417,7 +417,7 @@ typedef struct bxr_line_s
 /**
  * Construct a line
  */
-#define bxr_line_make(ax, ay, bx, by)                                          \
+#define bxr_line_create(ax, ay, bx, by)                                        \
   ((const bxr_line_t){ { ax, ay }, { bx, by } })
 
 /**
@@ -434,7 +434,7 @@ typedef struct bxr_triangle_s
 /**
  * Construct a triangle
  */
-#define bxr_triangle_make(ax, ay, bx, by, cx, cy)                              \
+#define bxr_triangle_create(ax, ay, bx, by, cx, cy)                            \
   ((const bxr_triangle_t){ { ax, ay }, { bx, by }, { cx, cy } })
 
 /**
@@ -449,7 +449,7 @@ typedef struct bxr_rect_s
 /**
  * Construct a rectangle
  */
-#define bxr_rect_make(x, y, w, h) ((const bxr_rect_t){ x, y, w, h })
+#define bxr_rect_create(x, y, w, h) ((const bxr_rect_t){ x, y, w, h })
 
 /**
  * `returns` the area of the rectangle
@@ -498,7 +498,7 @@ bxr_rect_get_intersection(bxr_rect_t r1, bxr_rect_t r2)
   if (h < y)
     h = y;
 
-  return bxr_rect_make(x, y, w - x, h - y);
+  return bxr_rect_create(x, y, w - x, h - y);
 }
 
 /**
@@ -556,10 +556,10 @@ bxr_rect_adjacent(bxr_rect_t r1, bxr_rect_t r2)
 BXR_INLINE bxr_rect_t
 bxr_rect_expand(bxr_rect_t rect, float amount)
 {
-  return bxr_rect_make(rect.x - amount,
-                       rect.y - amount,
-                       rect.w + 2 * amount,
-                       rect.h + 2 * amount);
+  return bxr_rect_create(rect.x - amount,
+                         rect.y - amount,
+                         rect.w + 2 * amount,
+                         rect.h + 2 * amount);
 }
 
 /**
@@ -569,10 +569,10 @@ bxr_rect_expand(bxr_rect_t rect, float amount)
 bxr_rect_t BXR_INLINE
 bxr_rect_contract(bxr_rect_t rect, float amount)
 {
-  return bxr_rect_make(rect.x + amount,
-                       rect.y + amount,
-                       rect.w - 2 * amount,
-                       rect.h - 2 * amount);
+  return bxr_rect_create(rect.x + amount,
+                         rect.y + amount,
+                         rect.w - 2 * amount,
+                         rect.h - 2 * amount);
 }
 
 /**
@@ -588,7 +588,7 @@ typedef struct bxr_textured_rect_s
 /**
  * Construct a textured rectangle.
  */
-#define bxr_textured_rect_make(dst, src)                                       \
+#define bxr_textured_rect_create(dst, src)                                     \
   ((const bxr_textured_rect_t){ dst, src })
 
 /**
@@ -603,6 +603,7 @@ typedef struct bxr_region_s
 /**
  * Construct a region
  */
-#define bxr_region_make(x0, y0, x1, y1) ((const bxr_region_t){ x0, y0, x1, y1 })
+#define bxr_region_create(x0, y0, x1, y1)                                      \
+  ((const bxr_region_t){ x0, y0, x1, y1 })
 
 #endif // BXR_MATH_H_

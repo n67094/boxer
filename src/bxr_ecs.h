@@ -18,6 +18,10 @@ typedef size_t bxr_ecs_mask_t;
 #define BXR_ECS_INVALID_ENTITY ((bxr_ecs_entity_t)(-1))
 
 /**
+ * ECS API
+ */
+
+/**
  * Description for creating an ECS instance.
  *
  * `max_entities` is the maximum number of entities that can be created in the
@@ -61,6 +65,10 @@ void bxr_ecs_destroy(bxr_ecs_t *ecs);
 void bxr_ecs_reset(bxr_ecs_t *ecs);
 
 /**
+ * ECS component API
+ */
+
+/**
  * Callback called when a component is created.
  *
  * `ecs` is the ECS instance the component belongs to.
@@ -69,13 +77,13 @@ void bxr_ecs_reset(bxr_ecs_t *ecs);
  *
  * `component_ptr` is a pointer to the component data.
  *
- * `args` is the arguments passed to `bxr_ecs_add_component_to_entity` when
- * adding the component to an entity.
+ * `args` is the arguments passed to `bxr_ecs_entity_add_component` when adding
+ * the component (can be NULL).
  */
-typedef void (*bxr_ecs_make_component_cb)(bxr_ecs_t *ecs,
-                                          bxr_ecs_entity_t entity,
-                                          void *component_ptr,
-                                          void *args);
+typedef void (*bxr_ecs_component_create_cb)(bxr_ecs_t *ecs,
+                                            bxr_ecs_entity_t entity,
+                                            void *component_ptr,
+                                            void *args);
 
 /**
  * Callback called when a component is destroyed.
@@ -86,7 +94,7 @@ typedef void (*bxr_ecs_make_component_cb)(bxr_ecs_t *ecs,
  *
  * `component_ptr` is a pointer to the component data.
  */
-typedef void (*bxr_ecs_destroy_component_cb)(bxr_ecs_t *ecs,
+typedef void (*bxr_ecs_component_destroy_cb)(bxr_ecs_t *ecs,
                                              bxr_ecs_entity_t entity,
                                              void *component_ptr);
 
@@ -95,7 +103,9 @@ typedef void (*bxr_ecs_destroy_component_cb)(bxr_ecs_t *ecs,
  *
  * `ecs` is the ECS instance to define the component in.
  *
- * `make_cb` called when a component of this type is created. (NULL if no
+ * `component_size` is the size of the component data in bytes.
+ *
+ * `create_cb` called when a component of this type is created. (NULL if no
  * callback is needed).
  *
  * `destroy_cb` called when a component of this type is
@@ -105,9 +115,113 @@ typedef void (*bxr_ecs_destroy_component_cb)(bxr_ecs_t *ecs,
  * could not be defined.
  */
 bxr_ecs_component_t
-bxr_ecs_define_component(bxr_ecs_t *ecs,
-                         bxr_ecs_make_component_cb make_cb,
-                         bxr_ecs_destroy_component_cb destroy_cb);
+bxr_ecs_component_define(bxr_ecs_t *ecs,
+                         size_t component_size,
+                         bxr_ecs_component_create_cb create_cb,
+                         bxr_ecs_component_destroy_cb destroy_cb);
+
+/**
+ * ECS Entity API
+ */
+
+/**
+ * Create a new entity in the ECS instance.
+ *
+ * `ecs` is the ECS instance to create the entity in.
+ *
+ * `return` the ID of the created entity, or BXR_ECS_INVALID_ENTITY if the
+ * entity could not be created. Use `bxr_error_get` to get more information
+ * about the error.
+ */
+bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs);
+
+/**
+ * Return `true` if the entity is active and has not been queued for
+ * destruction, `false` otherwise.
+ *
+ * `ecs` is the ECS instance to query.
+ *
+ * `entity` is the entity to check.
+ */
+bool bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
+
+/**
+ * Test if an entity has a component.
+ *
+ * `ecs` is the ECS instance to query.
+ *
+ * `entity` is the entity to check.
+ *
+ * `component` is the component to check for.
+ *
+ * `return` `true` if the entity has the component, `false` otherwise.
+ */
+bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
+                                  bxr_ecs_entity_t entity,
+                                  bxr_ecs_component_t component);
+
+/**
+ * Add a component to an entity.
+ *
+ * `ecs` is the ECS instance to modify.
+ *
+ * `entity` is the entity to add the component to.
+ *
+ * `component` is the component to add to the entity.
+ *
+ * `args` is the arguments to pass to the component's create callback when
+ * creating the component data for the entity (can be NULL).
+ *
+ * `return` a pointer to the created component data, or NULL if an error
+ * occurred. Use `bxr_error_get` to get more information about the error.
+ */
+void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
+                                   bxr_ecs_entity_t entity,
+                                   bxr_ecs_component_t component,
+                                   void *args);
+
+/**
+ * Get a pointer to a component of an entity.
+ *
+ * `ecs` is the ECS instance to query.
+ *
+ * `entity` is the entity to get the component from.
+ *
+ * `component` is the component to get from the entity.
+ *
+ * `return` a pointer to the component data, or NULL if the entity does not have
+ * the component.
+ */
+void *bxr_ecs_entity_get_component(const bxr_ecs_t *ecs,
+                                   bxr_ecs_entity_t entity,
+                                   bxr_ecs_component_t component);
+
+/**
+ * Remove a component from an entity.
+ *
+ * `ecs` is the ECS instance to modify.
+ *
+ * `entity` is the entity to remove the component from.
+ *
+ * `component` is the component to remove from the entity.
+ */
+void bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
+                                     bxr_ecs_entity_t entity,
+                                     bxr_ecs_component_t component);
+
+/**
+ * Destroy an entity, free it's resources and push it's id in the entity
+ * stack for re-use.
+ *
+ * `ecs` is the ECS instance to query.
+ *
+ * `entity` is the entity to destroy
+ */
+void bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
+
+/**
+ * ECS System API
+ */
 
 /**
  * Callback called when a system is run.
@@ -122,10 +236,10 @@ bxr_ecs_define_component(bxr_ecs_t *ecs,
  *
  * `return` 0 on success, or a non-zero error code on failure.
  */
-typedef int (*bxr_ecs_logic_cb)(bxr_ecs_t *ecs,
-                                bxr_ecs_entity_t *entities,
-                                size_t entity_count,
-                                void *udata);
+typedef int (*bxr_ecs_system_logic_cb)(bxr_ecs_t *ecs,
+                                       bxr_ecs_entity_t *entities,
+                                       size_t entity_count,
+                                       void *udata);
 
 /**
  * Callback called when an entity is added to a system.
@@ -172,13 +286,12 @@ typedef void (*bxr_ecs_system_remove_cb)(bxr_ecs_t *ecs,
  * `return` the ID of the defined system, or an invalid ID if the system could
  * not be defined.
  */
-bxr_ecs_system_t bxr_ecs_define_system(bxr_ecs_t *ecs,
+bxr_ecs_system_t bxr_ecs_system_define(bxr_ecs_t *ecs,
                                        bxr_ecs_mask_t mask,
-                                       bxr_ecs_logic_cb logic_cb,
+                                       bxr_ecs_system_logic_cb logic_cb,
                                        bxr_ecs_system_add_cb add_cb,
                                        bxr_ecs_system_remove_cb remove_cb,
                                        void *udata);
-
 /**
  * Require a component for a system.
  *
@@ -188,9 +301,9 @@ bxr_ecs_system_t bxr_ecs_define_system(bxr_ecs_t *ecs,
  *
  * `component` is the component to require for the system.
  */
-void bxr_ecs_require_component(bxr_ecs_t *ecs,
-                               bxr_ecs_system_t system,
-                               bxr_ecs_component_t comp);
+void bxr_ecs_system_require_component(bxr_ecs_t *ecs,
+                                      bxr_ecs_system_t system,
+                                      bxr_ecs_component_t comp);
 
 /**
  * Exclude a component for a system.
@@ -201,29 +314,29 @@ void bxr_ecs_require_component(bxr_ecs_t *ecs,
  *
  * `component` is the component to exclude for the system.
  */
-void bxr_ecs_exclude_component(bxr_ecs_t *ecs,
-                               bxr_ecs_system_t system,
-                               bxr_ecs_component_t component);
+void bxr_ecs_system_exclude_component(bxr_ecs_t *ecs,
+                                      bxr_ecs_system_t system,
+                                      bxr_ecs_component_t component);
 
 /**
- * Enable a system, allowing it to be run when `bxr_ecs_run_system` or
- * `ecs_run_systems` is called.
+ * Enable a system, allowing it to be run when `bxr_ecs_system_run` or
+ * `ecs_systems_run` is called.
  *
  * `ecs` is the ECS instance to modify.
  *
  * `sys` is the system to enable.
  */
-void bxr_ecs_enable_system(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+void bxr_ecs_system_enable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
- * Disable a system, preventing it from being run when `bxr_ecs_run_system` or
- * `ecs_run_systems` is called.
+ * Disable a system, preventing it from being run when `bxr_ecs_system_run` or
+ * `ecs_systems_run` is called.
  *
  * `ecs` is the ECS instance to modify.
  *
  * `system` is the system to disable.
  */
-void bxr_ecs_disable_system(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+void bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
  * Set the callbacks for a system.
@@ -239,9 +352,9 @@ void bxr_ecs_disable_system(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  * `remove_cb` is the callback to call when an entity is removed from the
  * system.
  */
-void bxr_ecs_set_system_callback(bxr_ecs_t *ecs,
+void bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
                                  bxr_ecs_system_t system,
-                                 bxr_ecs_logic_cb logic_cb,
+                                 bxr_ecs_system_logic_cb logic_cb,
                                  bxr_ecs_system_add_cb add_cb,
                                  bxr_ecs_system_remove_cb remove_cb);
 
@@ -255,7 +368,7 @@ void bxr_ecs_set_system_callback(bxr_ecs_t *ecs,
  * `udata` is the user data to associate with the system (can be NULL).
  */
 void
-bxr_ecs_set_system_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system, void *udata);
+bxr_ecs_system_set_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system, void *udata);
 
 /**
  * Get the user data for a system.
@@ -267,7 +380,7 @@ bxr_ecs_set_system_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system, void *udata);
  * `return` the user data associated with the system, or NULL if no user data
  * is associated with the system.
  */
-void *bxr_ecs_get_system_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+void *bxr_ecs_system_get_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
  * Set the system mask (a.k.a tags).
@@ -278,7 +391,7 @@ void *bxr_ecs_get_system_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  *
  * `mask` is the mask to set for the system.
  */
-void bxr_ecs_set_system_mask(bxr_ecs_t *ecs,
+void bxr_ecs_system_set_mask(bxr_ecs_t *ecs,
                              bxr_ecs_system_t system,
                              bxr_ecs_mask_t mask);
 
@@ -291,109 +404,12 @@ void bxr_ecs_set_system_mask(bxr_ecs_t *ecs,
  *
  * `return` the mask associated with the system.
  */
-bxr_ecs_mask_t bxr_ecs_get_system_mask(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+bxr_ecs_mask_t bxr_ecs_system_get_mask(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
  * Get the number of entities assigned to a system.
  */
-size_t bxr_ecs_get_system_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system);
-
-/**
- * Create a new entity in the ECS instance.
- *
- * `ecs` is the ECS instance to create the entity in.
- *
- * `return` the ID of the created entity, or BXR_ECS_INVALID_ENTITY if the
- * entity could not be created. Use `bxr_error_get` to get more information
- * about the error.
- */
-bxr_ecs_entity_t bxr_ecs_make_entity(bxr_ecs_t *ecs);
-
-/**
- * Destroy an entity, free it's resources and push it's id in the entity
- * stack for re-use.
- *
- * `ecs` is the ECS instance to query.
- *
- * `entity` is the entity to destroy
- */
-void bxr_ecs_destroy_entity(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
-
-/**
- * Return `true` if the entity is active and has not been queued for
- * destruction, `false` otherwise.
- *
- * `ecs` is the ECS instance to query.
- *
- * `entity` is the entity to check.
- */
-bool bxr_ecs_is_entity_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
-
-/**
- * Test if an entity has a component.
- *
- * `ecs` is the ECS instance to query.
- *
- * `entity` is the entity to check.
- *
- * `component` is the component to check for.
- *
- * `return` `true` if the entity has the component, `false` otherwise.
- */
-bool bxr_ecs_has_component(const bxr_ecs_t *ecs,
-                           bxr_ecs_entity_t entity,
-                           bxr_ecs_component_t component);
-
-/**
- * Add a component to an entity.
- *
- * `ecs` is the ECS instance to modify.
- *
- * `entity` is the entity to add the component to.
- *
- * `component` is the component to add to the entity.
- *
- * `args` is the arguments to pass to the component's make callback when
- * creating the component data for the entity (can be NULL).
- *
- * `return` a pointer to the created component data, or NULL if an error
- * occurred. Use `bxr_error_get` to get more information about the error.
- */
-void *bxr_ecs_add_component(bxr_ecs_t *ecs,
-                            bxr_ecs_entity_t entity,
-                            bxr_ecs_component_t component,
-                            void *args);
-
-/**
- * Get a pointer to a component of an entity.
- *
- * `ecs` is the ECS instance to query.
- *
- * `entity` is the entity to get the component from.
- *
- * `component` is the component to get from the entity.
- *
- * `return` a pointer to the component data, or NULL if the entity does not have
- * the component.
- */
-void *bxr_ecs_get_component(const bxr_ecs_t *ecs,
-                            bxr_ecs_entity_t entity,
-                            bxr_ecs_component_t component);
-
-/**
- * Remove a component from an entity.
- *
- * `ecs` is the ECS instance to modify.
- *
- * `entity` is the entity to remove the component from.
- *
- * `component` is the component to remove from the entity.
- */
-void bxr_ecs_remove_component(bxr_ecs_t *ecs,
-                              bxr_ecs_entity_t entity,
-                              bxr_ecs_component_t component);
-
-void bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
+size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
  * Call a system logic on required component, but not exclueded ones.
@@ -404,7 +420,7 @@ void bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
  *
  * `mask` determines which systems run run based on a group/category.
  */
-int bxr_ecs_run_system(bxr_ecs_t *ecs,
+int bxr_ecs_system_run(bxr_ecs_t *ecs,
                        bxr_ecs_system_t system,
                        bxr_ecs_mask_t mask);
 
@@ -415,6 +431,6 @@ int bxr_ecs_run_system(bxr_ecs_t *ecs,
  *
  * `mask` determines which systems run based on a group/category.
  */
-int ecs_run_systems(bxr_ecs_t *ecs, bxr_ecs_mask_t mask);
+int bxr_ecs_systems_run(bxr_ecs_t *ecs, bxr_ecs_mask_t mask);
 
 #endif // BXR_ECS_H_

@@ -12,15 +12,15 @@ typedef size_t _bxr_ecs_id_t;
 
 typedef struct _bxr_ecs_component_array_s
 {
-  size_t length;
+  size_t capacity;
   size_t size; // Size of each component in bytes.
   void *data;
 } _bxr_ecs_component_array_t;
 
 typedef struct _bxr_ecs_component_data_s
 {
-  bxr_ecs_make_component_cb make_cb;
-  bxr_ecs_destroy_component_cb destroy_cb;
+  bxr_ecs_component_create_cb create_cb;
+  bxr_ecs_component_destroy_cb destroy_cb;
 } _bxr_ecs_component_data_t;
 
 typedef struct _bxr_ecs_entity_data_s
@@ -35,7 +35,7 @@ typedef struct _bxr_ecs_system_data_s
   bool active;
   bxr_sparse_set_t *entity_ids;
   bxr_ecs_mask_t mask;
-  bxr_ecs_logic_cb logic_cb;
+  bxr_ecs_system_logic_cb logic_cb;
   bxr_ecs_system_add_cb add_cb;
   bxr_ecs_system_remove_cb remove_cb;
   bxr_bitset_t *require_bits;
@@ -171,7 +171,8 @@ _bxr_ecs_destruct(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
       _bxr_ecs_component_data_t *component_data
           = &ecs->component_data[component];
       if (component_data->destroy_cb) {
-        void *component_ptr = bxr_ecs_get_component(ecs, entity, component);
+        void *component_ptr
+            = bxr_ecs_entity_get_component(ecs, entity, component);
         component_data->destroy_cb(ecs, entity, component_ptr);
       }
     }
@@ -246,7 +247,7 @@ bxr_ecs_create(const bxr_ecs_desc_t *desc)
              ecs->max_components * sizeof(_bxr_ecs_component_array_t));
 
   // Allocate component data array and initialize it to zero (components with no
-  // make/destroy callbacks)
+  // create/destroy callbacks)
   BXR_CALLOC(ecs->component_data,
              ecs->max_components,
              sizeof(_bxr_ecs_component_data_t));
@@ -375,182 +376,45 @@ bxr_ecs_reset(bxr_ecs_t *ecs)
   }
 }
 
+/**
+ * ECS Component API
+ */
+
 bxr_ecs_component_t
-bxr_ecs_define_component(bxr_ecs_t *ecs,
-                         bxr_ecs_make_component_cb make_cb,
-                         bxr_ecs_destroy_component_cb destroy_cb)
+bxr_ecs_component_define(bxr_ecs_t *ecs,
+                         size_t component_size,
+                         bxr_ecs_component_create_cb create_cb,
+                         bxr_ecs_component_destroy_cb destroy_cb)
 {
   SDL_assert(ecs);
   SDL_assert(ecs->component_count < ecs->max_components);
 
   bxr_ecs_component_t id = ecs->component_count;
 
-  _bxr_ecs_component_data_t *component_data = &ecs->component_data[id];
+  // Allocate component array for the new component type and initialize it to
+  // zero
+  _bxr_ecs_component_array_t *component_array = &ecs->component_arrays[id];
+  component_array->size                       = component_size;
+  component_array->capacity                   = ecs->max_entities;
+  BXR_CALLOC(
+      component_array->data, component_array->capacity, component_array->size);
 
-  component_data->make_cb    = make_cb;
-  component_data->destroy_cb = destroy_cb;
+  // Set component data for the new component type
+  _bxr_ecs_component_data_t *component_data = &ecs->component_data[id];
+  component_data->create_cb                 = create_cb;
+  component_data->destroy_cb                = destroy_cb;
 
   ecs->component_count++;
 
   return id;
 }
 
-bxr_ecs_system_t
-bxr_ecs_define_system(bxr_ecs_t *ecs,
-                      bxr_ecs_mask_t mask,
-                      bxr_ecs_logic_cb logic_cb,
-                      bxr_ecs_system_add_cb add_cb,
-                      bxr_ecs_system_remove_cb remove_cb,
-                      void *udata)
-{
-  SDL_assert(ecs);
-  SDL_assert(ecs->system_count < ecs->max_systems);
-
-  bxr_ecs_system_t id = ecs->system_count;
-
-  _bxr_ecs_system_data_t *system_data = &ecs->system_data[id];
-
-  system_data->active       = true;
-  system_data->mask         = mask;
-  system_data->entity_ids   = bxr_sparse_set_create(ecs->max_entities);
-  system_data->logic_cb     = logic_cb;
-  system_data->add_cb       = add_cb;
-  system_data->remove_cb    = remove_cb;
-  system_data->require_bits = bxr_bitset_create(ecs->max_components);
-  system_data->exclude_bits = bxr_bitset_create(ecs->max_components);
-  system_data->udata        = udata;
-
-  ecs->system_count++;
-
-  return id;
-}
-
-void
-bxr_ecs_require_component(bxr_ecs_t *ecs,
-                          bxr_ecs_system_t system,
-                          bxr_ecs_component_t component)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-  SDL_assert(component < ecs->max_components);
-  SDL_assert(component < ecs->component_count);
-
-  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
-
-  bxr_bitset_set(system_data->require_bits, component);
-}
-
-void
-bxr_ecs_exclude_component(bxr_ecs_t *ecs,
-                          bxr_ecs_system_t system,
-                          bxr_ecs_component_t component)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-  SDL_assert(component < ecs->max_components);
-  SDL_assert(component < ecs->component_count);
-
-  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
-
-  bxr_bitset_set(system_data->exclude_bits, component);
-}
-
-void
-bxr_ecs_enable_system(bxr_ecs_t *ecs, bxr_ecs_system_t system)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
-  system_data->active                 = true;
-}
-
-void
-bxr_ecs_disable_system(bxr_ecs_t *ecs, bxr_ecs_system_t system)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
-  system_data->active                 = false;
-}
-
-void
-bxr_ecs_set_system_callback(bxr_ecs_t *ecs,
-                            bxr_ecs_system_t system,
-                            bxr_ecs_logic_cb logic_cb,
-                            bxr_ecs_system_add_cb add_cb,
-                            bxr_ecs_system_remove_cb remove_cb)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
-
-  system_data->logic_cb  = logic_cb;
-  system_data->add_cb    = add_cb;
-  system_data->remove_cb = remove_cb;
-}
-
-void
-bxr_ecs_set_system_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system, void *udata)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  ecs->system_data[system].udata = udata;
-}
-
-void *
-bxr_ecs_get_system_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  return ecs->system_data[system].udata;
-}
-
-void
-bxr_ecs_set_system_mask(bxr_ecs_t *ecs,
-                        bxr_ecs_system_t system,
-                        bxr_ecs_mask_t mask)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  ecs->system_data[system].mask = mask;
-}
-
-bxr_ecs_mask_t
-bxr_ecs_get_system_mask(bxr_ecs_t *ecs, bxr_ecs_system_t system)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  return ecs->system_data[system].mask;
-}
-
-size_t
-bxr_ecs_get_system_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system)
-{
-  SDL_assert(ecs);
-  SDL_assert(system < ecs->max_systems);
-  SDL_assert(system < ecs->system_count);
-
-  return bxr_sparse_set_count(ecs->system_data[system].entity_ids);
-}
+/**
+ * ECS Entity API
+ */
 
 bxr_ecs_entity_t
-bxr_ecs_make_entity(bxr_ecs_t *ecs)
+bxr_ecs_entity_create(bxr_ecs_t *ecs)
 {
   SDL_assert(ecs);
 
@@ -591,7 +455,7 @@ bxr_ecs_make_entity(bxr_ecs_t *ecs)
 }
 
 bool
-bxr_ecs_is_entity_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
+bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
 {
   SDL_assert(ecs);
   SDL_assert(entity < ecs->max_entities);
@@ -600,9 +464,9 @@ bxr_ecs_is_entity_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
 }
 
 bool
-bxr_ecs_has_component(const bxr_ecs_t *ecs,
-                      bxr_ecs_entity_t entity,
-                      bxr_ecs_component_t component)
+bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
+                             bxr_ecs_entity_t entity,
+                             bxr_ecs_component_t component)
 {
   SDL_assert(ecs);
   SDL_assert(entity < ecs->max_entities);
@@ -616,10 +480,10 @@ bxr_ecs_has_component(const bxr_ecs_t *ecs,
 }
 
 void *
-bxr_ecs_add_component(bxr_ecs_t *ecs,
-                      bxr_ecs_entity_t entity,
-                      bxr_ecs_component_t component,
-                      void *args)
+bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
+                             bxr_ecs_entity_t entity,
+                             bxr_ecs_component_t component,
+                             void *args)
 {
   SDL_assert(ecs);
   SDL_assert(entity < ecs->max_entities);
@@ -635,13 +499,20 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
   _bxr_ecs_component_array_t *component_array
       = &ecs->component_arrays[component];
 
+  SDL_Log("entity: %zu component array length: %zu",
+          entity,
+          component_array->capacity);
+
+  // TODO fixme capacity is 0
+
   // Grow component_array if needed
-  if (entity >= component_array->length) {
+  if (entity >= component_array->capacity) {
     do {
-      component_array->length = component_array->length * 2;
-    } while (entity >= component_array->length);
-    BXR_RESIZE(component_array,
-               component_array->length * component_array->size);
+      component_array->capacity *= 2;
+    } while (entity >= component_array->capacity);
+
+    BXR_RESIZE(component_array->data,
+               component_array->capacity * component_array->size);
     if (!component_array->data) {
       bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
       return NULL;
@@ -649,11 +520,11 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
   }
 
   // Get a pointer to the component's data and set it to zero
-  void *component_ptr = bxr_ecs_get_component(ecs, entity, component);
+  void *component_ptr = bxr_ecs_entity_get_component(ecs, entity, component);
   BXR_MEMSET(component_ptr, 0, component_array->size);
 
-  if (component_data->make_cb)
-    component_data->make_cb(ecs, entity, component_ptr, args);
+  if (component_data->create_cb)
+    component_data->create_cb(ecs, entity, component_ptr, args);
 
   // Set the entity's component bit
   bxr_bitset_set(entity_data->component_bits, component);
@@ -748,9 +619,9 @@ bxr_ecs_add_component(bxr_ecs_t *ecs,
 }
 
 void *
-bxr_ecs_get_component(const bxr_ecs_t *ecs,
-                      bxr_ecs_entity_t entity,
-                      bxr_ecs_component_t component)
+bxr_ecs_entity_get_component(const bxr_ecs_t *ecs,
+                             bxr_ecs_entity_t entity,
+                             bxr_ecs_component_t component)
 {
   SDL_assert(ecs);
   SDL_assert(entity < ecs->max_entities);
@@ -765,9 +636,9 @@ bxr_ecs_get_component(const bxr_ecs_t *ecs,
 }
 
 void
-bxr_ecs_remove_component(bxr_ecs_t *ecs,
-                         bxr_ecs_entity_t entity,
-                         bxr_ecs_component_t component)
+bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
+                                bxr_ecs_entity_t entity,
+                                bxr_ecs_component_t component)
 {
   SDL_assert(ecs);
   SDL_assert(entity < ecs->max_entities);
@@ -865,7 +736,7 @@ bxr_ecs_remove_component(bxr_ecs_t *ecs,
   _bxr_ecs_component_data_t *component_data = &ecs->component_data[component];
 
   if (component_data->destroy_cb) {
-    void *component_ptr = bxr_ecs_get_component(ecs, entity, component);
+    void *component_ptr = bxr_ecs_entity_get_component(ecs, entity, component);
     component_data->destroy_cb(ecs, entity, component_ptr);
   }
 
@@ -874,7 +745,7 @@ bxr_ecs_remove_component(bxr_ecs_t *ecs,
 }
 
 void
-bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
+bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
 {
   SDL_assert(ecs);
   SDL_assert(entity < ecs->max_entities);
@@ -939,8 +810,166 @@ bxr_ecs_destroy_component(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
   }
 }
 
+/**
+ * ECS System API
+ */
+
+bxr_ecs_system_t
+bxr_ecs_system_define(bxr_ecs_t *ecs,
+                      bxr_ecs_mask_t mask,
+                      bxr_ecs_system_logic_cb logic_cb,
+                      bxr_ecs_system_add_cb add_cb,
+                      bxr_ecs_system_remove_cb remove_cb,
+                      void *udata)
+{
+  SDL_assert(ecs);
+  SDL_assert(ecs->system_count < ecs->max_systems);
+
+  bxr_ecs_system_t id = ecs->system_count;
+
+  _bxr_ecs_system_data_t *system_data = &ecs->system_data[id];
+
+  system_data->active       = true;
+  system_data->mask         = mask;
+  system_data->entity_ids   = bxr_sparse_set_create(ecs->max_entities);
+  system_data->logic_cb     = logic_cb;
+  system_data->add_cb       = add_cb;
+  system_data->remove_cb    = remove_cb;
+  system_data->require_bits = bxr_bitset_create(ecs->max_components);
+  system_data->exclude_bits = bxr_bitset_create(ecs->max_components);
+  system_data->udata        = udata;
+
+  ecs->system_count++;
+
+  return id;
+}
+
+void
+bxr_ecs_system_require_component(bxr_ecs_t *ecs,
+                                 bxr_ecs_system_t system,
+                                 bxr_ecs_component_t component)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+  SDL_assert(component < ecs->max_components);
+  SDL_assert(component < ecs->component_count);
+
+  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
+
+  bxr_bitset_set(system_data->require_bits, component);
+}
+
+void
+bxr_ecs_system_exclude_component(bxr_ecs_t *ecs,
+                                 bxr_ecs_system_t system,
+                                 bxr_ecs_component_t component)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+  SDL_assert(component < ecs->max_components);
+  SDL_assert(component < ecs->component_count);
+
+  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
+
+  bxr_bitset_set(system_data->exclude_bits, component);
+}
+
+void
+bxr_ecs_system_enable(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
+  system_data->active                 = true;
+}
+
+void
+bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
+  system_data->active                 = false;
+}
+
+void
+bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
+                            bxr_ecs_system_t system,
+                            bxr_ecs_system_logic_cb logic_cb,
+                            bxr_ecs_system_add_cb add_cb,
+                            bxr_ecs_system_remove_cb remove_cb)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  _bxr_ecs_system_data_t *system_data = &ecs->system_data[system];
+
+  system_data->logic_cb  = logic_cb;
+  system_data->add_cb    = add_cb;
+  system_data->remove_cb = remove_cb;
+}
+
+void
+bxr_ecs_system_set_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system, void *udata)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  ecs->system_data[system].udata = udata;
+}
+
+void *
+bxr_ecs_system_get_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  return ecs->system_data[system].udata;
+}
+
+void
+bxr_ecs_system_set_mask(bxr_ecs_t *ecs,
+                        bxr_ecs_system_t system,
+                        bxr_ecs_mask_t mask)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  ecs->system_data[system].mask = mask;
+}
+
+bxr_ecs_mask_t
+bxr_ecs_system_get_mask(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  return ecs->system_data[system].mask;
+}
+
+size_t
+bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+{
+  SDL_assert(ecs);
+  SDL_assert(system < ecs->max_systems);
+  SDL_assert(system < ecs->system_count);
+
+  return bxr_sparse_set_count(ecs->system_data[system].entity_ids);
+}
+
 int
-bxr_ecs_run_system(bxr_ecs_t *ecs, bxr_ecs_system_t system, bxr_ecs_mask_t mask)
+bxr_ecs_system_run(bxr_ecs_t *ecs, bxr_ecs_system_t system, bxr_ecs_mask_t mask)
 {
   SDL_assert(ecs);
   SDL_assert(system < ecs->max_systems);
@@ -971,14 +1000,14 @@ bxr_ecs_run_system(bxr_ecs_t *ecs, bxr_ecs_system_t system, bxr_ecs_mask_t mask)
 }
 
 int
-ecs_run_systems(bxr_ecs_t *ecs, bxr_ecs_mask_t mask)
+bxr_ecs_systems_run(bxr_ecs_t *ecs, bxr_ecs_mask_t mask)
 {
   SDL_assert(ecs);
 
   for (_bxr_ecs_id_t system_id = 0; system_id < ecs->system_count;
        system_id++) {
 
-    int retval = bxr_ecs_run_system(ecs, system_id, mask);
+    int retval = bxr_ecs_system_run(ecs, system_id, mask);
 
     if (retval != 0) {
       return retval;

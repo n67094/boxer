@@ -55,13 +55,13 @@ bxr_error_get_msg(bxr_erro_code_e error)
     // bxr_image.c errors
   case BXR_ERROR_IMAGE_FILE:
     return "Image open file error.";
-  case BXR_ERROR_IMAGE_MAKE:
-    return "Image make error.";
-  case BXR_ERROR_IMAGE_MAKE_MEM:
-    return "Image make from memory error.";
+  case BXR_ERROR_IMAGE_CREATE:
+    return "Image create error.";
+  case BXR_ERROR_IMAGE_CREATE_MEM:
+    return "Image create from memory error.";
     // bxr_sampler.c errors
-  case BXR_ERROR_SAMPLER_MAKE:
-    return "Sampler make error.";
+  case BXR_ERROR_SAMPLER_CREATE:
+    return "Sampler create error.";
     // bxr_io.c errors
   case BXR_ERROR_IO_READ:
     return "IO read error.";

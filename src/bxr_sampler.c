@@ -86,7 +86,7 @@ bxr_sampler_create(bxr_sampler_e sampler_type)
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to create GPU sampler (error: %s)",
                  SDL_GetError());
-    bxr_error_set(BXR_ERROR_SAMPLER_MAKE);
+    bxr_error_set(BXR_ERROR_SAMPLER_CREATE);
     return (bxr_sampler_t){ .sampler = NULL };
   }
 

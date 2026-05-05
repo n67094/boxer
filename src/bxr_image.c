@@ -50,7 +50,7 @@ bxr_image_create(const char *path)
   SDL_Surface *surface = SDL_LoadPNG_IO(stream, true);
   if (!surface) {
     SDL_CloseIO(stream);
-    bxr_error_set(BXR_ERROR_IMAGE_MAKE);
+    bxr_error_set(BXR_ERROR_IMAGE_CREATE);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
@@ -73,7 +73,7 @@ bxr_image_create_mem(unsigned int width, unsigned int height, void *pixels)
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to create surface from memory (error: %s)",
                  SDL_GetError());
-    bxr_error_set(BXR_ERROR_IMAGE_MAKE_MEM);
+    bxr_error_set(BXR_ERROR_IMAGE_CREATE_MEM);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 

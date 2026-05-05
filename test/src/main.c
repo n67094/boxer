@@ -1,6 +1,7 @@
 #include "bxr.h"
 
 #include "bitset.h"
+#include "ecs.h"
 #include "ini.h"
 #include "json.h"
 #include "math.h"
@@ -35,6 +36,7 @@ bxr_game_setup(void)
   BXR_UNIT_RUN_SUITE(suite_ini);
   BXR_UNIT_RUN_SUITE(suite_sparse_set);
   BXR_UNIT_RUN_SUITE(suite_bitset);
+  BXR_UNIT_RUN_SUITE(suite_ecs);
 
   bxr_unit_report();
 }

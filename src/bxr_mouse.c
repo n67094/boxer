@@ -117,7 +117,7 @@ bxr_mouse_pos(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  return bxr_vec2_make(_mouse.x, _mouse.y);
+  return bxr_vec2_create(_mouse.x, _mouse.y);
 }
 
 bxr_vec2_t
@@ -125,7 +125,7 @@ bxr_mouse_prev_pos(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
 
-  return bxr_vec2_make(_mouse.x_prev, _mouse.y_prev);
+  return bxr_vec2_create(_mouse.x_prev, _mouse.y_prev);
 }
 
 bool
@@ -181,7 +181,7 @@ bxr_vec2_t
 bxr_mouse_wheel(void)
 {
   SDL_assert(_initialized == BXR_INIT_COOKIE);
-  return bxr_vec2_make(_mouse.wheel_x, _mouse.wheel_y);
+  return bxr_vec2_create(_mouse.wheel_x, _mouse.wheel_y);
 }
 
 void
