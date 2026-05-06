@@ -268,15 +268,116 @@ BXR_UNIT_CASE(case_ecs_exclude)
   return true;
 }
 
+bxr_ecs_component_t _c1;
+
+int
+remove_exclude_system(bxr_ecs_t *ecs,
+                      bxr_ecs_entity_t *entities,
+                      size_t entity_count,
+                      void *udata)
+{
+  (void)udata;
+
+  for (size_t i = 0; i < entity_count; i++) {
+    bxr_ecs_entity_remove_component(ecs, entities[i], _c1);
+  }
+
+  return 0;
+}
+
+BXR_UNIT_CASE(case_ecs_exclude_remove_system)
+{
+  _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+  bxr_ecs_component_t c2
+      = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  bxr_ecs_system_t s1
+      = bxr_ecs_system_define(ecs, 0, remove_exclude_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_exclude_component(ecs, s1, _c1);
+  bxr_ecs_system_require_component(ecs, s1, c2);
+
+  bxr_ecs_system_t s2
+      = bxr_ecs_system_define(ecs, 0, remove_exclude_system, NULL, NULL, NULL);
+  bxr_ecs_system_require_component(ecs, s2, c2);
+
+  bxr_ecs_entity_t e1 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e1, _c1, NULL);
+  bxr_ecs_entity_add_component(ecs, e1, c2, NULL);
+
+  bxr_ecs_entity_t e2 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e2, c2, NULL);
+
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s1) == 1);
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s2) == 2);
+
+  bxr_ecs_system_run(ecs, s2, 0);
+
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s1) == 2);
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s2) == 2);
+
+  return true;
+}
+
+int
+add_exclude_system(bxr_ecs_t *ecs,
+                   bxr_ecs_entity_t *entities,
+                   size_t entity_count,
+                   void *udata)
+{
+  (void)udata;
+
+  for (size_t i = 0; i < entity_count; i++) {
+    bxr_ecs_entity_add_component(ecs, entities[i], _c1, NULL);
+  }
+
+  return 0;
+}
+
+BXR_UNIT_CASE(case_ecs_exclude_add_system)
+{
+  _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+  bxr_ecs_component_t c2
+      = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  bxr_ecs_system_t s1
+      = bxr_ecs_system_define(ecs, 0, add_exclude_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_exclude_component(ecs, s1, _c1);
+  bxr_ecs_system_require_component(ecs, s1, c2);
+
+  bxr_ecs_system_t s2
+      = bxr_ecs_system_define(ecs, 0, add_exclude_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_require_component(ecs, s2, c2);
+
+  bxr_ecs_entity_t e1 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e1, _c1, NULL);
+  bxr_ecs_entity_add_component(ecs, e1, c2, NULL);
+
+  bxr_ecs_entity_t e2 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e2, c2, NULL);
+
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s1) == 1);
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s2) == 2);
+
+  bxr_ecs_system_run(ecs, s2, 0);
+
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s1) == 0);
+  BXR_UNIT_ASSERT(bxr_ecs_system_get_entity_count(ecs, s2) == 2);
+
+  return true;
+}
+
 BXR_UNIT_SUITE(suite_ecs)
 {
   bxr_unit_setup(ecs_test_setup, ecs_test_teardown);
 
   BXR_UNIT_RUN_CASE(case_ecs_reset);
   BXR_UNIT_RUN_CASE(case_ecs_exclude);
+  BXR_UNIT_RUN_CASE(case_ecs_exclude_remove_system);
+  BXR_UNIT_RUN_CASE(case_ecs_exclude_add_system);
   /*
-  BXR_UNIT_RUN_CASE(test_exclude_remove_system);
-  BXR_UNIT_RUN_CASE(test_exclude_add_system);
   BXR_UNIT_RUN_CASE(test_constructor);
   BXR_UNIT_RUN_CASE(test_destructor_remove);
   BXR_UNIT_RUN_CASE(test_destructor_destroy);
