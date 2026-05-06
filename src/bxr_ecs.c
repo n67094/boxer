@@ -670,7 +670,8 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
       if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
         if (system_data->remove_cb)
           system_data->remove_cb(ecs, entity, system_data->udata);
-      } // If the entity with the removed component is equal the the system's
+      }
+      // If the entity with the removed component is equal the the system's
       // required components, add it to the system
     } else if (bxr_bitset_equal(next_component_bits,
                                 system_data->require_bits)) {

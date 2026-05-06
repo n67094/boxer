@@ -123,73 +123,132 @@ exclude_remove_cb(bxr_ecs_t *ecs, bxr_ecs_entity_t entity, void *udata)
 
 exclude_sys_state_t state1 = { 0 };
 exclude_sys_state_t state2 = { 0 };
+exclude_sys_state_t state3 = { 0 };
 
 BXR_UNIT_CASE(case_ecs_exclude)
 {
   BXR_MEMSET(&state1, 0, sizeof(exclude_sys_state_t));
   BXR_MEMSET(&state2, 0, sizeof(exclude_sys_state_t));
+  BXR_MEMSET(&state3, 0, sizeof(exclude_sys_state_t));
 
   bxr_ecs_component_t c1
       = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
   bxr_ecs_component_t c2
       = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+  bxr_ecs_component_t c3
+      = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
 
   bxr_ecs_system_t s1 = bxr_ecs_system_define(
       ecs, 0, exclude_system, exclude_add_cb, exclude_remove_cb, &state1);
   bxr_ecs_system_exclude_component(ecs, s1, c1);
-  bxr_ecs_system_require_component(ecs, s1, c2);
+  bxr_ecs_system_exclude_component(ecs, s1, c2);
+  bxr_ecs_system_require_component(ecs, s1, c3);
 
   bxr_ecs_system_t s2 = bxr_ecs_system_define(
       ecs, 0, exclude_system, exclude_add_cb, exclude_remove_cb, &state2);
+  bxr_ecs_system_exclude_component(ecs, s2, c1);
   bxr_ecs_system_require_component(ecs, s2, c2);
+  bxr_ecs_system_require_component(ecs, s2, c3);
+
+  bxr_ecs_system_t s3 = bxr_ecs_system_define(
+      ecs, 0, exclude_system, exclude_add_cb, exclude_remove_cb, &state3);
+  bxr_ecs_system_require_component(ecs, s3, c1);
+  bxr_ecs_system_require_component(ecs, s3, c2);
+  bxr_ecs_system_require_component(ecs, s3, c3);
 
   bxr_ecs_entity_t e1 = bxr_ecs_entity_create(ecs);
-  bxr_ecs_entity_add_component(ecs, e1, c1, NULL);
-  bxr_ecs_entity_add_component(ecs, e1, c2, NULL);
+  bxr_ecs_entity_add_component(ecs, e1, c3, NULL);
 
   bxr_ecs_entity_t e2 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e2, c2, NULL);
+  bxr_ecs_entity_add_component(ecs, e2, c3, NULL);
+
+  bxr_ecs_entity_t e3 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e3, c1, NULL);
+  bxr_ecs_entity_add_component(ecs, e3, c2, NULL);
+  bxr_ecs_entity_add_component(ecs, e3, c3, NULL);
+
+  bxr_ecs_system_run(ecs, s1, 0);
+  bxr_ecs_system_run(ecs, s2, 0);
+  bxr_ecs_system_run(ecs, s3, 0);
+
+  BXR_UNIT_ASSERT(state1.count == 1);
+  BXR_UNIT_ASSERT(state1.entity == e1);
+  BXR_UNIT_ASSERT(state1.add_count == 1);
+  BXR_UNIT_ASSERT(state1.remove_count == 0);
+
+  BXR_UNIT_ASSERT(state2.count == 1);
+  BXR_UNIT_ASSERT(state2.entity == e2);
+  BXR_UNIT_ASSERT(state2.add_count == 1);
+  BXR_UNIT_ASSERT(state2.remove_count == 0);
+
+  BXR_UNIT_ASSERT(state3.count == 1);
+  BXR_UNIT_ASSERT(state3.entity == e3);
+  BXR_UNIT_ASSERT(state3.add_count == 1);
+  BXR_UNIT_ASSERT(state3.remove_count == 0);
+
+  BXR_MEMSET(&state1, 0, sizeof(exclude_sys_state_t));
+  BXR_MEMSET(&state2, 0, sizeof(exclude_sys_state_t));
+  BXR_MEMSET(&state3, 0, sizeof(exclude_sys_state_t));
+
+  // Removing c1 from e3 causes it to be added to s2 and removed from s3
+  bxr_ecs_entity_remove_component(ecs, e3, c1);
+
+  bxr_ecs_system_run(ecs, s1, 0);
+  bxr_ecs_system_run(ecs, s2, 0);
+  bxr_ecs_system_run(ecs, s3, 0);
+
+  BXR_UNIT_ASSERT(state1.count == 1);
+  BXR_UNIT_ASSERT(state1.entity == e1);
+  BXR_UNIT_ASSERT(state1.add_count == 0);
+  BXR_UNIT_ASSERT(state1.remove_count == 0);
+
+  BXR_UNIT_ASSERT(state2.count == 2);
+  BXR_UNIT_ASSERT(state2.entity == e2);
+  BXR_UNIT_ASSERT(state2.add_count == 1);
+  BXR_UNIT_ASSERT(state2.remove_count == 0);
+
+  BXR_UNIT_ASSERT(state3.count == 0);
+  BXR_UNIT_ASSERT(state3.entity == 0);
+  BXR_UNIT_ASSERT(state3.add_count == 0);
+  BXR_UNIT_ASSERT(state3.remove_count == 1);
+
+  BXR_MEMSET(&state1, 0, sizeof(exclude_sys_state_t));
+  BXR_MEMSET(&state2, 0, sizeof(exclude_sys_state_t));
+  BXR_MEMSET(&state3, 0, sizeof(exclude_sys_state_t));
+
+  // Removing c2 from e2 causes it to be added to s1 and removed from s2
+  bxr_ecs_entity_remove_component(ecs, e2, c2);
+
+  bxr_ecs_system_run(ecs, s1, 0);
+  bxr_ecs_system_run(ecs, s2, 0);
+  bxr_ecs_system_run(ecs, s3, 0);
+
+  BXR_UNIT_ASSERT(state1.count == 2);
+  BXR_UNIT_ASSERT(state1.entity == e1);
+  BXR_UNIT_ASSERT(state1.add_count == 1);
+  BXR_UNIT_ASSERT(state1.remove_count == 0);
+
+  BXR_UNIT_ASSERT(state2.count == 1);
+  BXR_UNIT_ASSERT(state2.entity == e3);
+  BXR_UNIT_ASSERT(state2.add_count == 0);
+  BXR_UNIT_ASSERT(state2.remove_count == 1);
+
+  BXR_UNIT_ASSERT(state3.count == 0);
+  BXR_UNIT_ASSERT(state3.entity == 0);
+  BXR_UNIT_ASSERT(state3.add_count == 0);
+  BXR_UNIT_ASSERT(state3.remove_count == 0);
+
+  BXR_MEMSET(&state1, 0, sizeof(exclude_sys_state_t));
+  BXR_MEMSET(&state2, 0, sizeof(exclude_sys_state_t));
+  BXR_MEMSET(&state3, 0, sizeof(exclude_sys_state_t));
+
+  // Adding c2 back to e2 causes it to be added to s2 and removed from s1
   bxr_ecs_entity_add_component(ecs, e2, c2, NULL);
 
   bxr_ecs_system_run(ecs, s1, 0);
   bxr_ecs_system_run(ecs, s2, 0);
-
-  BXR_UNIT_ASSERT(state1.count == 1);
-  BXR_UNIT_ASSERT(state1.entity == e2);
-  BXR_UNIT_ASSERT(state1.add_count == 1);
-  BXR_UNIT_ASSERT(state1.remove_count == 0);
-
-  BXR_UNIT_ASSERT(state2.count == 2);
-  BXR_UNIT_ASSERT(state2.entity == e1);
-  BXR_UNIT_ASSERT(state2.add_count == 2);
-  BXR_UNIT_ASSERT(state2.remove_count == 0);
-
-  BXR_MEMSET(&state1, 0, sizeof(exclude_sys_state_t));
-  BXR_MEMSET(&state2, 0, sizeof(exclude_sys_state_t));
-
-  // Removing c1 from e1 causes it to be added to the system
-  bxr_ecs_entity_remove_component(ecs, e1, c1);
-
-  bxr_ecs_system_run(ecs, s1, 0);
-  bxr_ecs_system_run(ecs, s2, 0);
-
-  BXR_UNIT_ASSERT(state1.count == 2);
-  BXR_UNIT_ASSERT(state1.entity == e2);
-  BXR_UNIT_ASSERT(state1.add_count == 1);
-  BXR_UNIT_ASSERT(state1.remove_count == 0);
-
-  BXR_UNIT_ASSERT(state2.count == 2);
-  BXR_UNIT_ASSERT(state2.entity == e1);
-  BXR_UNIT_ASSERT(state2.add_count == 0);
-  BXR_UNIT_ASSERT(state2.remove_count == 0);
-
-  BXR_MEMSET(&state1, 0, sizeof(exclude_sys_state_t));
-  BXR_MEMSET(&state2, 0, sizeof(exclude_sys_state_t));
-
-  // Adding c1 to e2 causes it to be removed from the system
-  bxr_ecs_entity_add_component(ecs, e2, c1, NULL);
-
-  bxr_ecs_system_run(ecs, s1, 0);
-  bxr_ecs_system_run(ecs, s2, 0);
+  bxr_ecs_system_run(ecs, s3, 0);
 
   BXR_UNIT_ASSERT(state1.count == 1);
   BXR_UNIT_ASSERT(state1.entity == e1);
@@ -197,9 +256,14 @@ BXR_UNIT_CASE(case_ecs_exclude)
   BXR_UNIT_ASSERT(state1.remove_count == 1);
 
   BXR_UNIT_ASSERT(state2.count == 2);
-  BXR_UNIT_ASSERT(state2.entity == e1);
-  BXR_UNIT_ASSERT(state2.add_count == 0);
+  BXR_UNIT_ASSERT(state2.entity == e3);
+  BXR_UNIT_ASSERT(state2.add_count == 1);
   BXR_UNIT_ASSERT(state2.remove_count == 0);
+
+  BXR_UNIT_ASSERT(state3.count == 0);
+  BXR_UNIT_ASSERT(state3.entity == 0);
+  BXR_UNIT_ASSERT(state3.add_count == 0);
+  BXR_UNIT_ASSERT(state3.remove_count == 0);
 
   return true;
 }
