@@ -177,6 +177,9 @@ _bxr_ecs_destruct(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
       }
     }
   }
+
+  bxr_bitset_destroy(entity_data->component_bits);
+  entity_data->component_bits = NULL;
 }
 
 bxr_ecs_t *
@@ -365,6 +368,15 @@ bxr_ecs_reset(bxr_ecs_t *ecs)
   ecs->entity_add_current     = 0;
   ecs->entity_remove_current  = 0;
   ecs->entity_destroy_current = 0;
+
+  for (size_t i = 0; i < ecs->entity_data_count; i++) {
+    _bxr_ecs_entity_data_t *entity_data = &ecs->entity_data[i];
+
+    if (entity_data->component_bits) {
+      bxr_bitset_destroy(entity_data->component_bits);
+      entity_data->component_bits = NULL;
+    }
+  }
 
   BXR_MEMSET(
       ecs->entity_data, 0, ecs->max_entities * sizeof(_bxr_ecs_entity_data_t));
@@ -776,26 +788,30 @@ bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
       }
     }
 
-    // If a system is running, manage entity's stacks accordingly
-    if (ecs->active_system >= 0) {
-      _bxr_ecs_system_data_t *system_data
-          = &ecs->system_data[ecs->active_system];
+    bxr_bitset_destroy(exclude_overlap);
+    bxr_bitset_destroy(require_overlap);
+  }
 
-      if (!bxr_bitset_true(exclude_overlap)
-          && bxr_bitset_equal(require_overlap, system_data->require_bits)) {
+  // If a system is running, manage entity's stacks accordingly
+  if (ecs->active_system >= 0) {
+    _bxr_ecs_system_data_t *system_data = &ecs->system_data[ecs->active_system];
 
-        if (bxr_sparse_set_contains(system_data->entity_ids, entity, NULL)) {
-          if (system_data->remove_cb)
-            system_data->remove_cb(ecs, entity, system_data->udata);
+    bxr_bitset_t *exclude_overlap = bxr_bitset_and(
+        entity_data->component_bits, ecs->system_data->exclude_bits);
+    bxr_bitset_t *require_overlap = bxr_bitset_and(
+        entity_data->component_bits, ecs->system_data->require_bits);
 
-          _bxr_ecs_push_destroy_entity(ecs, entity);
+    if (!bxr_bitset_true(exclude_overlap)
+        && bxr_bitset_equal(require_overlap, system_data->require_bits)) {
 
-          bxr_bitset_destroy(entity_data->component_bits);
-          entity_data->component_bits = NULL;
+      if (bxr_sparse_set_contains(system_data->entity_ids, entity, NULL)) {
+        if (system_data->remove_cb)
+          system_data->remove_cb(ecs, entity, system_data->udata);
 
-          entity_data->ready  = false;
-          entity_data->active = true;
-        }
+        _bxr_ecs_push_destroy_entity(ecs, entity);
+
+        entity_data->ready  = false;
+        entity_data->active = true;
       }
     }
 

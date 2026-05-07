@@ -44,6 +44,7 @@ bxr_game_setup(void)
 void
 bxr_game_update(Uint64 delta_time_ms)
 {
+  bxr_quit();
 }
 
 void

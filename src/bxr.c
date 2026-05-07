@@ -471,3 +471,11 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 
   SDL_Quit();
 }
+
+void
+bxr_quit(void)
+{
+  SDL_Event quit_event;
+  quit_event.type = SDL_EVENT_QUIT;
+  SDL_PushEvent(&quit_event);
+}

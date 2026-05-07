@@ -37,6 +37,9 @@
 #include "bxr_str.h"
 #include "bxr_unit.h"
 
+/**
+ * Quit the game loop and exit the application.
+ */
 void bxr_quit(void);
 
 #endif // BXR_H_

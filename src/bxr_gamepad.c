@@ -111,9 +111,9 @@ bxr_gamepad_listen(void)
         break;
       }
     }
-
-    SDL_free(gamepad_ids);
   }
+
+  SDL_free(gamepad_ids);
 }
 
 void
