@@ -9,6 +9,7 @@
 
 #include "bxr.h"
 
+#define MIN_ENTITIES 256
 #define MAX_ENTITIES 1024
 #define MAX_COMPONENTS 64
 #define MAX_SYSTEMS 16
@@ -28,11 +29,11 @@ dummy_system(bxr_ecs_t *ecs,
   return 0;
 }
 
-void
+static void
 ecs_test_setup(void)
 {
   bxr_ecs_desc_t desc = {
-    .max_entities   = MAX_ENTITIES,
+    .max_entities   = MIN_ENTITIES, // Min here to grow dynamically in the test
     .max_components = MAX_COMPONENTS,
     .max_systems    = MAX_SYSTEMS,
   };
@@ -40,7 +41,7 @@ ecs_test_setup(void)
   ecs = bxr_ecs_create(&desc);
 }
 
-void
+static void
 ecs_test_teardown(void)
 {
   bxr_ecs_destroy(ecs);
@@ -54,7 +55,7 @@ BXR_UNIT_CASE(case_ecs_reset)
   bxr_ecs_component_t c2
       = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
 
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < BXR_ECS_DEFAULT_ENTITY; i++) {
     bxr_ecs_entity_t e = bxr_ecs_entity_create(ecs);
     bxr_ecs_entity_add_component(ecs, e, c1, NULL);
     bxr_ecs_entity_add_component(ecs, e, c2, NULL);
@@ -271,7 +272,7 @@ BXR_UNIT_CASE(case_ecs_system_exclude)
 
 bxr_ecs_component_t _c1;
 
-int
+static int
 remove_exclude_system(bxr_ecs_t *ecs,
                       bxr_ecs_entity_t *entities,
                       size_t entity_count,
@@ -322,7 +323,7 @@ BXR_UNIT_CASE(case_ecs_system_exclude_remove)
   return true;
 }
 
-int
+static int
 add_exclude_system(bxr_ecs_t *ecs,
                    bxr_ecs_entity_t *entities,
                    size_t entity_count,
@@ -384,7 +385,7 @@ typedef struct
   bool used;
 } test_args_t;
 
-void
+static void
 constructor(bxr_ecs_t *ecs, bxr_ecs_entity_t entity, void *ptr, void *args)
 {
   (void)ecs;
@@ -413,7 +414,7 @@ BXR_UNIT_CASE(case_ecs_component_constructor)
   return true;
 }
 
-void
+static void
 destructor(bxr_ecs_t *ecs, bxr_ecs_entity_t entity, void *ptr)
 {
   (void)ecs;
@@ -619,6 +620,8 @@ remove_system(bxr_ecs_t *ecs,
   return 0;
 };
 
+// Tests that removing components from an entity while running a system causes
+// it to be removed from the system.
 BXR_UNIT_CASE(case_ecs_entity_remove_system)
 {
   _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
@@ -726,6 +729,126 @@ BXR_UNIT_CASE(case_ecs_entity_destroy_system)
   return true;
 }
 
+static bxr_ecs_system_t _s1;
+
+static int
+queue_add_system(bxr_ecs_t *ecs,
+                 bxr_ecs_entity_t *entities,
+                 size_t entity_count,
+                 void *udata)
+{
+  (void)entities;
+  (void)entity_count;
+  (void)udata;
+
+  for (size_t i = 0; i < MIN_ENTITIES + 256; i++) {
+    bxr_ecs_entity_t e = bxr_ecs_entity_create(ecs);
+    bxr_ecs_entity_add_component(ecs, e, _c1, NULL);
+  }
+
+  return bxr_ecs_system_get_entity_count(ecs, _s1);
+};
+
+BXR_UNIT_CASE(case_ecs_queue_add)
+{
+  _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  _s1 = bxr_ecs_system_define(ecs, 0, queue_add_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_require_component(ecs, _s1, _c1);
+
+  size_t inner_count = bxr_ecs_system_run(ecs, _s1, 0);
+  size_t outer_count = bxr_ecs_system_get_entity_count(ecs, _s1);
+
+  BXR_UNIT_ASSERT(outer_count == inner_count + 256);
+
+  return true;
+}
+
+static int
+queue_remove_system(bxr_ecs_t *ecs,
+                    bxr_ecs_entity_t *entities,
+                    size_t entity_count,
+                    void *udata)
+{
+  (void)entities;
+  (void)entity_count;
+  (void)udata;
+
+  SDL_Log("entity_count: %zu", entity_count);
+
+  for (size_t i = 0; i < entity_count; i++) {
+    bxr_ecs_entity_remove_component(ecs, entities[i], _c1);
+  }
+
+  return bxr_ecs_system_get_entity_count(ecs, _s1);
+};
+
+BXR_UNIT_CASE(case_ecs_queue_remove)
+{
+  _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  _s1 = bxr_ecs_system_define(ecs, 0, queue_remove_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_require_component(ecs, _s1, _c1);
+
+  for (size_t i = 0; i < MAX_ENTITIES; i++) {
+    bxr_ecs_entity_t e = bxr_ecs_entity_create(ecs);
+    bxr_ecs_entity_add_component(ecs, e, _c1, NULL);
+  }
+
+  size_t inner_count = bxr_ecs_system_run(ecs, _s1, 0);
+  size_t outer_count = bxr_ecs_system_get_entity_count(ecs, _s1);
+
+  SDL_Log("inner_count: %zu, outer_count: %zu", inner_count, outer_count);
+
+  BXR_UNIT_ASSERT(inner_count == MAX_ENTITIES);
+  BXR_UNIT_ASSERT(outer_count == 0);
+
+  return true;
+}
+
+static int
+queue_destroy_system(bxr_ecs_t *ecs,
+                     bxr_ecs_entity_t *entities,
+                     size_t entity_count,
+                     void *udata)
+{
+  (void)entities;
+  (void)entity_count;
+  (void)udata;
+
+  for (size_t i = 0; i < entity_count; i++) {
+    bxr_ecs_entity_destroy(ecs, entities[i]);
+  }
+
+  return bxr_ecs_system_get_entity_count(ecs, _s1);
+};
+
+BXR_UNIT_CASE(case_ecs_queue_destroy)
+{
+  _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  _s1 = bxr_ecs_system_define(ecs, 0, queue_destroy_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_require_component(ecs, _s1, _c1);
+
+  for (size_t i = 0; i < MAX_ENTITIES; i++) {
+    bxr_ecs_entity_t e = bxr_ecs_entity_create(ecs);
+    bxr_ecs_entity_add_component(ecs, e, _c1, NULL);
+  }
+
+  size_t inner_count = bxr_ecs_system_run(ecs, _s1, 0);
+  size_t outer_count = bxr_ecs_system_get_entity_count(ecs, _s1);
+
+  SDL_Log("inner_count: %zu, outer_count: %zu", inner_count, outer_count);
+
+  BXR_UNIT_ASSERT(inner_count == MAX_ENTITIES);
+  BXR_UNIT_ASSERT(outer_count == 0);
+
+  return true;
+}
+
 BXR_UNIT_SUITE(suite_ecs)
 {
   bxr_unit_setup(ecs_test_setup, ecs_test_teardown);
@@ -748,10 +871,11 @@ BXR_UNIT_SUITE(suite_ecs)
   BXR_UNIT_RUN_CASE(case_ecs_entity_destroy);
   BXR_UNIT_RUN_CASE(case_ecs_entity_destroy_system);
 
+  BXR_UNIT_RUN_CASE(case_ecs_queue_add);
+  BXR_UNIT_RUN_CASE(case_ecs_queue_remove);
+  BXR_UNIT_RUN_CASE(case_ecs_queue_destroy);
+
   /*
-  BXR_UNIT_RUN_CASE(test_queue_add);
-  BXR_UNIT_RUN_CASE(test_queue_remove);
-  BXR_UNIT_RUN_CASE(test_queue_destroy);
   BXR_UNIT_RUN_CASE(test_enable_disable);
   BXR_UNIT_RUN_CASE(test_system_mask);
   BXR_UNIT_RUN_CASE(test_add_remove_callbacks);

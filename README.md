@@ -71,4 +71,4 @@ You can also check out my blog at www.nsix.blog.
 
 # License
 
-This project is licensed under the MIT License
+This project is licensed under the zlib License. See the [LICENSE](LICENSE) file for details.

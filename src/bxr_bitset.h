@@ -135,4 +135,11 @@ bxr_bitset_t *bxr_bitset_not(const bxr_bitset_t *bitset);
  */
 bool bxr_bitset_equal(const bxr_bitset_t *a, const bxr_bitset_t *b);
 
+/**
+ * Clear all bits in the bitset (set them to 0).
+ *
+ * `bitset` The bitset to clear.
+ */
+void bxr_bitset_clear(bxr_bitset_t *bitset);
+
 #endif // BXR_BITSET_H_

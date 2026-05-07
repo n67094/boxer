@@ -184,6 +184,23 @@ BXR_UNIT_CASE(case_bitset_equal)
   return true;
 }
 
+BXR_UNIT_CASE(case_bitset_clear)
+{
+  bxr_bitset_t *bitset = bxr_bitset_create(96);
+
+  bxr_bitset_set(bitset, 0);
+  bxr_bitset_set(bitset, 31);
+
+  bxr_bitset_clear(bitset);
+
+  BXR_UNIT_ASSERT(bxr_bitset_test(bitset, 0) == false);
+  BXR_UNIT_ASSERT(bxr_bitset_test(bitset, 31) == false);
+
+  bxr_bitset_destroy(bitset);
+
+  return true;
+}
+
 BXR_UNIT_SUITE(suite_bitset)
 {
   BXR_UNIT_RUN_CASE(case_bitset_is_zero);
@@ -195,5 +212,6 @@ BXR_UNIT_SUITE(suite_bitset)
   BXR_UNIT_RUN_CASE(case_bitset_or);
   BXR_UNIT_RUN_CASE(case_bitset_not);
   BXR_UNIT_RUN_CASE(case_bitset_equal);
+  BXR_UNIT_RUN_CASE(case_bitset_clear);
 }
 #endif // BITSET_H_

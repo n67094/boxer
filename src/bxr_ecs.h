@@ -24,8 +24,15 @@ typedef size_t bxr_ecs_mask_t;
 /**
  * Description for creating an ECS instance.
  *
- * `max_entities` is the maximum number of entities that can be created in the
- * ECS instance. (default: BXR_ECS_DEFAULT_MAX_ENTITIES)
+ * `max_entities` is the maximum number of entities that can be created. `0`
+ * means use the default value of BXR_ECS_DEFAULT_ENTITY. Max entities grow
+ * dynamically but never shrink.
+ *
+ * `max_components` is the maximum number of components that can be defined. `0`
+ * means use the default value of BXR_ECS_DEFAULT_COMPONENT.
+ *
+ * `max_systems` is the maximum number of systems that can be defined. `0` means
+ * use the default value of BXR_ECS_DEFAULT_SYSTEM.
  */
 typedef struct bxr_ecs_desc_s
 {
