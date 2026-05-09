@@ -14,12 +14,6 @@ Depending on the operating system, the `system preferred path` is as follows:
 - **macOS:** `~/Library/Application Support/<config->name>/`
 
 <a name="line-28"></a>
----
-
-```cpp
-BXR_INLINE Uint8 *
-```
-
 Read a file from the given path and return its contents.
 
 `path` is the path to the file to read, relative to the data directory.
@@ -33,13 +27,13 @@ data.
 The caller is responsible for freeing the returned data using `SDL_free` when
 it is no longer needed.
 
-<a name="line-94"></a>
----
-
 ```cpp
-BXR_INLINE bool
+BXR_INLINE Uint8 *
 ```
 
+---
+
+<a name="line-94"></a>
 Write data to a file at the given path.
 
 `path` is the path to the file to write, relative to the data directory.
@@ -53,3 +47,9 @@ or overwrite it (if false).
 
 `return` true if the write operation was successful, false otherwise. Use
 `bxr_error_get` to get more information about the error if the write
+
+```cpp
+BXR_INLINE bool
+```
+
+---

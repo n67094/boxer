@@ -13,9 +13,10 @@ To get the key value of the current keyboard layout, use `bxr_key_name` or
 `bxr_key_name_ex` with the appropriate modifiers.
 
 <a name="line-156"></a>
-Internal API
+## Internal API
 
 <a name="line-160"></a>
+---
 
 ```cpp
 void bxr_keyboard_setup(void)
@@ -25,6 +26,7 @@ Initialize the keyboard input system. Must be called before using any
 other keyboard functions.
 
 <a name="line-166"></a>
+---
 
 ```cpp
 void bxr_keyboard_begin_frame(void)
@@ -34,6 +36,7 @@ Update the keyboard state for the current frame. Must be called at the
 beginning of each frame before processing input.
 
 <a name="line-172"></a>
+---
 
 ```cpp
 void bxr_keyboard_shutdown(void)
@@ -43,6 +46,7 @@ Shutdown the keyboard input system. Must be called when the
 application is closing to free any resources used by the keyboard system.
 
 <a name="line-178"></a>
+---
 
 ```cpp
 void bxr_key_down(bxr_key_e scancode)
@@ -54,6 +58,7 @@ key down event is received from SDL.
 `scancode` is the scancode of the key that was pressed.
 
 <a name="line-186"></a>
+---
 
 ```cpp
 void bxr_key_up(bxr_key_e scancode)
@@ -65,9 +70,10 @@ key up event is received from SDL.
 `scancode` is the scancode of the key that was released.
 
 <a name="line-194"></a>
-Public API
+## Public API
 
 <a name="line-198"></a>
+---
 
 ```cpp
 const char *bxr_key_name(bxr_key_e key)
@@ -82,6 +88,7 @@ Use the current modifier state to determine the key name.
 `return` the name of the key, or "Unknown" if the key is not recognized.
 
 <a name="line-209"></a>
+---
 
 ```cpp
 const char *bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod)
@@ -96,6 +103,7 @@ Get the name of a key based on its scancode and the given modifier state.
 `return` the name of the key, or "Unknown" if the key is not recognized.
 
 <a name="line-220"></a>
+---
 
 ```cpp
 bool bxr_key_held(bxr_key_e key)
@@ -108,6 +116,7 @@ Check if a key is currently held down.
 `return` true if the key is currently held down, false otherwise.
 
 <a name="line-229"></a>
+---
 
 ```cpp
 bool bxr_key_just_pressed(bxr_key_e key)
@@ -120,6 +129,7 @@ Check if a key was just pressed this frame.
 `return` true if the key was just pressed this frame, false otherwise.
 
 <a name="line-238"></a>
+---
 
 ```cpp
 bool bxr_key_just_released(bxr_key_e key)
@@ -132,6 +142,7 @@ Check if a key was just released this frame.
 `return` true if the key was just released this frame, false otherwise.
 
 <a name="line-247"></a>
+---
 
 ```cpp
 Uint64 bxr_key_held_time(bxr_key_e key)
@@ -144,6 +155,7 @@ Get the amount of time a key has been held down.
 `return` the amount of time the key has been held down in milliseconds.
 
 <a name="line-256"></a>
+---
 
 ```cpp
 bool bxr_keymod_pressed(bxr_keymode_e mod)
