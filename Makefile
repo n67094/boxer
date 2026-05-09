@@ -15,6 +15,7 @@
 #   make DEBUG=1               Build with debug symbols
 #   make SANITIZER=1           Build with address sanitizer
 #   make DEBUG=1 SANITIZER=1   Build with debug symbols and address sanitizer
+#   make docs                  Generate documentation (using docgen)
 #   make clean                 Clean build artifacts
 #
 # Authors: nsix
@@ -25,25 +26,16 @@ TARGET := my_game
 # Directories
 
 BUILD_DIR := build
-
 DATA_DIR := data
-
 GAME_DIR := game
-GAME_SRC_DIR := $(GAME_DIR)
-GAME_INC_DIR := $(GAME_DIR)
-
 BOXER_DIR := src
-BOXER_SRC_DIR := $(BOXER_DIR)
-BOXER_INC_DIR := $(BOXER_DIR)
+BOXER_DOCS_DIR := docs
 
 # Libraries Directories
 
 LIB_DIR := lib
-
-PHYSFS_SRC_DIR := $(LIB_DIR)/physfs
-PHYSFS_INC_DIR := $(LIB_DIR)/physfs
-
-SDL_GP_INC_DIR := $(LIB_DIR)/SDL_gp
+PHYSFS_DIR := $(LIB_DIR)/physfs
+SDL_GP_DIR := $(LIB_DIR)/SDL_gp
 
 # Options
 
@@ -60,7 +52,7 @@ LDFLAGS = -lSDL3 -lm
 CFLAGS = -std=c99 -Wall
 CXXFLAGS = -std=c++11 -Wall
 
-INC_FLAGS := -I$(PHYSFS_INC_DIR) -I$(SDL_GP_INC_DIR) -I$(BOXER_INC_DIR) -I$(GAME_INC_DIR)
+INC_FLAGS := -I$(PHYSFS_DIR) -I$(SDL_GP_DIR) -I$(BOXER_DIR) -I$(GAME_DIR)
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -O0 -DDEBUG -D_GNU_SOURCE $(INC_FLAGS)
@@ -75,33 +67,44 @@ endif
 
 # Source Files
 
-PHYSFS_SRCS := $(wildcard $(PHYSFS_SRC_DIR)/*.c)
-BOXER_SRCS := $(wildcard $(BOXER_SRC_DIR)/*.c)
-GAME_SRCS := $(wildcard $(GAME_SRC_DIR)/*.c)
+PHYSFS_SRCS := $(wildcard $(PHYSFS_DIR)/*.c)
+BOXER_SRCS := $(wildcard $(BOXER_DIR)/*.c)
+GAME_SRCS := $(wildcard $(GAME_DIR)/*.c)
 
 ALL_SRCS = $(PHYSFS_SRCS) $(BOXER_SRCS) $(GAME_SRCS)
 
 # Object Files
 
-PHYSFS_OBJS := $(patsubst $(PHYSFS_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(PHYSFS_SRCS))
-BOXER_OBJS := $(patsubst $(BOXER_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(BOXER_SRCS))
-GAME_OBJS := $(patsubst $(GAME_SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(GAME_SRCS))
+PHYSFS_OBJS := $(patsubst $(PHYSFS_DIR)/%.c, $(BUILD_DIR)/%.o, $(PHYSFS_SRCS))
+BOXER_OBJS := $(patsubst $(BOXER_DIR)/%.c, $(BUILD_DIR)/%.o, $(BOXER_SRCS))
+GAME_OBJS := $(patsubst $(GAME_DIR)/%.c, $(BUILD_DIR)/%.o, $(GAME_SRCS))
 
 ALL_OBJS = $(PHYSFS_OBJS) $(BOXER_OBJS) $(GAME_OBJS)
+
+# Docs files
+
+BOXER_HDRS := $(wildcard $(BOXER_DIR)/*.h)
+
+BOXER_DOCS := $(patsubst $(BOXER_DIR)/%.h, $(BOXER_DOCS_DIR)/%.md, $(BOXER_HDRS))
 
 # Targets
 
 .PHONY: all data docs clean
 .DEFAULT_GOAL := all
 
-all: $(TARGET) data
+all: $(TARGET) data docs
 
+# Package data directory into a zip file
 data:
 	zip -r data.zip $(DATA_DIR)
 
-docs:
-	doxygen
+# Use docgen to generate documentation for Boxer headers
+docs: $(BOXER_DOCS)
 
+$(BOXER_DOCS_DIR)/%.md: $(BOXER_DIR)/%.h
+	node $(BOXER_DOCS_DIR)/docgen/docgen.js $< -o $@
+
+# Build the executable
 $(TARGET): $(ALL_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
@@ -117,8 +120,10 @@ $(BUILD_DIR)/%.o: $(BOXER_SRC_DIR)/%.c | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: $(GAME_SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Ensure build directory exists
 $(BUILD_DIR):
 	mkdir -p $@
 
+# Clean build artifacts
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET) data.zip
+	rm -rf $(BUILD_DIR) $(TARGET) data.zip $(BOXER_DOCS)
