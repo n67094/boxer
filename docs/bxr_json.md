@@ -28,6 +28,7 @@ resolution).
 
 The caller is responsible for destroying the returned reader using
 `bxr_json_destroy_reader` when it is no longer needed.
+
 ---
 
 <a name="line-63"></a>
@@ -39,6 +40,7 @@ void bxr_json_destroy_reader(bxr_json_reader_t *reader)
 Destroy a JSON reader and free its resources.
 
 `reader` is the JSON reader to destroy.
+
 ---
 
 <a name="line-70"></a>
@@ -57,6 +59,7 @@ get more information about the error.
 
 The caller should not modify or free these pointers, as they are owned by the
 JSON reader.
+
 ---
 
 <a name="line-84"></a>
@@ -80,6 +83,7 @@ value in the iteration.
 
 `return` 1 if a key-value pair was successfully read, 0 if the end of the
 object was reached, or -1 if an error occurred while reading.
+
 ---
 
 <a name="line-106"></a>
@@ -100,6 +104,7 @@ value in the iteration.
 
 `return` 1 if a value was successfully read, 0 if the end of the array was
 reached, or -1 if an error occurred while reading.
+
 ---
 
 <a name="line-124"></a>
@@ -117,6 +122,7 @@ previous call to `bxr_jsonr_read` and should have type `BXR_JSON_STRING`.
 
 `return` true if the JSON token's string value matches the expected string,
 or false otherwise.
+
 ---
 
 <a name="line-137"></a>
@@ -134,6 +140,7 @@ previous call to `bxr_jsonr_read` and should have type `BXR_JSON_NUMBER`.
 
 `return` true if the JSON token's number value matches the expected number,
 or false otherwise.
+
 ---
 
 <a name="line-150"></a>
@@ -151,6 +158,7 @@ previous call to `bxr_jsonr_read` and should have type `BXR_JSON_BOOL`.
 
 `return` true if the JSON token's boolean value matches the expected boolean,
 or false otherwise.
+
 ---
 
 <a name="line-163"></a>
@@ -167,6 +175,7 @@ type `BXR_JSON_STRING`.
 
 `return` a pointer to the string value of the JSON token, or NULL if the
 token does not have a string value.
+
 ---
 
 <a name="line-175"></a>
@@ -183,6 +192,7 @@ type `BXR_JSON_NUMBER`.
 
 `return` the number value of the JSON token, or 0.0 if the token does not
 have a number value.
+
 ---
 
 <a name="line-187"></a>
@@ -199,6 +209,7 @@ type `BXR_JSON_BOOL`.
 
 `return` the boolean value of the JSON token, or false if the token does not
 have a boolean value.
+
 ---
 
 <a name="line-199"></a>
@@ -218,6 +229,7 @@ error.
 
 The caller is responsible for destroying the returned JSON writer using
 `bxr_json_destroy_writer` when it is no longer needed.
+
 ---
 
 <a name="line-217"></a>
@@ -229,6 +241,7 @@ void bxr_json_destroy_writer(bxr_json_writer_t *json)
 Destroy a JSON writer and free its resources.
 
 `json` is the JSON writer to destroy.
+
 ---
 
 <a name="line-224"></a>
@@ -243,6 +256,7 @@ Begin a new JSON object in the writer.
 
 `return` true if the object was successfully begun, or false if an error
 occurred.
+
 ---
 
 <a name="line-234"></a>
@@ -257,6 +271,7 @@ End the current JSON object in the writer.
 
 `return` true if the object was successfully ended, or false if an error
 occurred.
+
 ---
 
 <a name="line-244"></a>
@@ -271,6 +286,7 @@ Begin a new JSON array in the writer.
 
 `return` true if the array was successfully begun, or false if an error
 occurred.
+
 ---
 
 <a name="line-254"></a>
@@ -285,6 +301,7 @@ End the current JSON array in the writer.
 
 `return` true if the array was successfully ended, or false if an error
 occurred.
+
 ---
 
 <a name="line-264"></a>
@@ -304,6 +321,7 @@ writer.
 
 `return` true if the key-value pair was successfully added, or false if an
 error occurred.
+
 ---
 
 <a name="line-279"></a>
@@ -320,6 +338,7 @@ Add a string value to the current JSON array in the writer.
 
 `return` true if the value was successfully added, or false if an error
 occurred.
+
 ---
 
 <a name="line-291"></a>
@@ -336,6 +355,7 @@ Add a number value to the current JSON array in the writer.
 
 `return` true if the value was successfully added, or false if an error
 occurred.
+
 ---
 
 <a name="line-303"></a>
@@ -352,6 +372,7 @@ Add a boolean value to the current JSON array in the writer.
 
 `return` true if the value was successfully added, or false if an error
 occurred.
+
 ---
 
 <a name="line-315"></a>
@@ -371,6 +392,7 @@ writer.
 
 `return` true if the key-value pair was successfully added, or false if an
 error occurred.
+
 ---
 
 <a name="line-332"></a>
@@ -390,6 +412,7 @@ writer.
 
 `return` true if the key-value pair was successfully added, or false if an
 error occurred.
+
 ---
 
 <a name="line-349"></a>
@@ -409,6 +432,7 @@ writer.
 
 `return` true if the key-value pair was successfully added, or false if an
 error occurred.
+
 ---
 
 <a name="line-365"></a>
@@ -426,4 +450,5 @@ Save the JSON data from the writer to a file at the given path.
 
 `return` true if the JSON data was successfully saved, or false if an error
 occurred.
+
 ---

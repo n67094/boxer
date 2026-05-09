@@ -33,6 +33,7 @@ Use `bxr_error_get` to get more information about the error.
 
 The caller is responsible for destroying the returned sparse set using
 `bxr_sparse_set_destroy` when it is no longer needed.
+
 ---
 
 <a name="line-42"></a>
@@ -42,6 +43,7 @@ void bxr_sparse_set_destroy(bxr_sparse_set_t *set)
 ```
 
 Destroy the given sparse set and free its memory.
+
 ---
 
 <a name="line-47"></a>
@@ -58,6 +60,7 @@ Insert an handle into the sparse set.
 
 `return` `true` if the element was successfully inserted, `false` if the
 element already exists in the set or if an error occurred.
+
 ---
 
 <a name="line-59"></a>
@@ -74,6 +77,7 @@ Remove an element from the sparse set.
 
 `return` `true` if the element was successfully removed, `false` if the
 element does not exist in the set or if an error occurred.
+
 ---
 
 <a name="line-71"></a>
@@ -92,6 +96,7 @@ Check if an element exists in the sparse set.
 handle. Or UINT32_MAX if the handle does not exist in the set.
 
 `return` `true` if the element exists in the set, `false` otherwise.
+
 ---
 
 <a name="line-87"></a>
@@ -103,6 +108,7 @@ size_t bxr_sparse_set_capacity(const bxr_sparse_set_t *set)
 
 `return` the capacity of the sparse set (the max number of handles that can
 be stored in the sparse set without resizing).
+
 ---
 
 <a name="line-94"></a>
@@ -112,6 +118,7 @@ size_t bxr_sparse_set_count(const bxr_sparse_set_t *set)
 ```
 
 `return` the number of handles stored in the sparse set.
+
 ---
 
 <a name="line-99"></a>
@@ -122,6 +129,7 @@ void bxr_sparse_set_clear(bxr_sparse_set_t *set)
 
 Clear all handles from the sparse set (but keep the allocated memory for
 future insertions).
+
 ---
 
 <a name="line-105"></a>
@@ -131,4 +139,5 @@ size_t *bxr_sparse_set_get_dense(const bxr_sparse_set_t *set)
 ```
 
 `return` a pointer to the dense array of the sparse set.
+
 ---

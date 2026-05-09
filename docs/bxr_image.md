@@ -18,6 +18,7 @@ Initialize the image subsystem. Must be called before using any other image
 functions.
 
 `context` is the bxr context to use for image operations.
+
 ---
 
 <a name="line-32"></a>
@@ -27,6 +28,7 @@ void bxr_image_shutdown(void)
 ```
 
 Shutdown the image subsystem.
+
 ---
 
 <a name="line-37"></a>
@@ -47,6 +49,7 @@ loaded. Use `bxr_error_get` to get more information about the error.
 
 The caller is responsible for destroying the returned image using
 `bxr_image_destroy` when it is no longer needed.
+
 ---
 
 <a name="line-54"></a>
@@ -68,6 +71,7 @@ created. Use `bxr_error_get` to get more information about the error.
 
 The caller is responsible for destroying the returned image using
 `bxr_image_destroy` when it is no longer needed.
+
 ---
 
 <a name="line-72"></a>
@@ -81,6 +85,7 @@ Get the width of an image in pixels.
 `image` is the image to get the width of.
 
 `return` the width of the image in pixels, or 0 if the image is invalid.
+
 ---
 
 <a name="line-81"></a>
@@ -94,6 +99,7 @@ Get the height of an image in pixels.
 `image` is the image to get the height of.
 
 `return` the height of the image in pixels, or 0 if the image is invalid.
+
 ---
 
 <a name="line-90"></a>
@@ -105,4 +111,5 @@ void bxr_image_destroy(bxr_image_t image)
 Destroy an image and free its resources.
 
 `image` is the image to destroy.
+
 ---

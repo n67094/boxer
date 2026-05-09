@@ -33,6 +33,7 @@ Write mounted directories:
 - **macOS:** `~/Library/Application Support/<config->name>/`
 
 `return` the game configuration to use for the game.
+
 ---
 
 <a name="line-54"></a>
@@ -42,6 +43,7 @@ extern void bxr_game_setup(void)
 ```
 
 The user should provide this function to setup the game.
+
 ---
 
 <a name="line-59"></a>
@@ -56,6 +58,7 @@ The user should provide this function to update the game logic.
 
 **NOTE:** The game is updated at a fixed rate defined by the `target_ups`
 configuration value.
+
 ---
 
 <a name="line-69"></a>
@@ -70,6 +73,7 @@ The user should provide this function to render the game.
 
 **NOTE:** The game is rendered at a variable rate, and `alpha_time_ms` can be
 used to interpolate the game state for smooth rendering.
+
 ---
 
 <a name="line-79"></a>
@@ -79,4 +83,5 @@ extern void bxr_game_shutdown(void)
 ```
 
 The user should provide this function to shutdown the game.
+
 ---

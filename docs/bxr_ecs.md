@@ -25,6 +25,7 @@ Use `bxr_error_get` to get more information about the error.
 
 The caller is responsible for destroying the returned ECS instance using
 `bxr_ecs_destroy` when it is no longer needed.
+
 ---
 
 <a name="line-43"></a>
@@ -36,6 +37,7 @@ void bxr_ecs_destroy(bxr_ecs_t *ecs)
 Destroy the given ECS instance and free its memory.
 
 `ecs` is the ECS instance to destroy.
+
 ---
 
 <a name="line-50"></a>
@@ -48,6 +50,7 @@ Reset the ECS instance, removing all entities, preserving systems and
 components.
 
 `ecs` is the ECS instance to reset.
+
 ---
 
 <a name="line-58"></a>
@@ -69,6 +72,7 @@ Callback called when a component is created.
 
 `args` is the arguments passed to `bxr_ecs_entity_add_component` when adding
 the component (can be NULL).
+
 ---
 
 <a name="line-79"></a>
@@ -84,6 +88,7 @@ Callback called when a component is destroyed.
 `entity` is the entity the component belongs to.
 
 `component_ptr` is a pointer to the component data.
+
 ---
 
 <a name="line-92"></a>
@@ -106,6 +111,7 @@ destroyed. (NULL if no callback is needed).
 
 `return` the ID of the defined component, or an invalid ID if the component
 could not be defined.
+
 ---
 
 <a name="line-114"></a>
@@ -124,6 +130,7 @@ Create a new entity in the ECS instance.
 `return` the ID of the created entity, or BXR_ECS_INVALID_ENTITY if the
 entity could not be created. Use `bxr_error_get` to get more information
 about the error.
+
 ---
 
 <a name="line-129"></a>
@@ -138,6 +145,7 @@ destruction, `false` otherwise.
 `ecs` is the ECS instance to query.
 
 `entity` is the entity to check.
+
 ---
 
 <a name="line-139"></a>
@@ -155,6 +163,7 @@ Test if an entity has a component.
 `component` is the component to check for.
 
 `return` `true` if the entity has the component, `false` otherwise.
+
 ---
 
 <a name="line-154"></a>
@@ -176,6 +185,7 @@ creating the component data for the entity (can be NULL).
 
 `return` a pointer to the created component data, or NULL if an error
 occurred. Use `bxr_error_get` to get more information about the error.
+
 ---
 
 <a name="line-174"></a>
@@ -194,6 +204,7 @@ Get a pointer to a component of an entity.
 
 `return` a pointer to the component data, or NULL if the entity does not have
 the component.
+
 ---
 
 <a name="line-190"></a>
@@ -209,6 +220,7 @@ Remove a component from an entity.
 `entity` is the entity to remove the component from.
 
 `component` is the component to remove from the entity.
+
 ---
 
 <a name="line-203"></a>
@@ -223,6 +235,7 @@ stack for re-use.
 `ecs` is the ECS instance to query.
 
 `entity` is the entity to destroy
+
 ---
 
 <a name="line-213"></a>
@@ -245,6 +258,7 @@ Callback called when a system is run.
 `udata` is the user data associated with the system.
 
 `return` 0 on success, or a non-zero error code on failure.
+
 ---
 
 <a name="line-235"></a>
@@ -260,6 +274,7 @@ Callback called when an entity is added to a system.
 `entity` is the entity that was added to the system.
 
 `udata` is the user data associated with the system.
+
 ---
 
 <a name="line-248"></a>
@@ -275,6 +290,7 @@ Callback called when an entity is removed from a system.
 `entity` is the entity that was removed from the system.
 
 `udata` is the user data associated with the system.
+
 ---
 
 <a name="line-261"></a>
@@ -300,6 +316,7 @@ system.
 
 `return` the ID of the defined system, or an invalid ID if the system could
 not be defined.
+
 ---
 
 <a name="line-286"></a>
@@ -315,6 +332,7 @@ Require a component for a system.
 `system` is the system to require the component for.
 
 `component` is the component to require for the system.
+
 ---
 
 <a name="line-299"></a>
@@ -330,6 +348,7 @@ Exclude a component for a system.
 `system` is the system to exclude the component for.
 
 `component` is the component to exclude for the system.
+
 ---
 
 <a name="line-312"></a>
@@ -344,6 +363,7 @@ Enable a system, allowing it to be run when `bxr_ecs_system_run` or
 `ecs` is the ECS instance to modify.
 
 `sys` is the system to enable.
+
 ---
 
 <a name="line-322"></a>
@@ -358,6 +378,7 @@ Disable a system, preventing it from being run when `bxr_ecs_system_run` or
 `ecs` is the ECS instance to modify.
 
 `system` is the system to disable.
+
 ---
 
 <a name="line-332"></a>
@@ -378,6 +399,7 @@ Set the callbacks for a system.
 
 `remove_cb` is the callback to call when an entity is removed from the
 system.
+
 ---
 
 <a name="line-352"></a>
@@ -393,6 +415,7 @@ Set the user data for a system.
 `system` is the system to set the user data for.
 
 `udata` is the user data to associate with the system (can be NULL).
+
 ---
 
 <a name="line-364"></a>
@@ -409,6 +432,7 @@ Get the user data for a system.
 
 `return` the user data associated with the system, or NULL if no user data
 is associated with the system.
+
 ---
 
 <a name="line-376"></a>
@@ -424,6 +448,7 @@ Set the system mask (a.k.a tags).
 `system` is the system to set the mask for.
 
 `mask` is the mask to set for the system.
+
 ---
 
 <a name="line-389"></a>
@@ -439,6 +464,7 @@ Get the system mask (a.k.a tags).
 `system` is the system to get the mask for.
 
 `return` the mask associated with the system.
+
 ---
 
 <a name="line-400"></a>
@@ -448,6 +474,7 @@ size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system)
 ```
 
 Get the number of entities assigned to a system.
+
 ---
 
 <a name="line-405"></a>
@@ -463,6 +490,7 @@ Call a system logic on required component, but not exclueded ones.
 `sys` is the system to run.
 
 `mask` determines which systems run run based on a group/category.
+
 ---
 
 <a name="line-418"></a>
@@ -476,4 +504,5 @@ Call all system logic using `bxr_ecs_run_system`.
 `ecs` is the ECS isntance tu use.
 
 `mask` determines which systems run based on a group/category.
+
 ---

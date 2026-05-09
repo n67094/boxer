@@ -31,6 +31,7 @@ data.
 
 The caller is responsible for freeing the returned data using `SDL_free` when
 it is no longer needed.
+
 ---
 
 <a name="line-94"></a>
@@ -52,4 +53,5 @@ or overwrite it (if false).
 
 `return` true if the write operation was successful, false otherwise. Use
 `bxr_error_get` to get more information about the error if the write
+
 ---

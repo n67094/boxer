@@ -28,6 +28,7 @@ Initializes the shader system. Must be called before using any other shader
 functions.
 
 `context` is the bxr context to use for shader operations.
+
 ---
 
 <a name="line-61"></a>
@@ -37,6 +38,7 @@ void bxr_shader_shutdown(void)
 ```
 
 Shuts down the shader system.
+
 ---
 
 <a name="line-66"></a>
@@ -57,6 +59,7 @@ be created. Use `bxr_error_get` to get more information about the error.
 
 The caller is responsible for destroying the returned shader using
 `bxr_shader_destroy` when it is no longer needed.
+
 ---
 
 <a name="line-83"></a>
@@ -68,4 +71,5 @@ void bxr_shader_destroy(bxr_shader_t shader)
 Destroys a shader, freeing any resources associated with it.
 
 `shader` is the shader to destroy.
+
 ---

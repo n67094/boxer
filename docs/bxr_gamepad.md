@@ -16,6 +16,7 @@ void bxr_gamepad_setup(void)
 
 Initializes the gamepad subsystem. Must be called before using any other
 gamepad functions.
+
 ---
 
 <a name="line-71"></a>
@@ -26,6 +27,7 @@ void bxr_gamepad_shutdown(void)
 
 Shuts down the gamepad subsystem. Must be called when the application is
 shutting down.
+
 ---
 
 <a name="line-77"></a>
@@ -36,6 +38,7 @@ void bxr_gamepad_listen(void)
 
 Listens for gamepad events and updates the internal state of the gamepads.
 Must be called every frame to ensure that the gamepad state is updated.
+
 ---
 
 <a name="line-83"></a>
@@ -46,6 +49,7 @@ void bxr_gamepad_begin_frame(void)
 
 Update the gamepad state for the current frame. Must be called at the
 beginning of each frame before processing input.
+
 ---
 
 <a name="line-89"></a>
@@ -60,6 +64,7 @@ down event is received from SDL.
 `index` is the index of the gamepad that the event occurred on.
 
 `button` is the button that was pressed.
+
 ---
 
 <a name="line-99"></a>
@@ -74,6 +79,7 @@ event is received from SDL.
 `index` is the index of the gamepad that the event occurred on.
 
 `button` is the button that was released.
+
 ---
 
 <a name="line-109"></a>
@@ -90,6 +96,7 @@ motion event is received from SDL.
 `axis` is the axis that was moved.
 
 `value` is the new value of the axis, normalized to the range [-1, 1].
+
 ---
 
 <a name="line-121"></a>
@@ -104,6 +111,7 @@ int bxr_gamepad_count(void)
 Get the number of connected gamepads.
 
 `return` the number of connected gamepads.
+
 ---
 
 <a name="line-132"></a>
@@ -115,6 +123,7 @@ void bxr_gamepad_set_deadzone(float deadzone)
 Set the deadzone for gamepad axes.
 
 `deadzone` is the deadzone to set.
+
 ---
 
 <a name="line-139"></a>
@@ -126,6 +135,7 @@ float bxr_gamepad_get_deadzone(void)
 Get the current deadzone for gamepad axes.
 
 `return` the current deadzone for gamepad axes.
+
 ---
 
 <a name="line-146"></a>
@@ -139,6 +149,7 @@ Check if a gamepad is connected.
 `index` is the index of the gamepad to check.
 
 `return` true if the gamepad is connected, false otherwise.
+
 ---
 
 <a name="line-155"></a>
@@ -152,6 +163,7 @@ Get the name of a gamepad.
 `index` is the index of the gamepad to get the name of.
 
 `return` the name of the gamepad, or NULL if the gamepad is not connected.
+
 ---
 
 <a name="line-164"></a>
@@ -166,6 +178,7 @@ Get the serial number of a gamepad.
 
 `return` the serial number of the gamepad, or NULL if the gamepad is not
 connected.
+
 ---
 
 <a name="line-174"></a>
@@ -181,6 +194,7 @@ Check if a gamepad button is currently held down.
 `button` is the button to check.
 
 `return` true if the button is currently held down, false otherwise.
+
 ---
 
 <a name="line-185"></a>
@@ -196,6 +210,7 @@ Check if a gamepad button was just pressed this frame.
 `button` is the button to check.
 
 `return` true if the button was just pressed this frame, false otherwise.
+
 ---
 
 <a name="line-196"></a>
@@ -211,6 +226,7 @@ Check if a gamepad button was just released this frame.
 `button` is the button to check.
 
 `return` true if the button was just released this frame, false otherwise.
+
 ---
 
 <a name="line-207"></a>
@@ -226,6 +242,7 @@ Get the amount of time a gamepad button has been held down.
 `button` is the button to check.
 
 `return` the amount of time the button has been held down in milliseconds.
+
 ---
 
 <a name="line-218"></a>
@@ -241,6 +258,7 @@ Get the current value of a gamepad axis.
 `axis` is the axis to check.
 
 `return` the current value of the axis.
+
 ---
 
 <a name="line-229"></a>
@@ -256,6 +274,7 @@ Get the value of a gamepad axis in the previous frame.
 `axis` is the axis to check.
 
 `return` the value of the axis in the previous frame.
+
 ---
 
 <a name="line-240"></a>
@@ -275,4 +294,5 @@ Set the rumble state of a gamepad.
 `duration_ms` is the duration of the rumble effect in milliseconds.
 
 `return` true if the rumble state was successfully set, false otherwise.
+
 ---

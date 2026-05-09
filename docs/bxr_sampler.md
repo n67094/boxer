@@ -16,6 +16,7 @@ void bxr_sampler_setup(void)
 
 Initializes the sampler system. Must be called before using any other sampler
 functions.
+
 ---
 
 <a name="line-40"></a>
@@ -25,6 +26,7 @@ void bxr_sampler_shutdown(void)
 ```
 
 Shuts down the sampler system.
+
 ---
 
 <a name="line-45"></a>
@@ -42,6 +44,7 @@ Create a sampler with the given sampler type.
 
 `return` the created sampler, or an NULL sampler if the sampler could not
 be created. Use `bxr_error_get` to get more information about the error.
+
 ---
 
 <a name="line-59"></a>
@@ -53,4 +56,5 @@ void bxr_sampler_destroy(bxr_sampler_t *sampler)
 Destroy a sampler.
 
 `sampler` is the sampler to destroy.
+
 ---

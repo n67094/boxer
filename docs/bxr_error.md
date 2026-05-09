@@ -17,6 +17,7 @@ void bxr_error_set(bxr_erro_code_e error)
 Set the last error code.
 
 `error` is the error code to set.
+
 ---
 
 <a name="line-47"></a>
@@ -31,6 +32,7 @@ bxr_erro_code_e bxr_error_get(void)
 Get the last error code.
 
 `return` the last error code.
+
 ---
 
 <a name="line-58"></a>
@@ -44,4 +46,5 @@ Get the error message corresponding to the given error code.
 `error` is the error code to get the message for.
 
 `return` the error message corresponding to the given error code.
+
 ---

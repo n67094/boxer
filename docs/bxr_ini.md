@@ -44,6 +44,7 @@ resolution).
 
 The caller is responsible for destroying the returned reader using
 `bxr_ini_destroy_reader` when it is no longer needed.
+
 ---
 
 <a name="line-54"></a>
@@ -55,6 +56,7 @@ void bxr_ini_destroy_reader(bxr_ini_reader_t *ini)
 Destroy an INI reader and free its resources.
 
 `ini` is the INI reader to destroy.
+
 ---
 
 <a name="line-61"></a>
@@ -73,6 +75,7 @@ Get the string value associated with the given section and key.
 
 `return` the string value associated with the given section and key, or NULL
 if the section or key was not found.
+
 ---
 
 <a name="line-76"></a>
@@ -91,6 +94,7 @@ Get the number value associated with the given section and key.
 
 `return` the number value associated with the given section and key, or 0.0
 if the section or key was not found.
+
 ---
 
 <a name="line-92"></a>
@@ -113,6 +117,7 @@ found.
 
 `return` the string value associated with the given section and key, or
 `default_value` if the section or key was not found.
+
 ---
 
 <a name="line-113"></a>
@@ -135,6 +140,7 @@ found.
 
 `return` the number value associated with the given section and key, or
 `default_value` if the section or key was not found.
+
 ---
 
 <a name="line-134"></a>
@@ -153,6 +159,7 @@ get more information about the error.
 
 The caller is responsible for destroying the returned writer using
 `bxr_ini_destroy_writer` when it is no longer needed.
+
 ---
 
 <a name="line-151"></a>
@@ -164,6 +171,7 @@ void bxr_ini_destroy_writer(bxr_ini_writer_t *ini)
 Destroy an INI writer and free its resources.
 
 `ini` is the INI writer to destroy.
+
 ---
 
 <a name="line-158"></a>
@@ -180,6 +188,7 @@ Begin a new section in the INI writer.
 
 `return` true if the section was successfully begun, or false if an error
 occurred. Use `bxr_error_get` to get more information about the error.
+
 ---
 
 <a name="line-170"></a>
@@ -194,6 +203,7 @@ End the current section in the INI writer.
 
 `return` true if the section was successfully ended, or false if an error
 occurred. Use `bxr_error_get` to get more information about the error.
+
 ---
 
 <a name="line-180"></a>
@@ -213,6 +223,7 @@ writer.
 
 `return` true if the key-value pair was successfully added, or false if an
 error occurred. Use `bxr_error_get` to get more information about the error.
+
 ---
 
 <a name="line-196"></a>
@@ -232,6 +243,7 @@ writer.
 
 `return` true if the key-value pair was successfully added, or false if an
 error occurred. Use `bxr_error_get` to get more information about the error.
+
 ---
 
 <a name="line-211"></a>
@@ -249,4 +261,5 @@ resolution).
 
 `return` true if the INI data was successfully saved, or false if an error
 occurred. Use `bxr_error_get` to get more information about the error.
+
 ---

@@ -28,6 +28,7 @@ not be created.
 
 The caller is responsible for destroying the returned pipeline using
 `bxr_pipeline_destroy` when it is no longer needed.
+
 ---
 
 <a name="line-64"></a>
@@ -39,4 +40,5 @@ void bxr_pipeline_destroy(bxr_pipeline_t pipeline)
 Destroy a graphics pipeline.
 
 `pipeline` is the pipeline to destroy.
+
 ---

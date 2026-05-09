@@ -39,6 +39,7 @@ Asserts that an expression is true and reports the result to the console.
 `line` is the line number in the source file where the assertion is located.
 
 `return` true if the assertion passed, false if it failed.
+
 ---
 
 <a name="line-53"></a>
@@ -52,6 +53,7 @@ Runs a test case function and reports the result to the console.
 `name` is the name of the test case function being run.
 
 `case_cb` is the test case callback function to execute.
+
 ---
 
 <a name="line-62"></a>
@@ -65,6 +67,7 @@ Runs a test suite function and reports the results to the console.
 `name` is the name of the test suite function being run.
 
 `suite_cb` is the test suite callback function to run.
+
 ---
 
 <a name="line-71"></a>
@@ -79,6 +82,7 @@ Public API
 Runs a test suite function and reports the results to the console.
 
 `suite_cb` is the test suite callback function to run.
+
 ---
 
 <a name="line-82"></a>
@@ -90,6 +94,7 @@ Runs a test suite function and reports the results to the console.
 Defines a test suite function.
 
 `name` is the name of the test suite function.
+
 ---
 
 <a name="line-89"></a>
@@ -101,6 +106,7 @@ Defines a test suite function.
 Runs a single unit test case and reports the result to the console.
 
 `test_cb` is the test case callback function to execute.
+
 ---
 
 <a name="line-96"></a>
@@ -114,6 +120,7 @@ Defines a test case function.
 `name` is the name of the test case function.
 
 `return` `true` if the test case passed, `false` if it failed.
+
 ---
 
 <a name="line-105"></a>
@@ -127,6 +134,7 @@ Asserts that an expression is true.
 `expr` is the expression to assert.
 
 `return` `true` if the assertion passed, `false` if it failed.
+
 ---
 
 <a name="line-118"></a>
@@ -136,6 +144,7 @@ typedef void (*bxr_unit_setup_cb)(void)
 ```
 
 Functions that are run before and/or after a number of unit tests execute.
+
 ---
 
 <a name="line-123"></a>
@@ -152,6 +161,7 @@ function after. Either of these functions can be `NULL`.
 `setup_cb` The setup callback function.
 
 `teardown_cb` The teardown callback function.
+
 ---
 
 <a name="line-135"></a>
@@ -161,6 +171,7 @@ void bxr_unit_clear_setup(void)
 ```
 
 Disables the setup and teardown functions by setting them to `NULL`.
+
 ---
 
 <a name="line-140"></a>
@@ -172,6 +183,7 @@ void bxr_unit_enable_colors(bool enabled)
 Enables or disables colored output in the console.
 
 `enabled` `true` to enable colored output, `false` to disable it.
+
 ---
 
 <a name="line-147"></a>
@@ -181,6 +193,7 @@ void bxr_unit_report(void)
 ```
 
 Reports the results of the unit tests to the console.
+
 ---
 
 <a name="line-152"></a>
@@ -192,4 +205,5 @@ bool bxr_unit_failed(void)
 Check whether at least one test failed.
 
 `return` `true` if any test failed, `false` if they all passed
+
 ---

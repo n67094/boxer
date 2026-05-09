@@ -21,6 +21,7 @@ Computes the sign of the number.
 - -1 if `val` is less than zero;
 - 0 if `val` is equal to zero;
 - 1 if `val` is greater than zero.
+
 ---
 
 <a name="line-103"></a>
@@ -30,6 +31,7 @@ BXR_INLINE bool
 ```
 
 `return` `true` if the values are within epsilon of one another.
+
 ---
 
 <a name="line-112"></a>
@@ -43,6 +45,7 @@ Linearly interpolates the two values.
 `step` a number in [0, 1] that specifies the position between the values.
 
 `return` the interpolated value.
+
 ---
 
 <a name="line-125"></a>
@@ -61,6 +64,7 @@ Linearly interpolates between two angles.
 angles.
 
 `return` the interpolated angle in radians.
+
 ---
 
 <a name="line-150"></a>
@@ -74,6 +78,7 @@ Clamps the angle to be in [0, 2 * BXR_PI].
 `angle` The angle in radians.
 
 `return` the normalized angle in radians.
+
 ---
 
 <a name="line-169"></a>
@@ -86,6 +91,7 @@ Clamps the angle to be in [0, 2 * BXR_PI].
 ```
 
 Constructs a point.
+
 ---
 
 <a name="line-178"></a>
@@ -98,6 +104,7 @@ Vectors 2
 ```
 
 Constructs a vector.
+
 ---
 
 <a name="line-187"></a>
@@ -107,6 +114,7 @@ BXR_INLINE bool
 ```
 
 `returns` true if the vectors are equal (within epsilon).
+
 ---
 
 <a name="line-196"></a>
@@ -116,6 +124,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `retrurn` the sum of two vectors.
+
 ---
 
 <a name="line-205"></a>
@@ -125,6 +134,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the difference of two vectors.
+
 ---
 
 <a name="line-214"></a>
@@ -135,6 +145,7 @@ BXR_INLINE bxr_vec2_t
 
 
 `return` the product of two vectors.
+
 ---
 
 <a name="line-224"></a>
@@ -144,6 +155,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the quotient of two vectors.
+
 ---
 
 <a name="line-233"></a>
@@ -153,6 +165,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the vector scaled by the specified scalar.
+
 ---
 
 <a name="line-242"></a>
@@ -162,6 +175,7 @@ BXR_INLINE float
 ```
 
 `return` the dot product of two vectors.
+
 ---
 
 <a name="line-251"></a>
@@ -171,6 +185,7 @@ BXR_INLINE float
 ```
 
 `return` the squared length of the vector.
+
 ---
 
 <a name="line-260"></a>
@@ -180,6 +195,7 @@ BXR_INLINE float
 ```
 
 `return` the length of the vector (magnitude).
+
 ---
 
 <a name="line-269"></a>
@@ -190,6 +206,7 @@ BXR_INLINE bxr_vec2_t
 
 `return` the normalized vector (vector with length 1). If the vector has zero
 length, the zero vector is returned.
+
 ---
 
 <a name="line-284"></a>
@@ -199,6 +216,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the negation of the vector.
+
 ---
 
 <a name="line-293"></a>
@@ -208,6 +226,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` a vector that is perpendicular to the specified vector.
+
 ---
 
 <a name="line-302"></a>
@@ -217,6 +236,7 @@ BXR_INLINE float
 ```
 
 `return` A 2D analog of the 3D cross product.
+
 ---
 
 <a name="line-312"></a>
@@ -226,6 +246,7 @@ BXR_INLINE float
 ```
 
 `return` the angle the vector with respect to the current basis.
+
 ---
 
 <a name="line-321"></a>
@@ -235,6 +256,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the projection of `v1` onto `v2`.
+
 ---
 
 <a name="line-332"></a>
@@ -244,6 +266,7 @@ BXR_INLINE float
 ```
 
 `return` the distance between the two vectors.
+
 ---
 
 <a name="line-343"></a>
@@ -253,6 +276,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the linearly interpolates between two vectors.
+
 ---
 
 <a name="line-357"></a>
@@ -262,6 +286,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `returns` the zero vector.
+
 ---
 
 <a name="line-362"></a>
@@ -271,6 +296,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` a vector in polar coordinates.
+
 ---
 
 <a name="line-371"></a>
@@ -280,6 +306,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the component-wise minimum of two vectors.
+
 ---
 
 <a name="line-380"></a>
@@ -289,6 +316,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the component-wise maximum of two vectors.
+
 ---
 
 <a name="line-389"></a>
@@ -298,6 +326,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the component-wise floor of the specified vector.
+
 ---
 
 <a name="line-398"></a>
@@ -307,6 +336,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 `return` the component-wise ceiling of the specified vector.
+
 ---
 
 <a name="line-407"></a>
@@ -319,6 +349,7 @@ BXR_INLINE bxr_vec2_t
 ```
 
 Construct a line
+
 ---
 
 <a name="line-423"></a>
@@ -331,6 +362,7 @@ Construct a line
 ```
 
 Construct a triangle
+
 ---
 
 <a name="line-440"></a>
@@ -343,6 +375,7 @@ Construct a triangle
 ```
 
 Construct a rectangle
+
 ---
 
 <a name="line-454"></a>
@@ -352,6 +385,7 @@ BXR_INLINE float
 ```
 
 `returns` the area of the rectangle
+
 ---
 
 <a name="line-463"></a>
@@ -361,6 +395,7 @@ BXR_INLINE bool
 ```
 
 `returns` true if the rectangles overlap
+
 ---
 
 <a name="line-481"></a>
@@ -373,6 +408,7 @@ BXR_INLINE bxr_rect_t
 
 If they don't overlap, `return` a rectangle starting at r2 x, y with zero
 width and height.
+
 ---
 
 <a name="line-504"></a>
@@ -382,6 +418,7 @@ BXR_INLINE bool
 ```
 
 `return` true if r1 completely contains r2.
+
 ---
 
 <a name="line-522"></a>
@@ -391,6 +428,7 @@ BXR_INLINE bool
 ```
 
 `return` true if the rectangle contains the point.
+
 ---
 
 <a name="line-540"></a>
@@ -400,6 +438,7 @@ BXR_INLINE bool
 ```
 
 `return` true if the rectangles are adjacent (share a side).
+
 ---
 
 <a name="line-552"></a>
@@ -410,6 +449,7 @@ BXR_INLINE bxr_rect_t
 
 `return` a rectangle that is expanded by the specified amount in all
 directions.
+
 ---
 
 <a name="line-565"></a>
@@ -420,6 +460,7 @@ bxr_rect_t BXR_INLINE
 
 `return` a rectangle that is contracted by the specified amount in all
 directions.
+
 ---
 
 <a name="line-578"></a>
@@ -432,6 +473,7 @@ directions.
 ```
 
 Construct a textured rectangle.
+
 ---
 
 <a name="line-594"></a>
@@ -444,4 +486,5 @@ Construct a textured rectangle.
 ```
 
 Construct a region
+
 ---

@@ -12,4 +12,5 @@ void bxr_quit(void)
 ```
 
 Quit the game loop and exit the application.
+
 ---
