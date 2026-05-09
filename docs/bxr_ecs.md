@@ -9,7 +9,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 ECS API
 
 <a name="line-28"></a>
-# 🔹 bxr_ecs_t *bxr_ecs_create(size_t entity_count)
+---
 
 ```cpp
 bxr_ecs_t *bxr_ecs_create(size_t entity_count)
@@ -28,7 +28,7 @@ The caller is responsible for destroying the returned ECS instance using
 `bxr_ecs_destroy` when it is no longer needed.
 
 <a name="line-43"></a>
-# 🔹 void bxr_ecs_destroy(bxr_ecs_t *ecs)
+---
 
 ```cpp
 void bxr_ecs_destroy(bxr_ecs_t *ecs)
@@ -39,7 +39,7 @@ Destroy the given ECS instance and free its memory.
 `ecs` is the ECS instance to destroy.
 
 <a name="line-50"></a>
-# 🔹 void bxr_ecs_reset(bxr_ecs_t *ecs)
+---
 
 ```cpp
 void bxr_ecs_reset(bxr_ecs_t *ecs)
@@ -54,7 +54,7 @@ components.
 ECS component API
 
 <a name="line-62"></a>
-# 🔹 typedef void (*bxr_ecs_component_create_cb)(bxr_ecs_t *ecs,
+---
 
 ```cpp
 typedef void (*bxr_ecs_component_create_cb)(bxr_ecs_t *ecs,
@@ -72,7 +72,7 @@ Callback called when a component is created.
 the component (can be NULL).
 
 <a name="line-79"></a>
-# 🔹 typedef void (*bxr_ecs_component_destroy_cb)(bxr_ecs_t *ecs,
+---
 
 ```cpp
 typedef void (*bxr_ecs_component_destroy_cb)(bxr_ecs_t *ecs,
@@ -87,7 +87,7 @@ Callback called when a component is destroyed.
 `component_ptr` is a pointer to the component data.
 
 <a name="line-92"></a>
-# 🔧 bxr_ecs_component_t
+---
 
 ```cpp
 bxr_ecs_component_t
@@ -112,7 +112,7 @@ could not be defined.
 ECS Entity API
 
 <a name="line-118"></a>
-# 🔹 bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs)
+---
 
 ```cpp
 bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs)
@@ -127,7 +127,7 @@ entity could not be created. Use `bxr_error_get` to get more information
 about the error.
 
 <a name="line-129"></a>
-# 🔹 bool bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
+---
 
 ```cpp
 bool bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
@@ -141,7 +141,7 @@ destruction, `false` otherwise.
 `entity` is the entity to check.
 
 <a name="line-139"></a>
-# 🔹 bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
+---
 
 ```cpp
 bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
@@ -158,7 +158,7 @@ Test if an entity has a component.
 `return` `true` if the entity has the component, `false` otherwise.
 
 <a name="line-154"></a>
-# 🔹 void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
+---
 
 ```cpp
 void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
@@ -179,7 +179,7 @@ creating the component data for the entity (can be NULL).
 occurred. Use `bxr_error_get` to get more information about the error.
 
 <a name="line-174"></a>
-# 🔹 void *bxr_ecs_entity_get_component(bxr_ecs_t *ecs,
+---
 
 ```cpp
 void *bxr_ecs_entity_get_component(bxr_ecs_t *ecs,
@@ -197,7 +197,7 @@ Get a pointer to a component of an entity.
 the component.
 
 <a name="line-190"></a>
-# 🔹 void bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
+---
 
 ```cpp
 void bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
@@ -212,7 +212,7 @@ Remove a component from an entity.
 `component` is the component to remove from the entity.
 
 <a name="line-203"></a>
-# 🔹 void bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
+---
 
 ```cpp
 void bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
@@ -229,7 +229,7 @@ stack for re-use.
 ECS System API
 
 <a name="line-217"></a>
-# 🔹 typedef int (*bxr_ecs_system_logic_cb)(bxr_ecs_t *ecs,
+---
 
 ```cpp
 typedef int (*bxr_ecs_system_logic_cb)(bxr_ecs_t *ecs,
@@ -248,7 +248,7 @@ Callback called when a system is run.
 `return` 0 on success, or a non-zero error code on failure.
 
 <a name="line-235"></a>
-# 🔹 typedef void (*bxr_ecs_system_add_cb)(bxr_ecs_t *ecs,
+---
 
 ```cpp
 typedef void (*bxr_ecs_system_add_cb)(bxr_ecs_t *ecs,
@@ -263,7 +263,7 @@ Callback called when an entity is added to a system.
 `udata` is the user data associated with the system.
 
 <a name="line-248"></a>
-# 🔹 typedef void (*bxr_ecs_system_remove_cb)(bxr_ecs_t *ecs,
+---
 
 ```cpp
 typedef void (*bxr_ecs_system_remove_cb)(bxr_ecs_t *ecs,
@@ -278,7 +278,7 @@ Callback called when an entity is removed from a system.
 `udata` is the user data associated with the system.
 
 <a name="line-261"></a>
-# 🔹 bxr_ecs_system_t bxr_ecs_system_define(bxr_ecs_t *ecs,
+---
 
 ```cpp
 bxr_ecs_system_t bxr_ecs_system_define(bxr_ecs_t *ecs,
@@ -303,7 +303,7 @@ system.
 not be defined.
 
 <a name="line-286"></a>
-# 🔹 void bxr_ecs_system_require_component(bxr_ecs_t *ecs,
+---
 
 ```cpp
 void bxr_ecs_system_require_component(bxr_ecs_t *ecs,
@@ -318,7 +318,7 @@ Require a component for a system.
 `component` is the component to require for the system.
 
 <a name="line-299"></a>
-# 🔹 void bxr_ecs_system_exclude_component(bxr_ecs_t *ecs,
+---
 
 ```cpp
 void bxr_ecs_system_exclude_component(bxr_ecs_t *ecs,
@@ -333,7 +333,7 @@ Exclude a component for a system.
 `component` is the component to exclude for the system.
 
 <a name="line-312"></a>
-# 🔹 void bxr_ecs_system_enable(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+---
 
 ```cpp
 void bxr_ecs_system_enable(bxr_ecs_t *ecs, bxr_ecs_system_t system)
@@ -347,7 +347,7 @@ Enable a system, allowing it to be run when `bxr_ecs_system_run` or
 `sys` is the system to enable.
 
 <a name="line-322"></a>
-# 🔹 void bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+---
 
 ```cpp
 void bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system)
@@ -361,7 +361,7 @@ Disable a system, preventing it from being run when `bxr_ecs_system_run` or
 `system` is the system to disable.
 
 <a name="line-332"></a>
-# 🔹 void bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
+---
 
 ```cpp
 void bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
@@ -381,7 +381,7 @@ Set the callbacks for a system.
 system.
 
 <a name="line-352"></a>
-# 🔧 void
+---
 
 ```cpp
 void
@@ -396,7 +396,7 @@ Set the user data for a system.
 `udata` is the user data to associate with the system (can be NULL).
 
 <a name="line-364"></a>
-# 🔹 void *bxr_ecs_system_get_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+---
 
 ```cpp
 void *bxr_ecs_system_get_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system)
@@ -412,7 +412,7 @@ Get the user data for a system.
 is associated with the system.
 
 <a name="line-376"></a>
-# 🔹 void bxr_ecs_system_set_mask(bxr_ecs_t *ecs,
+---
 
 ```cpp
 void bxr_ecs_system_set_mask(bxr_ecs_t *ecs,
@@ -427,7 +427,7 @@ Set the system mask (a.k.a tags).
 `mask` is the mask to set for the system.
 
 <a name="line-389"></a>
-# 🔹 bxr_ecs_mask_t bxr_ecs_system_get_mask(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+---
 
 ```cpp
 bxr_ecs_mask_t bxr_ecs_system_get_mask(bxr_ecs_t *ecs, bxr_ecs_system_t system)
@@ -442,7 +442,7 @@ Get the system mask (a.k.a tags).
 `return` the mask associated with the system.
 
 <a name="line-400"></a>
-# 🔹 size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system)
+---
 
 ```cpp
 size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system)
@@ -451,7 +451,7 @@ size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system)
 Get the number of entities assigned to a system.
 
 <a name="line-405"></a>
-# 🔹 int bxr_ecs_system_run(bxr_ecs_t *ecs,
+---
 
 ```cpp
 int bxr_ecs_system_run(bxr_ecs_t *ecs,
@@ -466,7 +466,7 @@ Call a system logic on required component, but not exclueded ones.
 `mask` determines which systems run run based on a group/category.
 
 <a name="line-418"></a>
-# 🔹 int bxr_ecs_systems_run(bxr_ecs_t *ecs, bxr_ecs_mask_t mask)
+---
 
 ```cpp
 int bxr_ecs_systems_run(bxr_ecs_t *ecs, bxr_ecs_mask_t mask)

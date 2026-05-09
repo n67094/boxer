@@ -9,7 +9,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 ## Internal API
 
 <a name="line-24"></a>
-### 🔹 void bxr_image_setup(bxr_context_t *context)
+---
 
 ```cpp
 void bxr_image_setup(bxr_context_t *context)
@@ -21,7 +21,7 @@ functions.
 `context` is the bxr context to use for image operations.
 
 <a name="line-32"></a>
-### 🔹 void bxr_image_shutdown(void)
+---
 
 ```cpp
 void bxr_image_shutdown(void)
@@ -33,7 +33,7 @@ Shutdown the image subsystem.
 ## Public API
 
 <a name="line-41"></a>
-### 🔹 bxr_image_t bxr_image_create(const char *path)
+---
 
 ```cpp
 bxr_image_t bxr_image_create(const char *path)
@@ -50,7 +50,7 @@ The caller is responsible for destroying the returned image using
 `bxr_image_destroy` when it is no longer needed.
 
 <a name="line-54"></a>
-### 🔧 bxr_image_t
+---
 
 ```cpp
 bxr_image_t
@@ -71,7 +71,7 @@ The caller is responsible for destroying the returned image using
 `bxr_image_destroy` when it is no longer needed.
 
 <a name="line-72"></a>
-### 🔹 int bxr_image_get_width(bxr_image_t image)
+---
 
 ```cpp
 int bxr_image_get_width(bxr_image_t image)
@@ -84,7 +84,7 @@ Get the width of an image in pixels.
 `return` the width of the image in pixels, or 0 if the image is invalid.
 
 <a name="line-81"></a>
-### 🔹 int bxr_image_get_height(bxr_image_t image)
+---
 
 ```cpp
 int bxr_image_get_height(bxr_image_t image)
@@ -97,7 +97,7 @@ Get the height of an image in pixels.
 `return` the height of the image in pixels, or 0 if the image is invalid.
 
 <a name="line-90"></a>
-### 🔹 void bxr_image_destroy(bxr_image_t image)
+---
 
 ```cpp
 void bxr_image_destroy(bxr_image_t image)

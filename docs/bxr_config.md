@@ -9,7 +9,7 @@ Copyright (c) 2025 nsix. All rights reserved.
 ## Global Configuration
 
 <a name="line-18"></a>
-### 🔧 #define BXR_PATH_MAX_LENGTH 512
+---
 
 ```cpp
 #define BXR_PATH_MAX_LENGTH 512
@@ -21,7 +21,7 @@ Max path length in characters
 ## Filesystem Configuration
 
 <a name="line-27"></a>
-### 🔧 #define BXR_DATA_DIR "data"
+---
 
 ```cpp
 #define BXR_DATA_DIR "data"
@@ -33,7 +33,7 @@ The directory where game assets are located (relative to the executable)
 ## Painter Configuration
 
 <a name="line-36"></a>
-### 🔧 #define BXR_PAINTER_MAX_STATE 16
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_STATE 16
@@ -42,7 +42,7 @@ The directory where game assets are located (relative to the executable)
 Max number of painters state that can be used simultaneously (per frame)
 
 <a name="line-41"></a>
-### 🔧 #define BXR_PAINTER_MAX_TEXTURE_SLOTS 4
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_TEXTURE_SLOTS 4
@@ -51,7 +51,7 @@ Max number of painters state that can be used simultaneously (per frame)
 Max number of textures that can be bound at the same time (per draw call)
 
 <a name="line-46"></a>
-### 🔧 #define BXR_PAINTER_MAX_TRANSFORMS 64
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_TRANSFORMS 64
@@ -60,7 +60,7 @@ Max number of textures that can be bound at the same time (per draw call)
 Max number of transforms that can be pushed at the same time (per frame)
 
 <a name="line-51"></a>
-### 🔧 #define BXR_PAINTER_MAX_UNIFORM_FLOATS 8
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_UNIFORM_FLOATS 8
@@ -69,7 +69,7 @@ Max number of transforms that can be pushed at the same time (per frame)
 Max number of float (4-bytes) uniforms that can be set in a shader
 
 <a name="line-56"></a>
-### 🔧 #define BXR_PAINTER_OPTIMIZER_DEPTH 8
+---
 
 ```cpp
 #define BXR_PAINTER_OPTIMIZER_DEPTH 8
@@ -82,7 +82,7 @@ optimization
 ## Painter Resources Configuration
 
 <a name="line-66"></a>
-### 🔧 #define BXR_PAINTER_MAX_TEXTURE_DIMENSION 4096
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_TEXTURE_DIMENSION 4096
@@ -91,7 +91,7 @@ optimization
 Max texture dimension in pixels
 
 <a name="line-71"></a>
-### 🔧 #define BXR_PAINTER_MAX_IMAGE 64
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_IMAGE 64
@@ -100,7 +100,7 @@ Max texture dimension in pixels
 Max number of images that can be loaded at the same time
 
 <a name="line-76"></a>
-### 🔧 #define BXR_PAINTER_MAX_SHADER 8
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_SHADER 8
@@ -109,7 +109,7 @@ Max number of images that can be loaded at the same time
 Max number of shaders that can be loaded at the same time
 
 <a name="line-81"></a>
-### 🔧 #define BXR_PAINTER_MAX_PIPELINE 64
+---
 
 ```cpp
 #define BXR_PAINTER_MAX_PIPELINE 64
@@ -121,7 +121,7 @@ Max number of pipelines that can be created at the same time
 ## INI Reader/Writer Configuration
 
 <a name="line-90"></a>
-### 🔧 #define BXR_INI_MAX_ROW_SIZE 256
+---
 
 ```cpp
 #define BXR_INI_MAX_ROW_SIZE 256
@@ -131,7 +131,7 @@ Max number of characters in a line of an INI file (including section headers,
 key-value pairs, and comments).
 
 <a name="line-96"></a>
-### 🔧 #define BXR_INI_DEFAULT_DATA_CAPACITY 512
+---
 
 ```cpp
 #define BXR_INI_DEFAULT_DATA_CAPACITY 512
@@ -144,7 +144,7 @@ writer will automatically resize if the data exceeds this capacity.
 ## ECS Configuration
 
 <a name="line-106"></a>
-### 🔧 #define BXR_ECS_DEFAULT_ENTITY 256
+---
 
 ```cpp
 #define BXR_ECS_DEFAULT_ENTITY 256
@@ -153,7 +153,7 @@ writer will automatically resize if the data exceeds this capacity.
 Default number of entities that can be created at the same time.
 
 <a name="line-111"></a>
-### 🔧 #define BXR_ECS_MAX_COMPONENT 32
+---
 
 ```cpp
 #define BXR_ECS_MAX_COMPONENT 32
@@ -162,7 +162,7 @@ Default number of entities that can be created at the same time.
 max number of components that can be defined at the same time.
 
 <a name="line-116"></a>
-### 🔧 #define BXR_ECS_MAX_SYSTEM 16
+---
 
 ```cpp
 #define BXR_ECS_MAX_SYSTEM 16

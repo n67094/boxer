@@ -6,7 +6,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 # Common definitions and macros
 
 <a name="line-23"></a>
-## 🔹 #define BXR_DEFAULT(val, def) (((val) == 0) ? (def) : (val))
+---
 
 ```cpp
 #define BXR_DEFAULT(val, def) (((val) == 0) ? (def) : (val))
@@ -22,7 +22,7 @@ passed as 0.
 `return` `def` if `val` is 0, otherwise return `val`.
 
 <a name="line-35"></a>
-## 🔹 #define BXR_OFFSET_OF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
+---
 
 ```cpp
 #define BXR_OFFSET_OF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
@@ -37,7 +37,7 @@ Get the offset of a struct member in bytes.
 `return` the offset of the struct member in bytes.
 
 <a name="line-46"></a>
-## 🔹 #define BXR_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+---
 
 ```cpp
 #define BXR_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))

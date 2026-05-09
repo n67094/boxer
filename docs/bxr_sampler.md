@@ -9,7 +9,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 ## Internal API
 
 <a name="line-34"></a>
-### 🔹 void bxr_sampler_setup(void)
+---
 
 ```cpp
 void bxr_sampler_setup(void)
@@ -19,7 +19,7 @@ Initializes the sampler system. Must be called before using any other sampler
 functions.
 
 <a name="line-40"></a>
-### 🔹 void bxr_sampler_shutdown(void)
+---
 
 ```cpp
 void bxr_sampler_shutdown(void)
@@ -31,7 +31,7 @@ Shuts down the sampler system.
 ## Public API
 
 <a name="line-49"></a>
-### 🔹 bxr_sampler_t bxr_sampler_create(bxr_sampler_e sampler_type)
+---
 
 ```cpp
 bxr_sampler_t bxr_sampler_create(bxr_sampler_e sampler_type)
@@ -45,7 +45,7 @@ Create a sampler with the given sampler type.
 be created. Use `bxr_error_get` to get more information about the error.
 
 <a name="line-59"></a>
-### 🔹 void bxr_sampler_destroy(bxr_sampler_t *sampler)
+---
 
 ```cpp
 void bxr_sampler_destroy(bxr_sampler_t *sampler)

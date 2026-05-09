@@ -14,7 +14,7 @@ Depending on the operating system, the `system preferred path` is as follows:
 - **macOS:** `~/Library/Application Support/<config->name>/`
 
 <a name="line-28"></a>
-## 🔧 BXR_INLINE Uint8 *
+---
 
 ```cpp
 BXR_INLINE Uint8 *
@@ -34,7 +34,7 @@ The caller is responsible for freeing the returned data using `SDL_free` when
 it is no longer needed.
 
 <a name="line-94"></a>
-## 🔧 BXR_INLINE bool
+---
 
 ```cpp
 BXR_INLINE bool

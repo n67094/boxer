@@ -13,7 +13,7 @@ File extension doesn't matter, but recommended to use `.json`.
 ## Reader API
 
 <a name="line-49"></a>
-### 🔹 bxr_json_reader_t *bxr_json_create_reader(const char *path)
+---
 
 ```cpp
 bxr_json_reader_t *bxr_json_create_reader(const char *path)
@@ -31,7 +31,7 @@ The caller is responsible for destroying the returned reader using
 `bxr_json_destroy_reader` when it is no longer needed.
 
 <a name="line-63"></a>
-### 🔹 void bxr_json_destroy_reader(bxr_json_reader_t *reader)
+---
 
 ```cpp
 void bxr_json_destroy_reader(bxr_json_reader_t *reader)
@@ -42,7 +42,7 @@ Destroy a JSON reader and free its resources.
 `reader` is the JSON reader to destroy.
 
 <a name="line-70"></a>
-### 🔹 bxr_json_token_t bxr_json_read_token(bxr_json_reader_t *reader)
+---
 
 ```cpp
 bxr_json_token_t bxr_json_read_token(bxr_json_reader_t *reader)
@@ -60,7 +60,7 @@ The caller should not modify or free these pointers, as they are owned by the
 JSON reader.
 
 <a name="line-84"></a>
-### 🔹 int bxr_json_reader_iter_object(bxr_json_reader_t *reader,
+---
 
 ```cpp
 int bxr_json_reader_iter_object(bxr_json_reader_t *reader,
@@ -83,7 +83,7 @@ value in the iteration.
 object was reached, or -1 if an error occurred while reading.
 
 <a name="line-106"></a>
-### 🔹 int bxr_json_reader_iter_array(bxr_json_reader_t *reader,
+---
 
 ```cpp
 int bxr_json_reader_iter_array(bxr_json_reader_t *reader,
@@ -103,7 +103,7 @@ value in the iteration.
 reached, or -1 if an error occurred while reading.
 
 <a name="line-124"></a>
-### 🔹 bool bxr_json_reader_eq_str(bxr_json_token_t *key, const char *expected)
+---
 
 ```cpp
 bool bxr_json_reader_eq_str(bxr_json_token_t *key, const char *expected)
@@ -120,7 +120,7 @@ previous call to `bxr_jsonr_read` and should have type `BXR_JSON_STRING`.
 or false otherwise.
 
 <a name="line-137"></a>
-### 🔹 bool bxr_json_reader_eq_number(bxr_json_token_t *key, float expected)
+---
 
 ```cpp
 bool bxr_json_reader_eq_number(bxr_json_token_t *key, float expected)
@@ -137,7 +137,7 @@ previous call to `bxr_jsonr_read` and should have type `BXR_JSON_NUMBER`.
 or false otherwise.
 
 <a name="line-150"></a>
-### 🔹 bool bxr_json_reader_eq_bool(bxr_json_token_t *key, bool expected)
+---
 
 ```cpp
 bool bxr_json_reader_eq_bool(bxr_json_token_t *key, bool expected)
@@ -154,7 +154,7 @@ previous call to `bxr_jsonr_read` and should have type `BXR_JSON_BOOL`.
 or false otherwise.
 
 <a name="line-163"></a>
-### 🔹 const char *bxr_json_read_token_str(bxr_json_token_t *token)
+---
 
 ```cpp
 const char *bxr_json_read_token_str(bxr_json_token_t *token)
@@ -170,7 +170,7 @@ type `BXR_JSON_STRING`.
 token does not have a string value.
 
 <a name="line-175"></a>
-### 🔹 float bxr_json_read_token_number(bxr_json_token_t *token)
+---
 
 ```cpp
 float bxr_json_read_token_number(bxr_json_token_t *token)
@@ -186,7 +186,7 @@ type `BXR_JSON_NUMBER`.
 have a number value.
 
 <a name="line-187"></a>
-### 🔹 bool bxr_json_read_token_bool(bxr_json_token_t *token)
+---
 
 ```cpp
 bool bxr_json_read_token_bool(bxr_json_token_t *token)
@@ -205,7 +205,7 @@ have a boolean value.
 ## Writer API
 
 <a name="line-205"></a>
-### 🔹 bxr_json_writer_t *bxr_json_create_writer(void)
+---
 
 ```cpp
 bxr_json_writer_t *bxr_json_create_writer(void)
@@ -221,7 +221,7 @@ The caller is responsible for destroying the returned JSON writer using
 `bxr_json_destroy_writer` when it is no longer needed.
 
 <a name="line-217"></a>
-### 🔹 void bxr_json_destroy_writer(bxr_json_writer_t *json)
+---
 
 ```cpp
 void bxr_json_destroy_writer(bxr_json_writer_t *json)
@@ -232,7 +232,7 @@ Destroy a JSON writer and free its resources.
 `json` is the JSON writer to destroy.
 
 <a name="line-224"></a>
-### 🔹 bool bxr_json_writer_object_begin(bxr_json_writer_t *json)
+---
 
 ```cpp
 bool bxr_json_writer_object_begin(bxr_json_writer_t *json)
@@ -246,7 +246,7 @@ Begin a new JSON object in the writer.
 occurred.
 
 <a name="line-234"></a>
-### 🔹 bool bxr_json_writer_object_end(bxr_json_writer_t *json)
+---
 
 ```cpp
 bool bxr_json_writer_object_end(bxr_json_writer_t *json)
@@ -260,7 +260,7 @@ End the current JSON object in the writer.
 occurred.
 
 <a name="line-244"></a>
-### 🔹 bool bxr_json_writer_array_begin(bxr_json_writer_t *json)
+---
 
 ```cpp
 bool bxr_json_writer_array_begin(bxr_json_writer_t *json)
@@ -274,7 +274,7 @@ Begin a new JSON array in the writer.
 occurred.
 
 <a name="line-254"></a>
-### 🔹 bool bxr_json_writer_array_end(bxr_json_writer_t *json)
+---
 
 ```cpp
 bool bxr_json_writer_array_end(bxr_json_writer_t *json)
@@ -288,7 +288,7 @@ End the current JSON array in the writer.
 occurred.
 
 <a name="line-264"></a>
-### 🔹 bool bxr_json_write_key(bxr_json_writer_t *json, const char *key)
+---
 
 ```cpp
 bool bxr_json_write_key(bxr_json_writer_t *json, const char *key)
@@ -307,7 +307,7 @@ writer.
 error occurred.
 
 <a name="line-279"></a>
-### 🔹 bool bxr_json_write_str(bxr_json_writer_t *json, const char *value)
+---
 
 ```cpp
 bool bxr_json_write_str(bxr_json_writer_t *json, const char *value)
@@ -323,7 +323,7 @@ Add a string value to the current JSON array in the writer.
 occurred.
 
 <a name="line-291"></a>
-### 🔹 bool bxr_json_write_number(bxr_json_writer_t *json, float number)
+---
 
 ```cpp
 bool bxr_json_write_number(bxr_json_writer_t *json, float number)
@@ -339,7 +339,7 @@ Add a number value to the current JSON array in the writer.
 occurred.
 
 <a name="line-303"></a>
-### 🔹 bool bxr_json_write_bool(bxr_json_writer_t *json, bool value)
+---
 
 ```cpp
 bool bxr_json_write_bool(bxr_json_writer_t *json, bool value)
@@ -355,7 +355,7 @@ Add a boolean value to the current JSON array in the writer.
 occurred.
 
 <a name="line-315"></a>
-### 🔹 bool bxr_json_write_key_str(bxr_json_writer_t *json,
+---
 
 ```cpp
 bool bxr_json_write_key_str(bxr_json_writer_t *json,
@@ -374,7 +374,7 @@ writer.
 error occurred.
 
 <a name="line-332"></a>
-### 🔹 bool bxr_json_write_key_number(bxr_json_writer_t *json,
+---
 
 ```cpp
 bool bxr_json_write_key_number(bxr_json_writer_t *json,
@@ -393,7 +393,7 @@ writer.
 error occurred.
 
 <a name="line-349"></a>
-### 🔧 bool
+---
 
 ```cpp
 bool
@@ -412,7 +412,7 @@ writer.
 error occurred.
 
 <a name="line-365"></a>
-### 🔹 bool bxr_json_writer_save(bxr_json_writer_t *json, const char *path)
+---
 
 ```cpp
 bool bxr_json_writer_save(bxr_json_writer_t *json, const char *path)

@@ -29,7 +29,7 @@ test= ; this will be ignored
 ## Reader API
 
 <a name="line-40"></a>
-### 🔹 bxr_ini_reader_t *bxr_ini_create_reader(const char *path)
+---
 
 ```cpp
 bxr_ini_reader_t *bxr_ini_create_reader(const char *path)
@@ -47,7 +47,7 @@ The caller is responsible for destroying the returned reader using
 `bxr_ini_destroy_reader` when it is no longer needed.
 
 <a name="line-54"></a>
-### 🔹 void bxr_ini_destroy_reader(bxr_ini_reader_t *ini)
+---
 
 ```cpp
 void bxr_ini_destroy_reader(bxr_ini_reader_t *ini)
@@ -58,7 +58,7 @@ Destroy an INI reader and free its resources.
 `ini` is the INI reader to destroy.
 
 <a name="line-61"></a>
-### 🔧 const char *
+---
 
 ```cpp
 const char *
@@ -76,7 +76,7 @@ Get the string value associated with the given section and key.
 if the section or key was not found.
 
 <a name="line-76"></a>
-### 🔹 float bxr_ini_read_number(bxr_ini_reader_t *ini,
+---
 
 ```cpp
 float bxr_ini_read_number(bxr_ini_reader_t *ini,
@@ -94,7 +94,7 @@ Get the number value associated with the given section and key.
 if the section or key was not found.
 
 <a name="line-92"></a>
-### 🔹 const char *bxr_ini_read_str_or_else(bxr_ini_reader_t *ini,
+---
 
 ```cpp
 const char *bxr_ini_read_str_or_else(bxr_ini_reader_t *ini,
@@ -116,7 +116,7 @@ found.
 `default_value` if the section or key was not found.
 
 <a name="line-113"></a>
-### 🔹 float bxr_ini_read_number_or_else(bxr_ini_reader_t *ini,
+---
 
 ```cpp
 float bxr_ini_read_number_or_else(bxr_ini_reader_t *ini,
@@ -141,7 +141,7 @@ found.
 ## Writer API
 
 <a name="line-140"></a>
-### 🔹 bxr_ini_writer_t *bxr_ini_create_writer(void)
+---
 
 ```cpp
 bxr_ini_writer_t *bxr_ini_create_writer(void)
@@ -156,7 +156,7 @@ The caller is responsible for destroying the returned writer using
 `bxr_ini_destroy_writer` when it is no longer needed.
 
 <a name="line-151"></a>
-### 🔹 void bxr_ini_destroy_writer(bxr_ini_writer_t *ini)
+---
 
 ```cpp
 void bxr_ini_destroy_writer(bxr_ini_writer_t *ini)
@@ -167,7 +167,7 @@ Destroy an INI writer and free its resources.
 `ini` is the INI writer to destroy.
 
 <a name="line-158"></a>
-### 🔹 bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
+---
 
 ```cpp
 bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
@@ -183,7 +183,7 @@ Begin a new section in the INI writer.
 occurred. Use `bxr_error_get` to get more information about the error.
 
 <a name="line-170"></a>
-### 🔹 bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini)
+---
 
 ```cpp
 bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini)
@@ -197,7 +197,7 @@ End the current section in the INI writer.
 occurred. Use `bxr_error_get` to get more information about the error.
 
 <a name="line-180"></a>
-### 🔧 bool
+---
 
 ```cpp
 bool
@@ -216,7 +216,7 @@ writer.
 error occurred. Use `bxr_error_get` to get more information about the error.
 
 <a name="line-196"></a>
-### 🔹 bool bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
+---
 
 ```cpp
 bool bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
@@ -235,7 +235,7 @@ writer.
 error occurred. Use `bxr_error_get` to get more information about the error.
 
 <a name="line-211"></a>
-### 🔹 bool bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path)
+---
 
 ```cpp
 bool bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path)

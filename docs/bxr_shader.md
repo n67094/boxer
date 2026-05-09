@@ -19,7 +19,7 @@ Metal Shading Language, etc.).
 ## Internal API
 
 <a name="line-53"></a>
-### 🔹 void bxr_shader_setup(bxr_context_t *context)
+---
 
 ```cpp
 void bxr_shader_setup(bxr_context_t *context)
@@ -31,7 +31,7 @@ functions.
 `context` is the bxr context to use for shader operations.
 
 <a name="line-61"></a>
-### 🔹 void bxr_shader_shutdown(void)
+---
 
 ```cpp
 void bxr_shader_shutdown(void)
@@ -43,7 +43,7 @@ Shuts down the shader system.
 ## Public API
 
 <a name="line-70"></a>
-### 🔹 bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc)
+---
 
 ```cpp
 bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc)
@@ -60,7 +60,7 @@ The caller is responsible for destroying the returned shader using
 `bxr_shader_destroy` when it is no longer needed.
 
 <a name="line-83"></a>
-### 🔹 void bxr_shader_destroy(bxr_shader_t shader)
+---
 
 ```cpp
 void bxr_shader_destroy(bxr_shader_t shader)

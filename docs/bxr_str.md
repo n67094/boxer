@@ -6,7 +6,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 # String Utilities
 
 <a name="line-90"></a>
-## 🔧 BXR_INLINE char *
+---
 
 ```cpp
 BXR_INLINE char *
@@ -19,7 +19,7 @@ Trim leading and trailing whitespace from the given string.
 `return` the trimmed string, or NULL if the input string is NULL.
 
 <a name="line-115"></a>
-## 🔧 BXR_INLINE size_t
+---
 
 ```cpp
 BXR_INLINE size_t

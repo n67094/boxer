@@ -9,7 +9,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 Internal API
 
 <a name="line-38"></a>
-## 🔹 void bxr_mouse_setup(void)
+---
 
 ```cpp
 void bxr_mouse_setup(void)
@@ -19,7 +19,7 @@ Initialize the mouse subsystem. Must be called before using any other mouse
 functions.
 
 <a name="line-44"></a>
-## 🔹 void bxr_mouse_begin_frame(void)
+---
 
 ```cpp
 void bxr_mouse_begin_frame(void)
@@ -29,7 +29,7 @@ Update the mouse state for the current frame. Must be called at the beginning
 of each frame before processing input.
 
 <a name="line-50"></a>
-## 🔹 void bxr_mouse_shutdown(void)
+---
 
 ```cpp
 void bxr_mouse_shutdown(void)
@@ -39,7 +39,7 @@ Shutdown the mouse subsystem. Must be called when the application is shutting
 down.
 
 <a name="line-56"></a>
-## 🔹 void bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click)
+---
 
 ```cpp
 void bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click)
@@ -53,7 +53,7 @@ is received from SDL.
 `click` is the type of click (single or double).
 
 <a name="line-66"></a>
-## 🔹 void bxr_mouse_button_up(bxr_mouse_e button)
+---
 
 ```cpp
 void bxr_mouse_button_up(bxr_mouse_e button)
@@ -65,7 +65,7 @@ is received from SDL.
 `button` is the mouse button that was released.
 
 <a name="line-74"></a>
-## 🔹 void bxr_mouse_motion(float x, float y)
+---
 
 ```cpp
 void bxr_mouse_motion(float x, float y)
@@ -79,7 +79,7 @@ received from SDL.
 `y` is the new y position of the mouse cursor.
 
 <a name="line-84"></a>
-## 🔹 void bxr_mouse_wheel_motion(float x, float y)
+---
 
 ```cpp
 void bxr_mouse_wheel_motion(float x, float y)
@@ -96,7 +96,7 @@ event is received from SDL.
 Public API
 
 <a name="line-98"></a>
-## 🔹 bxr_vec2_t bxr_mouse_pos(void)
+---
 
 ```cpp
 bxr_vec2_t bxr_mouse_pos(void)
@@ -107,7 +107,7 @@ Get the current position of the mouse cursor.
 `return` the current position of the mouse cursor.
 
 <a name="line-105"></a>
-## 🔹 bxr_vec2_t bxr_mouse_prev_pos(void)
+---
 
 ```cpp
 bxr_vec2_t bxr_mouse_prev_pos(void)
@@ -118,7 +118,7 @@ Get the position of the mouse cursor in the previous frame.
 `return` the position of the mouse cursor in the previous frame.
 
 <a name="line-112"></a>
-## 🔹 bool bxr_mouse_held(bxr_mouse_e button)
+---
 
 ```cpp
 bool bxr_mouse_held(bxr_mouse_e button)
@@ -131,7 +131,7 @@ Check if a mouse button is currently held down.
 `return` true if the button is currently held down, false otherwise.
 
 <a name="line-121"></a>
-## 🔹 bool bxr_mouse_just_pressed(bxr_mouse_e button)
+---
 
 ```cpp
 bool bxr_mouse_just_pressed(bxr_mouse_e button)
@@ -144,7 +144,7 @@ Check if a mouse button was just pressed this frame.
 `return` true if the button was just pressed this frame, false otherwise.
 
 <a name="line-130"></a>
-## 🔹 bool bxr_mouse_just_released(bxr_mouse_e button)
+---
 
 ```cpp
 bool bxr_mouse_just_released(bxr_mouse_e button)
@@ -157,7 +157,7 @@ Check if a mouse button was just released this frame.
 `return` true if the button was just released this frame, false otherwise.
 
 <a name="line-139"></a>
-## 🔹 bool bxr_mouse_double_clicked(bxr_mouse_e button)
+---
 
 ```cpp
 bool bxr_mouse_double_clicked(bxr_mouse_e button)
@@ -170,7 +170,7 @@ Check if a mouse button was double clicked this frame.
 `return` true if the button was double clicked this frame, false otherwise.
 
 <a name="line-148"></a>
-## 🔹 Uint64 bxr_mouse_held_time(bxr_mouse_e button)
+---
 
 ```cpp
 Uint64 bxr_mouse_held_time(bxr_mouse_e button)
@@ -183,7 +183,7 @@ Get the amount of time a mouse button has been held down.
 `return` the amount of time the button has been held down in milliseconds.
 
 <a name="line-157"></a>
-## 🔹 bxr_vec2_t bxr_mouse_wheel(void)
+---
 
 ```cpp
 bxr_vec2_t bxr_mouse_wheel(void)
@@ -194,7 +194,7 @@ Get the amount of scroll from the mouse wheel in the current frame.
 `return` the amount of scroll from the mouse wheel in the current frame.
 
 <a name="line-164"></a>
-## 🔹 void bxr_mouse_hide(bool hide)
+---
 
 ```cpp
 void bxr_mouse_hide(bool hide)
@@ -205,7 +205,7 @@ Hide or show the mouse cursor.
 `hide` true to hide the mouse cursor, false to show it.
 
 <a name="line-171"></a>
-## 🔹 bool bxr_mouse_is_hidden(void)
+---
 
 ```cpp
 bool bxr_mouse_is_hidden(void)

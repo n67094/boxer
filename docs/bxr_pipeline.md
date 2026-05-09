@@ -9,7 +9,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 ## Public API
 
 <a name="line-44"></a>
-### 🔹 bxr_pipeline_t bxr_pipeline_create(bxr_shader_t shader,
+---
 
 ```cpp
 bxr_pipeline_t bxr_pipeline_create(bxr_shader_t shader,
@@ -31,7 +31,7 @@ The caller is responsible for destroying the returned pipeline using
 `bxr_pipeline_destroy` when it is no longer needed.
 
 <a name="line-64"></a>
-### 🔹 void bxr_pipeline_destroy(bxr_pipeline_t pipeline)
+---
 
 ```cpp
 void bxr_pipeline_destroy(bxr_pipeline_t pipeline)

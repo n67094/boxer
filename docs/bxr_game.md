@@ -6,7 +6,7 @@ Copyright (c) 2026 nsix. All rights reserved.
 # Game lifecycle management
 
 <a name="line-28"></a>
-## 🔹 extern bxr_game_config_t *bxr_game_config(void)
+---
 
 ```cpp
 extern bxr_game_config_t *bxr_game_config(void)
@@ -36,7 +36,7 @@ Write mounted directories:
 `return` the game configuration to use for the game.
 
 <a name="line-54"></a>
-## 🔹 extern void bxr_game_setup(void)
+---
 
 ```cpp
 extern void bxr_game_setup(void)
@@ -45,7 +45,7 @@ extern void bxr_game_setup(void)
 The user should provide this function to setup the game.
 
 <a name="line-59"></a>
-## 🔹 extern void bxr_game_update(Uint64 delta_time_ms)
+---
 
 ```cpp
 extern void bxr_game_update(Uint64 delta_time_ms)
@@ -59,7 +59,7 @@ The user should provide this function to update the game logic.
 configuration value.
 
 <a name="line-69"></a>
-## 🔹 extern void bxr_game_render(Uint64 alpha_time_ms)
+---
 
 ```cpp
 extern void bxr_game_render(Uint64 alpha_time_ms)
@@ -73,7 +73,7 @@ The user should provide this function to render the game.
 used to interpolate the game state for smooth rendering.
 
 <a name="line-79"></a>
-## 🔹 extern void bxr_game_shutdown(void)
+---
 
 ```cpp
 extern void bxr_game_shutdown(void)
