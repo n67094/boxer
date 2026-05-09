@@ -43,4 +43,13 @@
  */
 #define BXR_OFFSET_OF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
 
+/**
+ * Get the size of an array in elements.
+ *
+ * `arr` is the array to get the size of.
+ *
+ * `return` the size of the array in elements.
+ */
+#define BXR_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
 #endif // BXR_DEFS_H_

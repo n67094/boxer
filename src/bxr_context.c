@@ -1,23 +1,25 @@
 #include "bxr_context.h"
 #include "bxr_math.h"
 
-static bxr_context_t _context = { 0 };
+static bxr_context_t context_ = { 0 };
 
 bxr_context_t *
 bxr_context_get(void)
 {
-  return &_context;
+  return &context_;
 }
 
 bool
 bxr_context_is_valid(void)
 {
-  return _context._initialized == BXR_INIT_COOKIE;
+  return context_.initialized == BXR_INIT_COOKIE;
 }
 
 void
 bxr_context_set_window_dimensions(int width, int height)
 {
+  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+
   bxr_context_t *context = bxr_context_get();
   context->config.width  = width;
   context->config.height = height;
@@ -28,6 +30,8 @@ bxr_context_set_window_dimensions(int width, int height)
 bxr_vec2_t
 bxr_context_get_window_dimensions(void)
 {
+  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+
   bxr_context_t *context = bxr_context_get();
   return (bxr_vec2_t){ .x = context->config.width,
                        .y = context->config.height };
@@ -36,6 +40,8 @@ bxr_context_get_window_dimensions(void)
 void
 bxr_context_set_fullscreen(bool fullscreen)
 {
+  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+
   bxr_context_t *context     = bxr_context_get();
   context->config.fullscreen = fullscreen;
 
@@ -45,6 +51,8 @@ bxr_context_set_fullscreen(bool fullscreen)
 bool
 bxr_context_is_fullscreen(void)
 {
+  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+
   bxr_context_t *context = bxr_context_get();
   return context->config.fullscreen;
 }
@@ -52,6 +60,8 @@ bxr_context_is_fullscreen(void)
 void
 bxr_context_set_resizable(bool resizable)
 {
+  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+
   bxr_context_t *context    = bxr_context_get();
   context->config.resizable = resizable;
 
@@ -61,6 +71,8 @@ bxr_context_set_resizable(bool resizable)
 bool
 bxr_context_is_resizable(void)
 {
+  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+
   bxr_context_t *context = bxr_context_get();
   return context->config.resizable;
 }

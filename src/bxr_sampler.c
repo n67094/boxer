@@ -7,29 +7,29 @@
 #include "bxr_mem.h"
 #include "bxr_sampler.h"
 
-static Uint32 _initialized     = 0;
-static bxr_context_t *_context = NULL;
+static Uint32 initialized_     = 0;
+static bxr_context_t *context_ = NULL;
 
 void
 bxr_sampler_setup(void)
 {
-  SDL_assert(_initialized == 0);
+  SDL_assert(initialized_ == 0);
 
-  _initialized = BXR_INIT_COOKIE;
-  _context     = bxr_context_get();
+  initialized_ = BXR_INIT_COOKIE;
+  context_     = bxr_context_get();
 }
 
 void
 bxr_sampler_shutdown(void)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  _initialized = 0;
-  _context     = NULL;
+  initialized_ = 0;
+  context_     = NULL;
 }
 
 static SDL_GPUSamplerCreateInfo
-_bxr_painter_sampler(bxr_sampler_e sampler_type)
+_painter_sampler(bxr_sampler_e sampler_type)
 {
   SDL_GPUSamplerCreateInfo sampler_info;
 
@@ -78,9 +78,9 @@ bxr_sampler_create(bxr_sampler_e sampler_type)
 {
   bxr_sampler_t sampler;
 
-  SDL_GPUSamplerCreateInfo sampler_info = _bxr_painter_sampler(sampler_type);
+  SDL_GPUSamplerCreateInfo sampler_info = _painter_sampler(sampler_type);
 
-  sampler.sampler = SDL_CreateGPUSampler(_context->gpu_device, &sampler_info);
+  sampler.sampler = SDL_CreateGPUSampler(context_->gpu_device, &sampler_info);
 
   if (!sampler.sampler) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
@@ -97,7 +97,7 @@ void
 bxr_sampler_destroy(bxr_sampler_t *sampler)
 {
   if (sampler && sampler->sampler) {
-    SDL_ReleaseGPUSampler(_context->gpu_device, sampler->sampler);
+    SDL_ReleaseGPUSampler(context_->gpu_device, sampler->sampler);
     sampler->sampler = NULL;
   }
 }

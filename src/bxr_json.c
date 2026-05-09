@@ -15,7 +15,7 @@ struct bxr_json_reader_s
 };
 
 static bool
-bxr_json_reader_is_string(char *cursor, char *end, char *expect)
+bxr_json_reader_is_string_(char *cursor, char *end, char *expect)
 {
   while (*expect) {
     if (cursor == end || *cursor != *expect) {
@@ -28,7 +28,7 @@ bxr_json_reader_is_string(char *cursor, char *end, char *expect)
 }
 
 static void
-bxr_json_reader_discard_until(bxr_json_reader_t *json, int depth)
+bxr_json_reader_discard_until_(bxr_json_reader_t *json, int depth)
 {
   bxr_json_token_t token;
   token.type = BXR_JSON_NULL;
@@ -193,15 +193,15 @@ top:
   case 'f':
     token.type = (*json->cursor == 'n') ? BXR_JSON_NULL : BXR_JSON_BOOL;
 
-    if (bxr_json_reader_is_string(json->cursor, json->end, "null")) {
+    if (bxr_json_reader_is_string_(json->cursor, json->end, "null")) {
       json->cursor += 4;
       break;
     }
-    if (bxr_json_reader_is_string(json->cursor, json->end, "true")) {
+    if (bxr_json_reader_is_string_(json->cursor, json->end, "true")) {
       json->cursor += 4;
       break;
     }
-    if (bxr_json_reader_is_string(json->cursor, json->end, "false")) {
+    if (bxr_json_reader_is_string_(json->cursor, json->end, "false")) {
       json->cursor += 5;
       break;
     }
@@ -230,7 +230,7 @@ bxr_json_reader_iter_object(bxr_json_reader_t *reader,
   SDL_assert(value);
 
   // Discard remainings token until we are at object depth
-  bxr_json_reader_discard_until(reader, obj->depht);
+  bxr_json_reader_discard_until_(reader, obj->depht);
 
   *key = bxr_json_read_token(reader);
   if (key->type == BXR_JSON_END) {
@@ -265,7 +265,7 @@ bxr_json_reader_iter_array(bxr_json_reader_t *reader,
   SDL_assert(value);
 
   // Discard remainings token until we are at array depth
-  bxr_json_reader_discard_until(reader, arr->depht);
+  bxr_json_reader_discard_until_(reader, arr->depht);
 
   *value = bxr_json_read_token(reader);
   if (value->type == BXR_JSON_END) {
@@ -344,7 +344,7 @@ struct bxr_json_writer_s
 };
 
 static bool
-bxr_json_writer_append(bxr_json_writer_t *json, const char *str)
+bxr_json_writer_append_(bxr_json_writer_t *json, const char *str)
 {
   size_t len      = str ? SDL_strlen(str) : 0;
   size_t new_size = json->size + len;
@@ -370,12 +370,12 @@ bxr_json_writer_append(bxr_json_writer_t *json, const char *str)
 }
 
 static bool
-bxr_json_writer_comma(bxr_json_writer_t *writer)
+bxr_json_writer_comma_(bxr_json_writer_t *writer)
 {
   bool is_ok = true;
 
   if (writer->needs_comma) {
-    is_ok = bxr_json_writer_append(writer, ",");
+    is_ok = bxr_json_writer_append_(writer, ",");
   }
 
   writer->needs_comma = true;
@@ -384,9 +384,9 @@ bxr_json_writer_comma(bxr_json_writer_t *writer)
 }
 
 static bool
-bxr_json_writer_append_escaped(bxr_json_writer_t *json, const char *str)
+bxr_json_writer_append_escaped_(bxr_json_writer_t *json, const char *str)
 {
-  if (!bxr_json_writer_append(json, "\"")) {
+  if (!bxr_json_writer_append_(json, "\"")) {
     return false;
   }
 
@@ -395,41 +395,41 @@ bxr_json_writer_append_escaped(bxr_json_writer_t *json, const char *str)
   for (const char *c = str; *c && is_ok; c++) {
     switch (*c) {
     case '\"':
-      is_ok = bxr_json_writer_append(json, "\\\"");
+      is_ok = bxr_json_writer_append_(json, "\\\"");
       break;
     case '\\':
-      is_ok = bxr_json_writer_append(json, "\\\\");
+      is_ok = bxr_json_writer_append_(json, "\\\\");
       break;
     case '\b':
-      is_ok = bxr_json_writer_append(json, "\\b");
+      is_ok = bxr_json_writer_append_(json, "\\b");
       break;
     case '\f':
-      is_ok = bxr_json_writer_append(json, "\\f");
+      is_ok = bxr_json_writer_append_(json, "\\f");
       break;
     case '\n':
-      is_ok = bxr_json_writer_append(json, "\\n");
+      is_ok = bxr_json_writer_append_(json, "\\n");
       break;
     case '\r':
-      is_ok = bxr_json_writer_append(json, "\\r");
+      is_ok = bxr_json_writer_append_(json, "\\r");
       break;
     case '\t':
-      is_ok = bxr_json_writer_append(json, "\\t");
+      is_ok = bxr_json_writer_append_(json, "\\t");
       break;
     default:
       if ((unsigned char)*c < 0x20) {
         char buf[7];
         SDL_snprintf(buf, sizeof(buf), "\\u%04x", (unsigned char)*c);
-        is_ok = bxr_json_writer_append(json, buf);
+        is_ok = bxr_json_writer_append_(json, buf);
       } else {
         char buf[2] = { *c, '\0' };
-        is_ok       = bxr_json_writer_append(json, buf);
+        is_ok       = bxr_json_writer_append_(json, buf);
       }
       break;
     }
   }
 
   if (is_ok) {
-    is_ok = bxr_json_writer_append(json, "\"");
+    is_ok = bxr_json_writer_append_(json, "\"");
   }
 
   return is_ok;
@@ -483,8 +483,8 @@ bxr_json_writer_object_begin(bxr_json_writer_t *json)
 
   bool is_ok = true;
 
-  is_ok &= bxr_json_writer_comma(json);
-  is_ok &= bxr_json_writer_append(json, "{");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, "{");
 
   json->depth++;
   json->needs_comma = false;
@@ -498,7 +498,7 @@ bxr_json_writer_object_end(bxr_json_writer_t *json)
   SDL_assert(json->depth > 0);
   SDL_assert(json->data);
 
-  if (!bxr_json_writer_append(json, "}")) {
+  if (!bxr_json_writer_append_(json, "}")) {
     return false;
   }
 
@@ -515,8 +515,8 @@ bxr_json_writer_array_begin(bxr_json_writer_t *json)
 
   bool is_ok = true;
 
-  is_ok &= bxr_json_writer_comma(json);
-  is_ok &= bxr_json_writer_append(json, "[");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, "[");
 
   json->depth++;
   json->needs_comma = false;
@@ -530,7 +530,7 @@ bxr_json_writer_array_end(bxr_json_writer_t *json)
   SDL_assert(json->depth > 0);
   SDL_assert(json->data);
 
-  if (!bxr_json_writer_append(json, "]")) {
+  if (!bxr_json_writer_append_(json, "]")) {
     return false;
   }
 
@@ -548,9 +548,9 @@ bxr_json_write_key(bxr_json_writer_t *json, const char *key)
 
   bool is_ok = true;
 
-  is_ok &= bxr_json_writer_comma(json);
-  is_ok &= bxr_json_writer_append_escaped(json, key);
-  is_ok &= bxr_json_writer_append(json, ":");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_escaped_(json, key);
+  is_ok &= bxr_json_writer_append_(json, ":");
 
   json->needs_comma = false;
 
@@ -565,8 +565,8 @@ bxr_json_write_str(bxr_json_writer_t *json, const char *value)
 
   bool is_ok = true;
 
-  is_ok &= bxr_json_writer_comma(json);
-  is_ok &= bxr_json_writer_append_escaped(json, value);
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_escaped_(json, value);
 
   json->needs_comma = true;
 
@@ -583,8 +583,8 @@ bxr_json_write_number(bxr_json_writer_t *json, float number)
 
   bool is_ok = true;
 
-  is_ok &= bxr_json_writer_comma(json);
-  is_ok &= bxr_json_writer_append(json, number_str);
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, number_str);
 
   json->needs_comma = true;
 
@@ -598,8 +598,8 @@ bxr_json_write_bool(bxr_json_writer_t *json, bool value)
 
   bool is_ok = true;
 
-  is_ok &= bxr_json_writer_comma(json);
-  is_ok &= bxr_json_writer_append(json, value ? "true" : "false");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, value ? "true" : "false");
 
   json->needs_comma = true;
 

@@ -19,7 +19,7 @@
 
 typedef struct bxr_context_s
 {
-  Uint32 _initialized;
+  Uint32 initialized;
 
   bxr_game_config_t config;
 

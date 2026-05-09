@@ -157,9 +157,9 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   }
 
   bxr_context_t *context = bxr_context_get();
-  SDL_assert(context->_initialized == 0);
+  SDL_assert(context->initialized == 0);
 
-  context->_initialized = BXR_INIT_COOKIE;
+  context->initialized = BXR_INIT_COOKIE;
 
   context->config.name  = config->name;
   context->config.title = config->title;

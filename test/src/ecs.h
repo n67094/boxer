@@ -32,13 +32,7 @@ dummy_system(bxr_ecs_t *ecs,
 static void
 ecs_test_setup(void)
 {
-  bxr_ecs_desc_t desc = {
-    .max_entities   = MIN_ENTITIES, // Min here to grow dynamically in the test
-    .max_components = MAX_COMPONENTS,
-    .max_systems    = MAX_SYSTEMS,
-  };
-
-  ecs = bxr_ecs_create(&desc);
+  ecs = bxr_ecs_create(MIN_ENTITIES);
 }
 
 static void
@@ -55,7 +49,7 @@ BXR_UNIT_CASE(case_ecs_reset)
   bxr_ecs_component_t c2
       = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
 
-  for (int i = 0; i < BXR_ECS_DEFAULT_ENTITY; i++) {
+  for (int i = 0; i < MAX_ENTITIES; i++) {
     bxr_ecs_entity_t e = bxr_ecs_entity_create(ecs);
     bxr_ecs_entity_add_component(ecs, e, c1, NULL);
     bxr_ecs_entity_add_component(ecs, e, c2, NULL);
@@ -775,8 +769,6 @@ queue_remove_system(bxr_ecs_t *ecs,
   (void)entity_count;
   (void)udata;
 
-  SDL_Log("entity_count: %zu", entity_count);
-
   for (size_t i = 0; i < entity_count; i++) {
     bxr_ecs_entity_remove_component(ecs, entities[i], _c1);
   }
@@ -799,8 +791,6 @@ BXR_UNIT_CASE(case_ecs_queue_remove)
 
   size_t inner_count = bxr_ecs_system_run(ecs, _s1, 0);
   size_t outer_count = bxr_ecs_system_get_entity_count(ecs, _s1);
-
-  SDL_Log("inner_count: %zu, outer_count: %zu", inner_count, outer_count);
 
   BXR_UNIT_ASSERT(inner_count == MAX_ENTITIES);
   BXR_UNIT_ASSERT(outer_count == 0);
@@ -840,8 +830,6 @@ BXR_UNIT_CASE(case_ecs_queue_destroy)
 
   size_t inner_count = bxr_ecs_system_run(ecs, _s1, 0);
   size_t outer_count = bxr_ecs_system_get_entity_count(ecs, _s1);
-
-  SDL_Log("inner_count: %zu, outer_count: %zu", inner_count, outer_count);
 
   BXR_UNIT_ASSERT(inner_count == MAX_ENTITIES);
   BXR_UNIT_ASSERT(outer_count == 0);

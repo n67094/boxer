@@ -1,6 +1,8 @@
 /**
  * File `bxr_ecs.h`.
  *
+ * This ECS is based on "pico_ecs.h" Copyright (c) 2025 James Mclean.
+ *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
 
@@ -21,32 +23,14 @@ typedef size_t bxr_ecs_mask_t;
  * ECS API
  */
 
-/**
- * Description for creating an ECS instance.
- *
- * `max_entities` is the maximum number of entities that can be created. `0`
- * means use the default value of BXR_ECS_DEFAULT_ENTITY. Max entities grow
- * dynamically but never shrink.
- *
- * `max_components` is the maximum number of components that can be defined. `0`
- * means use the default value of BXR_ECS_DEFAULT_COMPONENT.
- *
- * `max_systems` is the maximum number of systems that can be defined. `0` means
- * use the default value of BXR_ECS_DEFAULT_SYSTEM.
- */
-typedef struct bxr_ecs_desc_s
-{
-  size_t max_entities;
-  size_t max_components;
-  size_t max_systems;
-} bxr_ecs_desc_t;
-
 typedef struct bxr_ecs_s bxr_ecs_t;
 
 /**
  * Create a new ECS instance with the given description.
  *
- * `desc` is the description of the ECS instance to create.
+ * `entity_count` is the starting number of entities the ECS instance can hold.
+ * The ECS instance will automatically grow if more entities are created, but
+ * will never shrink.
  *
  * `return` a pointer to the created ECS instance, or NULL if an error occurred.
  * Use `bxr_error_get` to get more information about the error.
@@ -54,7 +38,7 @@ typedef struct bxr_ecs_s bxr_ecs_t;
  * The caller is responsible for destroying the returned ECS instance using
  * `bxr_ecs_destroy` when it is no longer needed.
  */
-bxr_ecs_t *bxr_ecs_create(const bxr_ecs_desc_t *desc);
+bxr_ecs_t *bxr_ecs_create(size_t entity_count);
 
 /**
  * Destroy the given ECS instance and free its memory.
@@ -199,7 +183,7 @@ void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
  * `return` a pointer to the component data, or NULL if the entity does not have
  * the component.
  */
-void *bxr_ecs_entity_get_component(const bxr_ecs_t *ecs,
+void *bxr_ecs_entity_get_component(bxr_ecs_t *ecs,
                                    bxr_ecs_entity_t entity,
                                    bxr_ecs_component_t component);
 

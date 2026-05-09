@@ -106,17 +106,17 @@
 /**
  * Default number of entities that can be created at the same time.
  */
-#define BXR_ECS_DEFAULT_ENTITY 64
+#define BXR_ECS_DEFAULT_ENTITY 256
 
 /**
- * Default number of components that can be defined at the same time.
+ * max number of components that can be defined at the same time.
  */
-#define BXR_ECS_DEFAULT_COMPONENT 32
+#define BXR_ECS_MAX_COMPONENT 32
 
 /**
- * Default number of systems that can be defined at the same time.
+ * max number of systems that can be defined at the same time.
  */
-#define BXR_ECS_DEFAULT_SYSTEM 16
+#define BXR_ECS_MAX_SYSTEM 16
 
 /**
  * ## UI Configuration

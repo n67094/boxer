@@ -2,12 +2,12 @@
 
 #include "bxr_error.h"
 
-static bxr_erro_code_e _last_error = BXR_ERROR_NONE;
+static bxr_erro_code_e last_error_ = BXR_ERROR_NONE;
 
 bxr_erro_code_e
 bxr_error_get(void)
 {
-  return _last_error;
+  return last_error_;
 }
 
 void
@@ -17,7 +17,7 @@ bxr_error_set(bxr_erro_code_e error)
 
   SDL_LogError(
       SDL_LOG_CATEGORY_APPLICATION, "[%d] %s", error, bxr_error_get_msg(error));
-  _last_error = error;
+  last_error_ = error;
 }
 
 void
@@ -30,7 +30,7 @@ bxr_set_error_info(bxr_erro_code_e error, const char *info)
                error,
                bxr_error_get_msg(error),
                info);
-  _last_error = error;
+  last_error_ = error;
 }
 
 const char *
