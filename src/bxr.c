@@ -17,19 +17,43 @@
 #define SDL_GP_TEXTURE_SLOTS_MAX BXR_PAINTER_MAX_TEXTURE_SLOTS
 #define SDL_GP_TRANSFORMS_MAX BXR_PAINTER_MAX_TRANSFORMS
 #define SDL_GP_UNIFORM_FLOATS_MAX BXR_PAINTER_MAX_UNIFORM_FLOATS
-
-// Max number of commands that are looked back and batched together for
-// optimization
-#ifndef SDL_GP_OPTIMIZER_DEPTH
-#define SDL_GP_OPTIMIZER_DEPTH 8
-#endif
+#define SDL_GP_OPTIMIZER_DEPTH BXR_PAINTER_MAX_OPTIMIZER_DEPTH
 
 #include "bxr.h"
 
-// Defined and included here so others SDL_gp.h includes inside bxr file don't
-// re-include the implementation.
+// SDL_gp is defined and included here to prevent duplicate implementation
+// inclusions from other SDL_gp headers within the bxr file.
 #define SDL_GP_IMPLEMENTATION
 #include <SDL_gp.h>
+
+static bool
+update_refresh_rate_(bxr_context_t *context)
+{
+  SDL_DisplayID display_id = SDL_GetDisplayForWindow(context->window);
+  if (display_id == 0) {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Couldn't get display for window: %s",
+                SDL_GetError());
+    return false;
+  }
+
+  const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(display_id);
+  if (mode == NULL) {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Couldn't get display mode: %s",
+                SDL_GetError());
+    return false;
+  }
+
+  // context->target_delta_ms = 1000.0 / (double)mode->refresh_rate;
+  context->target_delta_ms = 1000.0 / (double)mode->refresh_rate;
+  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+              "Updated display refresh rate: %.2f Hz (delta: %2.f ms)",
+              mode->refresh_rate,
+              context->target_delta_ms);
+
+  return true;
+}
 
 SDL_AppResult
 SDL_AppInit(void **appstate, int argc, char **argv)
@@ -43,7 +67,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_assert(config->height > 0);
   SDL_assert(config->fullscreen == true || config->fullscreen == false);
   SDL_assert(config->resizable == true || config->resizable == false);
-  SDL_assert(config->target_ups > 0);
 
   if (!PHYSFS_init(NULL)) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
@@ -91,88 +114,14 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_LogInfo(
       SDL_LOG_CATEGORY_APPLICATION, "PhysFS mount directory: %s", mount_dir);
 
-  // Try to read the config file (if exists) to override default configuration
-  bxr_ini_reader_t *config_ini = bxr_ini_create_reader("config.ini");
-
-  if (config_ini) {
-    // Read width from ini
-    int width = bxr_ini_read_number_or_else(
-        config_ini, "window", "width", config->width);
-    if (width != config->width) {
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                  "Overriding config width from %d to %d",
-                  config->width,
-                  width);
-      config->width = width;
-    }
-
-    // Read height from ini
-    int height = bxr_ini_read_number_or_else(
-        config_ini, "window", "height", config->height);
-    if (height != config->height) {
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                  "Overriding config height from %d to %d",
-                  config->height,
-                  height);
-      config->height = height;
-    }
-
-    // Read fullscreen from ini
-    bool fullscreen
-        = bxr_ini_read_number_or_else(
-              config_ini, "window", "fullscreen", config->fullscreen)
-          != 0;
-    if (fullscreen != config->fullscreen) {
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                  "Overriding config fullscreen from %d to %d",
-                  config->fullscreen,
-                  fullscreen);
-      config->fullscreen = fullscreen;
-    }
-
-    // Read resizable from ini
-    bool resizable = bxr_ini_read_number_or_else(
-                         config_ini, "window", "resizable", config->resizable)
-                     != 0;
-    if (resizable != config->resizable) {
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                  "Overriding config resizable from %d to %d",
-                  config->resizable,
-                  resizable);
-      config->resizable = resizable;
-    }
-
-    // Read target_ups from ini
-    int target_ups = bxr_ini_read_number_or_else(
-        config_ini, "window", "target_ups", config->target_ups);
-    if (target_ups != config->target_ups) {
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                  "Overriding config target_ups from %d to %d",
-                  config->target_ups,
-                  target_ups);
-      config->target_ups = target_ups;
-    }
-
-    bxr_ini_destroy_reader(config_ini);
-  }
-
   bxr_context_t *context = bxr_context_get();
-  SDL_assert(context->initialized == 0);
 
-  context->initialized = BXR_INIT_COOKIE;
-
-  context->config.name  = config->name;
-  context->config.title = config->title;
-
-  context->config.width  = config->width;
-  context->config.height = config->height;
-
+  context->config.name       = config->name;
+  context->config.title      = config->title;
+  context->config.width      = config->width;
+  context->config.height     = config->height;
   context->config.fullscreen = config->fullscreen;
   context->config.resizable  = config->resizable;
-
-  context->config.target_ups = config->target_ups > 0 ? config->target_ups : 60;
-
-  context->delta_ms = 1000 / context->config.target_ups;
 
 // This is set because renderdoc doesn't support wayland
 #if defined(__linux__) && defined(DEBUG)
@@ -250,6 +199,18 @@ SDL_AppInit(void **appstate, int argc, char **argv)
               "Render pixel format: %s",
               SDL_GetPixelFormatName(context->pixel_format));
 
+  // Default fixed timestep fallback (60 Hz)
+  context->target_delta_ms = 1000.0 / 60.0;
+
+  if (!update_refresh_rate_(context)) {
+    SDL_LogWarn(
+        SDL_LOG_CATEGORY_APPLICATION,
+        "Failed to get display refresh rate, using default delta: %2.f ms",
+        context->target_delta_ms);
+  }
+
+  // --- Init here ---
+
   SDL_GPUCommandBuffer *cmd_buffer
       = SDL_AcquireGPUCommandBuffer(context->gpu_device);
   if (cmd_buffer == NULL) {
@@ -258,10 +219,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  context->cmd_buffer = cmd_buffer;
-  bxr_painter_update_command_buffer(context->cmd_buffer);
-
-  context->last_time_ms = SDL_GetTicks();
+  bxr_painter_update_command_buffer(cmd_buffer);
 
   bxr_painter_desc_t painter_desc = {
     .max_vertices = 0, // will use default
@@ -283,7 +241,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   bxr_game_setup();
 
   // Submit for resources uploads during setup
-  SDL_SubmitGPUCommandBuffer(context->cmd_buffer);
+  SDL_SubmitGPUCommandBuffer(cmd_buffer);
 
   return SDL_APP_CONTINUE;
 }
@@ -291,85 +249,103 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 SDL_AppResult
 SDL_AppIterate(void *appstate)
 {
-  SDL_assert(bxr_context_is_valid());
-
   bxr_context_t *context = bxr_context_get();
-
-  static Uint64 fps_timer_ms = 0;
-
-  static int update_count = 0;
-  static int frame_count  = 0;
-
-  float current_time_ms = SDL_GetTicks();
-  float elapsed_time_ms = current_time_ms - context->last_time_ms;
-  context->last_time_ms = current_time_ms;
-
-  context->lag_ms += elapsed_time_ms;
-  fps_timer_ms += elapsed_time_ms;
-
-  // Cap lag to avoid spiral of death
-  if (context->lag_ms > context->delta_ms * 3) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "High lag detected: %lu ms",
-                context->lag_ms);
-    context->lag_ms = context->delta_ms * 3;
+  if (!context) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Invalid context in SDL_AppIterate");
+    return SDL_APP_FAILURE;
   }
 
-  // Update Logic (fixed timestep)
+  static Uint64 fps            = 0;
+  static Uint64 ups            = 0;
+  static Uint64 frame_count    = 0;
+  static Uint64 update_count   = 0;
+  static double lag_ms         = 0;
+  static double last_ticks     = 0;
+  static Uint64 accumulator_ms = 0; // Track time for FPS counter
+  static bool first_frame      = true;
 
-  while (context->lag_ms >= context->delta_ms) {
+  if (first_frame) {
+    last_ticks  = SDL_GetTicks();
+    first_frame = false;
+    return SDL_APP_CONTINUE;
+  }
+
+  Uint64 current_ticks = SDL_GetTicks();
+  double elapsed_ms    = (double)(current_ticks - last_ticks);
+
+  last_ticks = current_ticks;
+
+  lag_ms += elapsed_ms;
+  accumulator_ms += elapsed_ms;
+
+  double delta_ms = context->target_delta_ms;
+
+  // Cap lag to avoid spiral of death (max  5 frames behind)
+  double max_lag_ms = delta_ms * 5.0;
+  if (lag_ms > delta_ms * 5.0) {
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "High lag detected: %.2f ms, capping to %.2f ms",
+                lag_ms,
+                max_lag_ms);
+    lag_ms = max_lag_ms;
+  }
+
+  while (lag_ms >= delta_ms) {
+    // --- Update here (fixed timestep) ---
+
     bxr_keyboard_begin_frame();
     bxr_mouse_begin_frame();
     bxr_gamepad_begin_frame();
 
-    bxr_game_update(context->delta_ms);
+    bxr_game_update(delta_ms);
 
-    context->lag_ms -= context->delta_ms;
+    lag_ms -= delta_ms;
     ++update_count;
   }
 
-  // Render Game (variable timestep)
+  double alpha_ms = (double)(lag_ms / delta_ms);
+
+  // --- Render here (use alpha_ms for interpolation if needed) ---
 
   // Get the command buffer
-  context->cmd_buffer = SDL_AcquireGPUCommandBuffer(context->gpu_device);
-  if (context->cmd_buffer == NULL) {
+  SDL_GPUCommandBuffer *cmd_buffer
+      = SDL_AcquireGPUCommandBuffer(context->gpu_device);
+  if (cmd_buffer == NULL) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to acquire GPU command buffer (error: %s)",
                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  bxr_painter_update_command_buffer(context->cmd_buffer);
+  bxr_painter_update_command_buffer(cmd_buffer);
 
   // Get the tagert texture
-  if (!SDL_WaitAndAcquireGPUSwapchainTexture(context->cmd_buffer,
-                                             context->window,
-                                             &context->target_texture,
-                                             NULL,
-                                             NULL)) {
+  SDL_GPUTexture *target_texture = NULL;
+  if (!SDL_WaitAndAcquireGPUSwapchainTexture(
+          cmd_buffer, context->window, &target_texture, NULL, NULL)) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to acquire swapchain texture (error: %s)",
                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  bxr_painter_update_swapchain_texture(context->target_texture);
+  bxr_painter_update_swapchain_texture(target_texture);
 
-  context->alpha_ms = context->lag_ms / context->delta_ms;
+  bxr_game_render(alpha_ms);
 
-  bxr_game_render(context->alpha_ms);
+  SDL_SubmitGPUCommandBuffer(cmd_buffer);
 
   ++frame_count;
 
-  SDL_SubmitGPUCommandBuffer(context->cmd_buffer);
+  // Calculate FPS and UPS every second
+  if (accumulator_ms >= 1000) {
+    fps = frame_count;
+    ups = update_count;
 
-  // Calculate FPS and UPS every second (1000 ms)
-  if (fps_timer_ms >= 1000) {
-    context->fps = frame_count;
-    context->ups = update_count;
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "FPS: %lu, UPS: %lu", fps, ups);
 
     frame_count  = 0;
     update_count = 0;
-
-    fps_timer_ms -= 1000;
+    accumulator_ms -= 1000;
   }
 
   return SDL_APP_CONTINUE;
@@ -379,21 +355,26 @@ SDL_AppResult
 SDL_AppEvent(void *appstate, SDL_Event *event)
 {
   SDL_assert(event);
-  SDL_assert(bxr_context_is_valid());
+
+  bxr_context_t *context = bxr_context_get();
 
   bxr_gamepad_listen();
 
   switch (event->type) {
+  case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+    return SDL_APP_SUCCESS;
+  case SDL_EVENT_WINDOW_DISPLAY_CHANGED: {
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+                "Display changed, updating refresh rate...");
+    update_refresh_rate_(context);
+    break;
+  }
   case SDL_EVENT_WINDOW_RESIZED:
     bxr_context_set_window_dimensions(event->window.data1, event->window.data2);
     break;
   case SDL_EVENT_MOUSE_WHEEL:
     bxr_mouse_wheel_motion(event->wheel.x, event->wheel.y);
     break;
-  case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-    return SDL_APP_SUCCESS;
-  case SDL_EVENT_QUIT:
-    return SDL_APP_SUCCESS;
   case SDL_EVENT_KEY_DOWN:
     bxr_key_down((bxr_key_e)event->key.scancode);
     break;
@@ -433,6 +414,8 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
   } break;
   default:
     break;
+  case SDL_EVENT_QUIT:
+    return SDL_APP_SUCCESS;
   }
 
   return SDL_APP_CONTINUE;
@@ -468,8 +451,6 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
   }
 
   PHYSFS_deinit();
-
-  SDL_Quit();
 }
 
 void

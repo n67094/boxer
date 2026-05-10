@@ -92,7 +92,7 @@ BOXER_DOCS := $(patsubst $(BOXER_DIR)/%.h, $(BOXER_DOCS_DIR)/%.md, $(BOXER_HDRS)
 .PHONY: all data docs clean
 .DEFAULT_GOAL := all
 
-all: $(TARGET) data docs
+all: $(TARGET) data
 
 # Package data directory into a zip file
 data:
@@ -109,15 +109,15 @@ $(TARGET): $(ALL_OBJS)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 # PhysFS
-$(BUILD_DIR)/%.o: $(PHYSFS_SRC_DIR)/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(PHYSFS_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Boxer
-$(BUILD_DIR)/%.o: $(BOXER_SRC_DIR)/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(BOXER_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Game (User Code)
-$(BUILD_DIR)/%.o: $(GAME_SRC_DIR)/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(GAME_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Ensure build directory exists
@@ -126,4 +126,4 @@ $(BUILD_DIR):
 
 # Clean build artifacts
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET) data.zip $(BOXER_DOCS)
+	rm -rf $(BUILD_DIR) $(TARGET) data.zip

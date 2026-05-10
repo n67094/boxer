@@ -84,6 +84,12 @@
 #define BXR_PAINTER_MAX_PIPELINE 64
 
 /**
+ * Max number of commands that are looked back and batched together for
+ * optimization
+ */
+#define BXR_PAINTER_MAX_OPTIMIZER_DEPTH 8
+
+/**
  * ## INI Reader/Writer Configuration
  */
 

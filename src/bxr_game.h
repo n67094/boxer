@@ -21,8 +21,6 @@ typedef struct bxr_game_config_s
 
   bool fullscreen;
   bool resizable;
-
-  unsigned int target_ups;
 } bxr_game_config_t;
 
 /**

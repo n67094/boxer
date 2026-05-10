@@ -1,78 +1,71 @@
 #include "bxr_context.h"
 #include "bxr_math.h"
 
-static bxr_context_t context_ = { 0 };
+static bxr_context_t *context_ = NULL;
 
 bxr_context_t *
 bxr_context_get(void)
 {
-  return &context_;
-}
+  if (context_ == NULL) {
+    context_ = SDL_malloc(sizeof(bxr_context_t));
+    SDL_zerop(context_);
+  }
 
-bool
-bxr_context_is_valid(void)
-{
-  return context_.initialized == BXR_INIT_COOKIE;
+  return context_;
 }
 
 void
 bxr_context_set_window_dimensions(int width, int height)
 {
-  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+  SDL_assert(context_);
 
-  bxr_context_t *context = bxr_context_get();
-  context->config.width  = width;
-  context->config.height = height;
+  context_->config.width  = width;
+  context_->config.height = height;
 
-  SDL_SetWindowSize(context->window, width, height);
+  SDL_SetWindowSize(context_->window, width, height);
 }
 
 bxr_vec2_t
 bxr_context_get_window_dimensions(void)
 {
-  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+  SDL_assert(context_);
 
-  bxr_context_t *context = bxr_context_get();
-  return (bxr_vec2_t){ .x = context->config.width,
-                       .y = context->config.height };
+  return (bxr_vec2_t){ .x = context_->config.width,
+                       .y = context_->config.height };
 }
 
 void
 bxr_context_set_fullscreen(bool fullscreen)
 {
-  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+  SDL_assert(context_);
 
-  bxr_context_t *context     = bxr_context_get();
-  context->config.fullscreen = fullscreen;
+  context_->config.fullscreen = fullscreen;
 
-  SDL_SetWindowFullscreen(context->window, fullscreen);
+  SDL_SetWindowFullscreen(context_->window, fullscreen);
 }
 
 bool
 bxr_context_is_fullscreen(void)
 {
-  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+  SDL_assert(context_);
 
-  bxr_context_t *context = bxr_context_get();
-  return context->config.fullscreen;
+  return context_->config.fullscreen;
 }
 
 void
 bxr_context_set_resizable(bool resizable)
 {
-  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+  SDL_assert(context_);
 
-  bxr_context_t *context    = bxr_context_get();
-  context->config.resizable = resizable;
+  context_->config.resizable = resizable;
 
-  SDL_SetWindowResizable(context->window, resizable);
+  SDL_SetWindowResizable(context_->window, resizable);
 }
 
 bool
 bxr_context_is_resizable(void)
 {
-  SDL_assert(context_.initialized == BXR_INIT_COOKIE);
+  SDL_assert(context_);
 
-  bxr_context_t *context = bxr_context_get();
-  return context->config.resizable;
+  return context_->config.resizable;
 }

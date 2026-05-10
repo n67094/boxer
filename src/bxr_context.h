@@ -5,8 +5,8 @@
  *
  * # Boxer context
  *
- * TODO improve context API, add more functions to set/get context state (e.g.
- * window title, icon, etc.).
+ * The context module provides a global context for the game, which holds
+ * important information about the engine state and configuration.
  */
 
 #ifndef BXR_CONTEXT_H_
@@ -19,27 +19,18 @@
 
 typedef struct bxr_context_s
 {
-  Uint32 initialized;
-
   bxr_game_config_t config;
+
+  Uint64 fps; // Frames per second (rendering fixed timestep)
+  Uint64 ups; // Updates per second (game logic)
+
+  float target_delta_ms;
 
   SDL_GPUDevice *gpu_device;
   SDL_AudioDeviceID *audio_devices;
   SDL_Window *window;
-  SDL_Event *event;
-
-  Uint64 last_time_ms;
-  Uint64 lag_ms;
-  Uint64 delta_ms;
-  Uint64 alpha_ms;
-
-  int fps;
-  int ups;
-
-  SDL_GPUTexture *target_texture;
   SDL_GPUTextureFormat texture_format;
   SDL_PixelFormat pixel_format;
-  SDL_GPUCommandBuffer *cmd_buffer;
 } bxr_context_t;
 
 /**
@@ -48,13 +39,6 @@ typedef struct bxr_context_s
  * `return` Pointer to the global context instance.
  */
 bxr_context_t *bxr_context_get(void);
-
-/**
- * Check if the global context is valid (initialized).
- *
- * `return` `true` if the context is valid, `false` otherwise.
- */
-bool bxr_context_is_valid(void);
 
 /**
  * Set the window dimensions.
