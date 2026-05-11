@@ -44,7 +44,15 @@ bxr_error_get_msg(bxr_erro_code_e error)
   case BXR_ERROR_OUT_OF_MEMORY:
     return "Out of memory.";
   case BXR_ERROR_FILE_NOT_FOUND:
-    return "File not found.";
+    // bxr_asset.c errors
+  case BXR_ERROR_ASSET_READ:
+    return "Asset read error.";
+  case BXR_ERROR_ASSET_WRITE:
+    return "Asset write error.";
+  case BXR_ERROR_ASSET_MOUNT:
+    return "Asset mount error.";
+  case BXR_ERROR_ASSET_UNMOUNT:
+    return "Asset unmount error.";
   // bxr_shader.c errors
   case BXR_ERROR_SHADER_NAME:
     return "Shader name error.";
@@ -53,8 +61,8 @@ bxr_error_get_msg(bxr_erro_code_e error)
   case BXR_ERROR_SHADER_LOAD_BYTECODE:
     return "Shader load bytecode error.";
     // bxr_image.c errors
-  case BXR_ERROR_IMAGE_FILE:
-    return "Image open file error.";
+  case BXR_ERROR_IMAGE_READ:
+    return "Image read error.";
   case BXR_ERROR_IMAGE_CREATE:
     return "Image create error.";
   case BXR_ERROR_IMAGE_CREATE_MEM:
@@ -62,11 +70,6 @@ bxr_error_get_msg(bxr_erro_code_e error)
     // bxr_sampler.c errors
   case BXR_ERROR_SAMPLER_CREATE:
     return "Sampler create error.";
-    // bxr_io.c errors
-  case BXR_ERROR_IO_READ:
-    return "IO read error.";
-  case BXR_ERROR_IO_WRITE:
-    return "IO write error.";
     // bxr_json.c errors
   case BXR_ERROR_JSON_READ:
     return "JSON read error.";

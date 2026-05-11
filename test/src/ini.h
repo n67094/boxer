@@ -40,13 +40,31 @@ BXR_UNIT_CASE(case_bxr_ini_write)
   }
   BXR_UNIT_ASSERT(bxr_ini_writer_section_end(ini));
 
-  BXR_UNIT_ASSERT(bxr_ini_writer_save(ini, "test_write.ini"));
+  const Uint8 *data;
+  size_t length;
+
+  data = bxr_ini_writer_get_data(ini, &length);
+  BXR_UNIT_ASSERT(data != NULL);
+  BXR_UNIT_ASSERT(length > 0);
+
+  // Write the INI data to a file
+  bxr_asset_write("test_write.ini", data, length, false);
 
   bxr_ini_destroy_writer(ini);
 
-  // read it back to verify
+  // Read the written ini to verify the content is correct
+  // -----------------------------------------------------
 
-  bxr_ini_reader_t *read_ini = bxr_ini_create_reader("test_write.ini");
+  Uint8 *read_data;
+  size_t read_length;
+  read_data = bxr_asset_read("test_write.ini", &read_length);
+
+  // Create a reader from the read data
+  bxr_ini_reader_t *read_ini = bxr_ini_create_reader(read_data, read_length);
+
+  // Free the read data after creating the reader, as the reader has its own
+  // copy of the data
+  BXR_FREE(read_data);
 
   const char *title = bxr_ini_read_str(read_ini, "Window", "title");
   float width       = bxr_ini_read_number(read_ini, "Window", "width");
@@ -95,9 +113,13 @@ BXR_UNIT_CASE(case_bxr_ini_read)
         "tab character\n"
         "test= ; this will be ignored\n";
 
-  bxr_io_write("test_read.ini", ini_content, SDL_strlen(ini_content), false);
+  size_t ini_length = SDL_strlen(ini_content);
 
-  bxr_ini_reader_t *ini = bxr_ini_create_reader("test_read.ini");
+  // Read the written ini to verify the content is correct
+  // -----------------------------------------------------
+
+  bxr_ini_reader_t *ini
+      = bxr_ini_create_reader((const Uint8 *)ini_content, ini_length);
   BXR_UNIT_ASSERT(ini != NULL);
 
   const char *title = bxr_ini_read_str(ini, "Window", "title");

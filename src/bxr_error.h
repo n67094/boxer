@@ -14,19 +14,21 @@ typedef enum
   BXR_ERROR_NONE = 0,
   BXR_ERROR_OUT_OF_MEMORY,
   BXR_ERROR_FILE_NOT_FOUND,
+  // bxr_asset.c errors
+  BXR_ERROR_ASSET_READ,
+  BXR_ERROR_ASSET_WRITE,
+  BXR_ERROR_ASSET_MOUNT,
+  BXR_ERROR_ASSET_UNMOUNT,
   // bxr_shader.c errors
   BXR_ERROR_SHADER_NAME,
   BXR_ERROR_SHADER_FORMAT,
   BXR_ERROR_SHADER_LOAD_BYTECODE,
   // bxr_image.c errors
-  BXR_ERROR_IMAGE_FILE,
+  BXR_ERROR_IMAGE_READ,
   BXR_ERROR_IMAGE_CREATE,
   BXR_ERROR_IMAGE_CREATE_MEM,
   // bxr_sampler.c errors
   BXR_ERROR_SAMPLER_CREATE,
-  // bxr_io.c errors
-  BXR_ERROR_IO_READ,
-  BXR_ERROR_IO_WRITE,
   // bxr_json.c errors remove those error don't care
   BXR_ERROR_JSON_READ,
   BXR_ERROR_JSON_WRITE,

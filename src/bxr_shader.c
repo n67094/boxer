@@ -4,11 +4,11 @@
 
 #include <physfs.h>
 
+#include "bxr_asset.h"
 #include "bxr_config.h"
 #include "bxr_context.h"
 #include "bxr_defs.h"
 #include "bxr_error.h"
-#include "bxr_io.h"
 #include "bxr_mem.h"
 #include "bxr_shader.h"
 
@@ -93,7 +93,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
   char shader_path[BXR_PATH_MAX_LENGTH];
   SDL_snprintf(shader_path, BXR_PATH_MAX_LENGTH, "%s%s", name, file_ext);
 
-  shader_bytecode->data = bxr_io_read(shader_path, &shader_bytecode->size);
+  shader_bytecode->data = bxr_asset_read(shader_path, &shader_bytecode->size);
 
   if (shader_bytecode->data == NULL) {
     BXR_FREE(shader_bytecode);

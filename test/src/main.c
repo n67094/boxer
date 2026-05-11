@@ -11,7 +11,7 @@ static bxr_game_config_t _config = { 0 };
 bxr_game_config_t *
 bxr_game_config(void)
 {
-  _config.name  = "boxer_bxr_test";
+  _config.name  = "boxer_engine_test";
   _config.title = "Boxer Engine Test";
 
   _config.width  = 1280;
@@ -19,8 +19,6 @@ bxr_game_config(void)
 
   _config.fullscreen = false;
   _config.resizable  = true;
-
-  _config.target_ups = 60;
 
   return &_config;
 }

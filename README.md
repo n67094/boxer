@@ -12,6 +12,7 @@ A minimal, full-featured, and high-performance 2D game engine written in C99, de
 
 Features:
 
+- a virtual file system to load game assets from `.zip`, `.7Z`, etc.
 - `.bmp` and `.png` image loading and rendering support.
 - `.ini` and `.json` configuration file reading and writing capabilities.
 - Keyboard, mouse, and gamepad input handling.

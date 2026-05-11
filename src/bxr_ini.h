@@ -38,10 +38,11 @@ typedef struct bxr_ini_reader_s bxr_ini_reader_t;
  */
 
 /**
- * Load an INI file from the given path and return a reader for it.
+ * Load an INI file from the given data and return a reader for it.
  *
- * `path` is the path to the INI file to load. (c.f `bxr_io_read` for path
- * resolution).
+ * `data` is a pointer to the INI data to load.
+ *
+ * `length` is the length of the INI data in bytes.
  *
  * `return` a reader for the loaded INI file, or NULL if an error occurred. Use
  * `bxr_error_get` to get more information about the error.
@@ -49,7 +50,7 @@ typedef struct bxr_ini_reader_s bxr_ini_reader_t;
  * The caller is responsible for destroying the returned reader using
  * `bxr_ini_destroy_reader` when it is no longer needed.
  */
-bxr_ini_reader_t *bxr_ini_create_reader(const char *path);
+bxr_ini_reader_t *bxr_ini_create_reader(const Uint8 *data, size_t length);
 
 /**
  * Destroy an INI reader and free its resources.
@@ -209,16 +210,18 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
 bool bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number);
 
 /**
- * Save the INI data to a file at the given path.
+ * Get the INI data from the writer.
  *
- * `ini` is the INI writer containing the data to save.
+ * `ini` is the INI writer to get the data from.
  *
- * `path` is the path to the file to save. (c.f `bxr_io_write` for path
- * resolution).
+ * `length` is an optional output parameter to store the length of the returned
+ * data in bytes.
  *
- * `return` true if the INI data was successfully saved, or false if an error
- * occurred. Use `bxr_error_get` to get more information about the error.
+ * *
+ * `return` a pointer to the Ini data written by the writer. The caller should
+ * not modify or free this pointer, as it is owned by the JSON writer.
  */
-bool bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path);
+const Uint8 *bxr_ini_writer_get_data(const bxr_ini_writer_t *ini,
+                                     size_t *length);
 
 #endif // BXR_INI_H_
