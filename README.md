@@ -2,31 +2,57 @@
   <img src="logo.png" alt="Boxer logo" />
 </p>
 
-_The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine flat design._
+_The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form. The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine's flat design._
 
 > As long as I can remember, I've always wanted to make games. Somehow I ended up doing it, and a good way for me to enjoy this journey is to build my own game engine and share it with you, hoping it will help you too.
 
 # Boxer (Work in Progress)
 
-_"The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form."_
-
 A minimal and high-performance 2D game engine written in C99, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
+
+Features:
+
+- An entity-component system (ECS) for flexible game object management.
+- A powerful and efficient 2D painting system that allows custom graphic pipelines and shaders.
+- `.bmp` and `.png` image loading and rendering support.
+- `.ini` and `.json` configuration file reading and writing capabilities.
+- Keyboard, mouse, and gamepad input handling.
+- Math utilities for vectors, matrices, and transformations.
+- Font atlas utilities for efficient text rendering.
+
+TODO:
+
+- File resource management system.
+- Immediate mode GUI system.
+- Audio support.
+- Physics engine integration.
 
 ## Prerequisites
 
 Install the following development dependencies (via your package manager or from source):
 
+- node (for documentation generation).
 - GNUMake.
 - C compiler.
 - SDL3 (>= 3.4.2).
 
-## Build and Run
+## Project Structure
 
-Clone the repo:
+The project is organized as follows:
 
 ```bash
-git clone git@github.com:Livy-s-Quest/boxer.git
-cd boxer
+data/  # Game assets such as textures, audio, etc.
+src/   # Core engine source code.
+game/  # A game example that demonstrates how to use the engine.
+test/  # Unit tests for the engine.
+```
+
+## Build
+
+Build and run the game example by cloning the repo:
+
+```bash
+git clone git@github.com:n67094/boxer.git
 ```
 
 Debug build:
@@ -47,18 +73,15 @@ Run the example game:
 ./my_game
 ```
 
-let's make it roar!
-
-# Project Structure
-
-The project is organized as follows:
+Build Docs:
 
 ```bash
-data/  # Game assets such as textures, audio, etc.
-src/ # Core engine source code
-game/  # Your game source code
-test/  # Unit tests for the engine (take a look to see examples on how to use the engine)
+make docs
 ```
+
+Documentation files will be generated in the `docs/` directory as Markdown files.
+
+_let's make it roar!_
 
 # Sponsors
 
