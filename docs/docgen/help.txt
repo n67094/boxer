@@ -1,0 +1,1 @@
+docgen [-h] [-l] [-o <output-file>] <header-file>
