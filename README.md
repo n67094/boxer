@@ -55,6 +55,7 @@ Build and run the game example by cloning the repo:
 
 ```bash
 git clone git@github.com:n67094/boxer.git
+git submodule update --init --recursive
 ```
 
 Debug build:
