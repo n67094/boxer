@@ -4,21 +4,21 @@
 
 _The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form. The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine's flat design._
 
-> As long as I can remember, I've always wanted to make games. Somehow I ended up doing it, and a good way for me to enjoy this journey is to build my own game engine and share it with you, hoping it will help you too.
+> As long as I can remember, I've always wanted to make games. Somehow I ended up doing it, and a good way for me to enjoy this journey is to build my own game engine and share it with you, hoping it will help you along yours.
 
 # Boxer (Work in Progress)
 
-A minimal and high-performance 2D game engine written in C99, designed so you can easily build your game around it, favoring direct inclusion rather than linking as a static or shared library.
+A minimal, full-featured, and high-performance 2D game engine written in C99, designed to let you easily build your game around it, favoring direct inclusion over linking as a static or shared library.
 
 Features:
 
-- An entity-component system (ECS) for flexible game object management.
-- A powerful and efficient 2D painting system that allows custom graphic pipelines and shaders.
 - `.bmp` and `.png` image loading and rendering support.
 - `.ini` and `.json` configuration file reading and writing capabilities.
 - Keyboard, mouse, and gamepad input handling.
 - Math utilities for vectors, matrices, and transformations.
 - Font atlas utilities for efficient text rendering.
+- A powerful and efficient 2D painting system that allows custom graphic pipelines and shaders.
+- An entity-component system (ECS) for flexible game object management.
 
 TODO:
 
@@ -94,4 +94,4 @@ You can also check out my blog at www.nsix.blog.
 
 # License
 
-This project is licensed under the zlib License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the `zlib` License. See the [LICENSE](LICENSE) file for details.
