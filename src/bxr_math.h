@@ -10,36 +10,69 @@
 #define BXR_MATH_H_
 
 #include <float.h>
-#include <math.h>
 
 #include <SDL3/SDL.h>
 
 #include "bxr_defs.h"
 
-#define BXR_EPSILON 1e-5f
+#define BXR_PI_D SDL_PI_D
+#define BXR_PI_F SDL_PI_F
+#define BXR_PI2_F (2.0f * SDL_PI_F)
+#define BXR_PI2_D (2.0f * SDL_PI_D)
 
-#define BXR_PI 3.14159265359f
-#define BXR_PI2 (2.0f * BXR_PI)
-#define BXR_E 2.71828182845f
+#define BXR_EPSILON SDL_FLT_EPSILON
+#define BXR_FLOAT_MIN FLT_MIN
+#define BXR_FLOAT_MAX FLT_MAX
 
-#define FLOAT_MIN FLT_MIN
-#define FLOAT_MAX FLT_MAX
-
-#define bxr_sqrt sqrtf
-#define bxr_cos cosf
-#define bxr_sin sinf
-#define bxr_acos acosf
-#define bxr_asin asinf
-#define bxr_atan2 atan2f
-#define bxr_abs fabsf
-#define bxr_fmod fmodf
-#define bxr_exp expf
-#define bxr_pow powf
-#define bxr_floor floorf
-#define bxr_ceil ceilf
-#define bxr_log2 log2f
-#define bxr_max fmaxf
-#define bxr_min fminf
+#define bxr_abs SDL_abs
+#define bxr_min SDL_min
+#define bxr_max SDL_max
+#define bxr_clamp SDL_clamp
+#define bxr_acos SDL_acos
+#define bxr_acosf SDL_acosf
+#define bxr_asin SDL_asin
+#define bxr_asinf SDL_asinf
+#define bxr_atan SDL_atan
+#define bxr_atanf SDL_atanf
+#define bxr_atan2 SDL_atan2
+#define bxr_atan2f SDL_atan2f
+#define bxr_ceil SDL_ceil
+#define bxr_ceilf SDL_ceilf
+#define bxr_copysign SDL_copysign
+#define bxr_copysignf SDL_copysignf
+#define bxr_cos SDL_cos
+#define bxr_cosf SDL_cosf
+#define bxr_exp SDL_exp
+#define bxr_expf SDL_expf
+#define bxr_fabs SDL_fabs
+#define bxr_fabsf SDL_fabsf
+#define bxr_floor SDL_floor
+#define bxr_floorf SDL_floorf
+#define bxr_trunc SDL_trunc
+#define bxr_truncf SDL_truncf
+#define bxr_fmod SDL_fmod
+#define bxr_fmodf SDL_fmodf
+#define bxr_fmodf SDL_fmodf
+#define bxr_isinf SDL_isinf
+#define bxr_isinff SDL_isinff
+#define bxr_isnan SDL_isnan
+#define bxr_isnanf SDL_isnanf
+#define bxr_modf SDL_modf
+#define bxr_modff SDL_modff
+#define bxr_pow SDL_pow
+#define bxr_powf SDL_powf
+#define bxr_round SDL_round
+#define bxr_roundf SDL_roundf
+#define bxr_lround SDL_lround
+#define bxr_lroundf SDL_lroundf
+#define bxr_scalbn SDL_scalbn
+#define bxr_scalbnf SDL_scalbnf
+#define bxr_sin SDL_sin
+#define bxr_sinf SDL_sinf
+#define bxr_sqrt SDL_sqrt
+#define bxr_sqrtf SDL_sqrtf
+#define bxr_tan SDL_tan
+#define bxr_tanf SDL_tanf
 
 typedef struct bxr_vec2_s
 {
@@ -51,32 +84,6 @@ typedef bxr_vec2_t bxr_point_t;
 /**
  * ## Scalar Functions and Macros
  */
-
-/**
- * `return` the minimum of `a` and `b`.
- */
-#define BXR_MIN(a, b) (((a) < (b)) ? (a) : (b))
-
-/**
- * `return` the maximum of `a` and `b`.
- */
-#define BXR_MAX(a, b) (((a) > (b)) ? (a) : (b))
-
-/**
- * Clamps the value to the given range.
- *
- * `val` is the value to clamp.
- *
- * `min` is the minimum value of the range.
- *
- * `max` is the maximum value of the range.
- *
- */
-inline float
-bxr_clamp(float val, float min, float max)
-{
-  return ((val < min) ? min : ((val > max) ? max : val));
-}
 
 /**
  * Computes the sign of the number.
@@ -132,10 +139,10 @@ bxr_lerp_angle(float angle1, float angle2, float step)
 {
   float diff = angle2 - angle1;
 
-  if (diff < -BXR_PI)
-    diff += BXR_PI2;
-  else if (diff > BXR_PI)
-    diff -= BXR_PI2;
+  if (diff < -BXR_PI_F)
+    diff += BXR_PI2_F;
+  else if (diff > BXR_PI_F)
+    diff -= BXR_PI2_F;
 
   return angle1 + diff * step;
 }
@@ -150,11 +157,11 @@ bxr_lerp_angle(float angle1, float angle2, float step)
 BXR_INLINE float
 bxr_normalize_angle(float angle)
 {
-  while (angle >= BXR_PI2)
-    angle -= BXR_PI2;
+  while (angle >= BXR_PI2_F)
+    angle -= BXR_PI2_F;
 
   while (angle < 0.0f)
-    angle += BXR_PI2;
+    angle += BXR_PI2_F;
 
   return angle;
 }
@@ -166,7 +173,7 @@ bxr_normalize_angle(float angle)
 /**
  * Constructs a point.
  */
-#define bxr_point_make(x, y) ((const bxr_point_t){ x, y })
+#define bxr_point_create(x, y) ((const bxr_point_t){ x, y })
 
 /**
  * Vectors 2
@@ -175,7 +182,7 @@ bxr_normalize_angle(float angle)
 /**
  * Constructs a vector.
  */
-#define bxr_vec2_make(x, y) ((const bxr_vec2_t){ x, y })
+#define bxr_vec2_create(x, y) ((const bxr_vec2_t){ x, y })
 
 /**
  * `returns` true if the vectors are equal (within epsilon).
@@ -192,7 +199,7 @@ bxr_vec2_equal(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_add(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x + v2.x, v1.y + v2.y);
+  return bxr_vec2_create(v1.x + v2.x, v1.y + v2.y);
 }
 
 /**
@@ -201,7 +208,7 @@ bxr_vec2_add(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_sub(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x - v2.x, v1.y - v2.y);
+  return bxr_vec2_create(v1.x - v2.x, v1.y - v2.y);
 }
 
 /**
@@ -211,7 +218,7 @@ bxr_vec2_sub(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_mul(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x * v2.x, v1.y * v2.y);
+  return bxr_vec2_create(v1.x * v2.x, v1.y * v2.y);
 }
 
 /**
@@ -220,7 +227,7 @@ bxr_vec2_mul(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_div(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(v1.x / v2.x, v1.y / v2.y);
+  return bxr_vec2_create(v1.x / v2.x, v1.y / v2.y);
 }
 
 /**
@@ -229,7 +236,7 @@ bxr_vec2_div(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_scale(bxr_vec2_t v, float c)
 {
-  return bxr_vec2_make(v.x * c, v.y * c);
+  return bxr_vec2_create(v.x * c, v.y * c);
 }
 
 /**
@@ -269,7 +276,7 @@ bxr_vec2_normalize(bxr_vec2_t v)
   float c = bxr_vec2_len(v);
 
   if (c < BXR_EPSILON)
-    return bxr_vec2_make(0.0f, 0.0f);
+    return bxr_vec2_create(0.0f, 0.0f);
   else
     return bxr_vec2_scale(v, 1.0f / c);
 }
@@ -289,7 +296,7 @@ bxr_vec2_reflect(bxr_vec2_t v)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_perp(bxr_vec2_t v)
 {
-  return bxr_vec2_make(-v.y, v.x);
+  return bxr_vec2_create(-v.y, v.x);
 }
 
 /**
@@ -308,7 +315,7 @@ bxr_vec2_cross(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE float
 bxr_vec2_angle(bxr_vec2_t v)
 {
-  return atan2(v.y, v.x);
+  return bxr_atan2(v.y, v.x);
 }
 
 /**
@@ -350,7 +357,7 @@ bxr_vec2_lerp(bxr_vec2_t v1, bxr_vec2_t v2, float step)
 /**
  * `returns` the zero vector.
  */
-#define bxr_vec2_t_zero() (bxr_vec2_make(0.0f, 0.0f))
+#define bxr_vec2_t_zero() (bxr_vec2_create(0.0f, 0.0f))
 
 /**
  * `return` a vector in polar coordinates.
@@ -358,7 +365,7 @@ bxr_vec2_lerp(bxr_vec2_t v1, bxr_vec2_t v2, float step)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_polar(float angle, float len)
 {
-  return bxr_vec2_make(len * bxr_cos(angle), len * bxr_sin(angle));
+  return bxr_vec2_create(len * bxr_cos(angle), len * bxr_sin(angle));
 }
 
 /**
@@ -367,7 +374,7 @@ bxr_vec2_polar(float angle, float len)
 BXR_INLINE bxr_vec2_t
 vec2_min(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(bxr_min(v1.x, v2.x), bxr_min(v1.y, v2.y));
+  return bxr_vec2_create(bxr_min(v1.x, v2.x), bxr_min(v1.y, v2.y));
 }
 
 /**
@@ -376,7 +383,7 @@ vec2_min(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 vec2_max(bxr_vec2_t v1, bxr_vec2_t v2)
 {
-  return bxr_vec2_make(bxr_max(v1.x, v2.x), bxr_max(v1.y, v2.y));
+  return bxr_vec2_create(bxr_max(v1.x, v2.x), bxr_max(v1.y, v2.y));
 }
 
 /**
@@ -385,7 +392,7 @@ vec2_max(bxr_vec2_t v1, bxr_vec2_t v2)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_floor(bxr_vec2_t v)
 {
-  return bxr_vec2_make(bxr_floor(v.x), bxr_floor(v.y));
+  return bxr_vec2_create(bxr_floor(v.x), bxr_floor(v.y));
 }
 
 /**
@@ -394,7 +401,7 @@ bxr_vec2_floor(bxr_vec2_t v)
 BXR_INLINE bxr_vec2_t
 bxr_vec2_ceil(bxr_vec2_t v)
 {
-  return bxr_vec2_make(bxr_ceil(v.x), bxr_ceil(v.y));
+  return bxr_vec2_create(bxr_ceil(v.x), bxr_ceil(v.y));
 }
 
 /**
@@ -410,7 +417,7 @@ typedef struct bxr_line_s
 /**
  * Construct a line
  */
-#define bxr_line_make(ax, ay, bx, by)                                          \
+#define bxr_line_create(ax, ay, bx, by)                                        \
   ((const bxr_line_t){ { ax, ay }, { bx, by } })
 
 /**
@@ -427,7 +434,7 @@ typedef struct bxr_triangle_s
 /**
  * Construct a triangle
  */
-#define bxr_triangle_make(ax, ay, bx, by, cx, cy)                              \
+#define bxr_triangle_create(ax, ay, bx, by, cx, cy)                            \
   ((const bxr_triangle_t){ { ax, ay }, { bx, by }, { cx, cy } })
 
 /**
@@ -442,7 +449,7 @@ typedef struct bxr_rect_s
 /**
  * Construct a rectangle
  */
-#define bxr_rect_make(x, y, w, h) ((const bxr_rect_t){ x, y, w, h })
+#define bxr_rect_create(x, y, w, h) ((const bxr_rect_t){ x, y, w, h })
 
 /**
  * `returns` the area of the rectangle
@@ -491,7 +498,7 @@ bxr_rect_get_intersection(bxr_rect_t r1, bxr_rect_t r2)
   if (h < y)
     h = y;
 
-  return bxr_rect_make(x, y, w - x, h - y);
+  return bxr_rect_create(x, y, w - x, h - y);
 }
 
 /**
@@ -549,10 +556,10 @@ bxr_rect_adjacent(bxr_rect_t r1, bxr_rect_t r2)
 BXR_INLINE bxr_rect_t
 bxr_rect_expand(bxr_rect_t rect, float amount)
 {
-  return bxr_rect_make(rect.x - amount,
-                       rect.y - amount,
-                       rect.w + 2 * amount,
-                       rect.h + 2 * amount);
+  return bxr_rect_create(rect.x - amount,
+                         rect.y - amount,
+                         rect.w + 2 * amount,
+                         rect.h + 2 * amount);
 }
 
 /**
@@ -562,10 +569,10 @@ bxr_rect_expand(bxr_rect_t rect, float amount)
 bxr_rect_t BXR_INLINE
 bxr_rect_contract(bxr_rect_t rect, float amount)
 {
-  return bxr_rect_make(rect.x + amount,
-                       rect.y + amount,
-                       rect.w - 2 * amount,
-                       rect.h - 2 * amount);
+  return bxr_rect_create(rect.x + amount,
+                         rect.y + amount,
+                         rect.w - 2 * amount,
+                         rect.h - 2 * amount);
 }
 
 /**
@@ -581,7 +588,7 @@ typedef struct bxr_textured_rect_s
 /**
  * Construct a textured rectangle.
  */
-#define bxr_textured_rect_make(dst, src)                                       \
+#define bxr_textured_rect_create(dst, src)                                     \
   ((const bxr_textured_rect_t){ dst, src })
 
 /**
@@ -596,6 +603,7 @@ typedef struct bxr_region_s
 /**
  * Construct a region
  */
-#define bxr_region_make(x0, y0, x1, y1) ((const bxr_region_t){ x0, y0, x1, y1 })
+#define bxr_region_create(x0, y0, x1, y1)                                      \
+  ((const bxr_region_t){ x0, y0, x1, y1 })
 
 #endif // BXR_MATH_H_

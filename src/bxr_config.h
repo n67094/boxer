@@ -16,62 +16,42 @@
  */
 
 /**
+ * Max path length in characters
+ */
+#define BXR_PATH_MAX_LENGTH 512
+
+/**
+ * ## Filesystem Configuration
+ */
+
+/**
  * The directory where game assets are located (relative to the executable)
  */
 #define BXR_DATA_DIR "data"
 
 /**
- * Max path length in characters
- */
-#define BXR_PATH_MAX 512
-
-/**
- * ## Painter Resources
- */
-
-/**
- * Max texture dimension in pixels
- */
-#define BXR_PAINTER_TEXTURE_DIMENSION_MAX 4096
-
-/**
- * Max number of images that can be loaded at the same time
- */
-#define BXR_PAINTER_IMAGE_MAX 64
-
-/**
- * Max number of shaders that can be loaded at the same time
- */
-#define BXR_PAINTER_SHADER_MAX 8
-
-/**
- * Max number of pipelines that can be created at the same time
- */
-#define BXR_PAINTER_PIPELINE_MAX 64
-
-/**
- * ## Painter Limitations
+ * ## Painter Configuration
  */
 
 /**
  * Max number of painters state that can be used simultaneously (per frame)
  */
-#define BXR_PAINTER_STATE_MAX 16
+#define BXR_PAINTER_MAX_STATE 16
 
 /**
  * Max number of textures that can be bound at the same time (per draw call)
  */
-#define BXR_PAINTER_TEXTURE_SLOTS_MAX 4
+#define BXR_PAINTER_MAX_TEXTURE_SLOTS 4
 
 /**
  * Max number of transforms that can be pushed at the same time (per frame)
  */
-#define BXR_PAINTER_TRANSFORMS_MAX 64
+#define BXR_PAINTER_MAX_TRANSFORMS 64
 
 /**
  * Max number of float (4-bytes) uniforms that can be set in a shader
  */
-#define BXR_PAINTER_UNIFORM_FLOATS_MAX 8
+#define BXR_PAINTER_MAX_UNIFORM_FLOATS 8
 
 /**
  * Max number of commands that are looked back and batched together for
@@ -80,7 +60,37 @@
 #define BXR_PAINTER_OPTIMIZER_DEPTH 8
 
 /**
- * INI Reader/Writer Limitations
+ * ## Painter Resources Configuration
+ */
+
+/**
+ * Max texture dimension in pixels
+ */
+#define BXR_PAINTER_MAX_TEXTURE_DIMENSION 4096
+
+/**
+ * Max number of images that can be loaded at the same time
+ */
+#define BXR_PAINTER_MAX_IMAGE 64
+
+/**
+ * Max number of shaders that can be loaded at the same time
+ */
+#define BXR_PAINTER_MAX_SHADER 8
+
+/**
+ * Max number of pipelines that can be created at the same time
+ */
+#define BXR_PAINTER_MAX_PIPELINE 64
+
+/**
+ * Max number of commands that are looked back and batched together for
+ * optimization
+ */
+#define BXR_PAINTER_MAX_OPTIMIZER_DEPTH 8
+
+/**
+ * ## INI Reader/Writer Configuration
  */
 
 /**
@@ -96,7 +106,26 @@
 #define BXR_INI_DEFAULT_DATA_CAPACITY 512
 
 /**
- * UI Limitations
+ * ## ECS Configuration
+ */
+
+/**
+ * Default number of entities that can be created at the same time.
+ */
+#define BXR_ECS_DEFAULT_ENTITY 256
+
+/**
+ * max number of components that can be defined at the same time.
+ */
+#define BXR_ECS_MAX_COMPONENT 32
+
+/**
+ * max number of systems that can be defined at the same time.
+ */
+#define BXR_ECS_MAX_SYSTEM 16
+
+/**
+ * ## UI Configuration
  */
 
 /* TODO re-add UI implementation

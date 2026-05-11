@@ -6,7 +6,7 @@
 #include "bxr_io.h"
 #include "bxr_json.h"
 
-struct bxr_jsonr_s
+struct bxr_json_reader_s
 {
   char *data;
   char *cursor;
@@ -15,7 +15,7 @@ struct bxr_jsonr_s
 };
 
 static bool
-bxr_jsonr_is_string(char *cursor, char *end, char *expect)
+bxr_json_reader_is_string_(char *cursor, char *end, char *expect)
 {
   while (*expect) {
     if (cursor == end || *cursor != *expect) {
@@ -28,21 +28,21 @@ bxr_jsonr_is_string(char *cursor, char *end, char *expect)
 }
 
 static void
-bxr_jsonr_discard_until(bxr_jsonr_t *json, int depth)
+bxr_json_reader_discard_until_(bxr_json_reader_t *json, int depth)
 {
-  bxr_jsonr_token_t token;
+  bxr_json_token_t token;
   token.type = BXR_JSON_NULL;
   while (json->depth != depth && token.type != BXR_JSON_ERROR) {
-    token = bxr_jsonr_read(json);
+    token = bxr_json_read_token(json);
   }
 }
 
-bxr_jsonr_t *
-bxr_jsonr_make(const char *path)
+bxr_json_reader_t *
+bxr_json_create_reader(const char *path)
 {
   SDL_assert(path);
 
-  bxr_jsonr_t *json = NULL;
+  bxr_json_reader_t *json = NULL;
   BXR_NEW(json);
   if (!json) {
     return NULL;
@@ -53,12 +53,13 @@ bxr_jsonr_make(const char *path)
 
   BXR_ALLOC(json->data, length + 1); // +1 for null-terminator
   if (!json->data) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(data);
     BXR_FREE(json);
     return NULL;
   }
 
-  SDL_memcpy(json->data, data, length);
+  BXR_MEMCPY(json->data, data, length);
 
   BXR_FREE(data);
 
@@ -71,7 +72,7 @@ bxr_jsonr_make(const char *path)
 }
 
 void
-bxr_jsonr_destroy(bxr_jsonr_t *json)
+bxr_json_destroy_reader(bxr_json_reader_t *json)
 {
   SDL_assert(json);
 
@@ -82,12 +83,12 @@ bxr_jsonr_destroy(bxr_jsonr_t *json)
   BXR_FREE(json);
 }
 
-bxr_jsonr_token_t
-bxr_jsonr_read(bxr_jsonr_t *json)
+bxr_json_token_t
+bxr_json_read_token(bxr_json_reader_t *json)
 {
   SDL_assert(json);
 
-  bxr_jsonr_token_t token = { 0 };
+  bxr_json_token_t token = { 0 };
 
 top:
   if (token.type == BXR_JSON_ERROR) {
@@ -96,7 +97,7 @@ top:
 
   if (json->cursor >= json->end) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unexpected end of JSON.");
-    bxr_set_error(BXR_ERROR_JSON_READ);
+    bxr_error_set(BXR_ERROR_JSON_READ);
 
     token.type  = BXR_JSON_ERROR;
     token.start = json->cursor;
@@ -146,7 +147,7 @@ top:
     while (0) {                   // Reading string
       if (json->cursor >= json->end) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unexpected end of JSON.");
-        bxr_set_error(BXR_ERROR_JSON_READ);
+        bxr_error_set(BXR_ERROR_JSON_READ);
 
         token.type  = BXR_JSON_ERROR;
         token.start = json->cursor;
@@ -182,7 +183,7 @@ top:
     if (--json->depth < 0) {
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                    "Mismatched closing bracket in JSON.");
-      bxr_set_error(BXR_ERROR_JSON_READ);
+      bxr_error_set(BXR_ERROR_JSON_READ);
       goto top;
     }
     json->cursor++;
@@ -192,15 +193,15 @@ top:
   case 'f':
     token.type = (*json->cursor == 'n') ? BXR_JSON_NULL : BXR_JSON_BOOL;
 
-    if (bxr_jsonr_is_string(json->cursor, json->end, "null")) {
+    if (bxr_json_reader_is_string_(json->cursor, json->end, "null")) {
       json->cursor += 4;
       break;
     }
-    if (bxr_jsonr_is_string(json->cursor, json->end, "true")) {
+    if (bxr_json_reader_is_string_(json->cursor, json->end, "true")) {
       json->cursor += 4;
       break;
     }
-    if (bxr_jsonr_is_string(json->cursor, json->end, "false")) {
+    if (bxr_json_reader_is_string_(json->cursor, json->end, "false")) {
       json->cursor += 5;
       break;
     }
@@ -209,7 +210,7 @@ top:
                  "Unexpected character '%c' in JSON. at position %td",
                  *json->cursor,
                  json->cursor - json->data);
-    bxr_set_error(BXR_ERROR_JSON_READ);
+    bxr_error_set(BXR_ERROR_JSON_READ);
     goto top;
   }
 
@@ -218,10 +219,10 @@ top:
 }
 
 int
-bxr_jsonr_iter_object(bxr_jsonr_t *reader,
-                      bxr_jsonr_token_t *obj,
-                      bxr_jsonr_token_t *key,
-                      bxr_jsonr_token_t *value)
+bxr_json_reader_iter_object(bxr_json_reader_t *reader,
+                            bxr_json_token_t *obj,
+                            bxr_json_token_t *key,
+                            bxr_json_token_t *value)
 {
   SDL_assert(reader);
   SDL_assert(obj);
@@ -229,9 +230,9 @@ bxr_jsonr_iter_object(bxr_jsonr_t *reader,
   SDL_assert(value);
 
   // Discard remainings token until we are at object depth
-  bxr_jsonr_discard_until(reader, obj->depht);
+  bxr_json_reader_discard_until_(reader, obj->depht);
 
-  *key = bxr_jsonr_read(reader);
+  *key = bxr_json_read_token(reader);
   if (key->type == BXR_JSON_END) {
     return 0;
   }
@@ -241,7 +242,7 @@ bxr_jsonr_iter_object(bxr_jsonr_t *reader,
     return -1;
   }
 
-  *value = bxr_jsonr_read(reader);
+  *value = bxr_json_read_token(reader);
   if (value->type == BXR_JSON_END) {
     return 0;
   }
@@ -255,18 +256,18 @@ bxr_jsonr_iter_object(bxr_jsonr_t *reader,
 }
 
 int
-bxr_jsonr_iter_array(bxr_jsonr_t *reader,
-                     bxr_jsonr_token_t *arr,
-                     bxr_jsonr_token_t *value)
+bxr_json_reader_iter_array(bxr_json_reader_t *reader,
+                           bxr_json_token_t *arr,
+                           bxr_json_token_t *value)
 {
   SDL_assert(reader);
   SDL_assert(arr);
   SDL_assert(value);
 
   // Discard remainings token until we are at array depth
-  bxr_jsonr_discard_until(reader, arr->depht);
+  bxr_json_reader_discard_until_(reader, arr->depht);
 
-  *value = bxr_jsonr_read(reader);
+  *value = bxr_json_read_token(reader);
   if (value->type == BXR_JSON_END) {
     return 0;
   }
@@ -280,33 +281,33 @@ bxr_jsonr_iter_array(bxr_jsonr_t *reader,
 }
 
 bool
-bxr_jsonr_eq_str(bxr_jsonr_token_t *key, const char *expected)
+bxr_json_reader_eq_str(bxr_json_token_t *key, const char *expected)
 {
   SDL_assert(key);
   SDL_assert(expected);
 
   size_t len = key->end - key->start;
-  return SDL_strlen(expected) == len && !SDL_memcmp(expected, key->start, len);
+  return SDL_strlen(expected) == len && !BXR_MEMCMP(expected, key->start, len);
 }
 
 bool
-bxr_jsonr_eq_number(bxr_jsonr_token_t *key, float expected)
+bxr_json_reader_eq_number(bxr_json_token_t *key, float expected)
 {
   SDL_assert(key->type == BXR_JSON_NUMBER);
 
-  return bxr_jsonr_token_number(key) == expected;
+  return bxr_json_read_token_number(key) == expected;
 }
 
 bool
-bxr_jsonr_eq_bool(bxr_jsonr_token_t *key, bool expected)
+bxr_json_reader_eq_bool(bxr_json_token_t *key, bool expected)
 {
   SDL_assert(key->type == BXR_JSON_BOOL);
 
-  return bxr_jsonr_token_bool(key) == expected;
+  return bxr_json_read_token_bool(key) == expected;
 }
 
 const char *
-bxr_jsonr_token_str(bxr_jsonr_token_t *token)
+bxr_json_read_token_str(bxr_json_token_t *token)
 {
   SDL_assert(token->type == BXR_JSON_STRING);
 
@@ -314,7 +315,7 @@ bxr_jsonr_token_str(bxr_jsonr_token_t *token)
 }
 
 float
-bxr_jsonr_token_number(bxr_jsonr_token_t *token)
+bxr_json_read_token_number(bxr_json_token_t *token)
 {
   SDL_assert(token->type == BXR_JSON_NUMBER);
 
@@ -322,7 +323,7 @@ bxr_jsonr_token_number(bxr_jsonr_token_t *token)
 }
 
 bool
-bxr_jsonr_token_bool(bxr_jsonr_token_t *token)
+bxr_json_read_token_bool(bxr_json_token_t *token)
 {
   SDL_assert(token->type == BXR_JSON_BOOL);
 
@@ -332,7 +333,7 @@ bxr_jsonr_token_bool(bxr_jsonr_token_t *token)
 
 // ----------------------------------------------------------------------------
 
-struct bxr_jsonw_s
+struct bxr_json_writer_s
 {
   char *data;
   size_t size;
@@ -343,7 +344,7 @@ struct bxr_jsonw_s
 };
 
 static bool
-bxr_jsonw_append(bxr_jsonw_t *json, const char *str)
+bxr_json_writer_append_(bxr_json_writer_t *json, const char *str)
 {
   size_t len      = str ? SDL_strlen(str) : 0;
   size_t new_size = json->size + len;
@@ -352,10 +353,10 @@ bxr_jsonw_append(bxr_jsonw_t *json, const char *str)
     size_t new_capacity = json->capacity * 2;
     char *new_data      = NULL;
     BXR_ALLOC(new_data, new_capacity);
-    if (new_data == NULL) {
+    if (!new_data) {
       return false;
     }
-    SDL_memcpy(new_data, json->data, json->size);
+    BXR_MEMCPY(new_data, json->data, json->size);
     BXR_FREE(json->data);
 
     json->data     = new_data;
@@ -369,12 +370,12 @@ bxr_jsonw_append(bxr_jsonw_t *json, const char *str)
 }
 
 static bool
-bxr_jsonw_comma(bxr_jsonw_t *writer)
+bxr_json_writer_comma_(bxr_json_writer_t *writer)
 {
   bool is_ok = true;
 
   if (writer->needs_comma) {
-    is_ok = bxr_jsonw_append(writer, ",");
+    is_ok = bxr_json_writer_append_(writer, ",");
   }
 
   writer->needs_comma = true;
@@ -383,9 +384,9 @@ bxr_jsonw_comma(bxr_jsonw_t *writer)
 }
 
 static bool
-bxr_jsonw_append_escaped(bxr_jsonw_t *json, const char *str)
+bxr_json_writer_append_escaped_(bxr_json_writer_t *json, const char *str)
 {
-  if (!bxr_jsonw_append(json, "\"")) {
+  if (!bxr_json_writer_append_(json, "\"")) {
     return false;
   }
 
@@ -394,56 +395,61 @@ bxr_jsonw_append_escaped(bxr_jsonw_t *json, const char *str)
   for (const char *c = str; *c && is_ok; c++) {
     switch (*c) {
     case '\"':
-      is_ok = bxr_jsonw_append(json, "\\\"");
+      is_ok = bxr_json_writer_append_(json, "\\\"");
       break;
     case '\\':
-      is_ok = bxr_jsonw_append(json, "\\\\");
+      is_ok = bxr_json_writer_append_(json, "\\\\");
       break;
     case '\b':
-      is_ok = bxr_jsonw_append(json, "\\b");
+      is_ok = bxr_json_writer_append_(json, "\\b");
       break;
     case '\f':
-      is_ok = bxr_jsonw_append(json, "\\f");
+      is_ok = bxr_json_writer_append_(json, "\\f");
       break;
     case '\n':
-      is_ok = bxr_jsonw_append(json, "\\n");
+      is_ok = bxr_json_writer_append_(json, "\\n");
       break;
     case '\r':
-      is_ok = bxr_jsonw_append(json, "\\r");
+      is_ok = bxr_json_writer_append_(json, "\\r");
       break;
     case '\t':
-      is_ok = bxr_jsonw_append(json, "\\t");
+      is_ok = bxr_json_writer_append_(json, "\\t");
       break;
     default:
       if ((unsigned char)*c < 0x20) {
         char buf[7];
         SDL_snprintf(buf, sizeof(buf), "\\u%04x", (unsigned char)*c);
-        is_ok = bxr_jsonw_append(json, buf);
+        is_ok = bxr_json_writer_append_(json, buf);
       } else {
         char buf[2] = { *c, '\0' };
-        is_ok       = bxr_jsonw_append(json, buf);
+        is_ok       = bxr_json_writer_append_(json, buf);
       }
       break;
     }
   }
 
   if (is_ok) {
-    is_ok = bxr_jsonw_append(json, "\"");
+    is_ok = bxr_json_writer_append_(json, "\"");
   }
 
   return is_ok;
 }
 
-bxr_jsonw_t *
-bxr_jsonw_make()
+bxr_json_writer_t *
+bxr_json_create_writer()
 {
-  bxr_jsonw_t *json = NULL;
+  bxr_json_writer_t *json = NULL;
   BXR_NEW(json);
+  if (!json) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    return NULL;
+  }
 
   json->data = NULL;
   BXR_ALLOC(json->data, BXR_JSON_DEFAULT_DATA_CAPACITY);
 
   if (json->data == NULL) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(json);
     return NULL;
   }
@@ -460,7 +466,7 @@ bxr_jsonw_make()
 }
 
 void
-bxr_jsonw_destroy(bxr_jsonw_t *json)
+bxr_json_destroy_writer(bxr_json_writer_t *json)
 {
   SDL_assert(json);
 
@@ -471,14 +477,14 @@ bxr_jsonw_destroy(bxr_jsonw_t *json)
 }
 
 bool
-bxr_jsonw_object_begin(bxr_jsonw_t *json)
+bxr_json_writer_object_begin(bxr_json_writer_t *json)
 {
   SDL_assert(json);
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_comma(json);
-  is_ok &= bxr_jsonw_append(json, "{");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, "{");
 
   json->depth++;
   json->needs_comma = false;
@@ -487,12 +493,12 @@ bxr_jsonw_object_begin(bxr_jsonw_t *json)
 }
 
 bool
-bxr_jsonw_object_end(bxr_jsonw_t *json)
+bxr_json_writer_object_end(bxr_json_writer_t *json)
 {
   SDL_assert(json->depth > 0);
   SDL_assert(json->data);
 
-  if (!bxr_jsonw_append(json, "}")) {
+  if (!bxr_json_writer_append_(json, "}")) {
     return false;
   }
 
@@ -503,14 +509,14 @@ bxr_jsonw_object_end(bxr_jsonw_t *json)
 }
 
 bool
-bxr_jsonw_array_begin(bxr_jsonw_t *json)
+bxr_json_writer_array_begin(bxr_json_writer_t *json)
 {
   SDL_assert(json);
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_comma(json);
-  is_ok &= bxr_jsonw_append(json, "[");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, "[");
 
   json->depth++;
   json->needs_comma = false;
@@ -519,12 +525,12 @@ bxr_jsonw_array_begin(bxr_jsonw_t *json)
 }
 
 bool
-bxr_jsonw_array_end(bxr_jsonw_t *json)
+bxr_json_writer_array_end(bxr_json_writer_t *json)
 {
   SDL_assert(json->depth > 0);
   SDL_assert(json->data);
 
-  if (!bxr_jsonw_append(json, "]")) {
+  if (!bxr_json_writer_append_(json, "]")) {
     return false;
   }
 
@@ -535,16 +541,16 @@ bxr_jsonw_array_end(bxr_jsonw_t *json)
 }
 
 bool
-bxr_jsonw_key(bxr_jsonw_t *json, const char *key)
+bxr_json_write_key(bxr_json_writer_t *json, const char *key)
 {
   SDL_assert(json);
   SDL_assert(key);
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_comma(json);
-  is_ok &= bxr_jsonw_append_escaped(json, key);
-  is_ok &= bxr_jsonw_append(json, ":");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_escaped_(json, key);
+  is_ok &= bxr_json_writer_append_(json, ":");
 
   json->needs_comma = false;
 
@@ -552,15 +558,15 @@ bxr_jsonw_key(bxr_jsonw_t *json, const char *key)
 }
 
 bool
-bxr_jsonw_str(bxr_jsonw_t *json, const char *value)
+bxr_json_write_str(bxr_json_writer_t *json, const char *value)
 {
   SDL_assert(json);
   SDL_assert(value);
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_comma(json);
-  is_ok &= bxr_jsonw_append_escaped(json, value);
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_escaped_(json, value);
 
   json->needs_comma = true;
 
@@ -568,7 +574,7 @@ bxr_jsonw_str(bxr_jsonw_t *json, const char *value)
 }
 
 bool
-bxr_jsonw_number(bxr_jsonw_t *json, float number)
+bxr_json_write_number(bxr_json_writer_t *json, float number)
 {
   SDL_assert(json);
 
@@ -577,8 +583,8 @@ bxr_jsonw_number(bxr_jsonw_t *json, float number)
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_comma(json);
-  is_ok &= bxr_jsonw_append(json, number_str);
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, number_str);
 
   json->needs_comma = true;
 
@@ -586,14 +592,14 @@ bxr_jsonw_number(bxr_jsonw_t *json, float number)
 }
 
 bool
-bxr_jsonw_bool(bxr_jsonw_t *json, bool value)
+bxr_json_write_bool(bxr_json_writer_t *json, bool value)
 {
   SDL_assert(json);
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_comma(json);
-  is_ok &= bxr_jsonw_append(json, value ? "true" : "false");
+  is_ok &= bxr_json_writer_comma_(json);
+  is_ok &= bxr_json_writer_append_(json, value ? "true" : "false");
 
   json->needs_comma = true;
 
@@ -601,7 +607,9 @@ bxr_jsonw_bool(bxr_jsonw_t *json, bool value)
 }
 
 bool
-bxr_jsonw_key_str(bxr_jsonw_t *json, const char *key, const char *value)
+bxr_json_write_key_str(bxr_json_writer_t *json,
+                       const char *key,
+                       const char *value)
 {
   SDL_assert(json);
   SDL_assert(key);
@@ -609,42 +617,44 @@ bxr_jsonw_key_str(bxr_jsonw_t *json, const char *key, const char *value)
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_key(json, key);
-  is_ok &= bxr_jsonw_str(json, value);
+  is_ok &= bxr_json_write_key(json, key);
+  is_ok &= bxr_json_write_str(json, value);
 
   return is_ok;
 }
 
 bool
-bxr_jsonw_key_number(bxr_jsonw_t *json, const char *key, float number)
+bxr_json_write_key_number(bxr_json_writer_t *json,
+                          const char *key,
+                          float number)
 {
   SDL_assert(json);
   SDL_assert(key);
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_key(json, key);
-  is_ok &= bxr_jsonw_number(json, number);
+  is_ok &= bxr_json_write_key(json, key);
+  is_ok &= bxr_json_write_number(json, number);
 
   return is_ok;
 }
 
 bool
-bxr_jsonw_key_bool(bxr_jsonw_t *json, const char *key, bool value)
+bxr_json_write_key_bool(bxr_json_writer_t *json, const char *key, bool value)
 {
   SDL_assert(json);
   SDL_assert(key);
 
   bool is_ok = true;
 
-  is_ok &= bxr_jsonw_key(json, key);
-  is_ok &= bxr_jsonw_bool(json, value);
+  is_ok &= bxr_json_write_key(json, key);
+  is_ok &= bxr_json_write_bool(json, value);
 
   return is_ok;
 }
 
 bool
-bxr_jsonw_save(bxr_jsonw_t *json, const char *path)
+bxr_json_writer_save(bxr_json_writer_t *json, const char *path)
 {
   SDL_assert(json);
   SDL_assert(path);
@@ -652,7 +662,7 @@ bxr_jsonw_save(bxr_jsonw_t *json, const char *path)
   if (json->depth != 0) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Cannot save JSON unclosed objects or arrays.");
-    bxr_set_error(BXR_ERROR_JSON_WRITE);
+    bxr_error_set(BXR_ERROR_JSON_WRITE);
     return false;
   }
 

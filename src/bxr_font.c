@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 
+#include "bxr_error.h"
 #include "bxr_font.h"
 #include "bxr_image.h"
 #include "bxr_mem.h"
@@ -18,14 +19,14 @@ struct bxr_font_s
 };
 
 bxr_font_t *
-bxr_font_load(const char *path,
-              const bxr_rect_t *glyphs,
-              size_t glyph_count,
-              bxr_vec2_t icon_range,
-              bxr_vec2_t char_range,
-              char first_char,
-              int char_spacing,
-              int line_spacing)
+bxr_font_create(const char *path,
+                const bxr_rect_t *glyphs,
+                size_t glyph_count,
+                bxr_vec2_t icon_range,
+                bxr_vec2_t char_range,
+                char first_char,
+                int char_spacing,
+                int line_spacing)
 {
   SDL_assert(path);
   SDL_assert(glyphs);
@@ -34,12 +35,11 @@ bxr_font_load(const char *path,
   bxr_font_t *font = NULL;
   BXR_NEW(font);
   if (!font) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for atlas font");
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
-  font->image        = bxr_image_make(path);
+  font->image        = bxr_image_create(path);
   font->glyphs       = glyphs;
   font->glyph_count  = glyph_count;
   font->icon_range   = icon_range;
@@ -52,16 +52,16 @@ bxr_font_load(const char *path,
 }
 
 bxr_font_t *
-bxr_font_mem(unsigned int width,
-             unsigned int height,
-             const void *data,
-             const bxr_rect_t *glyphs,
-             size_t glyph_count,
-             bxr_vec2_t icon_range,
-             bxr_vec2_t char_range,
-             char first_char,
-             int char_spacing,
-             int line_spacing)
+bxr_font_create_mem(unsigned int width,
+                    unsigned int height,
+                    const void *data,
+                    const bxr_rect_t *glyphs,
+                    size_t glyph_count,
+                    bxr_vec2_t icon_range,
+                    bxr_vec2_t char_range,
+                    char first_char,
+                    int char_spacing,
+                    int line_spacing)
 {
   SDL_assert(data);
   SDL_assert(width > 0);
@@ -72,12 +72,11 @@ bxr_font_mem(unsigned int width,
   bxr_font_t *font = NULL;
   BXR_NEW(font);
   if (!font) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to allocate memory for atlas font");
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
-  font->image        = bxr_image_make_mem(width, height, (void *)data);
+  font->image        = bxr_image_create_mem(width, height, (void *)data);
   font->glyphs       = glyphs;
   font->glyph_count  = glyph_count;
   font->icon_range   = icon_range;
@@ -168,4 +167,52 @@ bxr_font_set_line_spacing(bxr_font_t *font, int line_spacing)
 {
   SDL_assert(font);
   font->line_spacing = line_spacing;
+}
+
+bxr_vec2_t
+bxr_font_measure_text(const bxr_font_t *font, const char *str)
+{
+  SDL_assert(font);
+
+  if (str == NULL || *str == '\0') {
+    return (bxr_vec2_t){ 0, 0 };
+  }
+
+  char base_char        = bxr_font_get_base(font);
+  int line_spacing      = bxr_font_get_line_spacing(font);
+  int char_spacing      = bxr_font_get_char_spacing(font);
+  bxr_vec2_t char_range = bxr_font_get_char_range(font);
+
+  bxr_vec2_t measure = { 0, 0 };
+
+  char *cursor = (char *)str;
+
+  while (*cursor) {
+
+    switch (*cursor) {
+    case '\n':
+      measure.y += line_spacing;
+      cursor++;
+      break;
+    default: {
+      int glyphs_index = (int)*cursor - (int)base_char;
+      if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
+        SDL_LogWarn(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Invalid character '%c' in text string. Valid characters are "
+            "from %d to %d.",
+            *cursor,
+            (int)char_range.x,
+            (int)char_range.y);
+        cursor++;
+        continue;
+      }
+      bxr_rect_t glyph_rect = bxr_font_get_glyph_rect(font, glyphs_index);
+      measure.x += (glyph_rect.w + char_spacing);
+      cursor++;
+    } break;
+    }
+  }
+
+  return measure;
 }

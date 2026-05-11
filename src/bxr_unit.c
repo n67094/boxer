@@ -6,40 +6,40 @@
 #define BXR_UNIT_TERM_COLOR_BOLD "[1m"
 #define BXR_UNIT_TERM_COLOR_RESET "[0m"
 
-static unsigned _asserts_count = 0;
-static unsigned _passed_count  = 0;
-static unsigned _failed_count  = 0;
-static unsigned _suites_count  = 0;
+static unsigned asserts_count_ = 0;
+static unsigned passed_count_  = 0;
+static unsigned failed_count_  = 0;
+static unsigned suites_count_  = 0;
 
-static bool _has_colors = false;
+static bool has_colors_ = false;
 
-static bxr_unit_setup_cb _setup_cb    = NULL;
-static bxr_unit_setup_cb _teardown_cb = NULL;
+static bxr_unit_setup_cb setup_cb_    = NULL;
+static bxr_unit_setup_cb teardown_cb_ = NULL;
 
 void
 bxr_unit_setup(bxr_unit_setup_cb setup_cb, bxr_unit_setup_cb teardown_cb)
 {
-  _setup_cb    = setup_cb;
-  _teardown_cb = teardown_cb;
+  setup_cb_    = setup_cb;
+  teardown_cb_ = teardown_cb;
 }
 
 void
 bxr_unit_clear_setup(void)
 {
-  _setup_cb    = NULL;
-  _teardown_cb = NULL;
+  setup_cb_    = NULL;
+  teardown_cb_ = NULL;
 }
 
 void
 bxr_unit_enable_colors(bool enabled)
 {
-  _has_colors = enabled;
+  has_colors_ = enabled;
 }
 
 bool
 bxr_unit_failed(void)
 {
-  return (_failed_count != 0);
+  return (failed_count_ != 0);
 }
 
 bool
@@ -48,14 +48,14 @@ bxr_unit_assert(bool passed,
                 const char *const file,
                 int line)
 {
-  _asserts_count++;
+  asserts_count_++;
 
   if (passed) {
     return true;
   }
 
-  if (_has_colors) {
-    SDL_Log("(%c%sFAILED%c%s: %s (%d): %s)\n",
+  if (has_colors_) {
+    SDL_Log("\t(%c%sFAILED%c%s: %s (%d): %s)\n",
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_RED,
             BXR_UNIT_TERM_COLOR_CODE,
@@ -64,7 +64,7 @@ bxr_unit_assert(bool passed,
             line,
             expr);
   } else {
-    SDL_Log("(FAILED: %s (%d): %s)\n", file, line, expr);
+    SDL_Log("\t(FAILED: %s (%d): %s)\n", file, line, expr);
   }
 
   return false;
@@ -73,38 +73,36 @@ bxr_unit_assert(bool passed,
 void
 bxr_unit_run_case(const char *const name, bxr_unit_case_cb case_cb)
 {
-  if (NULL != _setup_cb) {
-    _setup_cb();
+  if (NULL != setup_cb_) {
+    setup_cb_();
   }
 
   SDL_Log("Running: %s ", name);
 
   if (!case_cb()) {
-    _failed_count++;
+    failed_count_++;
 
-    if (NULL != _teardown_cb) {
-      _teardown_cb();
+    if (NULL != teardown_cb_) {
+      teardown_cb_();
     }
 
     return;
   }
 
-  if (_has_colors) {
-    SDL_Log("(%c%sOK%c%s)",
+  if (has_colors_) {
+    SDL_Log("\t(%c%sOK%c%s)",
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_GREEN,
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_RESET);
   } else {
-    SDL_Log("(OK)");
+    SDL_Log("\t(OK)");
   }
 
-  SDL_Log("\n");
+  passed_count_++;
 
-  _passed_count++;
-
-  if (NULL != _teardown_cb) {
-    _teardown_cb();
+  if (NULL != teardown_cb_) {
+    teardown_cb_();
   }
 }
 
@@ -113,7 +111,7 @@ bxr_unit_run_suite(const char *const name, bxr_unit_suite_cb suite_cb)
 {
   SDL_Log("===============================================================\n");
 
-  if (_has_colors) {
+  if (has_colors_) {
     SDL_Log("%c%sRunning: %s%c%s\n",
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_BOLD,
@@ -127,7 +125,7 @@ bxr_unit_run_suite(const char *const name, bxr_unit_suite_cb suite_cb)
   SDL_Log("---------------------------------------------------------------\n");
   suite_cb();
 
-  _suites_count++;
+  suites_count_++;
 }
 
 void
@@ -135,33 +133,33 @@ bxr_unit_report(void)
 {
   SDL_Log("===============================================================\n");
 
-  if (_has_colors) {
+  if (has_colors_) {
     SDL_Log("Summary: Passed: %c%s%u%c%s "
             "Failed: %c%s%u%c%s "
             "Total: %u Suites: %u "
             "Asserts: %u\n",
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_GREEN,
-            _passed_count,
+            passed_count_,
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_RESET,
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_RED,
-            _failed_count,
+            failed_count_,
             BXR_UNIT_TERM_COLOR_CODE,
             BXR_UNIT_TERM_COLOR_RESET,
-            _passed_count + _failed_count,
-            _suites_count,
-            _asserts_count);
+            passed_count_ + failed_count_,
+            suites_count_,
+            asserts_count_);
   } else {
     SDL_Log("Summary: Passed: %u "
             "Failed: %u "
             "Total: %u Suites: %u "
             "Asserts: %u\n",
-            _passed_count,
-            _failed_count,
-            _passed_count + _failed_count,
-            _suites_count,
-            _asserts_count);
+            passed_count_,
+            failed_count_,
+            passed_count_ + failed_count_,
+            suites_count_,
+            asserts_count_);
   }
 }

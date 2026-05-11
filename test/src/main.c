@@ -1,9 +1,10 @@
 #include "bxr.h"
 
-#include "test_ini.h"
-#include "test_json.h"
-#include "test_math.h"
-// #include "test_text.h"
+#include "ecs.h"
+#include "ini.h"
+#include "json.h"
+#include "math.h"
+#include "sparse_set.h"
 
 static bxr_game_config_t _config = { 0 };
 
@@ -32,7 +33,8 @@ bxr_game_setup(void)
   BXR_UNIT_RUN_SUITE(suite_math);
   BXR_UNIT_RUN_SUITE(suite_json);
   BXR_UNIT_RUN_SUITE(suite_ini);
-  // BXR_UNIT_RUN_SUITE(suite_text);
+  BXR_UNIT_RUN_SUITE(suite_sparse_set);
+  BXR_UNIT_RUN_SUITE(suite_ecs);
 
   bxr_unit_report();
 }
@@ -40,6 +42,7 @@ bxr_game_setup(void)
 void
 bxr_game_update(Uint64 delta_time_ms)
 {
+  bxr_quit();
 }
 
 void

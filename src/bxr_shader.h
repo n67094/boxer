@@ -5,6 +5,15 @@
  *
  * # Shader Management System.
  *
+ * Shader bytecode are loaded from `BXR_DATA_DIR`.
+ *
+ * Shader should be name like this `<name>.<stage>.<format>`, where:
+ *
+ * - `<name>` is the name of the shader (e.g. "basic", "sprite", etc.).
+ * - `<stage>` is the shader stage (e.g. "vert" for vertex shader, "frag" for
+ * fragment shader).
+ * - `<format>` is the shader bytecode format (e.g. "spv" for SPIR-V, "msl" for
+ * Metal Shading Language, etc.).
  */
 
 #ifndef BXR_SHADER_H_
@@ -15,6 +24,8 @@
 #include <SDL_gp.h>
 
 #include "bxr_context.h"
+
+#define BXR_SHADER_INVALID_ID SDL_GP_INVALID_ID
 
 typedef SDL_GPShader bxr_shader_t;
 
@@ -62,9 +73,12 @@ void bxr_shader_shutdown(void);
  * `desc` is the description of the shader to create.
  *
  * `return` the created shader, or an invalid shader if the shader could not
- * be created.
+ * be created. Use `bxr_error_get` to get more information about the error.
+ *
+ * The caller is responsible for destroying the returned shader using
+ * `bxr_shader_destroy` when it is no longer needed.
  */
-bxr_shader_t bxr_shader_make(bxr_shader_desc_t *desc);
+bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc);
 
 /**
  * Destroys a shader, freeing any resources associated with it.

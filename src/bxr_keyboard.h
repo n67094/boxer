@@ -154,7 +154,7 @@ typedef enum
 } bxr_keymode_e;
 
 /**
- * Internal API
+ * ## Internal API
  */
 
 /**
@@ -192,7 +192,7 @@ void bxr_key_down(bxr_key_e scancode);
 void bxr_key_up(bxr_key_e scancode);
 
 /**
- * Public API
+ * ## Public API
  */
 
 /**

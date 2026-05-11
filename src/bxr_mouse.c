@@ -1,17 +1,17 @@
 #include "bxr_mouse.h"
 #include "bxr_defs.h"
 
-typedef struct _bxr_mouse_button_state_s
+typedef struct bxr_mouse_button_state_s_
 {
   bxr_mouse_click_e click;
   bool just_pressed;
   bool just_released;
   Uint64 pressed_at;
-} _bxr_mouse_button_state_t;
+} bxr_mouse_button_state_t_;
 
-typedef struct _bxr_mouse_s
+typedef struct bxr_mouse_s_
 {
-  _bxr_mouse_button_state_t buttons[BXR_MOUSE_SIZE];
+  bxr_mouse_button_state_t_ buttons[BXR_MOUSE_SIZE];
 
   bool just_pressed_acc[BXR_MOUSE_SIZE];
   bool just_released_acc[BXR_MOUSE_SIZE];
@@ -24,170 +24,170 @@ typedef struct _bxr_mouse_s
 
   float wheel_x;
   float wheel_y;
-} _bxr_mouse_t;
+} bxr_mouse_t_;
 
-static Uint32 _initialized = 0;
-static _bxr_mouse_t _mouse = { 0 };
+static Uint32 initialized_ = 0;
+static bxr_mouse_t_ mouse_ = { 0 };
 
 void
 bxr_mouse_setup(void)
 {
-  SDL_assert(_initialized == 0);
+  SDL_assert(initialized_ == 0);
 
-  _initialized = BXR_INIT_COOKIE;
+  initialized_ = BXR_INIT_COOKIE;
 }
 
 void
 bxr_mouse_begin_frame()
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
   for (int i = 0; i < BXR_MOUSE_SIZE; ++i) {
-    _mouse.just_pressed_acc[i]  = _mouse.buttons[i].just_pressed;
-    _mouse.just_released_acc[i] = _mouse.buttons[i].just_released;
+    mouse_.just_pressed_acc[i]  = mouse_.buttons[i].just_pressed;
+    mouse_.just_released_acc[i] = mouse_.buttons[i].just_released;
 
-    _mouse.buttons[i].just_pressed  = false;
-    _mouse.buttons[i].just_released = false;
+    mouse_.buttons[i].just_pressed  = false;
+    mouse_.buttons[i].just_released = false;
   }
 
-  _mouse.wheel_x = 0;
-  _mouse.wheel_y = 0;
+  mouse_.wheel_x = 0;
+  mouse_.wheel_y = 0;
 
-  _mouse.x_prev = _mouse.x;
-  _mouse.y_prev = _mouse.y;
+  mouse_.x_prev = mouse_.x;
+  mouse_.y_prev = mouse_.y;
 }
 
 void
 bxr_mouse_shutdown(void)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  _initialized = 0;
-  _mouse       = (_bxr_mouse_t){ 0 };
+  initialized_ = 0;
+  mouse_       = (bxr_mouse_t_){ 0 };
 }
 
 void
 bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   SDL_assert(button > 0 && button < BXR_MOUSE_SIZE);
 
-  if (_mouse.buttons[button].click == BXR_MOUSE_NONE) {
-    _mouse.buttons[button].pressed_at   = SDL_GetTicks();
-    _mouse.buttons[button].just_pressed = true;
+  if (mouse_.buttons[button].click == BXR_MOUSE_NONE) {
+    mouse_.buttons[button].pressed_at   = SDL_GetTicks();
+    mouse_.buttons[button].just_pressed = true;
   }
 
-  _mouse.buttons[button].click = click;
+  mouse_.buttons[button].click = click;
 }
 
 void
 bxr_mouse_button_up(bxr_mouse_e button)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   SDL_assert(button > 0 && button < BXR_MOUSE_SIZE);
 
-  if (_mouse.buttons[button].click != BXR_MOUSE_NONE) {
-    _mouse.buttons[button].just_released = true;
+  if (mouse_.buttons[button].click != BXR_MOUSE_NONE) {
+    mouse_.buttons[button].just_released = true;
   }
 
-  _mouse.buttons[button].pressed_at = 0;
-  _mouse.buttons[button].click      = BXR_MOUSE_NONE;
+  mouse_.buttons[button].pressed_at = 0;
+  mouse_.buttons[button].click      = BXR_MOUSE_NONE;
 }
 
 void
 bxr_mouse_motion(float x, float y)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  _mouse.x = x;
-  _mouse.y = y;
+  mouse_.x = x;
+  mouse_.y = y;
 }
 
 void
 bxr_mouse_wheel_motion(float x, float y)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  _mouse.wheel_x = x;
-  _mouse.wheel_y = y;
+  mouse_.wheel_x = x;
+  mouse_.wheel_y = y;
 }
 
 bxr_vec2_t
 bxr_mouse_pos(void)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  return bxr_vec2_make(_mouse.x, _mouse.y);
+  return bxr_vec2_create(mouse_.x, mouse_.y);
 }
 
 bxr_vec2_t
 bxr_mouse_prev_pos(void)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  return bxr_vec2_make(_mouse.x_prev, _mouse.y_prev);
+  return bxr_vec2_create(mouse_.x_prev, mouse_.y_prev);
 }
 
 bool
 bxr_mouse_held(bxr_mouse_e button)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   SDL_assert(button > 0 && button < BXR_MOUSE_SIZE);
 
-  return _mouse.buttons[button].click != BXR_MOUSE_NONE;
+  return mouse_.buttons[button].click != BXR_MOUSE_NONE;
 }
 
 bool
 bxr_mouse_just_pressed(bxr_mouse_e button)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   SDL_assert(button > 0 && button < BXR_MOUSE_SIZE);
 
-  return _mouse.just_pressed_acc[button];
+  return mouse_.just_pressed_acc[button];
 }
 
 bool
 bxr_mouse_just_released(bxr_mouse_e button)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   SDL_assert(button > 0 && button < BXR_MOUSE_SIZE);
 
-  return _mouse.just_released_acc[button];
+  return mouse_.just_released_acc[button];
 }
 
 bool
 bxr_mouse_double_clicked(bxr_mouse_e button)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   SDL_assert(button > 0 && button < BXR_MOUSE_SIZE);
 
-  return _mouse.buttons[button].click == BXR_MOUSE_DOUBLE;
+  return mouse_.buttons[button].click == BXR_MOUSE_DOUBLE;
 }
 
 Uint64
 bxr_mouse_held_time(bxr_mouse_e button)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   SDL_assert(button > 0 && button < BXR_MOUSE_SIZE);
 
-  if (!_mouse.buttons[button].click) {
+  if (!mouse_.buttons[button].click) {
     return false;
   }
 
-  return SDL_GetTicks() - _mouse.buttons[button].pressed_at;
+  return SDL_GetTicks() - mouse_.buttons[button].pressed_at;
 }
 
 bxr_vec2_t
 bxr_mouse_wheel(void)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
-  return bxr_vec2_make(_mouse.wheel_x, _mouse.wheel_y);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  return bxr_vec2_create(mouse_.wheel_x, mouse_.wheel_y);
 }
 
 void
 bxr_mouse_hide(bool hide)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
   if (hide) {
     SDL_ShowCursor();
@@ -199,6 +199,6 @@ bxr_mouse_hide(bool hide)
 bool
 bxr_mouse_is_hidden(void)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
   return SDL_CursorVisible();
 }

@@ -53,10 +53,13 @@ typedef enum
  *
  * `return` the created pipeline, or an invalid pipeline if the pipeline could
  * not be created.
+ *
+ * The caller is responsible for destroying the returned pipeline using
+ * `bxr_pipeline_destroy` when it is no longer needed.
  */
-bxr_pipeline_t bxr_pipeline_make(bxr_shader_t shader,
-                                 bxr_primitive_e primitive_type,
-                                 bxr_blendmode_e blend_mode);
+bxr_pipeline_t bxr_pipeline_create(bxr_shader_t shader,
+                                   bxr_primitive_e primitive_type,
+                                   bxr_blendmode_e blend_mode);
 
 /**
  * Destroy a graphics pipeline.

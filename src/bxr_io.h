@@ -33,7 +33,11 @@
  * `length` is an optional output parameter to store the length of the returned
  * data.
  *
- * `return` the contents of the file or NULL if the file could not be read.
+ * `return` the contents of the file or NULL if an error occurred. Use
+ * `bxr_error_get` to get more information about the error.
+ *
+ * The caller is responsible for freeing the returned data using `SDL_free` when
+ * it is no longer needed.
  */
 BXR_INLINE Uint8 *
 bxr_io_read(const char *path, size_t *length)
@@ -41,25 +45,26 @@ bxr_io_read(const char *path, size_t *length)
   SDL_assert(path);
 
   if (!PHYSFS_exists(path)) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "File not found: %s", path);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "File not found: %s", path);
+    bxr_error_set(BXR_ERROR_FILE_NOT_FOUND);
     return NULL;
   }
 
   PHYSFS_File *file = PHYSFS_openRead(path);
   if (!file) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to open file: %s (error: %s)",
-                path,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_set_error(BXR_ERROR_IO_READ);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to open file: %s (error: %s)",
+                 path,
+                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    bxr_error_set(BXR_ERROR_IO_READ);
     return NULL;
   }
 
   size_t len = PHYSFS_fileLength(file);
   if (len == 0) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "File is empty: %s", path);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "File is empty: %s", path);
     PHYSFS_close(file);
-    bxr_set_error(BXR_ERROR_IO_READ);
+    bxr_error_set(BXR_ERROR_IO_READ);
     return NULL;
   }
 
@@ -68,12 +73,12 @@ bxr_io_read(const char *path, size_t *length)
 
   Sint64 read_size = PHYSFS_readBytes(file, buffer, len);
   if (read_size != len) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to read file: %s (error: %s)",
-                path,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to read file: %s (error: %s)",
+                 path,
+                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_set_error(BXR_ERROR_IO_READ);
+    bxr_error_set(BXR_ERROR_IO_READ);
     return NULL;
   }
 
@@ -98,7 +103,8 @@ bxr_io_read(const char *path, size_t *length)
  * `append` is a boolean flag indicating whether to append to the file (if true)
  * or overwrite it (if false).
  *
- * `return` true if the write operation was successful, false otherwise.
+ * `return` true if the write operation was successful, false otherwise. Use
+ * `bxr_error_get` to get more information about the error if the write
  */
 BXR_INLINE bool
 bxr_io_write(const char *path, const void *data, size_t length, bool append)
@@ -113,11 +119,11 @@ bxr_io_write(const char *path, const void *data, size_t length, bool append)
   }
 
   if (!file) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to open file for writing: %s (error: %s)",
-                path,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_set_error(BXR_ERROR_IO_WRITE);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to open file for writing: %s (error: %s)",
+                 path,
+                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    bxr_error_set(BXR_ERROR_IO_WRITE);
     return false;
   }
 
@@ -126,12 +132,12 @@ bxr_io_write(const char *path, const void *data, size_t length, bool append)
   }
 
   if (PHYSFS_writeBytes(file, data, length) != (Sint64)length) {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to write to file: %s (error: %s)",
-                path,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                 "Failed to write to file: %s (error: %s)",
+                 path,
+                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_set_error(BXR_ERROR_IO_WRITE);
+    bxr_error_set(BXR_ERROR_IO_WRITE);
     return false;
   }
 

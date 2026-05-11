@@ -1,11 +1,13 @@
 /**
- * @file test_math.c
+ * File `math.c`.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * TODO add test cases for math functions.
  */
 
-#ifndef TEST_MATH_H_
-#define TEST_MATH_H_
+#ifndef MATH_H_
+#define MATH_H_
 
 #include "bxr.h"
 
@@ -19,4 +21,4 @@ BXR_UNIT_SUITE(suite_math)
   BXR_UNIT_RUN_CASE(case_bxr_sign);
 }
 
-#endif // TEST_MATH_H_
+#endif // MATH_H_

@@ -12,37 +12,37 @@
 #include "bxr_mem.h"
 #include "bxr_shader.h"
 
-typedef struct _bxr_shader_bytecode_s
+typedef struct bxr_shader_bytecode_s_
 {
   Uint8 *data;
   size_t size;
   SDL_GPUShaderFormat format;
-} _bxr_shader_bytecode_t;
+} bxr_shader_bytecode_t_;
 
-static Uint32 _initialized = 0;
-static bxr_context_t *_context;
+static Uint32 initialized_ = 0;
+static bxr_context_t *context_;
 
 void
 bxr_shader_setup(bxr_context_t *context)
 {
-  SDL_assert(_initialized == 0);
+  SDL_assert(initialized_ == 0);
   SDL_assert(context != NULL);
 
-  _initialized = BXR_INIT_COOKIE;
-  _context     = context;
+  initialized_ = BXR_INIT_COOKIE;
+  context_     = context;
 }
 
 void
 bxr_shader_shutdown(void)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  _initialized = 0;
-  _context     = NULL;
+  initialized_ = 0;
+  context_     = NULL;
 }
 
 // Return value must be freed as well as the data inside it.
-static _bxr_shader_bytecode_t *
+static bxr_shader_bytecode_t_ *
 _be_shader_load_bytecode(SDL_GPUDevice *device,
                          const char *name,
                          size_t *bytecode_size)
@@ -50,8 +50,12 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
   SDL_assert(device);
   SDL_assert(name);
 
-  _bxr_shader_bytecode_t *shader_bytecode = NULL;
+  bxr_shader_bytecode_t_ *shader_bytecode = NULL;
   BXR_NEW(shader_bytecode);
+  if (!shader_bytecode) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
+    return NULL;
+  }
 
   // Determine the shader stage/type based on the file extension
   SDL_GPUShaderStage stage;
@@ -61,7 +65,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
   } else if (SDL_strstr(name, ".frag") != NULL) {
     stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
   } else {
-    bxr_set_error(BXR_ERROR_SHADER_NAME);
+    bxr_error_set(BXR_ERROR_SHADER_NAME);
     return NULL;
   }
 
@@ -82,18 +86,18 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
     shader_bytecode->format = SDL_GPU_SHADERFORMAT_DXBC;
     file_ext                = ".dxbc";
   } else {
-    bxr_set_error(BXR_ERROR_SHADER_FORMAT);
+    bxr_error_set(BXR_ERROR_SHADER_FORMAT);
     return NULL;
   }
 
-  char shader_path[BXR_PATH_MAX];
-  SDL_snprintf(shader_path, BXR_PATH_MAX, "%s%s", name, file_ext);
+  char shader_path[BXR_PATH_MAX_LENGTH];
+  SDL_snprintf(shader_path, BXR_PATH_MAX_LENGTH, "%s%s", name, file_ext);
 
   shader_bytecode->data = bxr_io_read(shader_path, &shader_bytecode->size);
 
   if (shader_bytecode->data == NULL) {
     BXR_FREE(shader_bytecode);
-    bxr_set_error(BXR_ERROR_SHADER_LOAD_BYTECODE);
+    bxr_error_set(BXR_ERROR_SHADER_LOAD_BYTECODE);
     return NULL;
   }
 
@@ -101,15 +105,23 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 }
 
 bxr_shader_t
-bxr_shader_make(bxr_shader_desc_t *desc)
+bxr_shader_create(bxr_shader_desc_t *desc)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  _bxr_shader_bytecode_t *vert_bytecode
-      = _be_shader_load_bytecode(_context->gpu_device, desc->vert_name, NULL);
+  bxr_shader_bytecode_t_ *vert_bytecode
+      = _be_shader_load_bytecode(context_->gpu_device, desc->vert_name, NULL);
+  if (!vert_bytecode) {
+    return (bxr_shader_t){ .id = BXR_SHADER_INVALID_ID };
+  }
 
-  _bxr_shader_bytecode_t *frag_bytecode
-      = _be_shader_load_bytecode(_context->gpu_device, desc->frag_name, NULL);
+  bxr_shader_bytecode_t_ *frag_bytecode
+      = _be_shader_load_bytecode(context_->gpu_device, desc->frag_name, NULL);
+  if (!frag_bytecode) {
+    BXR_FREE(vert_bytecode->data);
+    BXR_FREE(vert_bytecode);
+    return (bxr_shader_t){ .id = BXR_SHADER_INVALID_ID };
+  }
 
   SDL_GPShaderDesc shader_desc = {
     // Vertex shader description
@@ -147,7 +159,7 @@ bxr_shader_make(bxr_shader_desc_t *desc)
 void
 bxr_shader_destroy(bxr_shader_t shader)
 {
-  SDL_assert(_initialized == BXR_INIT_COOKIE);
+  SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
   SDL_GPDestroyShader((SDL_GPShader)shader);
 }

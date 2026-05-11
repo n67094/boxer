@@ -9,14 +9,14 @@
 #include "bxr_mem.h"
 #include "bxr_str.h"
 
-struct bxr_inir_s
+struct bxr_ini_reader_s
 {
   char *data;
   char *end;
 };
 
 static char *
-bxr_inir_discard_line(bxr_inir_t *ini, char *cursor)
+bxr_ini_reader_discard_line_(bxr_ini_reader_t *ini, char *cursor)
 {
   while (cursor < ini->end && *cursor != '\n') {
     *cursor = '\0'; // Null-terminate for simplify parsing
@@ -27,7 +27,7 @@ bxr_inir_discard_line(bxr_inir_t *ini, char *cursor)
 
 // Unescape character in quoted value and move cursor to the end of the value.
 static char *
-bxr_inir_unescape_quoted_value(bxr_inir_t *ini, char *cursor)
+bxr_ini_reader_unescape_quoted_value_(bxr_ini_reader_t *ini, char *cursor)
 {
   char *dest = cursor;
   cursor++; // Skip opening quote
@@ -79,7 +79,7 @@ end:
 
 // Move cursor to the start of next line and return it.
 static char *
-bxr_inir_next(bxr_inir_t *ini, char *cursor)
+bxr_ini_reader_next_(bxr_ini_reader_t *ini, char *cursor)
 {
   cursor += SDL_strlen(cursor); // Skip remaining non-empty characters
   while (cursor < ini->end && *cursor == '\0') {
@@ -90,7 +90,7 @@ bxr_inir_next(bxr_inir_t *ini, char *cursor)
 }
 
 static void
-bxr_inir_trim_back(char *cursor, char *start)
+bxr_ini_reader_trim_back_(char *cursor, char *start)
 {
   while (cursor > start
          && (*cursor == ' ' || *cursor == '\t' || *cursor == '\r')) {
@@ -100,7 +100,7 @@ bxr_inir_trim_back(char *cursor, char *start)
 }
 
 static void
-bxr_inir_parse(bxr_inir_t *ini)
+bxr_ini_reader_parse_(bxr_ini_reader_t *ini)
 {
   char *cursor = ini->data;
 
@@ -118,13 +118,13 @@ bxr_inir_parse(bxr_inir_t *ini)
     case '[':
       cursor += bxr_strcspn(cursor, "]\n"); // Skip to ']' or end of line
       if (*cursor == '\n') {
-        cursor = bxr_inir_discard_line(ini, cursor);
+        cursor = bxr_ini_reader_discard_line_(ini, cursor);
         break;
       }
       *cursor = '\0'; // Null-terminate section name
       break;
     case ';':
-      cursor = bxr_inir_discard_line(ini, cursor);
+      cursor = bxr_ini_reader_discard_line_(ini, cursor);
       break;
     default: {
       char *line_start = cursor;
@@ -133,12 +133,12 @@ bxr_inir_parse(bxr_inir_t *ini)
 
       // If line is missing a '=', ignore the line
       if (*cursor != '=') {
-        cursor = bxr_inir_discard_line(ini, line_start);
+        cursor = bxr_ini_reader_discard_line_(ini, line_start);
         break;
       }
 
       // Trim whitespace before '=' for key
-      bxr_inir_trim_back(cursor - 1, line_start);
+      bxr_ini_reader_trim_back_(cursor - 1, line_start);
 
       // Trim '=' and whitespace after it
       do {
@@ -146,7 +146,7 @@ bxr_inir_parse(bxr_inir_t *ini)
       } while (*cursor == ' ' || *cursor == '\r' || *cursor == '\t');
 
       if (*cursor == '\n' || *cursor == '\0' || *cursor == ';') {
-        cursor = bxr_inir_discard_line(ini, line_start);
+        cursor = bxr_ini_reader_discard_line_(ini, line_start);
         break;
       }
 
@@ -154,23 +154,23 @@ bxr_inir_parse(bxr_inir_t *ini)
       if (*cursor == '"') {
         // Quoted string vlaue
         char *value_start = cursor;
-        cursor            = bxr_inir_unescape_quoted_value(ini, cursor);
+        cursor            = bxr_ini_reader_unescape_quoted_value_(ini, cursor);
 
         // If the string is empty, ignore the line
         if (cursor == value_start) {
-          cursor = bxr_inir_discard_line(ini, line_start);
+          cursor = bxr_ini_reader_discard_line_(ini, line_start);
           break;
         }
 
         // Trim whitespace after closing quote
-        cursor = bxr_inir_discard_line(ini, cursor);
+        cursor = bxr_ini_reader_discard_line_(ini, cursor);
 
       } else {
         // Normal value
         cursor += bxr_strcspn(cursor, "\n");
 
         // Trim whitespace at the end of value
-        bxr_inir_trim_back(cursor - 1, line_start);
+        bxr_ini_reader_trim_back_(cursor - 1, line_start);
       }
       break;
     }
@@ -178,14 +178,15 @@ bxr_inir_parse(bxr_inir_t *ini)
   }
 }
 
-bxr_inir_t *
-bxr_inir_make(const char *path)
+bxr_ini_reader_t *
+bxr_ini_create_reader(const char *path)
 {
   SDL_assert(path);
 
-  bxr_inir_t *ini = NULL;
+  bxr_ini_reader_t *ini = NULL;
   BXR_NEW(ini);
   if (!ini) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
@@ -194,25 +195,36 @@ bxr_inir_make(const char *path)
 
   BXR_ALLOC(ini->data, length + 1); // +1 for null-terminator
   if (!ini->data) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(data);
     BXR_FREE(ini);
     return NULL;
   }
 
-  SDL_memcpy(ini->data, data, length);
+  BXR_MEMCPY(ini->data, data, length);
 
   BXR_FREE(data);
 
   ini->data[length] = '\0'; // Null-terminate for simplify parsing
   ini->end          = ini->data + length;
 
-  bxr_inir_parse(ini);
+  bxr_ini_reader_parse_(ini);
 
   return ini;
 }
 
+void
+bxr_ini_destroy_reader(bxr_ini_reader_t *ini)
+{
+  if (ini->data) {
+    BXR_FREE(ini->data);
+  }
+
+  BXR_FREE(ini);
+}
+
 const char *
-bxr_inir_str(bxr_inir_t *ini, const char *section, const char *key)
+bxr_ini_read_str(bxr_ini_reader_t *ini, const char *section, const char *key)
 {
   SDL_assert(ini);
   SDL_assert(section);
@@ -227,7 +239,7 @@ bxr_inir_str(bxr_inir_t *ini, const char *section, const char *key)
 
   // Skip empty characters at the beginning
   if (*cursor == '\0') {
-    cursor = bxr_inir_next(ini, cursor);
+    cursor = bxr_ini_reader_next_(ini, cursor);
   }
 
   while (cursor < ini->end) {
@@ -236,8 +248,9 @@ bxr_inir_str(bxr_inir_t *ini, const char *section, const char *key)
       current_section = cursor + 1; // Skip opening bracket
     } else {
       // Handle key
-      value = bxr_inir_next(ini,
-                            cursor); // Move cursor to the start of the value
+      value = bxr_ini_reader_next_(
+          ini,
+          cursor); // Move cursor to the start of the value
 
       if (SDL_strlen(current_section) == section_len
           && !SDL_strncasecmp(section, current_section, section_len)) {
@@ -249,30 +262,20 @@ bxr_inir_str(bxr_inir_t *ini, const char *section, const char *key)
       cursor = value;
     }
 
-    cursor = bxr_inir_next(ini, cursor);
+    cursor = bxr_ini_reader_next_(ini, cursor);
   }
 
   return NULL;
 }
 
-void
-bxr_inir_destroy(bxr_inir_t *ini)
-{
-  if (ini->data) {
-    BXR_FREE(ini->data);
-  }
-
-  BXR_FREE(ini);
-}
-
 float
-bxr_inir_number(bxr_inir_t *ini, const char *section, const char *key)
+bxr_ini_read_number(bxr_ini_reader_t *ini, const char *section, const char *key)
 {
   SDL_assert(ini);
   SDL_assert(section);
   SDL_assert(key);
 
-  const char *str_value = bxr_inir_str(ini, section, key);
+  const char *str_value = bxr_ini_read_str(ini, section, key);
 
   if (!str_value) {
     return 0.0f; // Default value if not found
@@ -282,31 +285,31 @@ bxr_inir_number(bxr_inir_t *ini, const char *section, const char *key)
 }
 
 const char *
-bxr_inir_str_or_else(bxr_inir_t *ini,
-                     const char *section,
-                     const char *key,
-                     const char *default_value)
+bxr_ini_read_str_or_else(bxr_ini_reader_t *ini,
+                         const char *section,
+                         const char *key,
+                         const char *default_value)
 {
   SDL_assert(ini);
   SDL_assert(section);
   SDL_assert(key);
 
-  const char *value = bxr_inir_str(ini, section, key);
+  const char *value = bxr_ini_read_str(ini, section, key);
 
   return value ? value : default_value;
 }
 
 float
-bxr_inir_number_or_else(bxr_inir_t *ini,
-                        const char *section,
-                        const char *key,
-                        float default_value)
+bxr_ini_read_number_or_else(bxr_ini_reader_t *ini,
+                            const char *section,
+                            const char *key,
+                            float default_value)
 {
   SDL_assert(ini);
   SDL_assert(section);
   SDL_assert(key);
 
-  const char *str_value = bxr_inir_str(ini, section, key);
+  const char *str_value = bxr_ini_read_str(ini, section, key);
 
   if (!str_value) {
     return default_value; // Default value if not found
@@ -317,7 +320,7 @@ bxr_inir_number_or_else(bxr_inir_t *ini,
 
 // ----------------------------------------------------------------------------
 
-struct bxr_iniw_s
+struct bxr_ini_writer_s
 {
   bool in_section;
   char *data;
@@ -326,7 +329,7 @@ struct bxr_iniw_s
 };
 
 static bool
-bxr_iniw_append(bxr_iniw_t *ini, const char *str)
+bxr_ini_writer_append_(bxr_ini_writer_t *ini, const char *str)
 {
   size_t len      = str ? SDL_strlen(str) : 0;
   size_t new_size = ini->size + len;
@@ -336,9 +339,10 @@ bxr_iniw_append(bxr_iniw_t *ini, const char *str)
     char *new_data      = NULL;
     BXR_ALLOC(new_data, new_capacity);
     if (new_data == NULL) {
+      bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
       return false;
     }
-    SDL_memcpy(new_data, ini->data, ini->size);
+    BXR_MEMCPY(new_data, ini->data, ini->size);
     BXR_FREE(ini->data);
 
     ini->data     = new_data;
@@ -352,9 +356,9 @@ bxr_iniw_append(bxr_iniw_t *ini, const char *str)
 }
 
 static bool
-bxr_iniw_append_escaped(bxr_iniw_t *ini, const char *str)
+bxr_ini_writer_append_escaped_(bxr_ini_writer_t *ini, const char *str)
 {
-  if (!bxr_iniw_append(ini, "\"")) {
+  if (!bxr_ini_writer_append_(ini, "\"")) {
     return false;
   }
 
@@ -363,55 +367,56 @@ bxr_iniw_append_escaped(bxr_iniw_t *ini, const char *str)
   for (const char *c = str; *c && is_ok; c++) {
     switch (*c) {
     case '\"':
-      is_ok = bxr_iniw_append(ini, "\\\"");
+      is_ok = bxr_ini_writer_append_(ini, "\\\"");
       break;
     case '\\':
-      is_ok = bxr_iniw_append(ini, "\\\\");
+      is_ok = bxr_ini_writer_append_(ini, "\\\\");
       break;
     case '\b':
-      is_ok = bxr_iniw_append(ini, "\\b");
+      is_ok = bxr_ini_writer_append_(ini, "\\b");
       break;
     case '\f':
-      is_ok = bxr_iniw_append(ini, "\\f");
+      is_ok = bxr_ini_writer_append_(ini, "\\f");
       break;
     case '\n':
-      is_ok = bxr_iniw_append(ini, "\\n");
+      is_ok = bxr_ini_writer_append_(ini, "\\n");
       break;
     case '\r':
-      is_ok = bxr_iniw_append(ini, "\\r");
+      is_ok = bxr_ini_writer_append_(ini, "\\r");
       break;
     case '\t':
-      is_ok = bxr_iniw_append(ini, "\\t");
+      is_ok = bxr_ini_writer_append_(ini, "\\t");
       break;
     default:
       if ((unsigned char)*c < 0x20) {
         char buf[7];
         SDL_snprintf(buf, sizeof(buf), "\\u%04x", (unsigned char)*c);
-        is_ok = bxr_iniw_append(ini, buf);
+        is_ok = bxr_ini_writer_append_(ini, buf);
       } else {
         char buf[2] = { *c, '\0' };
-        is_ok       = bxr_iniw_append(ini, buf);
+        is_ok       = bxr_ini_writer_append_(ini, buf);
       }
       break;
     }
   }
 
   if (is_ok) {
-    is_ok = bxr_iniw_append(ini, "\"");
+    is_ok = bxr_ini_writer_append_(ini, "\"");
   }
 
   return is_ok;
 }
 
-bxr_iniw_t *
-bxr_iniw_make()
+bxr_ini_writer_t *
+bxr_ini_create_writer()
 {
-  bxr_iniw_t *ini = NULL;
+  bxr_ini_writer_t *ini = NULL;
   BXR_NEW(ini);
 
   ini->data = NULL;
   BXR_ALLOC(ini->data, BXR_INI_DEFAULT_DATA_CAPACITY);
   if (ini->data == NULL) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(ini);
     return NULL;
   }
@@ -425,7 +430,7 @@ bxr_iniw_make()
 }
 
 void
-bxr_iniw_destroy(bxr_iniw_t *ini)
+bxr_ini_destroy_writer(bxr_ini_writer_t *ini)
 {
   if (ini) {
     BXR_FREE(ini->data);
@@ -434,7 +439,7 @@ bxr_iniw_destroy(bxr_iniw_t *ini)
 }
 
 bool
-bxr_iniw_section_begin(bxr_iniw_t *ini, const char *section)
+bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
 {
   SDL_assert(ini);
   SDL_assert(section);
@@ -444,12 +449,13 @@ bxr_iniw_section_begin(bxr_iniw_t *ini, const char *section)
   char *line      = NULL;
   BXR_ALLOC(line, line_len);
   if (line == NULL) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
   SDL_snprintf(line, line_len, "[%s]\n", section);
 
-  if (!bxr_iniw_append(ini, line)) {
+  if (!bxr_ini_writer_append_(ini, line)) {
     BXR_FREE(line);
     return false;
   }
@@ -460,7 +466,22 @@ bxr_iniw_section_begin(bxr_iniw_t *ini, const char *section)
 }
 
 bool
-bxr_iniw_key_str(bxr_iniw_t *ini, const char *key, const char *value)
+bxr_ini_writer_section_end(bxr_ini_writer_t *ini)
+{
+  SDL_assert(ini);
+  SDL_assert(ini->in_section);
+
+  if (!bxr_ini_writer_append_(ini, "\n")) {
+    return false;
+  }
+
+  ini->in_section = false;
+
+  return true;
+}
+
+bool
+bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value)
 {
   SDL_assert(ini);
   SDL_assert(key);
@@ -470,30 +491,31 @@ bxr_iniw_key_str(bxr_iniw_t *ini, const char *key, const char *value)
   size_t left_len = SDL_strlen(key) + 2; // + 1 for = and + 1 for \n
   char *left      = NULL;
   BXR_ALLOC(left, left_len + 2);
-  if (left == NULL) {
+  if (!left) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
   SDL_snprintf(left, left_len, "%s=", key);
 
-  if (!bxr_iniw_append(ini, left)) {
+  if (!bxr_ini_writer_append_(ini, left)) {
     BXR_FREE(left);
     return false;
   }
 
   BXR_FREE(left);
 
-  if (!bxr_iniw_append_escaped(ini, value)) {
+  if (!bxr_ini_writer_append_escaped_(ini, value)) {
     return false;
   }
 
-  bxr_iniw_append(ini, "\n");
+  bxr_ini_writer_append_(ini, "\n");
 
   return true;
 }
 
 bool
-bxr_iniw_key_number(bxr_iniw_t *ini, const char *key, float number)
+bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
 {
   SDL_assert(ini);
   SDL_assert(key);
@@ -506,13 +528,14 @@ bxr_iniw_key_number(bxr_iniw_t *ini, const char *key, float number)
       = SDL_strlen(key) + SDL_strlen(number_str) + 3; // + 2 for = \n and \0
   char *line = NULL;
   BXR_ALLOC(line, line_len);
-  if (line == NULL) {
+  if (!line) {
+    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
   SDL_snprintf(line, line_len, "%s=%s\n", key, number_str);
 
-  if (!bxr_iniw_append(ini, line)) {
+  if (!bxr_ini_writer_append_(ini, line)) {
     BXR_FREE(line);
     return false;
   }
@@ -522,22 +545,7 @@ bxr_iniw_key_number(bxr_iniw_t *ini, const char *key, float number)
 }
 
 bool
-bxr_iniw_section_end(bxr_iniw_t *ini)
-{
-  SDL_assert(ini);
-  SDL_assert(ini->in_section);
-
-  if (!bxr_iniw_append(ini, "\n")) {
-    return false;
-  }
-
-  ini->in_section = false;
-
-  return true;
-}
-
-bool
-bxr_iniw_save(bxr_iniw_t *ini, const char *path)
+bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path)
 {
   SDL_assert(ini);
   SDL_assert(path);

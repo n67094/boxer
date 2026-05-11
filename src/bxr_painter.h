@@ -5,8 +5,14 @@
  *
  * # Painter System for Rendering Graphics
  *
- * **Usage:** make sure to call `bxr_painter_begin`, `bxr_painter_flush`, and
+ * Allow to render 2D graphics using a simple API.
+ *
+ * Make sure to call `bxr_painter_begin`, `bxr_painter_flush`, and
  * `bxr_painter_end` in the correct order for each frame to issue draw calls.
+ *
+ * You can have multiple `bxr_painter_begin` and `bxr_painter_end` as long as
+ * they don't intertwined (i.e. you can't call `bxr_painter_begin` twice without
+ * calling `bxr_painter_end` in between).
  */
 
 #ifndef BXR_PAINTER_H_

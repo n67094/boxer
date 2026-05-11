@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # JSON File Reader `jsonr` and Writer `jsonw`
+ * # JSON File Reader and Writer
  *
  * Support objects, arrays, strings, numbers and booleans.
  *
@@ -30,9 +30,9 @@ typedef enum
   BXR_JSON_NULL,
 } bxr_jsonr_e;
 
-typedef struct bxr_jsonr_s bxr_jsonr_t;
+typedef struct bxr_json_reader_s bxr_json_reader_t;
 
-typedef struct bxr_jsonr_token_s
+typedef struct bxr_json_token_s
 {
   bxr_jsonr_e type;
 
@@ -40,7 +40,7 @@ typedef struct bxr_jsonr_token_s
   char *end;
 
   int depht;
-} bxr_jsonr_token_t;
+} bxr_json_token_t;
 
 /**
  * ## Reader API
@@ -52,17 +52,20 @@ typedef struct bxr_jsonr_token_s
  * `path` is the path to the JSON file to load. (c.f `bxr_io_read` for path
  * resolution).
  *
- * `return` a reader for the loaded JSON file, or NULL if the file could not be
- * loaded.
+ * `return` a reader for the loaded JSON file, or NULL if an error occurred. Use
+ * `bxr_error_get` to get more information about the error.
+ *
+ * The caller is responsible for destroying the returned reader using
+ * `bxr_json_destroy_reader` when it is no longer needed.
  */
-bxr_jsonr_t *bxr_jsonr_make(const char *path);
+bxr_json_reader_t *bxr_json_create_reader(const char *path);
 
 /**
  * Destroy a JSON reader and free its resources.
  *
  * `reader` is the JSON reader to destroy.
  */
-void bxr_jsonr_destroy(bxr_jsonr_t *reader);
+void bxr_json_destroy_reader(bxr_json_reader_t *reader);
 
 /**
  * Read the next token from the JSON reader.
@@ -70,9 +73,13 @@ void bxr_jsonr_destroy(bxr_jsonr_t *reader);
  * `reader` is the JSON reader to read from.
  *
  * `return` the next token read from the JSON reader, or a token with type
- * `BXR_JSON_ERROR` if an error occurred while reading.
+ * `BXR_JSON_ERROR` if an error occurred while reading. Use `bxr_error_get` to
+ * get more information about the error.
+ *
+ * The caller should not modify or free these pointers, as they are owned by the
+ * JSON reader.
  */
-bxr_jsonr_token_t bxr_jsonr_read(bxr_jsonr_t *reader);
+bxr_json_token_t bxr_json_read_token(bxr_json_reader_t *reader);
 
 /**
  * Iterate over the key-value pairs in a JSON object.
@@ -91,10 +98,10 @@ bxr_jsonr_token_t bxr_jsonr_read(bxr_jsonr_t *reader);
  * `return` 1 if a key-value pair was successfully read, 0 if the end of the
  * object was reached, or -1 if an error occurred while reading.
  */
-int bxr_jsonr_iter_object(bxr_jsonr_t *reader,
-                          bxr_jsonr_token_t *obj,
-                          bxr_jsonr_token_t *key,
-                          bxr_jsonr_token_t *value);
+int bxr_json_reader_iter_object(bxr_json_reader_t *reader,
+                                bxr_json_token_t *obj,
+                                bxr_json_token_t *key,
+                                bxr_json_token_t *value);
 
 /**
  * Iterate over the values in a JSON array.
@@ -110,9 +117,9 @@ int bxr_jsonr_iter_object(bxr_jsonr_t *reader,
  * `return` 1 if a value was successfully read, 0 if the end of the array was
  * reached, or -1 if an error occurred while reading.
  */
-int bxr_jsonr_iter_array(bxr_jsonr_t *reader,
-                         bxr_jsonr_token_t *arr,
-                         bxr_jsonr_token_t *value);
+int bxr_json_reader_iter_array(bxr_json_reader_t *reader,
+                               bxr_json_token_t *arr,
+                               bxr_json_token_t *value);
 
 /**
  * Compare a JSON token with an expected string value.
@@ -125,7 +132,7 @@ int bxr_jsonr_iter_array(bxr_jsonr_t *reader,
  * `return` true if the JSON token's string value matches the expected string,
  * or false otherwise.
  */
-bool bxr_jsonr_eq_str(bxr_jsonr_token_t *key, const char *expected);
+bool bxr_json_reader_eq_str(bxr_json_token_t *key, const char *expected);
 
 /**
  * Compare a JSON token with an expected number value.
@@ -138,7 +145,7 @@ bool bxr_jsonr_eq_str(bxr_jsonr_token_t *key, const char *expected);
  * `return` true if the JSON token's number value matches the expected number,
  * or false otherwise.
  */
-bool bxr_jsonr_eq_number(bxr_jsonr_token_t *key, float expected);
+bool bxr_json_reader_eq_number(bxr_json_token_t *key, float expected);
 
 /**
  * Compare a JSON token with an expected boolean value.
@@ -151,7 +158,7 @@ bool bxr_jsonr_eq_number(bxr_jsonr_token_t *key, float expected);
  * `return` true if the JSON token's boolean value matches the expected boolean,
  * or false otherwise.
  */
-bool bxr_jsonr_eq_bool(bxr_jsonr_token_t *key, bool expected);
+bool bxr_json_reader_eq_bool(bxr_json_token_t *key, bool expected);
 
 /**
  * Get the string value of a JSON token.
@@ -163,7 +170,7 @@ bool bxr_jsonr_eq_bool(bxr_jsonr_token_t *key, bool expected);
  * `return` a pointer to the string value of the JSON token, or NULL if the
  * token does not have a string value.
  */
-const char *bxr_jsonr_token_str(bxr_jsonr_token_t *token);
+const char *bxr_json_read_token_str(bxr_json_token_t *token);
 
 /**
  * Get the number value of a JSON token.
@@ -175,7 +182,7 @@ const char *bxr_jsonr_token_str(bxr_jsonr_token_t *token);
  * `return` the number value of the JSON token, or 0.0 if the token does not
  * have a number value.
  */
-float bxr_jsonr_token_number(bxr_jsonr_token_t *token);
+float bxr_json_read_token_number(bxr_json_token_t *token);
 
 /**
  * Get the boolean value of a JSON token.
@@ -187,28 +194,32 @@ float bxr_jsonr_token_number(bxr_jsonr_token_t *token);
  * `return` the boolean value of the JSON token, or false if the token does not
  * have a boolean value.
  */
-bool bxr_jsonr_token_bool(bxr_jsonr_token_t *token);
+bool bxr_json_read_token_bool(bxr_json_token_t *token);
 
 /**
  * ## Writer API
  */
 
-typedef struct bxr_jsonw_s bxr_jsonw_t;
+typedef struct bxr_json_writer_s bxr_json_writer_t;
 
 /**
  * Create a new JSON writer.
  *
  * `return` a pointer to the newly created JSON writer, or NULL if the writer
- * could not be created.
+ * could not be created. Use `bxr_error_get` to get more information about the
+ * error.
+ *
+ * The caller is responsible for destroying the returned JSON writer using
+ * `bxr_json_destroy_writer` when it is no longer needed.
  */
-bxr_jsonw_t *bxr_jsonw_make(void);
+bxr_json_writer_t *bxr_json_create_writer(void);
 
 /**
  * Destroy a JSON writer and free its resources.
  *
  * `json` is the JSON writer to destroy.
  */
-void bxr_jsonw_destroy(bxr_jsonw_t *json);
+void bxr_json_destroy_writer(bxr_json_writer_t *json);
 
 /**
  * Begin a new JSON object in the writer.
@@ -218,7 +229,7 @@ void bxr_jsonw_destroy(bxr_jsonw_t *json);
  * `return` true if the object was successfully begun, or false if an error
  * occurred.
  */
-bool bxr_jsonw_object_begin(bxr_jsonw_t *json);
+bool bxr_json_writer_object_begin(bxr_json_writer_t *json);
 
 /**
  * End the current JSON object in the writer.
@@ -228,7 +239,7 @@ bool bxr_jsonw_object_begin(bxr_jsonw_t *json);
  * `return` true if the object was successfully ended, or false if an error
  * occurred.
  */
-bool bxr_jsonw_object_end(bxr_jsonw_t *json);
+bool bxr_json_writer_object_end(bxr_json_writer_t *json);
 
 /**
  * Begin a new JSON array in the writer.
@@ -238,7 +249,7 @@ bool bxr_jsonw_object_end(bxr_jsonw_t *json);
  * `return` true if the array was successfully begun, or false if an error
  * occurred.
  */
-bool bxr_jsonw_array_begin(bxr_jsonw_t *json);
+bool bxr_json_writer_array_begin(bxr_json_writer_t *json);
 
 /**
  * End the current JSON array in the writer.
@@ -248,7 +259,7 @@ bool bxr_jsonw_array_begin(bxr_jsonw_t *json);
  * `return` true if the array was successfully ended, or false if an error
  * occurred.
  */
-bool bxr_jsonw_array_end(bxr_jsonw_t *json);
+bool bxr_json_writer_array_end(bxr_json_writer_t *json);
 
 /**
  * Add a key-value pair with a string value to the current JSON object in the
@@ -263,7 +274,7 @@ bool bxr_jsonw_array_end(bxr_jsonw_t *json);
  * `return` true if the key-value pair was successfully added, or false if an
  * error occurred.
  */
-bool bxr_jsonw_key(bxr_jsonw_t *json, const char *key);
+bool bxr_json_write_key(bxr_json_writer_t *json, const char *key);
 
 /**
  * Add a string value to the current JSON array in the writer.
@@ -275,7 +286,7 @@ bool bxr_jsonw_key(bxr_jsonw_t *json, const char *key);
  * `return` true if the value was successfully added, or false if an error
  * occurred.
  */
-bool bxr_jsonw_str(bxr_jsonw_t *json, const char *value);
+bool bxr_json_write_str(bxr_json_writer_t *json, const char *value);
 
 /**
  * Add a number value to the current JSON array in the writer.
@@ -287,7 +298,7 @@ bool bxr_jsonw_str(bxr_jsonw_t *json, const char *value);
  * `return` true if the value was successfully added, or false if an error
  * occurred.
  */
-bool bxr_jsonw_number(bxr_jsonw_t *json, float number);
+bool bxr_json_write_number(bxr_json_writer_t *json, float number);
 
 /**
  * Add a boolean value to the current JSON array in the writer.
@@ -299,7 +310,7 @@ bool bxr_jsonw_number(bxr_jsonw_t *json, float number);
  * `return` true if the value was successfully added, or false if an error
  * occurred.
  */
-bool bxr_jsonw_bool(bxr_jsonw_t *json, bool value);
+bool bxr_json_write_bool(bxr_json_writer_t *json, bool value);
 
 /**
  * Add a key-value pair with a string value to the current JSON object in the
@@ -314,7 +325,9 @@ bool bxr_jsonw_bool(bxr_jsonw_t *json, bool value);
  * `return` true if the key-value pair was successfully added, or false if an
  * error occurred.
  */
-bool bxr_jsonw_key_str(bxr_jsonw_t *json, const char *key, const char *value);
+bool bxr_json_write_key_str(bxr_json_writer_t *json,
+                            const char *key,
+                            const char *value);
 
 /**
  * Add a key-value pair with a number value to the current JSON object in the
@@ -329,7 +342,9 @@ bool bxr_jsonw_key_str(bxr_jsonw_t *json, const char *key, const char *value);
  * `return` true if the key-value pair was successfully added, or false if an
  * error occurred.
  */
-bool bxr_jsonw_key_number(bxr_jsonw_t *json, const char *key, float number);
+bool bxr_json_write_key_number(bxr_json_writer_t *json,
+                               const char *key,
+                               float number);
 
 /**
  * Add a key-value pair with a boolean value to the current JSON object in the
@@ -344,7 +359,8 @@ bool bxr_jsonw_key_number(bxr_jsonw_t *json, const char *key, float number);
  * `return` true if the key-value pair was successfully added, or false if an
  * error occurred.
  */
-bool bxr_jsonw_key_bool(bxr_jsonw_t *json, const char *key, bool value);
+bool
+bxr_json_write_key_bool(bxr_json_writer_t *json, const char *key, bool value);
 
 /**
  * Save the JSON data from the writer to a file at the given path.
@@ -357,6 +373,6 @@ bool bxr_jsonw_key_bool(bxr_jsonw_t *json, const char *key, bool value);
  * `return` true if the JSON data was successfully saved, or false if an error
  * occurred.
  */
-bool bxr_jsonw_save(bxr_jsonw_t *json, const char *path);
+bool bxr_json_writer_save(bxr_json_writer_t *json, const char *path);
 
 #endif // BXR_JSON_H_

@@ -29,25 +29,25 @@
 
 typedef struct bxr_font_s bxr_font_t;
 
-bxr_font_t *bxr_font_load(const char *path,
-                          const bxr_rect_t *glyphs,
-                          size_t glyph_count,
-                          bxr_vec2_t icon_range,
-                          bxr_vec2_t char_range,
-                          char first_char,
-                          int char_spacing,
-                          int line_spacing);
+bxr_font_t *bxr_font_create(const char *path,
+                            const bxr_rect_t *glyphs,
+                            size_t glyph_count,
+                            bxr_vec2_t icon_range,
+                            bxr_vec2_t char_range,
+                            char first_char,
+                            int char_spacing,
+                            int line_spacing);
 
-bxr_font_t *bxr_font_mem(unsigned int width,
-                         unsigned int height,
-                         const void *data,
-                         const bxr_rect_t *glyphs,
-                         size_t glyph_count,
-                         bxr_vec2_t icon_range,
-                         bxr_vec2_t char_range,
-                         char first_char,
-                         int char_spacing,
-                         int line_spacing);
+bxr_font_t *bxr_font_create_mem(unsigned int width,
+                                unsigned int height,
+                                const void *data,
+                                const bxr_rect_t *glyphs,
+                                size_t glyph_count,
+                                bxr_vec2_t icon_range,
+                                bxr_vec2_t char_range,
+                                char first_char,
+                                int char_spacing,
+                                int line_spacing);
 
 void bxr_font_destroy(bxr_font_t *font);
 
@@ -67,5 +67,7 @@ void bxr_font_set_char_spacing(bxr_font_t *font, int spacing);
 
 int bxr_font_get_line_spacing(const bxr_font_t *font);
 void bxr_font_set_line_spacing(bxr_font_t *font, int line_spacing);
+
+bxr_vec2_t bxr_font_measure_text(const bxr_font_t *font, const char *str);
 
 #endif // BXR_FONT_H_

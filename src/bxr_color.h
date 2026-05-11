@@ -30,6 +30,6 @@ typedef struct bxr_color_s
 #define BXR_COLOR_YELLOW (bxr_color_t){ .r = 255, .g = 255, .b = 0, .a = 255 }
 #define BXR_COLOR_TRANSPARENT (bxr_color_t){ .r = 0, .g = 0, .b = 0, .a = 0 }
 
-#define bxr_color_make(r, g, b, a) ((const bxr_color_t){ r, g, b, a })
+#define bxr_color_create(r, g, b, a) ((const bxr_color_t){ r, g, b, a })
 
 #endif // BXR_COLOR_H_

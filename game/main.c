@@ -16,8 +16,6 @@ bxr_game_config(void)
   _config.fullscreen = false;
   _config.resizable  = true;
 
-  _config.target_ups = 60;
-
   return &_config;
 }
 
@@ -25,7 +23,7 @@ void
 bxr_game_setup(void)
 {
   // Load an image
-  _image = bxr_image_make("data/images/logo.png");
+  _image = bxr_image_create("data/images/logo.png");
 }
 
 void
@@ -41,33 +39,57 @@ bxr_game_render(Uint64 alpha_time_ms)
 
   bxr_painter_begin(window_size.x, window_size.y);
   {
-    bxr_painter_set_color(bxr_color_make(0, 0, 0, 255));
+    bxr_painter_set_color(bxr_color_create(0, 0, 0, 255));
     bxr_painter_clear();
 
     float width  = window_size.x;
     float height = window_size.y;
 
+    int img_width  = bxr_image_get_width(_image);
+    int img_height = bxr_image_get_height(_image);
+
     bxr_painter_push_transform();
     {
       // Move the origin to the center of the screen
-      bxr_painter_translate(width * 0.5f, height * 0.5f);
+      // bxr_painter_translate(width * 0.5f, height * 0.5f);
 
       // Scale the image by 2
       bxr_painter_scale(2.0f, 2.0f);
 
-      bxr_painter_set_color(bxr_color_make(255, 255, 255, 255));
+      bxr_painter_set_color(bxr_color_create(255, 255, 255, 255));
 
-      int width  = bxr_image_get_width(_image);
-      int height = bxr_image_get_height(_image);
+      for (int i = 0; i < 4096; ++i) {
+        int x = SDL_rand(width);
+        int y = SDL_rand(height);
 
-      bxr_rect_t img_src = bxr_rect_make(0, 0, (float)width, (float)height);
-      bxr_rect_t img_dst = bxr_rect_make(
-          -width * 0.5f, -height * 0.5f, (float)width, (float)height);
+        bxr_rect_t src_rect
+            = bxr_rect_create(0, 0, (float)img_width, (float)img_height);
+        bxr_rect_t dst_rect
+            = bxr_rect_create(x, y, (float)img_width, (float)img_height);
 
-      // Draw the image centered on the screen
-      bxr_painter_set_image(0, _image);
-      bxr_painter_draw_textured_rect(0,
-                                     bxr_textured_rect_make(img_dst, img_src));
+        bxr_painter_set_image(0, _image);
+
+        bxr_painter_draw_textured_rect(0,
+                                       (bxr_textured_rect_t){
+                                           .src = src_rect,
+                                           .dst = dst_rect,
+                                       });
+      }
+
+      /*
+
+     int width  = bxr_image_get_width(_image);
+     int height = bxr_image_get_height(_image);
+
+     bxr_rect_t img_src = bxr_rect_create(0, 0, (float)width, (float)height);
+     bxr_rect_t img_dst = bxr_rect_create(
+         -width * 0.5f, -height * 0.5f, (float)width, (float)height);
+
+     // Draw the image centered on the screen
+     bxr_painter_set_image(0, _image);
+     bxr_painter_draw_textured_rect(
+         0, bxr_textured_rect_create(img_dst, img_src));
+         */
     }
     bxr_painter_pop_transform();
 

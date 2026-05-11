@@ -15,6 +15,7 @@
 #include "bxr_config.h"
 #include "bxr_context.h"
 #include "bxr_defs.h"
+#include "bxr_ecs.h"
 #include "bxr_error.h"
 #include "bxr_font.h"
 #include "bxr_game.h"
@@ -29,11 +30,15 @@
 #include "bxr_mouse.h"
 #include "bxr_painter.h"
 #include "bxr_pipeline.h"
-#include "bxr_pool.h"
+#include "bxr_sampler.h"
 #include "bxr_shader.h"
-#include "bxr_text.h"
+#include "bxr_sparse_set.h"
+#include "bxr_str.h"
 #include "bxr_unit.h"
 
+/**
+ * Quit the game loop and exit the application.
+ */
 void bxr_quit(void);
 
 #endif // BXR_H_

@@ -2,22 +2,22 @@
 
 #include "bxr_error.h"
 
-static bxr_erro_code_e _last_error = BXR_ERROR_NONE;
+static bxr_erro_code_e last_error_ = BXR_ERROR_NONE;
 
 bxr_erro_code_e
-bxr_get_error(void)
+bxr_error_get(void)
 {
-  return _last_error;
+  return last_error_;
 }
 
 void
-bxr_set_error(bxr_erro_code_e error)
+bxr_error_set(bxr_erro_code_e error)
 {
   SDL_assert(error >= BXR_ERROR_NONE && error < BXR_ERROR_SIZE);
 
   SDL_LogError(
-      SDL_LOG_CATEGORY_APPLICATION, "[%d] %s", error, bxr_get_error_msg(error));
-  _last_error = error;
+      SDL_LOG_CATEGORY_APPLICATION, "[%d] %s", error, bxr_error_get_msg(error));
+  last_error_ = error;
 }
 
 void
@@ -28,19 +28,21 @@ bxr_set_error_info(bxr_erro_code_e error, const char *info)
   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                "[%d] %s - INFO: %s",
                error,
-               bxr_get_error_msg(error),
+               bxr_error_get_msg(error),
                info);
-  _last_error = error;
+  last_error_ = error;
 }
 
 const char *
-bxr_get_error_msg(bxr_erro_code_e error)
+bxr_error_get_msg(bxr_erro_code_e error)
 {
   SDL_assert(error >= BXR_ERROR_NONE && error < BXR_ERROR_SIZE);
 
   switch (error) {
   case BXR_ERROR_NONE:
     return "No error.";
+  case BXR_ERROR_OUT_OF_MEMORY:
+    return "Out of memory.";
   case BXR_ERROR_FILE_NOT_FOUND:
     return "File not found.";
   // bxr_shader.c errors
@@ -53,13 +55,13 @@ bxr_get_error_msg(bxr_erro_code_e error)
     // bxr_image.c errors
   case BXR_ERROR_IMAGE_FILE:
     return "Image open file error.";
-  case BXR_ERROR_IMAGE_MAKE:
-    return "Image make error.";
-  case BXR_ERROR_IMAGE_MAKE_MEM:
-    return "Image make from memory error.";
+  case BXR_ERROR_IMAGE_CREATE:
+    return "Image create error.";
+  case BXR_ERROR_IMAGE_CREATE_MEM:
+    return "Image create from memory error.";
     // bxr_sampler.c errors
-  case BXR_ERROR_SAMPLER_MAKE:
-    return "Sampler make error.";
+  case BXR_ERROR_SAMPLER_CREATE:
+    return "Sampler create error.";
     // bxr_io.c errors
   case BXR_ERROR_IO_READ:
     return "IO read error.";
