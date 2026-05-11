@@ -3,6 +3,30 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
+ * # Asset Management
+ *
+ * The asset system provides an interface for loading and managing game assets
+ * such as images, sounds, and other data files. It uses a virtual file system
+ * to allow mounting directories and archives (e.g. zip files).
+ *
+ * The asset system is built on top of the PhysicsFS library, which provides an
+ * abstraction layer for file I/O and supports various archive formats:
+ *
+ * Currently supported archive types:
+ *
+ *    .ZIP (pkZip/WinZip/Info-ZIP compatible)
+ *    .7Z (7zip archives)
+ *    .ISO (ISO9660 files, CD-ROM images)
+ *    .GRP (Build Engine groupfile archives)
+ *    .PAK (Quake I/II archive format)
+ *    .HOG (Descent I/II/III HOG file archives)
+ *    .MVL (Descent II movielib archives)
+ *    .WAD (DOOM engine archives)
+ *    .BIN (Chasm: The Rift engine archives)
+ *    .VDF (Gothic I/II engine archives)
+ *    .SLB (Independence War archives)
+ *    .POD (Terminal Velocity POD archives)
+ *    .DAT (Resident Evil 3 rofs.dat archives)
  */
 
 #ifndef BXR_ASSET_H_

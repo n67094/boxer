@@ -76,8 +76,7 @@ bxr_asset_mount(const char *path)
                 "Failed to mount %s: (error: %s)",
                 path,
                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    // TODO set error
-    // bxr_set_error(BXR_ERROR_ASSET_MOUNT);
+    bxr_error_set(BXR_ERROR_ASSET_MOUNT);
     return false;
   }
   return true;
@@ -94,8 +93,7 @@ bxr_asset_unmount(const char *path)
                 "Failed to unmount %s: (error: %s)",
                 path,
                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    // TODO set error
-    // bxr_set_error(BXR_ERROR_ASSET_UNMOUNT);
+    bxr_error_set(BXR_ERROR_ASSET_UNMOUNT);
     return false;
   }
   return true;
@@ -142,7 +140,7 @@ bxr_asset_read(const char *path, size_t *length)
                  "Failed to open file: %s (error: %s)",
                  path,
                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_error_set(BXR_ERROR_IO_READ);
+    bxr_error_set(BXR_ERROR_ASSET_READ);
     return NULL;
   }
 
@@ -168,7 +166,7 @@ bxr_asset_read(const char *path, size_t *length)
                  path,
                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_error_set(BXR_ERROR_IO_READ);
+    bxr_error_set(BXR_ERROR_ASSET_READ);
     return NULL;
   }
 
@@ -195,7 +193,7 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
                  "Failed to open file for writing: %s (error: %s)",
                  path,
                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_error_set(BXR_ERROR_IO_WRITE);
+    bxr_error_set(BXR_ERROR_ASSET_WRITE);
     return false;
   }
 
@@ -209,7 +207,7 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
                  path,
                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_error_set(BXR_ERROR_IO_WRITE);
+    bxr_error_set(BXR_ERROR_ASSET_WRITE);
     return false;
   }
 

@@ -37,13 +37,19 @@ bxr_image_create(const char *path)
 
   SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Loading image from: %s", path);
 
+  if (!PHYSFS_exists(path)) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "File not found: %s", path);
+    bxr_error_set(BXR_ERROR_FILE_NOT_FOUND);
+    return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
+  }
+
   SDL_IOStream *stream = PHYSFSSDL3_openRead(path);
   if (!stream) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                  "Failed to open image file: %s (error: %s)",
                  path,
                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_error_set(BXR_ERROR_IMAGE_FILE);
+    bxr_error_set(BXR_ERROR_IMAGE_READ);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
