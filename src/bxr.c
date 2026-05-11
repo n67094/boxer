@@ -4,8 +4,6 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
-#include <physfs.h>
-
 // Override SDL_gp configuration.
 
 #define SDL_GP_PATH_MAX BXR_PATH_MAX_LENGTH
@@ -67,52 +65,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_assert(config->height > 0);
   SDL_assert(config->fullscreen == true || config->fullscreen == false);
   SDL_assert(config->resizable == true || config->resizable == false);
-
-  if (!PHYSFS_init(NULL)) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to init PhysFS (error: %s)",
-                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    return SDL_APP_FAILURE;
-  }
-
-  // PHYSFS get write directory (system specific)
-  const char *write_dir = PHYSFS_getPrefDir("boxer_engine", config->name);
-  if (!PHYSFS_setWriteDir(write_dir)) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to set write dir to %s: (error: %s)",
-                write_dir,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    return SDL_APP_FAILURE;
-  }
-
-  SDL_LogInfo(
-      SDL_LOG_CATEGORY_APPLICATION, "PhysFS write directory: %s", write_dir);
-
-  // PHYSFS mounts write directory (system specific)
-  if (!PHYSFS_mount(write_dir, NULL, 1)) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to mount write dir %s: (error: %s)",
-                write_dir,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    return SDL_APP_FAILURE;
-  }
-  SDL_LogInfo(
-      SDL_LOG_CATEGORY_APPLICATION, "PhysFS mount directory: %s", write_dir);
-
-  // PHYSFS mounts read directory (BXR_DATA_DIR)
-  const char *base_dir = PHYSFS_getBaseDir();
-  char mount_dir[BXR_PATH_MAX_LENGTH];
-  SDL_snprintf(mount_dir, BXR_PATH_MAX_LENGTH, "%s%s", base_dir, BXR_DATA_DIR);
-
-  if (!PHYSFS_mount(mount_dir, "data/", 1)) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to mount %s: (error: %s)",
-                mount_dir,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    return SDL_APP_FAILURE;
-  }
-  SDL_LogInfo(
-      SDL_LOG_CATEGORY_APPLICATION, "PhysFS mount directory: %s", mount_dir);
 
   bxr_context_t *context = bxr_context_get();
 
@@ -231,6 +183,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   bxr_painter_setup(&painter_desc);
 
   // Setup subsystems
+  bxr_asset_setup(context);
   bxr_keyboard_setup();
   bxr_mouse_setup();
   bxr_gamepad_setup();
@@ -428,11 +381,12 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 
   bxr_game_shutdown();
 
-  bxr_keyboard_shutdown();
-  bxr_mouse_shutdown();
-  bxr_gamepad_shutdown();
-  bxr_image_shutdown();
   bxr_shader_shutdown();
+  bxr_image_shutdown();
+  bxr_gamepad_shutdown();
+  bxr_mouse_shutdown();
+  bxr_keyboard_shutdown();
+  bxr_asset_shutdown();
 
   bxr_painter_shutdown();
 
@@ -449,8 +403,6 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
       SDL_DestroyWindow(context->window);
     }
   }
-
-  PHYSFS_deinit();
 }
 
 void

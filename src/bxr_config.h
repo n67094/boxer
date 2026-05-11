@@ -21,15 +21,6 @@
 #define BXR_PATH_MAX_LENGTH 512
 
 /**
- * ## Filesystem Configuration
- */
-
-/**
- * The directory where game assets are located (relative to the executable)
- */
-#define BXR_DATA_DIR "data"
-
-/**
  * ## Painter Configuration
  */
 

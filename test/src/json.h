@@ -87,7 +87,15 @@ BXR_UNIT_CASE(case_bxr_json_write)
   }
   BXR_UNIT_ASSERT(bxr_json_writer_object_end(json));
 
-  BXR_UNIT_ASSERT(bxr_json_writer_save(json, "test.json"));
+  const Uint8 *data;
+  size_t length;
+
+  data = bxr_json_writer_get_data(json, &length);
+  BXR_UNIT_ASSERT(data != NULL);
+  BXR_UNIT_ASSERT(length > 0);
+
+  // write the JSON data to a file
+  bxr_asset_write("test.json", data, length, false);
 
   bxr_json_destroy_writer(json);
 
@@ -96,12 +104,21 @@ BXR_UNIT_CASE(case_bxr_json_write)
 
 BXR_UNIT_CASE(case_bxr_json_read)
 {
-  // Please note that here bxr_jsonr_eq_* could be bxr_jsonr_token_str
-  // functions, but using eq functions makes the test more readable and also
-  // tests the eq functions themselves.
+  // Reading the written JSON to verify the content is correct
+  // ---------------------------------------------------------
 
-  bxr_json_reader_t *json = bxr_json_create_reader("test.json");
-  bxr_json_token_t token  = bxr_json_read_token(json);
+  Uint8 *read_data;
+  size_t read_length;
+  read_data = bxr_asset_read("test.json", &read_length);
+
+  // Create a reader from the read data
+  bxr_json_reader_t *json = bxr_json_create_reader(read_data, read_length);
+
+  // Free the read data after creating the reader, as the reader has its own
+  // copy of the data
+  BXR_FREE(read_data);
+
+  bxr_json_token_t token = bxr_json_read_token(json);
 
   bxr_json_token_t key, value;
   while (bxr_json_reader_iter_object(json, &token, &key, &value) == 1) {

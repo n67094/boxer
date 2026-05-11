@@ -3,9 +3,10 @@
 #include <physfs.h>
 #include <physfssdl3.h>
 
+#include "bxr_asset.h"
 #include "bxr_config.h"
+#include "bxr_error.h"
 #include "bxr_ini.h"
-#include "bxr_io.h"
 #include "bxr_mem.h"
 #include "bxr_str.h"
 
@@ -179,9 +180,9 @@ bxr_ini_reader_parse_(bxr_ini_reader_t *ini)
 }
 
 bxr_ini_reader_t *
-bxr_ini_create_reader(const char *path)
+bxr_ini_create_reader(const Uint8 *data, size_t length)
 {
-  SDL_assert(path);
+  SDL_assert(data);
 
   bxr_ini_reader_t *ini = NULL;
   BXR_NEW(ini);
@@ -190,20 +191,14 @@ bxr_ini_create_reader(const char *path)
     return NULL;
   }
 
-  size_t length = 0;
-  char *data    = (char *)bxr_io_read(path, &length);
-
   BXR_ALLOC(ini->data, length + 1); // +1 for null-terminator
   if (!ini->data) {
     bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
-    BXR_FREE(data);
     BXR_FREE(ini);
     return NULL;
   }
 
   BXR_MEMCPY(ini->data, data, length);
-
-  BXR_FREE(data);
 
   ini->data[length] = '\0'; // Null-terminate for simplify parsing
   ini->end          = ini->data + length;
@@ -552,5 +547,17 @@ bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path)
 
   size_t data_len = SDL_strlen(ini->data);
 
-  return bxr_io_write(path, ini->data, data_len, false);
+  return bxr_asset_write(path, ini->data, data_len, false);
+}
+
+const Uint8 *
+bxr_ini_writer_get_data(const bxr_ini_writer_t *ini, size_t *length)
+{
+  SDL_assert(ini);
+
+  if (length) {
+    *length = ini->size;
+  }
+
+  return (const Uint8 *)ini->data;
 }

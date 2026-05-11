@@ -17,6 +17,8 @@
 #define INLINE
 #endif
 
+#define BXR_ORGANIZATION_NAME "boxer"
+
 // Magic value to indicate that a subsystem has been initialized
 #define BXR_INIT_COOKIE 0xC0DED1ED
 

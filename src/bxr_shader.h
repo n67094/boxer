@@ -5,7 +5,7 @@
  *
  * # Shader Management System.
  *
- * Shader bytecode are loaded from `BXR_DATA_DIR`.
+ * Shader are loaded from mounted directories using `bxr_asset.h` API.
  *
  * Shader should be name like this `<name>.<stage>.<format>`, where:
  *

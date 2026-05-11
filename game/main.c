@@ -22,6 +22,8 @@ bxr_game_config(void)
 void
 bxr_game_setup(void)
 {
+  bxr_asset_mount("data.zip");
+
   // Load an image
   _image = bxr_image_create("data/images/logo.png");
 }
@@ -77,7 +79,6 @@ bxr_game_render(Uint64 alpha_time_ms)
       }
 
       /*
-
      int width  = bxr_image_get_width(_image);
      int height = bxr_image_get_height(_image);
 
@@ -101,5 +102,7 @@ bxr_game_render(Uint64 alpha_time_ms)
 void
 bxr_game_shutdown(void)
 {
+  bxr_asset_unmount("data.zip");
+
   bxr_image_destroy(_image);
 }

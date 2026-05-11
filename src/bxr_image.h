@@ -4,6 +4,8 @@
  * Copyright (c) 2026 nsix. All rights reserved.
  *
  * # Image Management and Utilities
+ *
+ * Image are loaded from mounted directories using `bxr_asset.h` API.
  */
 
 #ifndef BXR_IMAGE_H_
@@ -41,7 +43,7 @@ void bxr_image_shutdown(void);
 /**
  * Load an image from a file.
  *
- * `path` is the path to the image file to load, relative to the data directory.
+ * `path` is the path to the image file to load, relative mounted directories.
  *
  * `return` the loaded image, or an invalid image if the image could not be
  * loaded. Use `bxr_error_get` to get more information about the error.

@@ -47,10 +47,11 @@ typedef struct bxr_json_token_s
  */
 
 /**
- * Load a JSON file from the given path and return a reader for it.
+ * Load a JSON file from the given data and return a reader for it.
  *
- * `path` is the path to the JSON file to load. (c.f `bxr_io_read` for path
- * resolution).
+ * `data` is a pointer to the JSON data to load.
+ *
+ * `length` is the length of the JSON data in bytes.
  *
  * `return` a reader for the loaded JSON file, or NULL if an error occurred. Use
  * `bxr_error_get` to get more information about the error.
@@ -58,7 +59,7 @@ typedef struct bxr_json_token_s
  * The caller is responsible for destroying the returned reader using
  * `bxr_json_destroy_reader` when it is no longer needed.
  */
-bxr_json_reader_t *bxr_json_create_reader(const char *path);
+bxr_json_reader_t *bxr_json_create_reader(const Uint8 *data, size_t length);
 
 /**
  * Destroy a JSON reader and free its resources.
@@ -363,16 +364,16 @@ bool
 bxr_json_write_key_bool(bxr_json_writer_t *json, const char *key, bool value);
 
 /**
- * Save the JSON data from the writer to a file at the given path.
+ * Get the JSON data written by the writer.
  *
- * `json` is the JSON writer containing the data to save.
+ * `json` is the JSON writer to get the data from.
  *
- * `path` is the path to the file where the JSON data should be saved. (c.f
- * `bxr_io_write` for path resolution).
+ * `length` is an optional output parameter to store the length of the returned
+ * data in bytes.
  *
- * `return` true if the JSON data was successfully saved, or false if an error
- * occurred.
+ * `return` a pointer to the JSON data written by the writer. The caller should
+ * not modify or free this pointer, as it is owned by the JSON writer.
  */
-bool bxr_json_writer_save(bxr_json_writer_t *json, const char *path);
+const Uint8 *bxr_json_writer_get_data(bxr_json_writer_t *json, size_t *length);
 
 #endif // BXR_JSON_H_

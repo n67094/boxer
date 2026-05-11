@@ -11,6 +11,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_asset.h"
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_context.h"
@@ -22,7 +23,6 @@
 #include "bxr_gamepad.h"
 #include "bxr_image.h"
 #include "bxr_ini.h"
-#include "bxr_io.h"
 #include "bxr_json.h"
 #include "bxr_keyboard.h"
 #include "bxr_math.h"

@@ -2,9 +2,10 @@
 
 #include <physfs.h>
 
+#include "bxr_asset.h"
 #include "bxr_error.h"
-#include "bxr_io.h"
 #include "bxr_json.h"
+#include "bxr_mem.h"
 
 struct bxr_json_reader_s
 {
@@ -38,9 +39,14 @@ bxr_json_reader_discard_until_(bxr_json_reader_t *json, int depth)
 }
 
 bxr_json_reader_t *
-bxr_json_create_reader(const char *path)
+bxr_json_create_reader(const Uint8 *data, size_t length)
 {
-  SDL_assert(path);
+  SDL_assert(data);
+
+  if (length == 0) {
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "JSON data is empty.");
+    return NULL;
+  }
 
   bxr_json_reader_t *json = NULL;
   BXR_NEW(json);
@@ -48,20 +54,14 @@ bxr_json_create_reader(const char *path)
     return NULL;
   }
 
-  size_t length = 0;
-  char *data    = (char *)bxr_io_read(path, &length);
-
   BXR_ALLOC(json->data, length + 1); // +1 for null-terminator
   if (!json->data) {
     bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
-    BXR_FREE(data);
     BXR_FREE(json);
     return NULL;
   }
 
   BXR_MEMCPY(json->data, data, length);
-
-  BXR_FREE(data);
 
   json->data[length] = '\0'; // Null-terminate the JSON data
   json->cursor       = json->data;
@@ -653,18 +653,14 @@ bxr_json_write_key_bool(bxr_json_writer_t *json, const char *key, bool value)
   return is_ok;
 }
 
-bool
-bxr_json_writer_save(bxr_json_writer_t *json, const char *path)
+const Uint8 *
+bxr_json_writer_get_data(bxr_json_writer_t *json, size_t *length)
 {
   SDL_assert(json);
-  SDL_assert(path);
 
-  if (json->depth != 0) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Cannot save JSON unclosed objects or arrays.");
-    bxr_error_set(BXR_ERROR_JSON_WRITE);
-    return false;
+  if (length) {
+    *length = json->size;
   }
 
-  return bxr_io_write(path, json->data, SDL_strlen(json->data), false);
+  return (const Uint8 *)json->data;
 }
