@@ -18,6 +18,8 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_defs.h"
+
 typedef enum
 {
   BXR_KEY_UNKNOWN = SDL_SCANCODE_UNKNOWN,
@@ -161,19 +163,19 @@ typedef enum
  * Initialize the keyboard input system. Must be called before using any
  * other keyboard functions.
  */
-void bxr_keyboard_setup(void);
+BXR_API void bxr_keyboard_setup(void);
 
 /**
  * Update the keyboard state for the current frame. Must be called at the
  * beginning of each frame before processing input.
  */
-void bxr_keyboard_begin_frame(void);
+BXR_API void bxr_keyboard_begin_frame(void);
 
 /**
  * Shutdown the keyboard input system. Must be called when the
  * application is closing to free any resources used by the keyboard system.
  */
-void bxr_keyboard_shutdown(void);
+BXR_API void bxr_keyboard_shutdown(void);
 
 /**
  * Handle a key down event for the given scancode. Must be called when a
@@ -181,7 +183,7 @@ void bxr_keyboard_shutdown(void);
  *
  * `scancode` is the scancode of the key that was pressed.
  */
-void bxr_key_down(bxr_key_e scancode);
+BXR_API void bxr_key_down(bxr_key_e scancode);
 
 /**
  * Handle a key up event for the given scancode. Must be called when a
@@ -189,7 +191,7 @@ void bxr_key_down(bxr_key_e scancode);
  *
  * `scancode` is the scancode of the key that was released.
  */
-void bxr_key_up(bxr_key_e scancode);
+BXR_API void bxr_key_up(bxr_key_e scancode);
 
 /**
  * ## Public API
@@ -204,7 +206,7 @@ void bxr_key_up(bxr_key_e scancode);
  *
  * `return` the name of the key, or "Unknown" if the key is not recognized.
  */
-const char *bxr_key_name(bxr_key_e key);
+BXR_API const char *bxr_key_name(bxr_key_e key);
 
 /**
  * Get the name of a key based on its scancode and the given modifier state.
@@ -215,7 +217,7 @@ const char *bxr_key_name(bxr_key_e key);
  *
  * `return` the name of the key, or "Unknown" if the key is not recognized.
  */
-const char *bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod);
+BXR_API const char *bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod);
 
 /**
  * Check if a key is currently held down.
@@ -224,7 +226,7 @@ const char *bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod);
  *
  * `return` true if the key is currently held down, false otherwise.
  */
-bool bxr_key_held(bxr_key_e key);
+BXR_API bool bxr_key_held(bxr_key_e key);
 
 /**
  * Check if a key was just pressed this frame.
@@ -233,7 +235,7 @@ bool bxr_key_held(bxr_key_e key);
  *
  * `return` true if the key was just pressed this frame, false otherwise.
  */
-bool bxr_key_just_pressed(bxr_key_e key);
+BXR_API bool bxr_key_just_pressed(bxr_key_e key);
 
 /**
  * Check if a key was just released this frame.
@@ -242,7 +244,7 @@ bool bxr_key_just_pressed(bxr_key_e key);
  *
  * `return` true if the key was just released this frame, false otherwise.
  */
-bool bxr_key_just_released(bxr_key_e key);
+BXR_API bool bxr_key_just_released(bxr_key_e key);
 
 /**
  * Get the amount of time a key has been held down.
@@ -251,7 +253,7 @@ bool bxr_key_just_released(bxr_key_e key);
  *
  * `return` the amount of time the key has been held down in milliseconds.
  */
-Uint64 bxr_key_held_time(bxr_key_e key);
+BXR_API Uint64 bxr_key_held_time(bxr_key_e key);
 
 /**
  * Check if a specific modifier key is currently pressed.
@@ -261,6 +263,6 @@ Uint64 bxr_key_held_time(bxr_key_e key);
  * `return` true if the specified modifier key is currently pressed, false
  * otherwise.
  */
-bool bxr_keymod_pressed(bxr_keymode_e mod);
+BXR_API bool bxr_keymod_pressed(bxr_keymode_e mod);
 
 #endif // BXR_KEYBOARD_H_

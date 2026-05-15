@@ -12,6 +12,7 @@
 #define BXR_IMAGE_H_
 
 #include "bxr_context.h"
+#include "bxr_defs.h"
 
 #define BXR_IMAGE_INVALID_ID 0
 
@@ -30,12 +31,12 @@ typedef struct bxr_image_s
  *
  * `context` is the bxr context to use for image operations.
  */
-void bxr_image_setup(bxr_context_t *context);
+BXR_API void bxr_image_setup(bxr_context_t *context);
 
 /**
  * Shutdown the image subsystem.
  */
-void bxr_image_shutdown(void);
+BXR_API void bxr_image_shutdown(void);
 
 /**
  * ## Public API
@@ -52,7 +53,7 @@ void bxr_image_shutdown(void);
  * The caller is responsible for destroying the returned image using
  * `bxr_image_destroy` when it is no longer needed.
  */
-bxr_image_t bxr_image_create(const char *path);
+BXR_API bxr_image_t bxr_image_create(const char *path);
 
 /**
  * Create an image from memory.
@@ -69,8 +70,9 @@ bxr_image_t bxr_image_create(const char *path);
  * The caller is responsible for destroying the returned image using
  * `bxr_image_destroy` when it is no longer needed.
  */
-bxr_image_t
-bxr_image_create_mem(unsigned int width, unsigned int height, void *pixels);
+BXR_API bxr_image_t bxr_image_create_mem(unsigned int width,
+                                         unsigned int height,
+                                         void *pixels);
 
 /**
  * Get the width of an image in pixels.
@@ -79,7 +81,7 @@ bxr_image_create_mem(unsigned int width, unsigned int height, void *pixels);
  *
  * `return` the width of the image in pixels, or 0 if the image is invalid.
  */
-int bxr_image_get_width(bxr_image_t image);
+BXR_API int bxr_image_get_width(bxr_image_t image);
 
 /**
  * Get the height of an image in pixels.
@@ -88,13 +90,13 @@ int bxr_image_get_width(bxr_image_t image);
  *
  * `return` the height of the image in pixels, or 0 if the image is invalid.
  */
-int bxr_image_get_height(bxr_image_t image);
+BXR_API int bxr_image_get_height(bxr_image_t image);
 
 /**
  * Destroy an image and free its resources.
  *
  * `image` is the image to destroy.
  */
-void bxr_image_destroy(bxr_image_t image);
+BXR_API void bxr_image_destroy(bxr_image_t image);
 
 #endif // BXR_IMAGE_H_

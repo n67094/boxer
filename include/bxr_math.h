@@ -566,7 +566,7 @@ bxr_rect_expand(bxr_rect_t rect, float amount)
  * `return` a rectangle that is contracted by the specified amount in all
  * directions.
  */
-bxr_rect_t BXR_INLINE
+BXR_INLINE bxr_rect_t
 bxr_rect_contract(bxr_rect_t rect, float amount)
 {
   return bxr_rect_create(rect.x + amount,
