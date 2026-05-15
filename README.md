@@ -6,7 +6,7 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 # Boxer (Work in Progress)
 
-A lighweight, full-featured, crossplatform 2D game library written in C99.
+A full-featured, lightweight and crossplatform 2D game library written in C.
 
 Features:
 
