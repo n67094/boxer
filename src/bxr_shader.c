@@ -145,7 +145,7 @@ bxr_shader_create(bxr_shader_desc_t *desc)
     .frag_num_uniform_buffers  = desc->frag_num_uniform_buffers,
   };
 
-  bxr_shader_t shader = (bxr_shader_t)SDL_GPCreateShader(&shader_desc);
+  bxr_shader_t shader = { .id = SDL_GPCreateShader(&shader_desc).id };
 
   BXR_FREE(vert_bytecode->data);
   BXR_FREE(vert_bytecode);
@@ -161,5 +161,9 @@ bxr_shader_destroy(bxr_shader_t shader)
 {
   SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  SDL_GPDestroyShader((SDL_GPShader)shader);
+  SDL_GPShader gp_shader = {
+    .id = shader.id,
+  };
+
+  SDL_GPDestroyShader(gp_shader);
 }

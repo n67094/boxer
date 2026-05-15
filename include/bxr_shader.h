@@ -21,13 +21,14 @@
 
 #include <SDL3/SDL.h>
 
-#include <SDL_gp.h>
-
 #include "bxr_context.h"
 
 #define BXR_SHADER_INVALID_ID SDL_GP_INVALID_ID
 
-typedef SDL_GPShader bxr_shader_t;
+typedef struct bxr_shader_s
+{
+  size_t id;
+} bxr_shader_t;
 
 typedef struct bxr_shader_desc_s
 {

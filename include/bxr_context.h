@@ -14,6 +14,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_defs.h"
 #include "bxr_game.h"
 #include "bxr_math.h"
 
@@ -38,7 +39,7 @@ typedef struct bxr_context_s
  *
  * `return` Pointer to the global context instance.
  */
-bxr_context_t *bxr_context_get(void);
+BXR_API bxr_context_t *bxr_context_get(void);
 
 /**
  * Set the window dimensions.
@@ -46,7 +47,7 @@ bxr_context_t *bxr_context_get(void);
  * `width`  The new width of the window in pixels.
  * `height` The new height of the window in pixels.
  */
-void bxr_context_set_window_dimensions(int width, int height);
+BXR_API void bxr_context_set_window_dimensions(int width, int height);
 
 /**
  * Get the current window dimensions.
@@ -54,7 +55,7 @@ void bxr_context_set_window_dimensions(int width, int height);
  * `return` The current window dimensions as a `bxr_vec2_t` (x = width, y =
  * height).
  */
-bxr_vec2_t bxr_context_get_window_dimensions(void);
+BXR_API bxr_vec2_t bxr_context_get_window_dimensions(void);
 
 /**
  * Set the fullscreen mode of the window.
@@ -62,14 +63,14 @@ bxr_vec2_t bxr_context_get_window_dimensions(void);
  * `fullscreen` `true` to set the window to fullscreen mode, `false` to set it
  * to windowed mode.
  */
-void bxr_context_set_fullscreen(bool fullscreen);
+BXR_API void bxr_context_set_fullscreen(bool fullscreen);
 
 /**
  * Check if the window is currently in fullscreen mode.
  *
  * `return` `true` if the window is in fullscreen mode, `false` otherwise.
  */
-bool bxr_context_is_fullscreen(void);
+BXR_API bool bxr_context_is_fullscreen(void);
 
 /**
  * Set the resizable property of the window.
@@ -77,13 +78,13 @@ bool bxr_context_is_fullscreen(void);
  * `resizable` `true` to make the window resizable, `false` to make it
  * non-resizable.
  */
-void bxr_context_set_resizable(bool resizable);
+BXR_API void bxr_context_set_resizable(bool resizable);
 
 /**
  * Check if the window is currently resizable.
  *
  * `return` `true` if the window is resizable, `false` otherwise.
  */
-bool bxr_context_is_resizable(void);
+BXR_API bool bxr_context_is_resizable(void);
 
 #endif // BXR_CONTEXT_H_

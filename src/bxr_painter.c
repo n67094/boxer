@@ -120,7 +120,11 @@ bxr_painter_scale_at(float sx, float sy, float ax, float ay)
 void
 bxr_painter_set_pipeline(bxr_pipeline_t pipeline)
 {
-  SDL_GPSetPipeline(pipeline);
+  SDL_GPPipeline gp_pipeline = {
+    .id = pipeline.id,
+  };
+
+  SDL_GPSetPipeline(gp_pipeline);
 }
 
 void
@@ -192,7 +196,11 @@ bxr_painter_reset_color(void)
 void
 bxr_painter_set_image(int channel, bxr_image_t image)
 {
-  SDL_GPSetImage(channel, (SDL_GPImage)image);
+  SDL_GPImage gp_image = {
+    .id = image.id,
+  };
+
+  SDL_GPSetImage(channel, gp_image);
 }
 
 void

@@ -9,6 +9,8 @@
 #ifndef BXR_ERROR_H_
 #define BXR_ERROR_H_
 
+#include "bxr_defs.h"
+
 typedef enum
 {
   BXR_ERROR_NONE = 0,
@@ -44,7 +46,7 @@ typedef enum
  *
  * `error` is the error code to set.
  */
-void bxr_error_set(bxr_erro_code_e error);
+BXR_API void bxr_error_set(bxr_erro_code_e error);
 
 /**
  * ## Public API
@@ -55,7 +57,7 @@ void bxr_error_set(bxr_erro_code_e error);
  *
  * `return` the last error code.
  */
-bxr_erro_code_e bxr_error_get(void);
+BXR_API bxr_erro_code_e bxr_error_get(void);
 
 /**
  * Get the error message corresponding to the given error code.
@@ -64,6 +66,6 @@ bxr_erro_code_e bxr_error_get(void);
  *
  * `return` the error message corresponding to the given error code.
  */
-const char *bxr_error_get_msg(bxr_erro_code_e error);
+BXR_API const char *bxr_error_get_msg(bxr_erro_code_e error);
 
 #endif // BXR_ERROR_H_

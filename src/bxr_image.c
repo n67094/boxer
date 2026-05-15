@@ -3,6 +3,8 @@
 #include <physfs.h>
 #include <physfssdl3.h>
 
+#include <SDL_gp.h>
+
 #include "bxr_context.h"
 #include "bxr_defs.h"
 #include "bxr_error.h"
@@ -60,7 +62,7 @@ bxr_image_create(const char *path)
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
-  bxr_image_t image = SDL_GPCreateImage(surface);
+  bxr_image_t image = { .id = SDL_GPCreateImage(surface).id };
 
   SDL_DestroySurface(surface);
 
@@ -83,7 +85,7 @@ bxr_image_create_mem(unsigned int width, unsigned int height, void *pixels)
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
-  bxr_image_t image = SDL_GPCreateImage(surface);
+  bxr_image_t image = { .id = SDL_GPCreateImage(surface).id };
 
   SDL_DestroySurface(surface);
 
@@ -95,7 +97,7 @@ bxr_image_get_width(bxr_image_t image)
 {
   SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  return SDL_GPGetImageWidth((SDL_GPImage)image);
+  return SDL_GPGetImageWidth((SDL_GPImage){ .id = image.id });
 }
 
 int
@@ -103,7 +105,7 @@ bxr_image_get_height(bxr_image_t image)
 {
   SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  return SDL_GPGetImageHeight((SDL_GPImage)image);
+  return SDL_GPGetImageHeight((SDL_GPImage){ .id = image.id });
 }
 
 void
@@ -111,5 +113,5 @@ bxr_image_destroy(bxr_image_t image)
 {
   SDL_assert(initialized_ == BXR_INIT_COOKIE);
 
-  SDL_GPDestroyImage((SDL_GPImage)image);
+  SDL_GPDestroyImage((SDL_GPImage){ .id = image.id });
 }

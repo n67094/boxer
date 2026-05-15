@@ -61,7 +61,7 @@ AR = ar
 LDLIBS  = -lSDL3 -lm
 LDFLAGS =
 
-CFLAGS = -std=c99 -Wall -I$(PHYSFS_DIR) -I$(SDL_GP_DIR) -I$(BOXER_INC_DIR)
+CFLAGS = -std=c99 -Wall -DBOXER_BUILD -I$(PHYSFS_DIR) -I$(SDL_GP_DIR) -I$(BOXER_INC_DIR)
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -O0 -DDEBUG
@@ -75,9 +75,6 @@ ifeq ($(SANITIZER), 1)
 CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 LDFLAGS += -fsanitize=address
 endif
-
-# Hide internal symbols by default (good practice for shared libs)
-CFLAGS += -fvisibility=hidden
 
 # Test compilation flags
 TEST_CFLAGS  := $(CFLAGS) -I$(TEST_DIR)

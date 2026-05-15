@@ -34,9 +34,8 @@
 
 #include <SDL3/SDL.h>
 
-#include <physfs.h>
-
 #include "bxr_context.h"
+#include "bxr_defs.h"
 
 /**
  * ## Internal API
@@ -48,12 +47,12 @@
  *
  * `context` is the bxr context to use for asset operations.
  */
-void bxr_asset_setup(bxr_context_t *context);
+BXR_API void bxr_asset_setup(bxr_context_t *context);
 
 /**
  * Shutdown the asset subsystem.
  */
-void bxr_asset_shutdown(void);
+BXR_API void bxr_asset_shutdown(void);
 
 /**
  * ## Public API
@@ -74,7 +73,7 @@ void bxr_asset_shutdown(void);
  * `return` true if the mount operation was successful, false otherwise.
  * Use `bxr_error_get` to get more information about the error.
  */
-bool bxr_asset_mount(const char *path);
+BXR_API bool bxr_asset_mount(const char *path);
 
 /**
  * Unmount a directory or archive from the virtual file system.
@@ -84,7 +83,7 @@ bool bxr_asset_mount(const char *path);
  * `return` true if the unmount operation was successful, false otherwise.
  * Use `bxr_error_get` to get more information about the error.
  */
-bool bxr_asset_unmount(const char *path);
+BXR_API bool bxr_asset_unmount(const char *path);
 
 /**
  * Check if a file or directory exists at the given path.
@@ -94,7 +93,7 @@ bool bxr_asset_unmount(const char *path);
  *
  * `return` true if the file or directory exists, false otherwise.
  */
-bool bxr_asset_exists(const char *path);
+BXR_API bool bxr_asset_exists(const char *path);
 
 /**
  * Check if the given path is a directory.
@@ -103,7 +102,7 @@ bool bxr_asset_exists(const char *path);
  *
  * `return` true if the path is a directory, false otherwise.
  */
-bool bxr_asset_is_directory(const char *path);
+BXR_API bool bxr_asset_is_directory(const char *path);
 
 /**
  * Read a file from the given path and return its contents.
@@ -120,7 +119,7 @@ bool bxr_asset_is_directory(const char *path);
  * The caller is responsible for freeing the returned data using `SDL_free` when
  * it is no longer needed.
  */
-Uint8 *bxr_asset_read(const char *path, size_t *length);
+BXR_API Uint8 *bxr_asset_read(const char *path, size_t *length);
 
 /**
  * Write data to a file at the given path.
@@ -144,7 +143,7 @@ Uint8 *bxr_asset_read(const char *path, size_t *length);
  * `return` true if the write operation was successful, false otherwise.  Use
  * `bxr_error_get` to get more information about the error.
  */
-bool
+BXR_API bool
 bxr_asset_write(const char *path, const void *data, size_t length, bool append);
 
 #endif // BXR_ASSET_H_

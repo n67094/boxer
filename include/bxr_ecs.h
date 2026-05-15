@@ -11,6 +11,8 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_defs.h"
+
 typedef size_t bxr_ecs_entity_t;
 typedef size_t bxr_ecs_component_t;
 typedef size_t bxr_ecs_system_t;
@@ -38,14 +40,14 @@ typedef struct bxr_ecs_s bxr_ecs_t;
  * The caller is responsible for destroying the returned ECS instance using
  * `bxr_ecs_destroy` when it is no longer needed.
  */
-bxr_ecs_t *bxr_ecs_create(size_t entity_count);
+BXR_API bxr_ecs_t *bxr_ecs_create(size_t entity_count);
 
 /**
  * Destroy the given ECS instance and free its memory.
  *
  * `ecs` is the ECS instance to destroy.
  */
-void bxr_ecs_destroy(bxr_ecs_t *ecs);
+BXR_API void bxr_ecs_destroy(bxr_ecs_t *ecs);
 
 /**
  * Reset the ECS instance, removing all entities, preserving systems and
@@ -53,7 +55,7 @@ void bxr_ecs_destroy(bxr_ecs_t *ecs);
  *
  * `ecs` is the ECS instance to reset.
  */
-void bxr_ecs_reset(bxr_ecs_t *ecs);
+BXR_API void bxr_ecs_reset(bxr_ecs_t *ecs);
 
 /**
  * ECS component API
@@ -105,7 +107,7 @@ typedef void (*bxr_ecs_component_destroy_cb)(bxr_ecs_t *ecs,
  * `return` the ID of the defined component, or an invalid ID if the component
  * could not be defined.
  */
-bxr_ecs_component_t
+BXR_API bxr_ecs_component_t
 bxr_ecs_component_define(bxr_ecs_t *ecs,
                          size_t component_size,
                          bxr_ecs_component_create_cb create_cb,
@@ -124,7 +126,7 @@ bxr_ecs_component_define(bxr_ecs_t *ecs,
  * entity could not be created. Use `bxr_error_get` to get more information
  * about the error.
  */
-bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs);
+BXR_API bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs);
 
 /**
  * Return `true` if the entity is active and has not been queued for
@@ -134,7 +136,8 @@ bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs);
  *
  * `entity` is the entity to check.
  */
-bool bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
+BXR_API bool bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs,
+                                     bxr_ecs_entity_t entity);
 
 /**
  * Test if an entity has a component.
@@ -147,9 +150,9 @@ bool bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
  *
  * `return` `true` if the entity has the component, `false` otherwise.
  */
-bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
-                                  bxr_ecs_entity_t entity,
-                                  bxr_ecs_component_t component);
+BXR_API bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
+                                          bxr_ecs_entity_t entity,
+                                          bxr_ecs_component_t component);
 
 /**
  * Add a component to an entity.
@@ -166,10 +169,10 @@ bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
  * `return` a pointer to the created component data, or NULL if an error
  * occurred. Use `bxr_error_get` to get more information about the error.
  */
-void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
-                                   bxr_ecs_entity_t entity,
-                                   bxr_ecs_component_t component,
-                                   void *args);
+BXR_API void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
+                                           bxr_ecs_entity_t entity,
+                                           bxr_ecs_component_t component,
+                                           void *args);
 
 /**
  * Get a pointer to a component of an entity.
@@ -183,9 +186,9 @@ void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
  * `return` a pointer to the component data, or NULL if the entity does not have
  * the component.
  */
-void *bxr_ecs_entity_get_component(bxr_ecs_t *ecs,
-                                   bxr_ecs_entity_t entity,
-                                   bxr_ecs_component_t component);
+BXR_API void *bxr_ecs_entity_get_component(bxr_ecs_t *ecs,
+                                           bxr_ecs_entity_t entity,
+                                           bxr_ecs_component_t component);
 
 /**
  * Remove a component from an entity.
@@ -196,9 +199,9 @@ void *bxr_ecs_entity_get_component(bxr_ecs_t *ecs,
  *
  * `component` is the component to remove from the entity.
  */
-void bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
-                                     bxr_ecs_entity_t entity,
-                                     bxr_ecs_component_t component);
+BXR_API void bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
+                                             bxr_ecs_entity_t entity,
+                                             bxr_ecs_component_t component);
 
 /**
  * Destroy an entity, free it's resources and push it's id in the entity
@@ -208,7 +211,7 @@ void bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
  *
  * `entity` is the entity to destroy
  */
-void bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
+BXR_API void bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
 
 /**
  * ECS System API
@@ -277,12 +280,13 @@ typedef void (*bxr_ecs_system_remove_cb)(bxr_ecs_t *ecs,
  * `return` the ID of the defined system, or an invalid ID if the system could
  * not be defined.
  */
-bxr_ecs_system_t bxr_ecs_system_define(bxr_ecs_t *ecs,
-                                       bxr_ecs_mask_t mask,
-                                       bxr_ecs_system_logic_cb logic_cb,
-                                       bxr_ecs_system_add_cb add_cb,
-                                       bxr_ecs_system_remove_cb remove_cb,
-                                       void *udata);
+BXR_API bxr_ecs_system_t
+bxr_ecs_system_define(bxr_ecs_t *ecs,
+                      bxr_ecs_mask_t mask,
+                      bxr_ecs_system_logic_cb logic_cb,
+                      bxr_ecs_system_add_cb add_cb,
+                      bxr_ecs_system_remove_cb remove_cb,
+                      void *udata);
 /**
  * Require a component for a system.
  *
@@ -292,9 +296,9 @@ bxr_ecs_system_t bxr_ecs_system_define(bxr_ecs_t *ecs,
  *
  * `component` is the component to require for the system.
  */
-void bxr_ecs_system_require_component(bxr_ecs_t *ecs,
-                                      bxr_ecs_system_t system,
-                                      bxr_ecs_component_t comp);
+BXR_API void bxr_ecs_system_require_component(bxr_ecs_t *ecs,
+                                              bxr_ecs_system_t system,
+                                              bxr_ecs_component_t comp);
 
 /**
  * Exclude a component for a system.
@@ -305,9 +309,9 @@ void bxr_ecs_system_require_component(bxr_ecs_t *ecs,
  *
  * `component` is the component to exclude for the system.
  */
-void bxr_ecs_system_exclude_component(bxr_ecs_t *ecs,
-                                      bxr_ecs_system_t system,
-                                      bxr_ecs_component_t component);
+BXR_API void bxr_ecs_system_exclude_component(bxr_ecs_t *ecs,
+                                              bxr_ecs_system_t system,
+                                              bxr_ecs_component_t component);
 
 /**
  * Enable a system, allowing it to be run when `bxr_ecs_system_run` or
@@ -317,7 +321,7 @@ void bxr_ecs_system_exclude_component(bxr_ecs_t *ecs,
  *
  * `sys` is the system to enable.
  */
-void bxr_ecs_system_enable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+BXR_API void bxr_ecs_system_enable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
  * Disable a system, preventing it from being run when `bxr_ecs_system_run` or
@@ -327,7 +331,7 @@ void bxr_ecs_system_enable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  *
  * `system` is the system to disable.
  */
-void bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+BXR_API void bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
  * Set the callbacks for a system.
@@ -343,11 +347,11 @@ void bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  * `remove_cb` is the callback to call when an entity is removed from the
  * system.
  */
-void bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
-                                 bxr_ecs_system_t system,
-                                 bxr_ecs_system_logic_cb logic_cb,
-                                 bxr_ecs_system_add_cb add_cb,
-                                 bxr_ecs_system_remove_cb remove_cb);
+BXR_API void bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
+                                         bxr_ecs_system_t system,
+                                         bxr_ecs_system_logic_cb logic_cb,
+                                         bxr_ecs_system_add_cb add_cb,
+                                         bxr_ecs_system_remove_cb remove_cb);
 
 /**j
  * Set the user data for a system.
@@ -358,7 +362,7 @@ void bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
  *
  * `udata` is the user data to associate with the system (can be NULL).
  */
-void
+BXR_API void
 bxr_ecs_system_set_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system, void *udata);
 
 /**
@@ -371,7 +375,7 @@ bxr_ecs_system_set_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system, void *udata);
  * `return` the user data associated with the system, or NULL if no user data
  * is associated with the system.
  */
-void *bxr_ecs_system_get_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+BXR_API void *bxr_ecs_system_get_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system);
 
 /**
  * Set the system mask (a.k.a tags).
@@ -382,9 +386,9 @@ void *bxr_ecs_system_get_udata(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  *
  * `mask` is the mask to set for the system.
  */
-void bxr_ecs_system_set_mask(bxr_ecs_t *ecs,
-                             bxr_ecs_system_t system,
-                             bxr_ecs_mask_t mask);
+BXR_API void bxr_ecs_system_set_mask(bxr_ecs_t *ecs,
+                                     bxr_ecs_system_t system,
+                                     bxr_ecs_mask_t mask);
 
 /**
  * Get the system mask (a.k.a tags).
@@ -395,12 +399,14 @@ void bxr_ecs_system_set_mask(bxr_ecs_t *ecs,
  *
  * `return` the mask associated with the system.
  */
-bxr_ecs_mask_t bxr_ecs_system_get_mask(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+BXR_API bxr_ecs_mask_t bxr_ecs_system_get_mask(bxr_ecs_t *ecs,
+                                               bxr_ecs_system_t system);
 
 /**
  * Get the number of entities assigned to a system.
  */
-size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system);
+BXR_API size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs,
+                                               bxr_ecs_system_t system);
 
 /**
  * Call a system logic on required component, but not exclueded ones.
@@ -411,9 +417,9 @@ size_t bxr_ecs_system_get_entity_count(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  *
  * `mask` determines which systems run run based on a group/category.
  */
-int bxr_ecs_system_run(bxr_ecs_t *ecs,
-                       bxr_ecs_system_t system,
-                       bxr_ecs_mask_t mask);
+BXR_API int bxr_ecs_system_run(bxr_ecs_t *ecs,
+                               bxr_ecs_system_t system,
+                               bxr_ecs_mask_t mask);
 
 /**
  * Call all system logic using `bxr_ecs_run_system`.
@@ -422,6 +428,6 @@ int bxr_ecs_system_run(bxr_ecs_t *ecs,
  *
  * `mask` determines which systems run based on a group/category.
  */
-int bxr_ecs_systems_run(bxr_ecs_t *ecs, bxr_ecs_mask_t mask);
+BXR_API int bxr_ecs_systems_run(bxr_ecs_t *ecs, bxr_ecs_mask_t mask);
 
 #endif // BXR_ECS_H_

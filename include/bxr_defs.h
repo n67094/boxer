@@ -9,6 +9,16 @@
 #ifndef BXR_DEFS_H_
 #define BXR_DEFS_H_
 
+#if defined(_WIN32)
+#ifdef BOXER_BUILD
+#define BXR_API __declspec(dllexport)
+#else
+#define BXR_API __declspec(dllimport)
+#endif
+#else
+#define BXR_API extern
+#endif
+
 #if defined(_MSC_VER)
 #define INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__)
