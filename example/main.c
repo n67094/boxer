@@ -1,4 +1,4 @@
-#include <bxr.h>
+#include <boxer/bxr.h>
 
 static bxr_image_t _image;
 

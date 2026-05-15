@@ -34,8 +34,6 @@
 
 #include <SDL3/SDL.h>
 
-#include <physfs.h>
-
 #include "bxr_context.h"
 
 /**

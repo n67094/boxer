@@ -14,7 +14,6 @@
 #define BXR_JSON_H_
 
 #include <SDL3/SDL.h>
-#include <physfs.h>
 
 #define BXR_JSON_DEFAULT_DATA_CAPACITY 1024
 

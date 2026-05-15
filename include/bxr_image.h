@@ -11,13 +11,14 @@
 #ifndef BXR_IMAGE_H_
 #define BXR_IMAGE_H_
 
-#include <SDL_gp.h>
-
 #include "bxr_context.h"
 
-#define BXR_IMAGE_INVALID_ID SDL_GP_INVALID_ID
+#define BXR_IMAGE_INVALID_ID 0
 
-typedef SDL_GPImage bxr_image_t;
+typedef struct bxr_image_s
+{
+  Uint32 id;
+} bxr_image_t;
 
 /**
  * ## Internal API

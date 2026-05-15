@@ -20,8 +20,6 @@
 
 #include <SDL3/SDL.h>
 
-#include <SDL_gp.h>
-
 #include "bxr_color.h"
 #include "bxr_image.h"
 #include "bxr_math.h"
