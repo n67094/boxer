@@ -1,5 +1,5 @@
 #
-# Makefile example for building your game project.
+# Makefile for building: boxer.
 #
 # Command examples:
 #
@@ -130,7 +130,8 @@ $(SHARED_LNK): $(SHARED_SO)
 	ln -sf $(notdir $<) $@
 
 # --- Compile rules ----------------------------------------------------------
-# Static (non-PIC) objects
+# Static (
+# on-PIC) objects
 $(OBJ_DIR)/physfs/%.o: $(PHYSFS_DIR)/%.c | $(OBJ_DIR)/physfs
 	$(CC) $(CFLAGS) -c $< -o $@
 

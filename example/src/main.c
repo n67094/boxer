@@ -16,7 +16,7 @@ bxr_game_config(void)
   _config.height = 720;
 
   _config.fullscreen = false;
-  _config.resizable  = true;
+  _config.resizable  = false;
 
   return &_config;
 }
@@ -79,20 +79,6 @@ bxr_game_render(Uint64 alpha_time_ms)
                                            .dst = dst_rect,
                                        });
       }
-
-      /*
-     int width  = bxr_image_get_width(_image);
-     int height = bxr_image_get_height(_image);
-
-     bxr_rect_t img_src = bxr_rect_create(0, 0, (float)width, (float)height);
-     bxr_rect_t img_dst = bxr_rect_create(
-         -width * 0.5f, -height * 0.5f, (float)width, (float)height);
-
-     // Draw the image centered on the screen
-     bxr_painter_set_image(0, _image);
-     bxr_painter_draw_textured_rect(
-         0, bxr_textured_rect_create(img_dst, img_src));
-         */
     }
     bxr_painter_pop_transform();
 
