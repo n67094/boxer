@@ -35,7 +35,7 @@ Install the following development dependencies (via your package manager or from
 - C compiler.
 - SDL3 (>= 3.4.2).
 
-## Build
+## Build and Installation
 
 First clone the repository with:
 
@@ -50,7 +50,7 @@ Build the library with:
 make
 ```
 
-Install the library with (will be installed at `/usr/local` by default):
+Install the library at `/usr/lib` by default:
 
 ```bash
 make install
@@ -66,6 +66,20 @@ Build documentation with:
 
 ```bash
 make docs
+```
+
+Once `boxer` is installed on your system, in order to run the example you may need to update the shared library cache with:
+
+```bash
+sudo ldconfig
+```
+
+Then you can build the example with:
+
+```bash
+cd example
+make
+./example
 ```
 
 _let's make it roar!_

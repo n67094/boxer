@@ -104,7 +104,7 @@ bxr_game_render(Uint64 alpha_time_ms)
 void
 bxr_game_shutdown(void)
 {
-  bxr_asset_unmount("data.zip");
+  bxr_asset_unmount(ASSET_PATH);
 
   bxr_image_destroy(_image);
 }

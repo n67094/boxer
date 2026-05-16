@@ -11,6 +11,7 @@ ASSETS_ZIP := $(ASSETS_DIR).zip
 
 all: $(TARGET) $(ASSETS_ZIP)
 
+# Create a zip archive of the assets directory
 $(ASSETS_ZIP): $(ASSETS_DIR)
 	zip -r $@ $<
 
