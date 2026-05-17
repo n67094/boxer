@@ -9,6 +9,8 @@
 #ifndef BXR_MEM_H_
 #define BXR_MEM_H_
 
+#include <SDL3/SDL.h>
+
 #define BXR_ALLOC(ptr, nbytes) ((ptr) = SDL_malloc(nbytes))
 
 #define BXR_CALLOC(ptr, count, nbytes)                                         \
