@@ -29,26 +29,21 @@ update_refresh_rate_(bxr_context_t *context)
 {
   SDL_DisplayID display_id = SDL_GetDisplayForWindow(context->window);
   if (display_id == 0) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Couldn't get display for window: %s",
-                SDL_GetError());
+    BXR_LOG_WARN("Couldn't get display for window: %s", SDL_GetError());
     return false;
   }
 
   const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(display_id);
   if (mode == NULL) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Couldn't get display mode: %s",
-                SDL_GetError());
+    BXR_LOG_WARN("Couldn't get display mode: %s", SDL_GetError());
     return false;
   }
 
   // context->target_delta_ms = 1000.0 / (double)mode->refresh_rate;
   context->target_delta_ms = 1000.0 / (double)mode->refresh_rate;
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-              "Updated display refresh rate: %.2f Hz (delta: %2.f ms)",
-              mode->refresh_rate,
-              context->target_delta_ms);
+  BXR_LOG_INFO("Updated display refresh rate: %.2f Hz (delta: %2.f ms)",
+               mode->refresh_rate,
+               context->target_delta_ms);
 
   return true;
 }
@@ -58,13 +53,13 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 {
   bxr_game_config_t *config = bxr_game_config();
 
-  SDL_assert(config);
-  SDL_assert(config->name);
-  SDL_assert(config->title);
-  SDL_assert(config->width > 0);
-  SDL_assert(config->height > 0);
-  SDL_assert(config->fullscreen == true || config->fullscreen == false);
-  SDL_assert(config->resizable == true || config->resizable == false);
+  BXR_ASSERT(config);
+  BXR_ASSERT(config->name);
+  BXR_ASSERT(config->title);
+  BXR_ASSERT(config->width > 0);
+  BXR_ASSERT(config->height > 0);
+  BXR_ASSERT(config->fullscreen == true || config->fullscreen == false);
+  BXR_ASSERT(config->resizable == true || config->resizable == false);
 
   bxr_context_t *context = bxr_context_get();
 
@@ -81,9 +76,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 #endif
 
   if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Couldn't initialize SDL: %s\n",
-                 SDL_GetError());
+    BXR_LOG_ERROR("Couldn't initialize SDL: %s\n", SDL_GetError());
     return SDL_APP_FAILURE;
   }
 
@@ -96,9 +89,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   context->window
       = SDL_CreateWindow(config->title, config->width, config->height, flags);
   if (context->window == NULL) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to create window (error: %s)",
-                 SDL_GetError());
+    BXR_LOG_ERROR("Failed to create window (error: %s)", SDL_GetError());
     return SDL_APP_FAILURE;
   }
 
@@ -109,15 +100,12 @@ SDL_AppInit(void **appstate, int argc, char **argv)
                                             true,
                                             NULL);
   if (context->gpu_device == NULL) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to create GPU Device (error: %s)",
-                 SDL_GetError());
+    BXR_LOG_ERROR("Failed to create GPU Device (error: %s)", SDL_GetError());
     return SDL_APP_FAILURE;
   }
 
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-              "Using GPU Driver: %s",
-              SDL_GetGPUDeviceDriver(context->gpu_device));
+  BXR_LOG_INFO("Using GPU Driver: %s",
+               SDL_GetGPUDeviceDriver(context->gpu_device));
 
   // Claime the window for the GPU device
   if (!SDL_ClaimWindowForGPUDevice(context->gpu_device, context->window)) {
@@ -147,16 +135,14 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   context->pixel_format
       = SDL_GetPixelFormatFromGPUTextureFormat(context->texture_format);
 
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-              "Render pixel format: %s",
-              SDL_GetPixelFormatName(context->pixel_format));
+  BXR_LOG_INFO("Render pixel format: %s",
+               SDL_GetPixelFormatName(context->pixel_format));
 
   // Default fixed timestep fallback (60 Hz)
   context->target_delta_ms = 1000.0 / 60.0;
 
   if (!update_refresh_rate_(context)) {
-    SDL_LogWarn(
-        SDL_LOG_CATEGORY_APPLICATION,
+    BXR_LOG_WARN(
         "Failed to get display refresh rate, using default delta: %2.f ms",
         context->target_delta_ms);
   }
@@ -166,9 +152,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   SDL_GPUCommandBuffer *cmd_buffer
       = SDL_AcquireGPUCommandBuffer(context->gpu_device);
   if (cmd_buffer == NULL) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to acquire GPU command buffer (error: %s)",
-                 SDL_GetError());
+    BXR_LOG_ERROR("Failed to acquire GPU command buffer (error: %s)",
+                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
   bxr_painter_update_command_buffer(cmd_buffer);
@@ -204,8 +189,7 @@ SDL_AppIterate(void *appstate)
 {
   bxr_context_t *context = bxr_context_get();
   if (!context) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Invalid context in SDL_AppIterate");
+    BXR_LOG_ERROR("Invalid context in SDL_AppIterate");
     return SDL_APP_FAILURE;
   }
 
@@ -237,10 +221,8 @@ SDL_AppIterate(void *appstate)
   // Cap lag to avoid spiral of death (max  5 frames behind)
   double max_lag_ms = delta_ms * 5.0;
   if (lag_ms > delta_ms * 5.0) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "High lag detected: %.2f ms, capping to %.2f ms",
-                lag_ms,
-                max_lag_ms);
+    BXR_LOG_WARN(
+        "High lag detected: %.2f ms, capping to %.2f ms", lag_ms, max_lag_ms);
     lag_ms = max_lag_ms;
   }
 
@@ -265,9 +247,8 @@ SDL_AppIterate(void *appstate)
   SDL_GPUCommandBuffer *cmd_buffer
       = SDL_AcquireGPUCommandBuffer(context->gpu_device);
   if (cmd_buffer == NULL) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to acquire GPU command buffer (error: %s)",
-                 SDL_GetError());
+    BXR_LOG_ERROR("Failed to acquire GPU command buffer (error: %s)",
+                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
   bxr_painter_update_command_buffer(cmd_buffer);
@@ -276,9 +257,8 @@ SDL_AppIterate(void *appstate)
   SDL_GPUTexture *target_texture = NULL;
   if (!SDL_WaitAndAcquireGPUSwapchainTexture(
           cmd_buffer, context->window, &target_texture, NULL, NULL)) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to acquire swapchain texture (error: %s)",
-                 SDL_GetError());
+    BXR_LOG_ERROR("Failed to acquire swapchain texture (error: %s)",
+                  SDL_GetError());
     return SDL_APP_FAILURE;
   }
   bxr_painter_update_swapchain_texture(target_texture);
@@ -294,7 +274,7 @@ SDL_AppIterate(void *appstate)
     fps = frame_count;
     ups = update_count;
 
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "FPS: %lu, UPS: %lu", fps, ups);
+    BXR_LOG_INFO("FPS: %lu, UPS: %lu", fps, ups);
 
     frame_count  = 0;
     update_count = 0;
@@ -307,7 +287,7 @@ SDL_AppIterate(void *appstate)
 SDL_AppResult
 SDL_AppEvent(void *appstate, SDL_Event *event)
 {
-  SDL_assert(event);
+  BXR_ASSERT(event);
 
   bxr_context_t *context = bxr_context_get();
 
@@ -317,8 +297,7 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
   case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
     return SDL_APP_SUCCESS;
   case SDL_EVENT_WINDOW_DISPLAY_CHANGED: {
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                "Display changed, updating refresh rate...");
+    BXR_LOG_INFO("Display changed, updating refresh rate...");
     update_refresh_rate_(context);
     break;
   }

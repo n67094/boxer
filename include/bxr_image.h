@@ -48,7 +48,7 @@ BXR_API void bxr_image_shutdown(void);
  * `path` is the path to the image file to load, relative mounted directories.
  *
  * `return` the loaded image, or an invalid image if the image could not be
- * loaded. Use `bxr_error_get` to get more information about the error.
+ * loaded.
  *
  * The caller is responsible for destroying the returned image using
  * `bxr_image_destroy` when it is no longer needed.
@@ -65,7 +65,7 @@ BXR_API bxr_image_t bxr_image_create(const char *path);
  * `pixels` is a pointer to the pixel data in memory.
  *
  * `return` the created image, or an invalid image if the image could not be
- * created. Use `bxr_error_get` to get more information about the error.
+ * created.
  *
  * The caller is responsible for destroying the returned image using
  * `bxr_image_destroy` when it is no longer needed.

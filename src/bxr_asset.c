@@ -1,10 +1,10 @@
 #include <physfs.h>
 
-#include "bxr_defs.h"
-#include "bxr_error.h"
-#include "bxr_mem.h"
-
+#include "bxr_assert.h"
 #include "bxr_asset.h"
+#include "bxr_defs.h"
+#include "bxr_log.h"
+#include "bxr_mem.h"
 
 static Uint32 initialized_     = 0;
 static bxr_context_t *context_ = NULL;
@@ -12,16 +12,15 @@ static bxr_context_t *context_ = NULL;
 void
 bxr_asset_setup(bxr_context_t *context)
 {
-  SDL_assert(initialized_ == 0);
-  SDL_assert(context != NULL);
+  BXR_ASSERT(initialized_ == 0);
+  BXR_ASSERT(context != NULL);
 
   initialized_ = BXR_INIT_COOKIE;
   context_     = context;
 
   if (!PHYSFS_init(NULL)) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to init PhysFS (error: %s)",
-                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    BXR_LOG_ERROR("Failed to init PhysFS (error: %s)",
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return;
   }
 
@@ -34,29 +33,27 @@ bxr_asset_setup(bxr_context_t *context)
   const char *write_dir
       = PHYSFS_getPrefDir(BXR_ORGANIZATION_NAME, context->config.name);
   if (!PHYSFS_setWriteDir(write_dir)) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to set write dir to %s: (error: %s)",
-                write_dir,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    BXR_LOG_ERROR("Failed to set write dir to %s: (error: %s)",
+                  write_dir,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return;
   }
-
-  SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Write directory: %s", write_dir);
 
   // Mounted as prepend (higher priority than read-only data dir)
   if (!PHYSFS_mount(write_dir, NULL, 0)) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to mount write dir %s: (error: %s)",
-                write_dir,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    BXR_LOG_ERROR("Failed to mount write dir %s: (error: %s)",
+                  write_dir,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return;
   }
+
+  BXR_LOG_INFO("Write directory: %s", write_dir);
 }
 
 void
 bxr_asset_shutdown(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   PHYSFS_deinit();
 
@@ -67,16 +64,14 @@ bxr_asset_shutdown(void)
 bool
 bxr_asset_mount(const char *path)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(path);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
 
   // Mounted as append (lower priority than write dir)
   if (!PHYSFS_mount(path, NULL, 1)) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to mount %s: (error: %s)",
-                path,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_error_set(BXR_ERROR_ASSET_MOUNT);
+    BXR_LOG_ERROR("Failed to mount %s: (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return false;
   }
   return true;
@@ -85,15 +80,13 @@ bxr_asset_mount(const char *path)
 bool
 bxr_asset_unmount(const char *path)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(path);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
 
   if (!PHYSFS_unmount(path)) {
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Failed to unmount %s: (error: %s)",
-                path,
-                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_error_set(BXR_ERROR_ASSET_UNMOUNT);
+    BXR_LOG_ERROR("Failed to unmount %s: (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return false;
   }
   return true;
@@ -102,8 +95,8 @@ bxr_asset_unmount(const char *path)
 bool
 bxr_asset_exists(const char *path)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(path);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
 
   return PHYSFS_exists(path) != 0;
 }
@@ -111,8 +104,8 @@ bxr_asset_exists(const char *path)
 bool
 bxr_asset_is_directory(const char *path)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(path);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
 
   PHYSFS_Stat statbuf = { 0 };
   if (!PHYSFS_stat(path, &statbuf)) {
@@ -125,22 +118,19 @@ bxr_asset_is_directory(const char *path)
 Uint8 *
 bxr_asset_read(const char *path, size_t *length)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(path);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
 
   if (!PHYSFS_exists(path)) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "File not found: %s", path);
-    bxr_error_set(BXR_ERROR_FILE_NOT_FOUND);
+    BXR_LOG_ERROR("File not found: %s", path);
     return NULL;
   }
 
   PHYSFS_File *file = PHYSFS_openRead(path);
   if (!file) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to open file: %s (error: %s)",
-                 path,
-                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_error_set(BXR_ERROR_ASSET_READ);
+    BXR_LOG_ERROR("Failed to open file: %s (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return NULL;
   }
 
@@ -151,8 +141,7 @@ bxr_asset_read(const char *path, size_t *length)
   }
 
   if (len == 0) {
-    SDL_LogInfo(
-        SDL_LOG_CATEGORY_APPLICATION, "Reading an empty file: %s", path);
+    BXR_LOG_ERROR("Reading an empty file: %s", path);
     return NULL;
   }
 
@@ -161,12 +150,10 @@ bxr_asset_read(const char *path, size_t *length)
 
   Sint64 read_size = PHYSFS_readBytes(file, buffer, len);
   if (read_size != len) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to read file: %s (error: %s)",
-                 path,
-                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    BXR_LOG_ERROR("Failed to read file: %s (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_error_set(BXR_ERROR_ASSET_READ);
     return NULL;
   }
 
@@ -178,8 +165,8 @@ bxr_asset_read(const char *path, size_t *length)
 bool
 bxr_asset_write(const char *path, const void *data, size_t length, bool append)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(path);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
 
   PHYSFS_File *file = NULL;
   if (append) {
@@ -189,11 +176,9 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
   }
 
   if (!file) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to open file for writing: %s (error: %s)",
-                 path,
-                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    bxr_error_set(BXR_ERROR_ASSET_WRITE);
+    BXR_LOG_ERROR("Failed to open file for writing: %s (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return false;
   }
 
@@ -202,12 +187,10 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
   }
 
   if (PHYSFS_writeBytes(file, data, length) != (Sint64)length) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to write to file: %s (error: %s)",
-                 path,
-                 PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    BXR_LOG_ERROR("Failed to write to file: %s (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     PHYSFS_close(file);
-    bxr_error_set(BXR_ERROR_ASSET_WRITE);
     return false;
   }
 

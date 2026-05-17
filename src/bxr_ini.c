@@ -3,9 +3,9 @@
 #include <physfs.h>
 #include <physfssdl3.h>
 
+#include "bxr_assert.h"
 #include "bxr_asset.h"
 #include "bxr_config.h"
-#include "bxr_error.h"
 #include "bxr_ini.h"
 #include "bxr_mem.h"
 #include "bxr_str.h"
@@ -182,18 +182,16 @@ bxr_ini_reader_parse_(bxr_ini_reader_t *ini)
 bxr_ini_reader_t *
 bxr_ini_create_reader(const Uint8 *data, size_t length)
 {
-  SDL_assert(data);
+  BXR_ASSERT(data);
 
   bxr_ini_reader_t *ini = NULL;
   BXR_NEW(ini);
   if (!ini) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
   BXR_ALLOC(ini->data, length + 1); // +1 for null-terminator
   if (!ini->data) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(ini);
     return NULL;
   }
@@ -221,9 +219,9 @@ bxr_ini_destroy_reader(bxr_ini_reader_t *ini)
 const char *
 bxr_ini_read_str(bxr_ini_reader_t *ini, const char *section, const char *key)
 {
-  SDL_assert(ini);
-  SDL_assert(section);
-  SDL_assert(key);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(section);
+  BXR_ASSERT(key);
 
   char *current_section = "";
   char *value           = NULL;
@@ -266,9 +264,9 @@ bxr_ini_read_str(bxr_ini_reader_t *ini, const char *section, const char *key)
 float
 bxr_ini_read_number(bxr_ini_reader_t *ini, const char *section, const char *key)
 {
-  SDL_assert(ini);
-  SDL_assert(section);
-  SDL_assert(key);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(section);
+  BXR_ASSERT(key);
 
   const char *str_value = bxr_ini_read_str(ini, section, key);
 
@@ -285,9 +283,9 @@ bxr_ini_read_str_or_else(bxr_ini_reader_t *ini,
                          const char *key,
                          const char *default_value)
 {
-  SDL_assert(ini);
-  SDL_assert(section);
-  SDL_assert(key);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(section);
+  BXR_ASSERT(key);
 
   const char *value = bxr_ini_read_str(ini, section, key);
 
@@ -300,9 +298,9 @@ bxr_ini_read_number_or_else(bxr_ini_reader_t *ini,
                             const char *key,
                             float default_value)
 {
-  SDL_assert(ini);
-  SDL_assert(section);
-  SDL_assert(key);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(section);
+  BXR_ASSERT(key);
 
   const char *str_value = bxr_ini_read_str(ini, section, key);
 
@@ -334,7 +332,6 @@ bxr_ini_writer_append_(bxr_ini_writer_t *ini, const char *str)
     char *new_data      = NULL;
     BXR_ALLOC(new_data, new_capacity);
     if (new_data == NULL) {
-      bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
       return false;
     }
     BXR_MEMCPY(new_data, ini->data, ini->size);
@@ -411,7 +408,6 @@ bxr_ini_create_writer()
   ini->data = NULL;
   BXR_ALLOC(ini->data, BXR_INI_DEFAULT_DATA_CAPACITY);
   if (ini->data == NULL) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     BXR_FREE(ini);
     return NULL;
   }
@@ -436,15 +432,14 @@ bxr_ini_destroy_writer(bxr_ini_writer_t *ini)
 bool
 bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
 {
-  SDL_assert(ini);
-  SDL_assert(section);
-  SDL_assert(!ini->in_section);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(section);
+  BXR_ASSERT(!ini->in_section);
 
   size_t line_len = SDL_strlen(section) + 4; // + 3 for [ ] \n and \0
   char *line      = NULL;
   BXR_ALLOC(line, line_len);
   if (line == NULL) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
@@ -463,8 +458,8 @@ bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
 bool
 bxr_ini_writer_section_end(bxr_ini_writer_t *ini)
 {
-  SDL_assert(ini);
-  SDL_assert(ini->in_section);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(ini->in_section);
 
   if (!bxr_ini_writer_append_(ini, "\n")) {
     return false;
@@ -478,16 +473,15 @@ bxr_ini_writer_section_end(bxr_ini_writer_t *ini)
 bool
 bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value)
 {
-  SDL_assert(ini);
-  SDL_assert(key);
-  SDL_assert(value);
-  SDL_assert(ini->in_section);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(key);
+  BXR_ASSERT(value);
+  BXR_ASSERT(ini->in_section);
 
   size_t left_len = SDL_strlen(key) + 2; // + 1 for = and + 1 for \n
   char *left      = NULL;
   BXR_ALLOC(left, left_len + 2);
   if (!left) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
@@ -512,9 +506,9 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value)
 bool
 bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
 {
-  SDL_assert(ini);
-  SDL_assert(key);
-  SDL_assert(ini->in_section);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(key);
+  BXR_ASSERT(ini->in_section);
 
   char number_str[32];
   SDL_snprintf(number_str, sizeof(number_str), "%g", number);
@@ -524,7 +518,6 @@ bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
   char *line = NULL;
   BXR_ALLOC(line, line_len);
   if (!line) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return false;
   }
 
@@ -542,8 +535,8 @@ bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
 bool
 bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path)
 {
-  SDL_assert(ini);
-  SDL_assert(path);
+  BXR_ASSERT(ini);
+  BXR_ASSERT(path);
 
   size_t data_len = SDL_strlen(ini->data);
 
@@ -553,7 +546,7 @@ bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path)
 const Uint8 *
 bxr_ini_writer_get_data(const bxr_ini_writer_t *ini, size_t *length)
 {
-  SDL_assert(ini);
+  BXR_ASSERT(ini);
 
   if (length) {
     *length = ini->size;

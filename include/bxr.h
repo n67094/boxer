@@ -11,13 +11,13 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_assert.h"
 #include "bxr_asset.h"
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_context.h"
 #include "bxr_defs.h"
 #include "bxr_ecs.h"
-#include "bxr_error.h"
 #include "bxr_font.h"
 #include "bxr_game.h"
 #include "bxr_gamepad.h"
@@ -25,6 +25,7 @@
 #include "bxr_ini.h"
 #include "bxr_json.h"
 #include "bxr_keyboard.h"
+#include "bxr_log.h"
 #include "bxr_math.h"
 #include "bxr_mem.h"
 #include "bxr_mouse.h"

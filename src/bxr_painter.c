@@ -2,6 +2,7 @@
 
 #include <SDL_gp.h>
 
+#include "bxr_assert.h"
 #include "bxr_painter.h"
 
 void
@@ -19,9 +20,9 @@ bxr_painter_update_command_buffer(SDL_GPUCommandBuffer *cmd_buffer)
 void
 bxr_painter_setup(bxr_painter_desc_t *desc)
 {
-  SDL_assert(desc);
-  SDL_assert(desc->window);
-  SDL_assert(desc->gpu_device);
+  BXR_ASSERT(desc);
+  BXR_ASSERT(desc->window);
+  BXR_ASSERT(desc->gpu_device);
 
   SDL_GPDesc painter_desc = {
     .max_vertices = desc->max_vertices,

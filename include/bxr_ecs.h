@@ -35,7 +35,6 @@ typedef struct bxr_ecs_s bxr_ecs_t;
  * will never shrink.
  *
  * `return` a pointer to the created ECS instance, or NULL if an error occurred.
- * Use `bxr_error_get` to get more information about the error.
  *
  * The caller is responsible for destroying the returned ECS instance using
  * `bxr_ecs_destroy` when it is no longer needed.
@@ -123,8 +122,7 @@ bxr_ecs_component_define(bxr_ecs_t *ecs,
  * `ecs` is the ECS instance to create the entity in.
  *
  * `return` the ID of the created entity, or BXR_ECS_INVALID_ENTITY if the
- * entity could not be created. Use `bxr_error_get` to get more information
- * about the error.
+ * entity could not be created.
  */
 BXR_API bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs);
 
@@ -167,7 +165,7 @@ BXR_API bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
  * creating the component data for the entity (can be NULL).
  *
  * `return` a pointer to the created component data, or NULL if an error
- * occurred. Use `bxr_error_get` to get more information about the error.
+ * occurred.
  */
 BXR_API void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
                                            bxr_ecs_entity_t entity,

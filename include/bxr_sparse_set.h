@@ -32,7 +32,6 @@ typedef struct bxr_sparse_set_s bxr_sparse_set_t;
  * of handles that can be stored in the sparse set without resizing).
  *
  * `return` a pointer to the created sparse set, or NULL if an error occurred.
- * Use `bxr_error_get` to get more information about the error.
  *
  * The caller is responsible for destroying the returned sparse set using
  * `bxr_sparse_set_destroy` when it is no longer needed.

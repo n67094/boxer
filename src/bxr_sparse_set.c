@@ -1,6 +1,6 @@
 #include <SDL3/SDL.h>
 
-#include "bxr_error.h"
+#include "bxr_assert.h"
 #include "bxr_mem.h"
 #include "bxr_sparse_set.h"
 
@@ -31,7 +31,6 @@ bxr_sparse_set_create(size_t default_capacity)
   bxr_sparse_set_t *set = NULL;
   BXR_NEW(set);
   if (!set) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     goto error;
   }
 
@@ -39,7 +38,6 @@ bxr_sparse_set_create(size_t default_capacity)
   BXR_ALLOC(set->dense, default_capacity * sizeof(size_t));
   if (!set->dense) {
     bxr_sparse_set_destroy(set);
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     goto error;
   }
 
@@ -47,7 +45,6 @@ bxr_sparse_set_create(size_t default_capacity)
   BXR_ALLOC(set->sparse, default_capacity * sizeof(size_t));
   if (!set->sparse) {
     bxr_sparse_set_destroy(set);
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     goto error;
   }
 
@@ -55,7 +52,6 @@ bxr_sparse_set_create(size_t default_capacity)
   BXR_MEMSET(set->sparse, 0, default_capacity * sizeof(size_t));
   if (!set->sparse) {
     bxr_sparse_set_destroy(set);
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     goto error;
   }
 
@@ -86,7 +82,7 @@ bxr_sparse_set_destroy(bxr_sparse_set_t *set)
 bool
 bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle)
 {
-  SDL_assert(set);
+  BXR_ASSERT(set);
 
   // Check if the handle already exists in the set
   if (bxr_sparse_set_contains(set, handle, NULL)) {
@@ -118,7 +114,7 @@ bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle)
 bool
 bxr_sparse_set_remove(bxr_sparse_set_t *set, size_t handle)
 {
-  SDL_assert(set);
+  BXR_ASSERT(set);
 
   // Check if the handle exists in the set
   if (!bxr_sparse_set_contains(set, handle, NULL)) {
@@ -142,7 +138,7 @@ bxr_sparse_set_contains(const bxr_sparse_set_t *set,
                         size_t handle,
                         size_t *found)
 {
-  SDL_assert(set);
+  BXR_ASSERT(set);
 
   if (handle < set->capacity && set->sparse[handle] < set->count
       && set->dense[set->sparse[handle]] == handle) {
@@ -161,7 +157,7 @@ bxr_sparse_set_contains(const bxr_sparse_set_t *set,
 size_t
 bxr_sparse_set_capacity(const bxr_sparse_set_t *set)
 {
-  SDL_assert(set);
+  BXR_ASSERT(set);
 
   return set->capacity;
 }
@@ -169,7 +165,7 @@ bxr_sparse_set_capacity(const bxr_sparse_set_t *set)
 size_t
 bxr_sparse_set_count(const bxr_sparse_set_t *set)
 {
-  SDL_assert(set);
+  BXR_ASSERT(set);
 
   return set->count;
 }
@@ -177,7 +173,7 @@ bxr_sparse_set_count(const bxr_sparse_set_t *set)
 void
 bxr_sparse_set_clear(bxr_sparse_set_t *set)
 {
-  SDL_assert(set);
+  BXR_ASSERT(set);
 
   set->count = 0;
 }
@@ -185,7 +181,7 @@ bxr_sparse_set_clear(bxr_sparse_set_t *set)
 size_t *
 bxr_sparse_set_get_dense(const bxr_sparse_set_t *set)
 {
-  SDL_assert(set);
+  BXR_ASSERT(set);
 
   return set->dense;
 }

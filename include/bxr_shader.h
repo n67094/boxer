@@ -74,7 +74,7 @@ void bxr_shader_shutdown(void);
  * `desc` is the description of the shader to create.
  *
  * `return` the created shader, or an invalid shader if the shader could not
- * be created. Use `bxr_error_get` to get more information about the error.
+ * be created.
  *
  * The caller is responsible for destroying the returned shader using
  * `bxr_shader_destroy` when it is no longer needed.

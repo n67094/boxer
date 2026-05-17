@@ -2,8 +2,9 @@
 
 #include <SDL_gp.h>
 
+#include "bxr_assert.h"
 #include "bxr_context.h"
-#include "bxr_error.h"
+#include "bxr_log.h"
 #include "bxr_mem.h"
 #include "bxr_sampler.h"
 
@@ -13,7 +14,7 @@ static bxr_context_t *context_ = NULL;
 void
 bxr_sampler_setup(void)
 {
-  SDL_assert(initialized_ == 0);
+  BXR_ASSERT(initialized_ == 0);
 
   initialized_ = BXR_INIT_COOKIE;
   context_     = bxr_context_get();
@@ -22,7 +23,7 @@ bxr_sampler_setup(void)
 void
 bxr_sampler_shutdown(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   initialized_ = 0;
   context_     = NULL;
@@ -83,10 +84,7 @@ bxr_sampler_create(bxr_sampler_e sampler_type)
   sampler.sampler = SDL_CreateGPUSampler(context_->gpu_device, &sampler_info);
 
   if (!sampler.sampler) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                 "Failed to create GPU sampler (error: %s)",
-                 SDL_GetError());
-    bxr_error_set(BXR_ERROR_SAMPLER_CREATE);
+    BXR_LOG_ERROR("Failed to create GPU sampler (error: %s)", SDL_GetError());
     return (bxr_sampler_t){ .sampler = NULL };
   }
 

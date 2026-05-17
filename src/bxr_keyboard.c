@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 
+#include "bxr_assert.h"
 #include "bxr_defs.h"
 #include "bxr_keyboard.h"
 
@@ -24,14 +25,14 @@ static bxr_keyboard_t_ key_ = { 0 };
 void
 bxr_keyboard_setup(void)
 {
-  SDL_assert(initialized_ == 0);
+  BXR_ASSERT(initialized_ == 0);
   initialized_ = BXR_INIT_COOKIE;
 }
 
 void
 bxr_keyboard_begin_frame(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   for (int i = 0; i < BXR_KEY_SIZE; ++i) {
     key_.just_pressed_acc[i]  = key_.keys[i].just_pressed;
@@ -45,7 +46,7 @@ bxr_keyboard_begin_frame(void)
 void
 bxr_keyboard_shutdown(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   initialized_ = 0;
   key_         = (bxr_keyboard_t_){ 0 };
@@ -54,8 +55,8 @@ bxr_keyboard_shutdown(void)
 void
 bxr_key_down(bxr_key_e key)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   if (!key_.keys[key].is_down) {
     key_.keys[key].pressed_at[key] = SDL_GetTicks();
@@ -68,8 +69,8 @@ bxr_key_down(bxr_key_e key)
 void
 bxr_key_up(bxr_key_e key)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   if (key_.keys[key].is_down) {
     key_.keys[key].just_released = true;
@@ -82,8 +83,8 @@ bxr_key_up(bxr_key_e key)
 const char *
 bxr_key_name(bxr_key_e key)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   SDL_Scancode scancode = (SDL_Scancode)key;
   if (scancode == SDL_SCANCODE_UNKNOWN) {
@@ -99,8 +100,8 @@ bxr_key_name(bxr_key_e key)
 const char *
 bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   SDL_Scancode scancode = (SDL_Scancode)key;
   if (scancode == SDL_SCANCODE_UNKNOWN) {
@@ -115,16 +116,16 @@ bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod)
 bool
 bxr_key_held(bxr_key_e key)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
   return key_.keys[key].is_down;
 }
 
 bool
 bxr_key_just_pressed(bxr_key_e key)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   return key_.just_pressed_acc[key];
 }
@@ -132,8 +133,8 @@ bxr_key_just_pressed(bxr_key_e key)
 bool
 bxr_key_just_released(bxr_key_e key)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   return key_.just_released_acc[key];
 }
@@ -141,8 +142,8 @@ bxr_key_just_released(bxr_key_e key)
 Uint64
 bxr_key_held_time(bxr_key_e key)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(key >= 0 && key < BXR_KEY_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   if (key_.keys[key].is_down) {
     return SDL_GetTicks() - key_.keys[key].pressed_at[key];
@@ -154,6 +155,6 @@ bxr_key_held_time(bxr_key_e key)
 bool
 bxr_keymod_pressed(bxr_keymode_e mod)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   return (SDL_GetModState() & (SDL_Keymod)mod) != 0;
 }
