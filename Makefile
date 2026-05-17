@@ -1,5 +1,5 @@
 #
-# Makefile example for building your game project.
+# Makefile for building: boxer.
 #
 # Command examples:
 #
@@ -7,7 +7,7 @@
 #   make DEBUG=1                      Build with debug symbols
 #   make SANITIZER=1                  Build with address sanitizer
 #   make DEBUG=1 SANITIZER=1          Build with debug symbols and address sanitizer
-#   make install PREFIX=/usr/local    Install the executable to /usr/local
+#   make install PREFIX=/usr          Install the executable to /usr/lib and /usr/bin
 #   make uninstall                    Uninstall library, executables, headers, and docs
 #   make docs                         Generate documentation (using docgen)
 #   make tests                        Build and run tests
@@ -45,7 +45,7 @@ SDL_GP_DIR := $(LIB_DIR)/SDL_gp
 # Options
 DEBUG ?= 0
 SANITIZER ?= 0
-PREFIX  ?= /usr/local
+PREFIX  ?= /usr
 
 # Output library names
 STATIC_LIB := $(LIB_OUT_DIR)/lib$(TARGET).a
@@ -130,7 +130,8 @@ $(SHARED_LNK): $(SHARED_SO)
 	ln -sf $(notdir $<) $@
 
 # --- Compile rules ----------------------------------------------------------
-# Static (non-PIC) objects
+# Static (
+# on-PIC) objects
 $(OBJ_DIR)/physfs/%.o: $(PHYSFS_DIR)/%.c | $(OBJ_DIR)/physfs
 	$(CC) $(CFLAGS) -c $< -o $@
 
