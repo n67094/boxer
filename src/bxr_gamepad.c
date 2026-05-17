@@ -1,7 +1,9 @@
 #include <SDL3/SDL.h>
 
+#include "bxr_assert.h"
 #include "bxr_defs.h"
 #include "bxr_gamepad.h"
+#include "bxr_log.h"
 #include "bxr_mem.h"
 
 typedef struct bxr_gamepad_button_state_s_
@@ -34,7 +36,7 @@ static float deadzone_                           = BXR_GAMEPAD_DEADZONE;
 void
 bxr_gamepad_setup(void)
 {
-  SDL_assert(initialized_ == 0);
+  BXR_ASSERT(initialized_ == 0);
 
   initialized_ = BXR_INIT_COOKIE;
   deadzone_    = BXR_GAMEPAD_DEADZONE;
@@ -43,7 +45,7 @@ bxr_gamepad_setup(void)
 void
 bxr_gamepad_listen(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   // Handle disconnected gamepads
   for (int i = 0; i < BXR_GAMEPAD_MAX; ++i) {
@@ -72,10 +74,9 @@ bxr_gamepad_listen(void)
     if (gamepad == NULL) { // Not connected yet try to open it
       gamepad = SDL_OpenGamepad(id);
       if (gamepad == NULL) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                    "Failed to open gamepad with id %d (error: %s)",
-                    id,
-                    SDL_GetError());
+        BXR_LOG_ERROR("Failed to open gamepad with id %d (error: %s)",
+                      id,
+                      SDL_GetError());
         continue;
       }
     }
@@ -119,7 +120,7 @@ bxr_gamepad_listen(void)
 void
 bxr_gamepad_begin_frame(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   for (int i = 0; i < BXR_GAMEPAD_MAX; ++i) {
     if (gamepads_[i].gamepad == NULL) {
@@ -145,7 +146,7 @@ bxr_gamepad_begin_frame(void)
 void
 bxr_gamepad_shutdown(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   // Close gamepads
   for (int i = 0; i < BXR_GAMEPAD_MAX; ++i) {
@@ -161,8 +162,8 @@ bxr_gamepad_shutdown(void)
 void
 bxr_gamepad_button_down(int index, bxr_gamepad_button_e button)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (!bxr_gamepad_connected(index)) {
     return;
@@ -179,8 +180,8 @@ bxr_gamepad_button_down(int index, bxr_gamepad_button_e button)
 void
 bxr_gamepad_button_up(int index, bxr_gamepad_button_e button)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (!bxr_gamepad_connected(index)) {
     return;
@@ -197,9 +198,9 @@ bxr_gamepad_button_up(int index, bxr_gamepad_button_e button)
 void
 bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, float value)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
-  SDL_assert(axis >= 0 && axis < BXR_GAMEPAD_AXIS_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(axis >= 0 && axis < BXR_GAMEPAD_AXIS_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return;
@@ -217,7 +218,7 @@ bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, float value)
 int
 bxr_gamepad_count(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   int count = 0;
   for (int i = 0; i < BXR_GAMEPAD_MAX; ++i) {
@@ -232,8 +233,8 @@ bxr_gamepad_count(void)
 void
 bxr_gamepad_set_deadzone(float deadzone)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(deadzone >= 0.0f && deadzone <= 1.0f);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(deadzone >= 0.0f && deadzone <= 1.0f);
 
   deadzone_ = deadzone;
 }
@@ -241,7 +242,7 @@ bxr_gamepad_set_deadzone(float deadzone)
 float
 bxr_gamepad_get_deadzone()
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   return deadzone_;
 }
@@ -249,8 +250,8 @@ bxr_gamepad_get_deadzone()
 bool
 bxr_gamepad_connected(int index)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (gamepads_[index].gamepad == NULL) {
     return false;
@@ -262,8 +263,8 @@ bxr_gamepad_connected(int index)
 const char *
 bxr_gamepad_name(int index)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (!bxr_gamepad_connected(index)) {
     return NULL;
@@ -275,8 +276,8 @@ bxr_gamepad_name(int index)
 const char *
 bxr_gamepad_serial(int index)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (!bxr_gamepad_connected(index)) {
     return NULL;
@@ -288,9 +289,9 @@ bxr_gamepad_serial(int index)
 bool
 bxr_gamepad_held(int index, bxr_gamepad_button_e button)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
-  SDL_assert(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return false;
@@ -302,9 +303,9 @@ bxr_gamepad_held(int index, bxr_gamepad_button_e button)
 bool
 bxr_gamepad_just_pressed(int index, bxr_gamepad_button_e button)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
-  SDL_assert(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return false;
@@ -316,9 +317,9 @@ bxr_gamepad_just_pressed(int index, bxr_gamepad_button_e button)
 bool
 bxr_gamepad_just_released(int index, bxr_gamepad_button_e button)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
-  SDL_assert(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return false;
@@ -330,9 +331,9 @@ bxr_gamepad_just_released(int index, bxr_gamepad_button_e button)
 Uint64
 bxr_gamepad_held_time(int index, bxr_gamepad_button_e button)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
-  SDL_assert(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return 0;
@@ -348,9 +349,9 @@ bxr_gamepad_held_time(int index, bxr_gamepad_button_e button)
 float
 bxr_gamepad_axis(int index, bxr_gamepad_axis_e axis)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
-  SDL_assert(axis >= 0 && axis < BXR_GAMEPAD_AXIS_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(axis >= 0 && axis < BXR_GAMEPAD_AXIS_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return 0.0f;
@@ -362,9 +363,9 @@ bxr_gamepad_axis(int index, bxr_gamepad_axis_e axis)
 float
 bxr_gamepad_axis_prev(int index, bxr_gamepad_axis_e axis)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
-  SDL_assert(index >= 0 && index < BXR_GAMEPAD_MAX);
-  SDL_assert(axis >= 0 && axis < BXR_GAMEPAD_AXIS_SIZE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(axis >= 0 && axis < BXR_GAMEPAD_AXIS_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return 0.0f;
@@ -379,7 +380,7 @@ bxr_gamepad_rumble(int index,
                    Uint16 high_frequency,
                    Uint32 duration_ms)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (gamepads_[index].gamepad == NULL) {
     return false;

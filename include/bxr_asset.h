@@ -71,7 +71,6 @@ BXR_API void bxr_asset_shutdown(void);
  * notation).
  *
  * `return` true if the mount operation was successful, false otherwise.
- * Use `bxr_error_get` to get more information about the error.
  */
 BXR_API bool bxr_asset_mount(const char *path);
 
@@ -81,7 +80,6 @@ BXR_API bool bxr_asset_mount(const char *path);
  * `path` directory or archive to unmount (in platform-dependent notation).
  *
  * `return` true if the unmount operation was successful, false otherwise.
- * Use `bxr_error_get` to get more information about the error.
  */
 BXR_API bool bxr_asset_unmount(const char *path);
 
@@ -113,8 +111,7 @@ BXR_API bool bxr_asset_is_directory(const char *path);
  * `length` is an optional output parameter to store the length of the returned
  * data.
  *
- * `return` the contents of the file or NULL if an error occurred. Use
- * `bxr_error_get` to get more information about the error.
+ * `return` the contents of the file or NULL if an error occurred.
  *
  * The caller is responsible for freeing the returned data using `SDL_free` when
  * it is no longer needed.
@@ -140,8 +137,7 @@ BXR_API Uint8 *bxr_asset_read(const char *path, size_t *length);
  * `append` is a boolean flag indicating whether to append to the file (if true)
  * or overwrite it (if false).
  *
- * `return` true if the write operation was successful, false otherwise.  Use
- * `bxr_error_get` to get more information about the error.
+ * `return` true if the write operation was successful, false otherwise.
  */
 BXR_API bool
 bxr_asset_write(const char *path, const void *data, size_t length, bool append);

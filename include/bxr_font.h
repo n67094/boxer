@@ -11,7 +11,8 @@
  * set the icon range to (0, 3) and the char range to (32, 126).
  */
 
-// TODO add a default font (better in .c files).
+// TODO add a default font and docs (font data should be nestead in font.c
+// files).
 
 #ifndef BXR_FONT_H_
 #define BXR_FONT_H_

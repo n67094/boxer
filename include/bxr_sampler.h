@@ -50,7 +50,7 @@ void bxr_sampler_shutdown(void);
  * `sampler_type` is the type of sampler to create.
  *
  * `return` the created sampler, or an NULL sampler if the sampler could not
- * be created. Use `bxr_error_get` to get more information about the error.
+ * be created.
  */
 bxr_sampler_t bxr_sampler_create(bxr_sampler_e sampler_type);
 

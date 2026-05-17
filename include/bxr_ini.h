@@ -46,8 +46,7 @@ typedef struct bxr_ini_reader_s bxr_ini_reader_t;
  *
  * `length` is the length of the INI data in bytes.
  *
- * `return` a reader for the loaded INI file, or NULL if an error occurred. Use
- * `bxr_error_get` to get more information about the error.
+ * `return` a reader for the loaded INI file, or NULL if an error occurred.
  *
  * The caller is responsible for destroying the returned reader using
  * `bxr_ini_destroy_reader` when it is no longer needed.
@@ -144,8 +143,7 @@ typedef struct bxr_ini_writer_s bxr_ini_writer_t;
 /**
  * Create a new INI writer.
  *
- * `return` a new INI writer, or NULL an error occurred. Use `bxr_error_get` to
- * get more information about the error.
+ * `return` a new INI writer, or NULL an error occurred.
  *
  * The caller is responsible for destroying the returned writer using
  * `bxr_ini_destroy_writer` when it is no longer needed.
@@ -167,7 +165,7 @@ BXR_API void bxr_ini_destroy_writer(bxr_ini_writer_t *ini);
  * `section` is the name of the section to begin.
  *
  * `return` true if the section was successfully begun, or false if an error
- * occurred. Use `bxr_error_get` to get more information about the error.
+ * occurred.
  */
 BXR_API bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini,
                                           const char *section);
@@ -178,7 +176,7 @@ BXR_API bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini,
  * `ini` is the INI writer to use.
  *
  * `return` true if the section was successfully ended, or false if an error
- * occurred. Use `bxr_error_get` to get more information about the error.
+ * occurred.
  */
 BXR_API bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini);
 
@@ -193,7 +191,7 @@ BXR_API bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini);
  * `value` is the string value to associate with the key.
  *
  * `return` true if the key-value pair was successfully added, or false if an
- * error occurred. Use `bxr_error_get` to get more information about the error.
+ * error occurred.
  */
 BXR_API bool
 bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
@@ -209,7 +207,7 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
  * `number` is the number value to associate with the key.
  *
  * `return` true if the key-value pair was successfully added, or false if an
- * error occurred. Use `bxr_error_get` to get more information about the error.
+ * error occurred.
  */
 BXR_API bool
 bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number);

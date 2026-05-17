@@ -4,11 +4,12 @@
 
 #include <physfs.h>
 
+#include "bxr_assert.h"
 #include "bxr_asset.h"
 #include "bxr_config.h"
 #include "bxr_context.h"
 #include "bxr_defs.h"
-#include "bxr_error.h"
+#include "bxr_log.h"
 #include "bxr_mem.h"
 #include "bxr_shader.h"
 
@@ -25,8 +26,8 @@ static bxr_context_t *context_;
 void
 bxr_shader_setup(bxr_context_t *context)
 {
-  SDL_assert(initialized_ == 0);
-  SDL_assert(context != NULL);
+  BXR_ASSERT(initialized_ == 0);
+  BXR_ASSERT(context != NULL);
 
   initialized_ = BXR_INIT_COOKIE;
   context_     = context;
@@ -35,7 +36,7 @@ bxr_shader_setup(bxr_context_t *context)
 void
 bxr_shader_shutdown(void)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   initialized_ = 0;
   context_     = NULL;
@@ -47,13 +48,12 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
                          const char *name,
                          size_t *bytecode_size)
 {
-  SDL_assert(device);
-  SDL_assert(name);
+  BXR_ASSERT(device);
+  BXR_ASSERT(name);
 
   bxr_shader_bytecode_t_ *shader_bytecode = NULL;
   BXR_NEW(shader_bytecode);
   if (!shader_bytecode) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
@@ -65,7 +65,6 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
   } else if (SDL_strstr(name, ".frag") != NULL) {
     stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
   } else {
-    bxr_error_set(BXR_ERROR_SHADER_NAME);
     return NULL;
   }
 
@@ -86,7 +85,9 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
     shader_bytecode->format = SDL_GPU_SHADERFORMAT_DXBC;
     file_ext                = ".dxbc";
   } else {
-    bxr_error_set(BXR_ERROR_SHADER_FORMAT);
+    BXR_LOG_ERROR(
+        "GPU Device does not support any known shader formats (SPIR-V, MSL, "
+        "DXIL, DXBC).");
     return NULL;
   }
 
@@ -97,7 +98,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 
   if (shader_bytecode->data == NULL) {
     BXR_FREE(shader_bytecode);
-    bxr_error_set(BXR_ERROR_SHADER_LOAD_BYTECODE);
+    BXR_LOG_ERROR("Failed to load shader bytecode from path: %s", shader_path);
     return NULL;
   }
 
@@ -107,7 +108,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 bxr_shader_t
 bxr_shader_create(bxr_shader_desc_t *desc)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   bxr_shader_bytecode_t_ *vert_bytecode
       = _be_shader_load_bytecode(context_->gpu_device, desc->vert_name, NULL);
@@ -159,7 +160,7 @@ bxr_shader_create(bxr_shader_desc_t *desc)
 void
 bxr_shader_destroy(bxr_shader_t shader)
 {
-  SDL_assert(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   SDL_GPShader gp_shader = {
     .id = shader.id,

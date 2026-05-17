@@ -1,8 +1,9 @@
 #include <SDL3/SDL.h>
 
-#include "bxr_error.h"
+#include "bxr_assert.h"
 #include "bxr_font.h"
 #include "bxr_image.h"
+#include "bxr_log.h"
 #include "bxr_mem.h"
 
 struct bxr_font_s
@@ -28,14 +29,13 @@ bxr_font_create(const char *path,
                 int char_spacing,
                 int line_spacing)
 {
-  SDL_assert(path);
-  SDL_assert(glyphs);
-  SDL_assert(glyph_count > 0);
+  BXR_ASSERT(path);
+  BXR_ASSERT(glyphs);
+  BXR_ASSERT(glyph_count > 0);
 
   bxr_font_t *font = NULL;
   BXR_NEW(font);
   if (!font) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
@@ -63,16 +63,15 @@ bxr_font_create_mem(unsigned int width,
                     int char_spacing,
                     int line_spacing)
 {
-  SDL_assert(data);
-  SDL_assert(width > 0);
-  SDL_assert(height > 0);
-  SDL_assert(glyphs);
-  SDL_assert(glyph_count > 0);
+  BXR_ASSERT(data);
+  BXR_ASSERT(width > 0);
+  BXR_ASSERT(height > 0);
+  BXR_ASSERT(glyphs);
+  BXR_ASSERT(glyph_count > 0);
 
   bxr_font_t *font = NULL;
   BXR_NEW(font);
   if (!font) {
-    bxr_error_set(BXR_ERROR_OUT_OF_MEMORY);
     return NULL;
   }
 
@@ -91,44 +90,44 @@ bxr_font_create_mem(unsigned int width,
 bxr_image_t
 bxr_font_get_image(const bxr_font_t *font)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   return font->image;
 }
 
 void
 bxr_font_set_char_spacing(bxr_font_t *font, int spacing)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   font->char_spacing = spacing;
 }
 
 bxr_vec2_t
 bxr_font_get_icon_range(const bxr_font_t *font)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   return font->icon_range;
 }
 
 bxr_vec2_t
 bxr_font_get_char_range(const bxr_font_t *font)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   return font->char_range;
 }
 
 int
 bxr_font_get_glyph_count(const bxr_font_t *font)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   return font->glyph_count;
 }
 
 bxr_rect_t
 bxr_font_get_glyph_rect(const bxr_font_t *font, int glyphs_index)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
 
-  SDL_assert(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
+  BXR_ASSERT(glyphs_index >= 0 && (size_t)glyphs_index < font->glyph_count);
   return font->glyphs[glyphs_index];
 }
 
@@ -136,43 +135,45 @@ void
 bxr_font_destroy(bxr_font_t *font)
 {
   if (!font) {
-    bxr_image_destroy(font->image);
-    BXR_FREE(font);
+    return;
   }
+
+  bxr_image_destroy(font->image);
+  BXR_FREE(font);
 }
 
 int
 bxr_font_get_base(const bxr_font_t *font)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   return font->base;
 }
 
 int
 bxr_font_get_char_spacing(const bxr_font_t *font)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   return font->char_spacing;
 }
 
 int
 bxr_font_get_line_spacing(const bxr_font_t *font)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   return font->line_spacing;
 }
 
 void
 bxr_font_set_line_spacing(bxr_font_t *font, int line_spacing)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
   font->line_spacing = line_spacing;
 }
 
 bxr_vec2_t
 bxr_font_measure_text(const bxr_font_t *font, const char *str)
 {
-  SDL_assert(font);
+  BXR_ASSERT(font);
 
   if (str == NULL || *str == '\0') {
     return (bxr_vec2_t){ 0, 0 };
@@ -197,8 +198,7 @@ bxr_font_measure_text(const bxr_font_t *font, const char *str)
     default: {
       int glyphs_index = (int)*cursor - (int)base_char;
       if (glyphs_index < char_range.x || glyphs_index > char_range.y) {
-        SDL_LogWarn(
-            SDL_LOG_CATEGORY_APPLICATION,
+        BXR_LOG_WARN(
             "Invalid character '%c' in text string. Valid characters are "
             "from %d to %d.",
             *cursor,
