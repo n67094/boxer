@@ -1,6 +1,8 @@
 #include "bxr_context.h"
 #include "bxr_assert.h"
+#include "bxr_log.h"
 #include "bxr_math.h"
+#include "bxr_mem.h"
 
 static bxr_context_t *context_ = NULL;
 
@@ -8,7 +10,12 @@ bxr_context_t *
 bxr_context_get(void)
 {
   if (context_ == NULL) {
-    context_ = SDL_malloc(sizeof(bxr_context_t));
+    BXR_NEW(context_);
+    if (!context_) {
+      BXR_LOG_ERROR("Failed to create context");
+      return NULL;
+    }
+
     SDL_zerop(context_);
   }
 
