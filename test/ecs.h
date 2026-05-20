@@ -743,6 +743,8 @@ queue_add_system(bxr_ecs_t *ecs,
   return bxr_ecs_system_get_entity_count(ecs, _s1);
 };
 
+// Tests that adding entities to a system while running it causes them to be
+// added to the system (deferred via the add queue).
 BXR_UNIT_CASE(case_ecs_queue_add)
 {
   _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
@@ -776,6 +778,8 @@ queue_remove_system(bxr_ecs_t *ecs,
   return bxr_ecs_system_get_entity_count(ecs, _s1);
 };
 
+// Tests that removing entities from a system while running it causes them to be
+// removed from the system (deferred via the remove queue).
 BXR_UNIT_CASE(case_ecs_queue_remove)
 {
   _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
@@ -815,6 +819,8 @@ queue_destroy_system(bxr_ecs_t *ecs,
   return bxr_ecs_system_get_entity_count(ecs, _s1);
 };
 
+// Tests that destroying entities from a system while running it causes them to
+// be removed from the system (deferred via the remove queue).
 BXR_UNIT_CASE(case_ecs_queue_destroy)
 {
   _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
@@ -833,6 +839,230 @@ BXR_UNIT_CASE(case_ecs_queue_destroy)
 
   BXR_UNIT_ASSERT(inner_count == MAX_ENTITIES);
   BXR_UNIT_ASSERT(outer_count == 0);
+
+  return true;
+}
+
+static int
+disable_system(bxr_ecs_t *ecs,
+               bxr_ecs_entity_t *entities,
+               size_t entity_count,
+               void *udata)
+{
+  (void)entities;
+  (void)entity_count;
+  (void)udata;
+
+  for (size_t i = 0; i < entity_count; i++) {
+
+    if (bxr_ecs_entity_has_component(ecs, entities[i], _c1)) {
+      test_component_t *component
+          = (test_component_t *)bxr_ecs_entity_get_component(
+              ecs, entities[i], _c1);
+      component->used = true;
+    }
+  }
+
+  return 0;
+};
+
+// Tests that disabling a system causes it to not run and that enabling it again
+// causes it to run.
+BXR_UNIT_CASE(case_ecs_system_enable_disable)
+{
+  _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  bxr_ecs_system_t s1
+      = bxr_ecs_system_define(ecs, 0, disable_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_require_component(ecs, s1, _c1);
+
+  bxr_ecs_entity_t e1    = bxr_ecs_entity_create(ecs);
+  test_component_t *comp = bxr_ecs_entity_add_component(ecs, e1, _c1, NULL);
+
+  // Default enable
+  comp->used = false;
+  bxr_ecs_system_run(ecs, s1, 0);
+  BXR_UNIT_ASSERT(comp->used == true);
+
+  // Explicit disable
+  comp->used = false;
+  bxr_ecs_system_disable(ecs, s1);
+  bxr_ecs_system_run(ecs, s1, 0);
+  BXR_UNIT_ASSERT(comp->used == false);
+
+  // Re-enable
+  bxr_ecs_system_enable(ecs, s1);
+  bxr_ecs_system_run(ecs, s1, 0);
+  BXR_UNIT_ASSERT(comp->used == true);
+
+  return true;
+}
+
+static int
+system_mask(bxr_ecs_t *ecs,
+            bxr_ecs_entity_t *entities,
+            size_t entity_count,
+            void *udata)
+{
+  (void)ecs;
+  (void)entities;
+  (void)entity_count;
+
+  bool *run = udata;
+  *run      = true;
+
+  return 0;
+};
+
+// Tests that a system only runs when the correct system mask is provided.
+BXR_UNIT_CASE(case_ecs_system_mask)
+{
+  bool run = false;
+
+  _s1 = bxr_ecs_system_define(
+      ecs, (1 << 0) | (1 << 1), system_mask, NULL, NULL, &run);
+
+  bxr_ecs_system_run(ecs, _s1, 0);
+  BXR_UNIT_ASSERT(!run);
+
+  bxr_ecs_system_run(ecs, _s1, (1 << 3));
+  BXR_UNIT_ASSERT(!run);
+
+  bxr_ecs_system_run(ecs, _s1, (1 << 1));
+  BXR_UNIT_ASSERT(run);
+
+  run = false;
+  bxr_ecs_system_run(ecs, _s1, (1 << 0) | (1 << 1));
+  BXR_UNIT_ASSERT(run);
+
+  run = false;
+  bxr_ecs_system_run(ecs, _s1, (bxr_ecs_mask_t)-1);
+  BXR_UNIT_ASSERT(run);
+
+  return true;
+}
+
+static bool added   = false;
+static bool removed = false;
+
+static void
+on_add_cb(bxr_ecs_t *ecs, bxr_ecs_entity_t entity, void *udata)
+{
+  (void)ecs;
+  (void)entity;
+  (void)udata;
+  added = true;
+}
+
+static void
+on_remove_cb(bxr_ecs_t *ecs, bxr_ecs_entity_t entity, void *udata)
+{
+  (void)ecs;
+  (void)entity;
+  (void)udata;
+  removed = true;
+}
+
+// Tests that the add and remove callbacks are called when components are added
+// and removed from entities.
+BXR_UNIT_CASE(case_ecs_system_add_remove_cb)
+{
+  bxr_ecs_system_t s1 = bxr_ecs_system_define(
+      ecs, 0, dummy_system, on_add_cb, on_remove_cb, NULL);
+
+  bxr_ecs_component_t c1
+      = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  bxr_ecs_system_require_component(ecs, s1, c1);
+
+  bxr_ecs_system_run(ecs, s1, 0);
+
+  bxr_ecs_entity_t e1 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e1, c1, NULL);
+  bxr_ecs_entity_destroy(ecs, e1);
+
+  BXR_UNIT_ASSERT(added == true);
+  BXR_UNIT_ASSERT(removed == true);
+
+  return true;
+}
+
+static int
+ret_system(bxr_ecs_t *ecs,
+           bxr_ecs_entity_t *entities,
+           size_t entity_count,
+           void *udata)
+{
+  (void)ecs;
+  (void)entities;
+  (void)entity_count;
+  (void)udata;
+
+  return 42;
+};
+
+static int
+alt_ret_system(bxr_ecs_t *ecs,
+               bxr_ecs_entity_t *entities,
+               size_t entity_count,
+               void *udata)
+{
+  (void)ecs;
+  (void)entities;
+  (void)entity_count;
+  (void)udata;
+
+  return 24;
+};
+
+// Tests that the system callback is called when a system is run.
+BXR_UNIT_CASE(case_ecs_system_cb)
+{
+  added   = false;
+  removed = false;
+
+  _s1 = bxr_ecs_system_define(ecs, 0, ret_system, NULL, NULL, NULL);
+
+  _c1 = bxr_ecs_component_define(ecs, sizeof(bxr_ecs_component_t), NULL, NULL);
+
+  bxr_ecs_system_require_component(ecs, _s1, _c1);
+
+  int retval = bxr_ecs_system_run(ecs, _s1, 0);
+  BXR_UNIT_ASSERT(retval == 42);
+
+  bxr_ecs_system_set_callbacks(
+      ecs, _s1, alt_ret_system, on_add_cb, on_remove_cb);
+  retval = bxr_ecs_system_run(ecs, _s1, 0);
+  BXR_UNIT_ASSERT(retval == 24);
+
+  bxr_ecs_entity_t e1 = bxr_ecs_entity_create(ecs);
+  bxr_ecs_entity_add_component(ecs, e1, _c1, NULL);
+  BXR_UNIT_ASSERT(added == true);
+
+  bxr_ecs_entity_destroy(ecs, e1);
+  BXR_UNIT_ASSERT(removed == true);
+
+  return true;
+}
+
+// Tests that the system user data is passed correctly to the system callback.
+BXR_UNIT_CASE(case_ecs_system_udata)
+{
+  int value = 42;
+  _s1       = bxr_ecs_system_define(ecs, 0, ret_system, NULL, NULL, NULL);
+
+  bxr_ecs_system_set_udata(ecs, _s1, &value);
+
+  void *udata = bxr_ecs_system_get_udata(ecs, _s1);
+  BXR_UNIT_ASSERT(udata == &value);
+  BXR_UNIT_ASSERT(*(int *)udata == 42);
+
+  int new_value = 24;
+  bxr_ecs_system_set_udata(ecs, _s1, &new_value);
+  udata = bxr_ecs_system_get_udata(ecs, _s1);
+  BXR_UNIT_ASSERT(udata == &new_value);
+  BXR_UNIT_ASSERT(*(int *)udata == 24);
 
   return true;
 }
@@ -863,14 +1093,11 @@ BXR_UNIT_SUITE(suite_ecs)
   BXR_UNIT_RUN_CASE(case_ecs_queue_remove);
   BXR_UNIT_RUN_CASE(case_ecs_queue_destroy);
 
-  /*
-  BXR_UNIT_RUN_CASE(test_enable_disable);
-  BXR_UNIT_RUN_CASE(test_system_mask);
-  BXR_UNIT_RUN_CASE(test_add_remove_callbacks);
-  BXR_UNIT_RUN_CASE(test_set_system_callbacks);
-  BXR_UNIT_RUN_CASE(test_system_udata);
-  BXR_UNIT_RUN_CASE(test_capacity_validation);
-  */
+  BXR_UNIT_RUN_CASE(case_ecs_system_enable_disable);
+  BXR_UNIT_RUN_CASE(case_ecs_system_mask);
+  BXR_UNIT_RUN_CASE(case_ecs_system_add_remove_cb);
+  BXR_UNIT_RUN_CASE(case_ecs_system_cb);
+  BXR_UNIT_RUN_CASE(case_ecs_system_udata);
 }
 
 #endif // ECS_H_

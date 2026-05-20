@@ -345,11 +345,11 @@ BXR_API void bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system);
  * `remove_cb` is the callback to call when an entity is removed from the
  * system.
  */
-BXR_API void bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
-                                         bxr_ecs_system_t system,
-                                         bxr_ecs_system_logic_cb logic_cb,
-                                         bxr_ecs_system_add_cb add_cb,
-                                         bxr_ecs_system_remove_cb remove_cb);
+BXR_API void bxr_ecs_system_set_callbacks(bxr_ecs_t *ecs,
+                                          bxr_ecs_system_t system,
+                                          bxr_ecs_system_logic_cb logic_cb,
+                                          bxr_ecs_system_add_cb add_cb,
+                                          bxr_ecs_system_remove_cb remove_cb);
 
 /**j
  * Set the user data for a system.

@@ -4,7 +4,6 @@
 #include "bxr_config.h"
 #include "bxr_defs.h"
 #include "bxr_ecs.h"
-#include "bxr_log.h"
 #include "bxr_mem.h"
 #include "bxr_sparse_set.h"
 
@@ -984,11 +983,11 @@ bxr_ecs_system_disable(bxr_ecs_t *ecs, bxr_ecs_system_t system)
 }
 
 void
-bxr_ecs_system_set_callback(bxr_ecs_t *ecs,
-                            bxr_ecs_system_t system,
-                            bxr_ecs_system_logic_cb logic_cb,
-                            bxr_ecs_system_add_cb add_cb,
-                            bxr_ecs_system_remove_cb remove_cb)
+bxr_ecs_system_set_callbacks(bxr_ecs_t *ecs,
+                             bxr_ecs_system_t system,
+                             bxr_ecs_system_logic_cb logic_cb,
+                             bxr_ecs_system_add_cb add_cb,
+                             bxr_ecs_system_remove_cb remove_cb)
 {
   BXR_ASSERT(ecs);
   BXR_ASSERT(system < BXR_ECS_MAX_SYSTEM);
