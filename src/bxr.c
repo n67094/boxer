@@ -149,15 +149,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
   // --- Init here ---
 
-  SDL_GPUCommandBuffer *cmd_buffer
-      = SDL_AcquireGPUCommandBuffer(context->gpu_device);
-  if (cmd_buffer == NULL) {
-    BXR_LOG_ERROR("Failed to acquire GPU command buffer (error: %s)",
-                  SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  bxr_painter_update_command_buffer(cmd_buffer);
-
   bxr_painter_desc_t painter_desc = {
     .max_vertices = 0, // will use default
     .max_commands = 0, // will use default
@@ -177,9 +168,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
   // Call user setup
   bxr_game_setup();
-
-  // Submit for resources uploads during setup
-  SDL_SubmitGPUCommandBuffer(cmd_buffer);
 
   return SDL_APP_CONTINUE;
 }
@@ -243,29 +231,7 @@ SDL_AppIterate(void *appstate)
 
   // --- Render here (use alpha_ms for interpolation if needed) ---
 
-  // Get the command buffer
-  SDL_GPUCommandBuffer *cmd_buffer
-      = SDL_AcquireGPUCommandBuffer(context->gpu_device);
-  if (cmd_buffer == NULL) {
-    BXR_LOG_ERROR("Failed to acquire GPU command buffer (error: %s)",
-                  SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  bxr_painter_update_command_buffer(cmd_buffer);
-
-  // Get the tagert texture
-  SDL_GPUTexture *target_texture = NULL;
-  if (!SDL_WaitAndAcquireGPUSwapchainTexture(
-          cmd_buffer, context->window, &target_texture, NULL, NULL)) {
-    BXR_LOG_ERROR("Failed to acquire swapchain texture (error: %s)",
-                  SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  bxr_painter_update_swapchain_texture(target_texture);
-
   bxr_game_render(alpha_ms);
-
-  SDL_SubmitGPUCommandBuffer(cmd_buffer);
 
   ++frame_count;
 

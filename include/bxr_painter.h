@@ -47,19 +47,6 @@ typedef struct bxr_vertex_s
  */
 
 /**
- * `swapchain_texture` is the new swapchain texture to use for the current
- * frame.
- */
-BXR_API void
-bxr_painter_update_swapchain_texture(SDL_GPUTexture *swapchain_texture);
-
-/**
- * `cmd_buffer` is the new command buffer to use for the current frame.
- */
-BXR_API void
-bxr_painter_update_command_buffer(SDL_GPUCommandBuffer *cmd_buffer);
-
-/**
  * Setup the painter system with the given description.
  *
  * `desc` is the description of the painter system to setup.

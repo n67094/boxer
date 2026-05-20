@@ -6,18 +6,6 @@
 #include "bxr_painter.h"
 
 void
-bxr_painter_update_swapchain_texture(SDL_GPUTexture *swapchain_texture)
-{
-  SDL_GPUpdateSwapchainTexture(swapchain_texture);
-}
-
-void
-bxr_painter_update_command_buffer(SDL_GPUCommandBuffer *cmd_buffer)
-{
-  SDL_GPUpdateCommandBuffer(cmd_buffer);
-}
-
-void
 bxr_painter_setup(bxr_painter_desc_t *desc)
 {
   BXR_ASSERT(desc);

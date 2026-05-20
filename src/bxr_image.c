@@ -55,7 +55,6 @@ bxr_image_create(const char *path)
 
   SDL_Surface *surface = SDL_LoadPNG_IO(stream, true);
   if (!surface) {
-    SDL_CloseIO(stream);
     BXR_LOG_ERROR(
         "Failed to load image from file: %s (error: %s)", path, SDL_GetError());
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
