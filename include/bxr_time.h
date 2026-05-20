@@ -22,6 +22,9 @@ bxr_time_get_ticks()
  *
  * Callback signature:
  *
+ * return the new callback time interval, or 0 to disable further runs of the
+ * callback.
+ *
  * ```c
  * uint32_t callback(void *udata, bxr_timer_t timer_id, uint32_t interval);
  * ```

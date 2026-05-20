@@ -35,6 +35,7 @@
 #include "bxr_shader.h"
 #include "bxr_sparse_set.h"
 #include "bxr_str.h"
+#include "bxr_time.h"
 #include "bxr_unit.h"
 
 /**
