@@ -15,16 +15,17 @@ Features:
 - Read/write support for `.ini` and `.json` files.
 - Keyboard, mouse, and gamepad input handling.
 - Math utilities for vectors, matrices, and transformations.
-- Font atlas utilities for efficient text rendering.
 - A 2D stack painter for drawing sprites, shapes, and text with support for custom shaders.
 - An entity-component system (ECS) for flexible game object management.
 
 TODO:
 
-- Immediate mode GUI system.
-- Audio support.
-- Physics utilities.
-- and more.
+- Immediate mode GUI system
+- Audio support
+- Physics utilities
+- coroutine support
+- Networking utilities
+- and more
 
 ## Prerequisites
 

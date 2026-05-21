@@ -18,7 +18,6 @@
 #include "bxr_context.h"
 #include "bxr_defs.h"
 #include "bxr_ecs.h"
-#include "bxr_font.h"
 #include "bxr_game.h"
 #include "bxr_gamepad.h"
 #include "bxr_image.h"
