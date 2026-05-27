@@ -71,10 +71,10 @@ typedef enum
 BXR_API void bxr_gamepad_setup(void);
 
 /**
- * Shuts down the gamepad subsystem. Must be called when the application is
+ * Tears down the gamepad subsystem. Must be called when the application is
  * shutting down.
  */
-BXR_API void bxr_gamepad_shutdown(void);
+BXR_API void bxr_gamepad_teardown(void);
 
 /**
  * Listens for gamepad events and updates the internal state of the gamepads.

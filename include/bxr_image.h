@@ -34,9 +34,9 @@ typedef struct bxr_image_s
 BXR_API void bxr_image_setup(bxr_context_t *context);
 
 /**
- * Shutdown the image subsystem.
+ * Tears down the image subsystem.
  */
-BXR_API void bxr_image_shutdown(void);
+BXR_API void bxr_image_teardown(void);
 
 /**
  * ## Public API

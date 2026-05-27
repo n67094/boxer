@@ -1,11 +1,6 @@
 #include "bxr_unit.h"
+#include "bxr_defs.h"
 #include "bxr_log.h"
-
-#define BXR_UNIT_TERM_COLOR_CODE 0x1B
-#define BXR_UNIT_TERM_COLOR_RED "[1;31m"
-#define BXR_UNIT_TERM_COLOR_GREEN "[1;32m"
-#define BXR_UNIT_TERM_COLOR_BOLD "[1m"
-#define BXR_UNIT_TERM_COLOR_RESET "[0m"
 
 static unsigned asserts_count_ = 0;
 static unsigned passed_count_  = 0;
@@ -56,11 +51,9 @@ bxr_unit_assert(bool passed,
   }
 
   if (has_colors_) {
-    BXR_LOG_INFO("\t(%c%sFAILED%c%s: %s (%d): %s)\n",
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_RED,
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_RESET,
+    BXR_LOG_INFO("\t(%sFAILED%s: %s (%d): %s)\n",
+                 BXR_TERM_COLOR_RED,
+                 BXR_TERM_RESET,
                  file,
                  line,
                  expr);
@@ -91,11 +84,7 @@ bxr_unit_run_case(const char *const name, bxr_unit_case_cb case_cb)
   }
 
   if (has_colors_) {
-    BXR_LOG_INFO("\t(%c%sOK%c%s)",
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_GREEN,
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_RESET);
+    BXR_LOG_INFO("\t(%sOK%s)", BXR_TERM_COLOR_GREEN, BXR_TERM_RESET);
   } else {
     BXR_LOG_INFO("\t(OK)");
   }
@@ -114,12 +103,7 @@ bxr_unit_run_suite(const char *const name, bxr_unit_suite_cb suite_cb)
       "===============================================================\n");
 
   if (has_colors_) {
-    BXR_LOG_INFO("%c%sRunning: %s%c%s\n",
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_BOLD,
-                 name,
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_RESET);
+    BXR_LOG_INFO("%sRunning: %s%s\n", BXR_TERM_BOLD, name, BXR_TERM_RESET);
   } else {
     BXR_LOG_INFO("Running: %s\n", name);
   }
@@ -138,20 +122,16 @@ bxr_unit_report(void)
       "===============================================================\n");
 
   if (has_colors_) {
-    BXR_LOG_INFO("Summary: Passed: %c%s%u%c%s "
-                 "Failed: %c%s%u%c%s "
+    BXR_LOG_INFO("Summary: Passed: %s%u%s "
+                 "Failed: %s%u%s "
                  "Total: %u Suites: %u "
                  "Asserts: %u\n",
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_GREEN,
+                 BXR_TERM_COLOR_GREEN,
                  passed_count_,
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_RESET,
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_RED,
+                 BXR_TERM_RESET,
+                 BXR_TERM_COLOR_RED,
                  failed_count_,
-                 BXR_UNIT_TERM_COLOR_CODE,
-                 BXR_UNIT_TERM_COLOR_RESET,
+                 BXR_TERM_RESET,
                  passed_count_ + failed_count_,
                  suites_count_,
                  asserts_count_);

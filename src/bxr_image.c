@@ -25,7 +25,7 @@ bxr_image_setup(bxr_context_t *context)
 }
 
 void
-bxr_image_shutdown(void)
+bxr_image_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 

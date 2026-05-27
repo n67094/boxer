@@ -51,7 +51,7 @@ bxr_asset_setup(bxr_context_t *context)
 }
 
 void
-bxr_asset_shutdown(void)
+bxr_asset_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 

@@ -64,4 +64,12 @@
  */
 #define BXR_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
+#define BXR_TERM_ESC "\x1B"
+#define BXR_TERM_RESET BXR_TERM_ESC "[0m"
+#define BXR_TERM_BOLD BXR_TERM_ESC "[1m"
+#define BXR_TERM_COLOR_CYAN BXR_TERM_ESC "[36m"
+#define BXR_TERM_COLOR_GREEN BXR_TERM_ESC "[32m"
+#define BXR_TERM_COLOR_YELLOW BXR_TERM_ESC "[33m"
+#define BXR_TERM_COLOR_RED BXR_TERM_ESC "[31m"
+
 #endif // BXR_DEFS_H_

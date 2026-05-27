@@ -49,10 +49,10 @@ BXR_API void bxr_mouse_setup(void);
 BXR_API void bxr_mouse_begin_frame(void);
 
 /**
- * Shutdown the mouse subsystem. Must be called when the application is shutting
- * down.
+ * Tears down the mouse subsystem. Must be called when the application is
+ * shutting down.
  */
-BXR_API void bxr_mouse_shutdown(void);
+BXR_API void bxr_mouse_teardown(void);
 
 /**
  * Handles a mouse button down event. Must be called when a mouse button event

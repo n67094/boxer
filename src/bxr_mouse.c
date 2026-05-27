@@ -59,7 +59,7 @@ bxr_mouse_begin_frame()
 }
 
 void
-bxr_mouse_shutdown(void)
+bxr_mouse_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 

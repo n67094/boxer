@@ -172,10 +172,10 @@ BXR_API void bxr_keyboard_setup(void);
 BXR_API void bxr_keyboard_begin_frame(void);
 
 /**
- * Shutdown the keyboard input system. Must be called when the
+ * Tears down the keyboard input system. Must be called when the
  * application is closing to free any resources used by the keyboard system.
  */
-BXR_API void bxr_keyboard_shutdown(void);
+BXR_API void bxr_keyboard_teardown(void);
 
 /**
  * Handle a key down event for the given scancode. Must be called when a

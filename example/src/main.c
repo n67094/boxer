@@ -1,6 +1,7 @@
 #include <boxer/bxr.h>
 
-#define ASSET_PATH "assets.zip"
+#define ASSET_MOUNT "assets.zip"
+#define ASSET_PATH "assets/"
 
 static bxr_image_t _image;
 
@@ -24,10 +25,10 @@ bxr_game_config(void)
 void
 bxr_game_setup(void)
 {
-  bxr_asset_mount(ASSET_PATH);
+  bxr_asset_mount(ASSET_MOUNT);
 
   // Load an image
-  _image = bxr_image_create("assets/images/logo.png");
+  _image = bxr_image_create(ASSET_PATH "images/logo.png");
 }
 
 void
@@ -78,9 +79,9 @@ bxr_game_render(Uint64 alpha_time_ms)
 }
 
 void
-bxr_game_shutdown(void)
+bxr_game_teardown(void)
 {
-  bxr_asset_unmount(ASSET_PATH);
+  bxr_asset_unmount(ASSET_MOUNT);
 
   bxr_image_destroy(_image);
 }

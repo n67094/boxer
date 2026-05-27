@@ -54,9 +54,9 @@ typedef struct bxr_vertex_s
 BXR_API void bxr_painter_setup(bxr_painter_desc_t *desc);
 
 /**
- * Shutdown the painter system.
+ * Tears down the painter system.
  */
-BXR_API void bxr_painter_shutdown(void);
+BXR_API void bxr_painter_teardown(void);
 
 /**
  * ## Public API

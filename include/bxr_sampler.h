@@ -36,9 +36,9 @@ typedef struct bxr_sampler_s
 void bxr_sampler_setup(void);
 
 /**
- * Shuts down the sampler system.
+ * Tears down the sampler system.
  */
-void bxr_sampler_shutdown(void);
+void bxr_sampler_teardown(void);
 
 /**
  * ## Public API

@@ -144,7 +144,7 @@ bxr_gamepad_begin_frame(void)
 }
 
 void
-bxr_gamepad_shutdown(void)
+bxr_gamepad_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 

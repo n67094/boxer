@@ -137,7 +137,7 @@ bxr_game_render(Uint64 alpha_time_ms)
 }
 
 void
-bxr_game_shutdown(void)
+bxr_game_teardown(void)
 {
     // Clean up game state here
 }

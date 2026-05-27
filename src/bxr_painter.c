@@ -23,7 +23,7 @@ bxr_painter_setup(bxr_painter_desc_t *desc)
 }
 
 void
-bxr_painter_shutdown()
+bxr_painter_teardown()
 {
   SDL_GPShutdown();
 }

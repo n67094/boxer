@@ -21,7 +21,7 @@ bxr_sampler_setup(void)
 }
 
 void
-bxr_sampler_shutdown(void)
+bxr_sampler_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 

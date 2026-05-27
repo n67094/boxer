@@ -44,7 +44,7 @@ bxr_keyboard_begin_frame(void)
 }
 
 void
-bxr_keyboard_shutdown(void)
+bxr_keyboard_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 

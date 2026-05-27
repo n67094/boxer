@@ -159,6 +159,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   bxr_painter_setup(&painter_desc);
 
   // Setup subsystems
+  bxr_log_setup();
   bxr_asset_setup(context);
   bxr_keyboard_setup();
   bxr_mouse_setup();
@@ -324,16 +325,17 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
   bxr_context_t *context = bxr_context_get();
 
-  bxr_game_shutdown();
+  bxr_game_teardown();
 
-  bxr_shader_shutdown();
-  bxr_image_shutdown();
-  bxr_gamepad_shutdown();
-  bxr_mouse_shutdown();
-  bxr_keyboard_shutdown();
-  bxr_asset_shutdown();
+  bxr_shader_teardown();
+  bxr_image_teardown();
+  bxr_gamepad_teardown();
+  bxr_mouse_teardown();
+  bxr_keyboard_teardown();
+  bxr_asset_teardown();
+  bxr_log_teardown();
 
-  bxr_painter_shutdown();
+  bxr_painter_teardown();
 
   if (context) {
     if (context->gpu_device && context->window) {

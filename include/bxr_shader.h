@@ -62,7 +62,7 @@ void bxr_shader_setup(bxr_context_t *context);
 /**
  * Shuts down the shader system.
  */
-void bxr_shader_shutdown(void);
+void bxr_shader_teardown(void);
 
 /**
  * ## Public API

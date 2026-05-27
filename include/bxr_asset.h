@@ -50,9 +50,9 @@
 BXR_API void bxr_asset_setup(bxr_context_t *context);
 
 /**
- * Shutdown the asset subsystem.
+ * Tears down the asset subsystem.
  */
-BXR_API void bxr_asset_shutdown(void);
+BXR_API void bxr_asset_teardown(void);
 
 /**
  * ## Public API

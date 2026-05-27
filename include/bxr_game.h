@@ -75,8 +75,8 @@ extern void bxr_game_update(Uint64 delta_time_ms);
 extern void bxr_game_render(Uint64 alpha_time_ms);
 
 /**
- * The user should provide this function to shutdown the game.
+ * The user should provide this function to tear down the game.
  */
-extern void bxr_game_shutdown(void);
+extern void bxr_game_teardown(void);
 
 #endif // BXR_GAME_H_

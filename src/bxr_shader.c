@@ -34,7 +34,7 @@ bxr_shader_setup(bxr_context_t *context)
 }
 
 void
-bxr_shader_shutdown(void)
+bxr_shader_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
