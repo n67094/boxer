@@ -581,15 +581,15 @@ bxr_rect_contract(bxr_rect_t rect, float amount)
 
 typedef struct bxr_textured_rect_s
 {
-  bxr_rect_t dst;
   bxr_rect_t src;
+  bxr_rect_t dst;
 } bxr_textured_rect_t;
 
 /**
  * Construct a textured rectangle.
  */
-#define bxr_textured_rect_create(dst, src)                                     \
-  ((const bxr_textured_rect_t){ dst, src })
+#define bxr_textured_rect_create(src, dst)                                     \
+  ((const bxr_textured_rect_t){ src, dst })
 
 /**
  * ## Region

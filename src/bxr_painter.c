@@ -3,6 +3,7 @@
 #include <SDL_gp.h>
 
 #include "bxr_assert.h"
+#include "bxr_context.h"
 #include "bxr_painter.h"
 
 void
@@ -26,12 +27,6 @@ void
 bxr_painter_teardown()
 {
   SDL_GPShutdown();
-}
-
-void
-bxr_painter_end()
-{
-  SDL_GPEnd();
 }
 
 void
@@ -205,21 +200,22 @@ bxr_painter_reset_sampler(int channel)
 }
 
 void
-bxr_painter_viewport(int x, int y, int w, int h)
-{
-  SDL_GPViewport(x, y, w, h);
-}
-
-void
-bxr_painter_reset_viewport(void)
-{
-  SDL_GPResetViewport();
-}
-
-void
 bxr_painter_scissor(int x, int y, int w, int h)
 {
-  SDL_GPScissor(x, y, w, h);
+  // Scale the scissor rectangle from virtual coordinates to actual coordinates
+
+  bxr_context_t *context = bxr_context_get();
+
+  int width  = context->config.width;
+  int height = context->config.height;
+
+  int virtual_width  = context->config.virtual_width;
+  int virtual_height = context->config.virtual_height;
+
+  int factor_x = width / virtual_width;
+  int factor_y = height / virtual_height;
+
+  SDL_GPScissor(x * factor_x, y * factor_y, w * factor_x, h * factor_y);
 }
 
 void

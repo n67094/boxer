@@ -213,7 +213,7 @@ BXR_API void bxr_painter_set_image(int channel, bxr_image_t image);
  *
  * `channel` is the texture channel to unbind the image from.
  */
-BXR_API void bxr_ainter_unset_image(int channel);
+BXR_API void bxr_painter_unset_image(int channel);
 
 /**
  * Reset current bound image in a texture channel to the default (white
@@ -248,21 +248,7 @@ BXR_API void bxr_painter_unset_sampler(int channel);
 BXR_API void bxr_painter_reset_sampler(int channel);
 
 /**
- * Set the screen are to draw to.
- *
- * `x` and `y` are the coordinates of the top-left corner of the viewport.
- *
- * `w` and `h` are the width and height of the viewport, respectively.
- */
-BXR_API void bxr_painter_viewport(int x, int y, int w, int h);
-
-/**
- * Reset the viewport to default (0, 0, width, height).
- */
-BXR_API void bxr_painter_reset_viewport(void);
-
-/**
- * Set the clipping rectangle in the viewport.
+ * Set the clipping rectangle.
  *
  * `x` and `y` are the coordinates of the top-left corner of the clipping
  * rectangle.
@@ -272,7 +258,7 @@ BXR_API void bxr_painter_reset_viewport(void);
 BXR_API void bxr_painter_scissor(int x, int y, int w, int h);
 
 /**
- * Reset the clipping rectangle to default (viewport bounds).
+ * Reset the clipping rectangle to default.
  */
 BXR_API void bxr_painter_reset_scissor(void);
 

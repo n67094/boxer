@@ -58,8 +58,10 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   BXR_ASSERT(config->title);
   BXR_ASSERT(config->width > 0);
   BXR_ASSERT(config->height > 0);
-  BXR_ASSERT(config->virtual_width > 0);
-  BXR_ASSERT(config->virtual_height > 0);
+  BXR_ASSERT(config->virtual_width > 0
+             && config->virtual_width <= config->width);
+  BXR_ASSERT(config->virtual_height > 0
+             && config->virtual_height <= config->height);
   BXR_ASSERT(config->fullscreen == true || config->fullscreen == false);
   BXR_ASSERT(config->resizable == true || config->resizable == false);
 
