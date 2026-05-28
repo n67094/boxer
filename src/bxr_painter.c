@@ -29,18 +29,6 @@ bxr_painter_teardown()
 }
 
 void
-bxr_painter_begin(int width, int height)
-{
-  SDL_GPBegin(width, height);
-}
-
-void
-bxr_painter_flush()
-{
-  SDL_GPFlush();
-}
-
-void
 bxr_painter_end()
 {
   SDL_GPEnd();

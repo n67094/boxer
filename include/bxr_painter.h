@@ -63,18 +63,6 @@ BXR_API void bxr_painter_teardown(void);
  */
 
 /**
- * Begin recording draw calls for the current frame.
- *
- * `width` and `height` are the dimensions of the current swapchain texture.
- */
-BXR_API void bxr_painter_begin(int width, int height);
-
-/**
- * Flush the recorded draw calls to the GPU.
- */
-BXR_API void bxr_painter_flush(void);
-
-/**
  * End recording draw calls for the current frame. Must be called after
  * `bxr_painter_begin` and `bxr_painter_flush`.
  */

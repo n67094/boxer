@@ -58,17 +58,21 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   BXR_ASSERT(config->title);
   BXR_ASSERT(config->width > 0);
   BXR_ASSERT(config->height > 0);
+  BXR_ASSERT(config->virtual_width > 0);
+  BXR_ASSERT(config->virtual_height > 0);
   BXR_ASSERT(config->fullscreen == true || config->fullscreen == false);
   BXR_ASSERT(config->resizable == true || config->resizable == false);
 
   bxr_context_t *context = bxr_context_get();
 
-  context->config.name       = config->name;
-  context->config.title      = config->title;
-  context->config.width      = config->width;
-  context->config.height     = config->height;
-  context->config.fullscreen = config->fullscreen;
-  context->config.resizable  = config->resizable;
+  context->config.name           = config->name;
+  context->config.title          = config->title;
+  context->config.width          = config->width;
+  context->config.height         = config->height;
+  context->config.virtual_width  = config->virtual_width;
+  context->config.virtual_height = config->virtual_height;
+  context->config.fullscreen     = config->fullscreen;
+  context->config.resizable      = config->resizable;
 
 // This is set because renderdoc doesn't support wayland
 #if defined(__linux__) && defined(DEBUG)
@@ -232,7 +236,38 @@ SDL_AppIterate(void *appstate)
 
   // --- Render here (use alpha_ms for interpolation if needed) ---
 
-  bxr_game_render(alpha_ms);
+  // Acquire a command buffer for the current frame
+  SDL_GPUCommandBuffer *cmd_buffer
+      = SDL_AcquireGPUCommandBuffer(_gp.desc.gpu_device);
+
+  SDL_GPBegin(context->config.virtual_width, context->config.virtual_height);
+  {
+    bxr_game_render(alpha_ms);
+
+    SDL_GPUpload(cmd_buffer);
+
+    SDL_GPUTexture *swapchain_texture = NULL;
+
+    SDL_WaitAndAcquireGPUSwapchainTexture(
+        cmd_buffer, _gp.desc.window, &swapchain_texture, NULL, NULL);
+
+    SDL_GPUColorTargetInfo color_target_info = {
+      .texture     = swapchain_texture,
+      .clear_color = { 0, 0, 0, 1 },
+      .load_op     = SDL_GPU_LOADOP_CLEAR,
+      .store_op    = SDL_GPU_STOREOP_STORE,
+      .cycle       = false,
+    };
+
+    SDL_GPURenderPass *render_pass
+        = SDL_BeginGPURenderPass(cmd_buffer, &color_target_info, 1, NULL);
+
+    SDL_GPFlush(render_pass);
+
+    SDL_EndGPURenderPass(render_pass);
+  }
+  SDL_GPEnd();
+  SDL_SubmitGPUCommandBuffer(cmd_buffer);
 
   ++frame_count;
 

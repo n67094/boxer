@@ -58,6 +58,22 @@ BXR_API void bxr_context_set_window_dimensions(int width, int height);
 BXR_API bxr_vec2_t bxr_context_get_window_dimensions(void);
 
 /**
+ * Set the virtual window dimensions.
+ *
+ * `width`  The new virtual width of the window in pixels.
+ * `height` The new virtual height of the window in pixels.
+ */
+BXR_API void bxr_context_set_virtual_window_dimensions(int width, int height);
+
+/**
+ * Get the current virtual window dimensions.
+ *
+ * `return` The current virtual window dimensions as a `bxr_vec2_t` (x = width,
+ * y = height).
+ */
+BXR_API bxr_vec2_t bxr_context_get_virtual_window_dimensions(void);
+
+/**
  * Set the fullscreen mode of the window.
  *
  * `fullscreen` `true` to set the window to fullscreen mode, `false` to set it

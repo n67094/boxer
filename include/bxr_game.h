@@ -19,31 +19,15 @@ typedef struct bxr_game_config_s
   unsigned int width;
   unsigned int height;
 
+  unsigned int virtual_width;
+  unsigned int virtual_height;
+
   bool fullscreen;
   bool resizable;
 } bxr_game_config_t;
 
 /**
  * The user should provide this function to return boxer's game configuration.
- *
- * If a file named "config.ini" exist in the `write` mounted directory
- * boxer will try to read the configuration values from the file and override
- * the default configuration values returned by this function.
- *
- * Here is the list of the configuration values that can be overridden by the
- * config.ini file:
- *
- * - width
- * - height
- * - fullscreen
- * - resizable
- * - target_ups
- *
- * Write mounted directories:
- *
- * - **Linux:** `~/.local/share/<config->name>/`
- * - **Windows:** `C:\Users\<username>\AppData\Roaming\<config->name>\`
- * - **macOS:** `~/Library/Application Support/<config->name>/`
  *
  * `return` the game configuration to use for the game.
  */

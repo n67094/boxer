@@ -33,6 +33,24 @@ bxr_context_set_window_dimensions(int width, int height)
   SDL_SetWindowSize(context_->window, width, height);
 }
 
+void
+bxr_context_set_virtual_window_dimensions(int width, int height)
+{
+  BXR_ASSERT(context_);
+
+  context_->config.virtual_width  = width;
+  context_->config.virtual_height = height;
+}
+
+bxr_vec2_t
+bxr_context_get_virtual_window_dimensions(void)
+{
+  BXR_ASSERT(context_);
+
+  return (bxr_vec2_t){ .x = context_->config.virtual_width,
+                       .y = context_->config.virtual_height };
+}
+
 bxr_vec2_t
 bxr_context_get_window_dimensions(void)
 {
