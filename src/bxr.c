@@ -192,12 +192,6 @@ SDL_AppIterate(void *appstate)
   bxr_mouse_begin_frame();
   bxr_gamepad_begin_frame();
 
-  static int count = 0;
-
-  if (bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_DOWN)) {
-    BXR_LOG_INFO("Button A just pressed! Count: %d", count++);
-  }
-
   static Uint64 fps            = 0;
   static Uint64 ups            = 0;
   static Uint64 frame_count    = 0;
@@ -338,8 +332,6 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
     int index         = SDL_GetGamepadPlayerIndexForID(id);
     if (index < 0 || index > BXR_GAMEPAD_MAX)
       break;
-    static int count = 0;
-    SDL_Log("Pushed %d", count++);
     bxr_gamepad_button_down(index, event->gbutton.button);
   } break;
   case SDL_EVENT_GAMEPAD_BUTTON_UP: {
