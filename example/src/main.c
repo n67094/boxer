@@ -37,6 +37,7 @@ bxr_game_setup(void)
 void
 bxr_game_update(Uint64 delta_time_ms)
 {
+
   // Update game logic here
 }
 
@@ -48,7 +49,7 @@ bxr_game_render(Uint64 alpha_time_ms)
   bxr_painter_set_color(bxr_color_create(0, 0, 0, 255));
   bxr_painter_clear();
 
-  for (int i = 0; i < 4096; ++i) {
+  for (int i = 0; i < 1024; ++i) {
     float width  = window_size.x;
     float height = window_size.y;
 

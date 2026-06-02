@@ -7,15 +7,14 @@ typedef struct bxr_mouse_button_state_s_
   bxr_mouse_click_e click;
   bool just_pressed;
   bool just_released;
+  bool pending_just_pressed;
+  bool pending_just_released;
   Uint64 pressed_at;
 } bxr_mouse_button_state_t_;
 
 typedef struct bxr_mouse_s_
 {
   bxr_mouse_button_state_t_ buttons[BXR_MOUSE_SIZE];
-
-  bool just_pressed_acc[BXR_MOUSE_SIZE];
-  bool just_released_acc[BXR_MOUSE_SIZE];
 
   float x;
   float y;
@@ -44,11 +43,11 @@ bxr_mouse_begin_frame()
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   for (int i = 0; i < BXR_MOUSE_SIZE; ++i) {
-    mouse_.just_pressed_acc[i]  = mouse_.buttons[i].just_pressed;
-    mouse_.just_released_acc[i] = mouse_.buttons[i].just_released;
+    mouse_.buttons[i].just_pressed  = mouse_.buttons[i].pending_just_pressed;
+    mouse_.buttons[i].just_released = mouse_.buttons[i].pending_just_released;
 
-    mouse_.buttons[i].just_pressed  = false;
-    mouse_.buttons[i].just_released = false;
+    mouse_.buttons[i].pending_just_pressed  = false;
+    mouse_.buttons[i].pending_just_released = false;
   }
 
   mouse_.wheel_x = 0;
@@ -74,8 +73,8 @@ bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click)
   BXR_ASSERT(button > 0 && button < BXR_MOUSE_SIZE);
 
   if (mouse_.buttons[button].click == BXR_MOUSE_NONE) {
-    mouse_.buttons[button].pressed_at   = SDL_GetTicks();
-    mouse_.buttons[button].just_pressed = true;
+    mouse_.buttons[button].pressed_at           = SDL_GetTicks();
+    mouse_.buttons[button].pending_just_pressed = true;
   }
 
   mouse_.buttons[button].click = click;
@@ -88,7 +87,7 @@ bxr_mouse_button_up(bxr_mouse_e button)
   BXR_ASSERT(button > 0 && button < BXR_MOUSE_SIZE);
 
   if (mouse_.buttons[button].click != BXR_MOUSE_NONE) {
-    mouse_.buttons[button].just_released = true;
+    mouse_.buttons[button].pending_just_released = true;
   }
 
   mouse_.buttons[button].pressed_at = 0;
@@ -144,7 +143,7 @@ bxr_mouse_just_pressed(bxr_mouse_e button)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(button > 0 && button < BXR_MOUSE_SIZE);
 
-  return mouse_.just_pressed_acc[button];
+  return mouse_.buttons[button].just_pressed;
 }
 
 bool
@@ -153,7 +152,7 @@ bxr_mouse_just_released(bxr_mouse_e button)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(button > 0 && button < BXR_MOUSE_SIZE);
 
-  return mouse_.just_released_acc[button];
+  return mouse_.buttons[button].just_released;
 }
 
 bool

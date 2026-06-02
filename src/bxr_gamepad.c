@@ -11,6 +11,8 @@ typedef struct bxr_gamepad_button_state_s_
   bool is_down;
   bool just_pressed;
   bool just_released;
+  bool pending_just_pressed;
+  bool pending_just_released;
   Uint64 pressed_at;
 } bxr_gamepad_button_state_t_;
 
@@ -21,9 +23,6 @@ typedef struct bxr_gamepad_s_
   const char *serial;
 
   bxr_gamepad_button_state_t_ buttons[BXR_GAMEPAD_BUTTON_SIZE];
-
-  bool just_pressed_acc[BXR_GAMEPAD_BUTTON_SIZE];
-  bool just_released_acc[BXR_GAMEPAD_BUTTON_SIZE];
 
   float axis[BXR_GAMEPAD_AXIS_SIZE];
   float axis_prev[BXR_GAMEPAD_AXIS_SIZE];
@@ -129,11 +128,13 @@ bxr_gamepad_begin_frame(void)
 
     // Update just pressed/released accumulators
     for (int j = 0; j < BXR_GAMEPAD_BUTTON_SIZE; ++j) {
-      gamepads_[i].just_pressed_acc[j]  = gamepads_[i].buttons[j].just_pressed;
-      gamepads_[i].just_released_acc[j] = gamepads_[i].buttons[j].just_released;
+      gamepads_[i].buttons[j].just_pressed
+          = gamepads_[i].buttons[j].pending_just_pressed;
+      gamepads_[i].buttons[j].just_released
+          = gamepads_[i].buttons[j].pending_just_released;
 
-      gamepads_[i].buttons[j].just_pressed  = false;
-      gamepads_[i].buttons[j].just_released = false;
+      gamepads_[i].buttons[j].pending_just_pressed  = false;
+      gamepads_[i].buttons[j].pending_just_released = false;
     }
 
     // Update previous axis values
@@ -170,8 +171,8 @@ bxr_gamepad_button_down(int index, bxr_gamepad_button_e button)
   }
 
   if (!gamepads_[index].buttons[button].is_down) {
-    gamepads_[index].buttons[button].pressed_at   = SDL_GetTicks();
-    gamepads_[index].buttons[button].just_pressed = true;
+    gamepads_[index].buttons[button].pressed_at           = SDL_GetTicks();
+    gamepads_[index].buttons[button].pending_just_pressed = true;
   }
 
   gamepads_[index].buttons[button].is_down = true;
@@ -188,7 +189,7 @@ bxr_gamepad_button_up(int index, bxr_gamepad_button_e button)
   }
 
   if (gamepads_[index].buttons[button].is_down) {
-    gamepads_[index].buttons[button].just_released = true;
+    gamepads_[index].buttons[button].pending_just_released = true;
   }
 
   gamepads_[index].buttons[button].pressed_at = 0;
@@ -311,7 +312,7 @@ bxr_gamepad_just_pressed(int index, bxr_gamepad_button_e button)
     return false;
   }
 
-  return gamepads_[index].just_pressed_acc[button];
+  return gamepads_[index].buttons[button].just_pressed;
 }
 
 bool
@@ -325,7 +326,7 @@ bxr_gamepad_just_released(int index, bxr_gamepad_button_e button)
     return false;
   }
 
-  return gamepads_[index].just_released_acc[button];
+  return gamepads_[index].buttons[button].just_released;
 }
 
 Uint64
