@@ -2,6 +2,43 @@
  * File `json.h`.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * {
+ *  "name":"nsix",
+ *  "id":123,
+ *  "is_human":false,
+ *  "items":[
+ *     "item1",
+ *     "item2"
+ *  ],
+ *  "scores":[
+ *     10,
+ *     20
+ *  ],
+ *  "flags":[
+ *     true,
+ *     false
+ *  ],
+ *  "mixed":[
+ *     "string",
+ *     42.24,
+ *     true
+ *  ],
+ *  "players":[
+ *     {
+ *        "name":"Alice",
+ *        "score":100
+ *     },
+ *     {
+ *        "name":"Bob",
+ *        "score":150
+ *     }
+ *  ],
+ *  "attributes":{
+ *     "strength":"high",
+ *     "agility":"medium"
+ *  }
+ * }
  */
 
 #ifndef JSON_H_

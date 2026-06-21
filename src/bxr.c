@@ -300,11 +300,9 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
   switch (event->type) {
   case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
     return SDL_APP_SUCCESS;
-  case SDL_EVENT_WINDOW_DISPLAY_CHANGED: {
-    BXR_LOG_INFO("Display changed, updating refresh rate...");
+  case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
     update_refresh_rate_(context);
     break;
-  }
   case SDL_EVENT_WINDOW_RESIZED:
     bxr_context_set_window_dimensions(event->window.data1, event->window.data2);
     break;
