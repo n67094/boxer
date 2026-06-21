@@ -42,6 +42,7 @@ First clone the repository with:
 
 ```bash
 git clone git@github.com:n67094/boxer.git
+cd boxer
 git submodule update --init --recursive
 ```
 
