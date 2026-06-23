@@ -30,6 +30,7 @@
 #include "bxr_mouse.h"
 #include "bxr_painter.h"
 #include "bxr_pipeline.h"
+#include "bxr_pixel.h"
 #include "bxr_sampler.h"
 #include "bxr_shader.h"
 #include "bxr_sparse_set.h"

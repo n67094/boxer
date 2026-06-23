@@ -10,6 +10,7 @@
 #include "bxr_defs.h"
 #include "bxr_image.h"
 #include "bxr_log.h"
+#include "bxr_pixel.h"
 
 static Uint32 initialized_     = 0;
 static bxr_context_t *context_ = NULL;
@@ -67,13 +68,23 @@ bxr_image_create(const char *path)
   return image;
 }
 
-bxr_image_t
-bxr_image_create_mem(unsigned int width, unsigned int height, void *pixels)
+BXR_API bxr_image_t
+bxr_image_create_mem(
+    int width, int height, bxr_pixel_format_e format, void *pixels, int pitch)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
+  if (pitch == 0) {
+    int bytes_per_pixel = SDL_BYTESPERPIXEL(format);
+    if (bytes_per_pixel == 0) {
+      BXR_LOG_ERROR("Cannot auto-calculate pitch for format %d", format);
+      return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
+    }
+    pitch = (int)width * bytes_per_pixel;
+  }
+
   SDL_Surface *surface = SDL_CreateSurfaceFrom(
-      width, height, context_->pixel_format, pixels, width * 4);
+      width, height, (SDL_PixelFormat)format, pixels, pitch);
 
   if (!surface) {
     BXR_LOG_ERROR("Failed to create surface from memory (error: %s)",
