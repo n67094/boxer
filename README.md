@@ -42,6 +42,7 @@ First clone the repository with:
 
 ```bash
 git clone git@github.com:n67094/boxer.git
+cd boxer
 git submodule update --init --recursive
 ```
 
@@ -51,10 +52,12 @@ Build the library with:
 make
 ```
 
-Install the library at `/usr/lib` by default:
+Install the library at `/usr/lib` by default so make sure to have it in your library path, or specify a custom installation prefix with `PREFIX`:
 
 ```bash
 make install
+or
+make install PREFIX=/custom/prefix
 ```
 
 Uninstall the library with:
