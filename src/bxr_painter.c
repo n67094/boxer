@@ -329,6 +329,9 @@ bxr_painter_draw_textured_rects(int channel,
   SDL_GPDrawTexturedRects(channel, (SDL_GPTexturedRect *)rects, count);
 }
 
+// FIXME use an alias typedef SDL_GPTexturedRect bxr_textured_rect_t; or a
+// memcpy instead of manually copying the fields. This applies to other calls as
+// well.
 void
 bxr_painter_draw_textured_rect(int channel, bxr_textured_rect_t rect)
 {

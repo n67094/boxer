@@ -58,7 +58,8 @@ typedef enum
  * The caller is responsible for destroying the returned pipeline using
  * `bxr_pipeline_destroy` when it is no longer needed.
  */
-bxr_pipeline_t bxr_pipeline_create(bxr_shader_t shader,
+bxr_pipeline_t bxr_pipeline_create(bxr_shader_t shader_vert,
+                                   bxr_shader_t shader_frag,
                                    bxr_primitive_e primitive_type,
                                    bxr_blendmode_e blend_mode);
 

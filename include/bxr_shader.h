@@ -14,6 +14,7 @@
  * fragment shader).
  * - `<format>` is the shader bytecode format (e.g. "spv" for SPIR-V, "msl" for
  * Metal Shading Language, etc.).
+ *
  */
 
 #ifndef BXR_SHADER_H_
@@ -25,6 +26,13 @@
 
 #define BXR_SHADER_INVALID_ID SDL_GP_INVALID_ID
 
+typedef enum
+{
+  BXR_SHADER_STAGE_VERTEX   = SDL_GPU_SHADERSTAGE_VERTEX,
+  BXR_SHADER_STAGE_FRAGMENT = SDL_GPU_SHADERSTAGE_FRAGMENT,
+  BXR_SHADER_STAGE_SIZE     = 2,
+} bxr_shader_stage_e;
+
 typedef struct bxr_shader_s
 {
   size_t id;
@@ -32,19 +40,13 @@ typedef struct bxr_shader_s
 
 typedef struct bxr_shader_desc_s
 {
-  const char *vert_name;
-  const char *vert_entrypoint;
-  Uint32 vert_num_samplers;
-  Uint32 vert_num_storage_textures;
-  Uint32 vert_num_storage_buffers;
-  Uint32 vert_num_uniform_buffers;
-
-  const char *frag_name;
-  const char *frag_entrypoint;
-  Uint32 frag_num_samplers;
-  Uint32 frag_num_storage_textures;
-  Uint32 frag_num_storage_buffers;
-  Uint32 frag_num_uniform_buffers;
+  const char *name;
+  const char *entrypoint;
+  bxr_shader_stage_e stage;
+  Uint32 num_samplers;
+  Uint32 num_storage_textures;
+  Uint32 num_storage_buffers;
+  Uint32 num_uniform_buffers;
 } bxr_shader_desc_t;
 
 /**
@@ -80,6 +82,16 @@ void bxr_shader_teardown(void);
  * `bxr_shader_destroy` when it is no longer needed.
  */
 bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc);
+
+/**
+ * Returns the SDL vertex shader associated with the given boxer shader.
+ */
+SDL_GPUShader *bxr_get_sdl_vertex_shader(bxr_shader_t shader);
+
+/**
+ * Returns the SDL fragment shader associated with the given boxer shader.
+ */
+SDL_GPUShader *bxr_get_sdl_fragment_shader(bxr_shader_t shader);
 
 /**
  * Destroys a shader, freeing any resources associated with it.

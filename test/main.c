@@ -17,6 +17,9 @@ bxr_game_config(void)
   _config.width  = 1280;
   _config.height = 720;
 
+  _config.virtual_width  = 1280;
+  _config.virtual_height = 720;
+
   _config.fullscreen = false;
   _config.resizable  = true;
 

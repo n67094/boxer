@@ -46,7 +46,7 @@ bxr_shader_teardown(void)
 static bxr_shader_bytecode_t_ *
 _be_shader_load_bytecode(SDL_GPUDevice *device,
                          const char *name,
-                         size_t *bytecode_size)
+                         bxr_shader_stage_e stage)
 {
   BXR_ASSERT(device);
   BXR_ASSERT(name);
@@ -57,15 +57,10 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
     return NULL;
   }
 
-  // Determine the shader stage/type based on the file extension
-  SDL_GPUShaderStage stage;
-
   if (SDL_strstr(name, ".vert") != NULL) {
-    stage = SDL_GPU_SHADERSTAGE_VERTEX;
+    BXR_ASSERT(stage == BXR_SHADER_STAGE_VERTEX);
   } else if (SDL_strstr(name, ".frag") != NULL) {
-    stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
-  } else {
-    return NULL;
+    BXR_ASSERT(stage == BXR_SHADER_STAGE_FRAGMENT);
   }
 
   SDL_GPUShaderFormat supported_formats = SDL_GetGPUShaderFormats(device);
@@ -110,51 +105,37 @@ bxr_shader_create(bxr_shader_desc_t *desc)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
-  bxr_shader_bytecode_t_ *vert_bytecode
-      = _be_shader_load_bytecode(context_->gpu_device, desc->vert_name, NULL);
-  if (!vert_bytecode) {
-    return (bxr_shader_t){ .id = BXR_SHADER_INVALID_ID };
-  }
-
-  bxr_shader_bytecode_t_ *frag_bytecode
-      = _be_shader_load_bytecode(context_->gpu_device, desc->frag_name, NULL);
-  if (!frag_bytecode) {
-    BXR_FREE(vert_bytecode->data);
-    BXR_FREE(vert_bytecode);
+  bxr_shader_bytecode_t_ *bytecode
+      = _be_shader_load_bytecode(context_->gpu_device, desc->name, desc->stage);
+  if (!bytecode) {
     return (bxr_shader_t){ .id = BXR_SHADER_INVALID_ID };
   }
 
   SDL_GPShaderDesc shader_desc = {
     // Vertex shader description
-    .vert_code_size            = vert_bytecode->size,
-    .vert_code                 = vert_bytecode->data,
-    .vert_entrypoint           = desc->vert_entrypoint,
-    .vert_format               = vert_bytecode->format,
-    .vert_num_samplers         = desc->vert_num_samplers,
-    .vert_num_storage_textures = desc->vert_num_storage_textures,
-    .vert_num_storage_buffers  = desc->vert_num_storage_buffers,
-    .vert_num_uniform_buffers  = desc->vert_num_uniform_buffers,
-
-    // Fragment shader description
-    .frag_code_size            = frag_bytecode->size,
-    .frag_code                 = frag_bytecode->data,
-    .frag_entrypoint           = desc->frag_entrypoint,
-    .frag_format               = frag_bytecode->format,
-    .frag_num_samplers         = desc->frag_num_samplers,
-    .frag_num_storage_textures = desc->frag_num_storage_textures,
-    .frag_num_storage_buffers  = desc->frag_num_storage_buffers,
-    .frag_num_uniform_buffers  = desc->frag_num_uniform_buffers,
+    .code_size            = bytecode->size,
+    .code                 = bytecode->data,
+    .entrypoint           = desc->entrypoint,
+    .format               = bytecode->format,
+    .stage                = (SDL_GPUShaderStage)desc->stage,
+    .num_samplers         = desc->num_samplers,
+    .num_storage_textures = desc->num_storage_textures,
+    .num_storage_buffers  = desc->num_storage_buffers,
+    .num_uniform_buffers  = desc->num_uniform_buffers,
   };
 
   bxr_shader_t shader = { .id = SDL_GPCreateShader(&shader_desc).id };
 
-  BXR_FREE(vert_bytecode->data);
-  BXR_FREE(vert_bytecode);
-
-  BXR_FREE(frag_bytecode->data);
-  BXR_FREE(frag_bytecode);
+  BXR_FREE(bytecode->data);
+  BXR_FREE(bytecode);
 
   return shader;
+}
+
+SDL_GPUShader *
+bxr_get_sdl_shader(bxr_shader_t shader)
+{
+  return SDL_GPGetGPUShader((SDL_GPShader){ .id = shader.id });
 }
 
 void

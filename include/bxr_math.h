@@ -577,6 +577,8 @@ bxr_rect_contract(bxr_rect_t rect, float amount)
 
 /**
  * ## Textured Rectangle
+ *
+ * TODO: this should be place in painter.h
  */
 
 typedef struct bxr_textured_rect_s
@@ -593,17 +595,22 @@ typedef struct bxr_textured_rect_s
 
 /**
  * ## Region
+ * FIXME: not used anymore ? remove it.
  */
 
+/*
 typedef struct bxr_region_s
 {
   float x0, y0, x1, y1;
 } bxr_region_t;
+*/
 
 /**
  * Construct a region
  */
+/*
 #define bxr_region_create(x0, y0, x1, y1)                                      \
   ((const bxr_region_t){ x0, y0, x1, y1 })
+*/
 
 #endif // BXR_MATH_H_
