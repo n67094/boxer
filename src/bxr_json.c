@@ -142,10 +142,8 @@ top:
   case '"':
     token.type  = BXR_JSON_STRING;
     token.start = ++json->cursor; // Skip opening quote
-    while (0) {                   // Reading string
+    while (1) {                   // Reading string
       if (json->cursor >= json->end) {
-        BXR_LOG_ERROR("Unexpected end of JSON.");
-
         token.type  = BXR_JSON_ERROR;
         token.start = json->cursor;
         token.end   = json->cursor;
@@ -174,6 +172,7 @@ top:
     json->cursor++;
 
     token.depht = json->depth;
+    break;
   case '}':
   case ']':
     token.type = BXR_JSON_END;
@@ -201,6 +200,7 @@ top:
       break;
     }
   default:
+    token.type = BXR_JSON_ERROR;
     BXR_LOG_ERROR("Unexpected character '%c' in JSON. at position %td",
                   *json->cursor,
                   json->cursor - json->data);
@@ -213,19 +213,20 @@ top:
 
 int
 bxr_json_reader_iter_object(bxr_json_reader_t *reader,
-                            bxr_json_token_t *obj,
+                            bxr_json_token_t *token,
                             bxr_json_token_t *key,
                             bxr_json_token_t *value)
 {
   BXR_ASSERT(reader);
-  BXR_ASSERT(obj);
+  BXR_ASSERT(token);
   BXR_ASSERT(key);
   BXR_ASSERT(value);
 
   // Discard remainings token until we are at object depth
-  bxr_json_reader_discard_until_(reader, obj->depht);
+  bxr_json_reader_discard_until_(reader, token->depht);
 
   *key = bxr_json_read_token(reader);
+
   if (key->type == BXR_JSON_END) {
     return 0;
   }
@@ -274,37 +275,39 @@ bxr_json_reader_iter_array(bxr_json_reader_t *reader,
 }
 
 bool
-bxr_json_reader_eq_str(bxr_json_token_t *key, const char *expected)
+bxr_json_reader_eq_str(bxr_json_token_t *value, const char *expected)
 {
-  BXR_ASSERT(key);
+  BXR_ASSERT(value);
   BXR_ASSERT(expected);
 
-  size_t len = key->end - key->start;
-  return SDL_strlen(expected) == len && !BXR_MEMCMP(expected, key->start, len);
+  size_t len = value->end - value->start;
+  return SDL_strlen(expected) == len
+         && !BXR_MEMCMP(expected, value->start, len);
 }
 
 bool
-bxr_json_reader_eq_number(bxr_json_token_t *key, float expected)
+bxr_json_reader_eq_number(bxr_json_token_t *value, float expected)
 {
-  BXR_ASSERT(key->type == BXR_JSON_NUMBER);
+  BXR_ASSERT(value->type == BXR_JSON_NUMBER);
 
-  return bxr_json_read_token_number(key) == expected;
+  return bxr_json_read_token_number(value) == expected;
 }
 
 bool
-bxr_json_reader_eq_bool(bxr_json_token_t *key, bool expected)
+bxr_json_reader_eq_bool(bxr_json_token_t *value, bool expected)
 {
-  BXR_ASSERT(key->type == BXR_JSON_BOOL);
+  BXR_ASSERT(value->type == BXR_JSON_BOOL);
 
-  return bxr_json_read_token_bool(key) == expected;
+  return bxr_json_read_token_bool(value) == expected;
 }
 
-const char *
+char *
 bxr_json_read_token_str(bxr_json_token_t *token)
 {
   BXR_ASSERT(token->type == BXR_JSON_STRING);
 
-  return token->start;
+  int len = token->end - token->start;
+  return SDL_strndup(token->start, len);
 }
 
 float
@@ -312,7 +315,12 @@ bxr_json_read_token_number(bxr_json_token_t *token)
 {
   BXR_ASSERT(token->type == BXR_JSON_NUMBER);
 
-  return (float)SDL_strtod(token->start, NULL);
+  int len         = token->end - token->start;
+  char *number_tr = SDL_strndup(token->start, len);
+  float number    = SDL_strtod(number_tr, NULL);
+  BXR_FREE(number_tr);
+
+  return number;
 }
 
 bool
@@ -320,8 +328,17 @@ bxr_json_read_token_bool(bxr_json_token_t *token)
 {
   BXR_ASSERT(token->type == BXR_JSON_BOOL);
 
-  return SDL_strcmp(token->start, "true") == 0
-         || SDL_strcmp(token->start, "false") == 0;
+  size_t len = token->end - token->start;
+
+  if (memcmp(token->start, "true", len) == 0) {
+    return true;
+  } else if (memcmp(token->start, "false", len) == 0) {
+    return false;
+  } else {
+    BXR_LOG_ERROR(
+        "Invalid boolean value in JSON: %.*s", (int)len, token->start);
+    return false;
+  }
 }
 
 // ----------------------------------------------------------------------------

@@ -22,6 +22,22 @@ bxr_context_get(void)
   return context_;
 }
 
+SDL_GPUDevice *
+bxr_context_get_gpu_device(void)
+{
+  BXR_ASSERT(context_);
+
+  return context_->gpu_device;
+}
+
+SDL_Window *
+bxr_context_get_window(void)
+{
+  BXR_ASSERT(context_);
+
+  return context_->window;
+}
+
 void
 bxr_context_set_window_dimensions(int width, int height)
 {

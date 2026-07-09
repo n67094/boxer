@@ -147,6 +147,8 @@ BXR_UNIT_CASE(case_bxr_json_read)
   Uint8 *read_data;
   size_t read_length;
   read_data = bxr_asset_read("test.json", &read_length);
+  BXR_UNIT_ASSERT(read_data != NULL);
+  BXR_UNIT_ASSERT(read_length > 0);
 
   // Create a reader from the read data
   bxr_json_reader_t *json = bxr_json_create_reader(read_data, read_length);
@@ -157,14 +159,27 @@ BXR_UNIT_CASE(case_bxr_json_read)
 
   bxr_json_token_t token = bxr_json_read_token(json);
 
+  bool find_name       = false;
+  bool find_id         = false;
+  bool find_is_human   = false;
+  bool find_items      = false;
+  bool find_scores     = false;
+  bool find_flags      = false;
+  bool find_mixed      = false;
+  bool find_players    = false;
+  bool find_attributes = false;
+
   bxr_json_token_t key, value;
   while (bxr_json_reader_iter_object(json, &token, &key, &value) == 1) {
     if (bxr_json_reader_eq_str(&key, "name")) {
       BXR_UNIT_ASSERT(bxr_json_reader_eq_str(&value, "nsix"));
+      find_name = true;
     } else if (bxr_json_reader_eq_str(&key, "id")) {
       BXR_UNIT_ASSERT(bxr_json_reader_eq_number(&value, 123));
+      find_id = true;
     } else if (bxr_json_reader_eq_str(&key, "is_human")) {
       BXR_UNIT_ASSERT(bxr_json_reader_eq_str(&value, "false"));
+      find_is_human = true;
     } else if (bxr_json_reader_eq_str(&key, "items")) {
       bxr_json_token_t item;
       int item_index = 0;
@@ -176,6 +191,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
         }
         item_index++;
       }
+      find_items = true;
       BXR_UNIT_ASSERT(item_index == 2);
     } else if (bxr_json_reader_eq_str(&key, "scores")) {
       bxr_json_token_t score;
@@ -190,6 +206,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
         score_index++;
       }
       BXR_UNIT_ASSERT(score_index == 2);
+      find_scores = true;
     } else if (bxr_json_reader_eq_str(&key, "flags")) {
       bxr_json_token_t flag;
       int flag_index = 0;
@@ -201,6 +218,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
           BXR_UNIT_ASSERT(bxr_json_reader_eq_bool(&flag, false));
         }
         flag_index++;
+        find_flags = true;
       }
       BXR_UNIT_ASSERT(flag_index == 2);
     } else if (bxr_json_reader_eq_str(&key, "mixed")) {
@@ -215,6 +233,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
           BXR_UNIT_ASSERT(bxr_json_reader_eq_bool(&mixed_value, true));
         }
         mixed_index++;
+        find_mixed = true;
       }
       BXR_UNIT_ASSERT(mixed_index == 3);
     } else if (bxr_json_reader_eq_str(&key, "players")) {
@@ -244,6 +263,7 @@ BXR_UNIT_CASE(case_bxr_json_read)
         player_index++;
       }
       BXR_UNIT_ASSERT(player_index == 2);
+      find_players = true;
     } else if (bxr_json_reader_eq_str(&key, "attributes")) {
       bxr_json_token_t attr_key, attr_value;
       BXR_UNIT_ASSERT(
@@ -254,10 +274,19 @@ BXR_UNIT_CASE(case_bxr_json_read)
           bxr_json_reader_iter_object(json, &value, &attr_key, &attr_value));
       BXR_UNIT_ASSERT(bxr_json_reader_eq_str(&attr_key, "agility"));
       BXR_UNIT_ASSERT(bxr_json_reader_eq_str(&attr_value, "medium"));
+
+      find_attributes = true;
     }
   }
 
   bxr_json_destroy_reader(json);
+
+  if (!find_name || !find_id || !find_is_human || !find_items || !find_scores
+      || !find_flags || !find_mixed || !find_players || !find_attributes) {
+    BXR_UNIT_ASSERT(false
+                    && "Not all expected keys were found before attributes");
+    return false;
+  }
 
   return true;
 }

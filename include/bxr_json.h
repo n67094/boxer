@@ -21,7 +21,8 @@
 
 typedef enum
 {
-  BXR_JSON_ERROR = 0,
+  BXR_JSON_NONE = 0,
+  BXR_JSON_ERROR,
   BXR_JSON_END,
   BXR_JSON_OBJECT,
   BXR_JSON_ARRAY,
@@ -87,7 +88,7 @@ BXR_API bxr_json_token_t bxr_json_read_token(bxr_json_reader_t *reader);
  *
  * `reader` is the JSON reader to read from.
  *
- * `obj` is the token representing the JSON object to iterate over. This token
+ * `token` is the token representing the JSON object to iterate over. This token
  * should have been returned by a previous call to `bxr_jsonr_read`.
  *
  * `key` is an output parameter to store the token representing the current key
@@ -100,7 +101,7 @@ BXR_API bxr_json_token_t bxr_json_read_token(bxr_json_reader_t *reader);
  * object was reached, or -1 if an error occurred while reading.
  */
 BXR_API int bxr_json_reader_iter_object(bxr_json_reader_t *reader,
-                                        bxr_json_token_t *obj,
+                                        bxr_json_token_t *token,
                                         bxr_json_token_t *key,
                                         bxr_json_token_t *value);
 
@@ -125,29 +126,29 @@ BXR_API int bxr_json_reader_iter_array(bxr_json_reader_t *reader,
 /**
  * Compare a JSON token with an expected string value.
  *
- * `key` is the JSON token to compare. This token should have been returned by a
- * previous call to `bxr_jsonr_read` and should have type `BXR_JSON_STRING`.
+ * `value` is the JSON token to compare. This token should have been returned by
+ * a previous call to `bxr_jsonr_read` and should have type `BXR_JSON_STRING`.
  *
  * `expected` is the expected string value to compare against.
  *
  * `return` true if the JSON token's string value matches the expected string,
  * or false otherwise.
  */
-BXR_API bool bxr_json_reader_eq_str(bxr_json_token_t *key,
+BXR_API bool bxr_json_reader_eq_str(bxr_json_token_t *value,
                                     const char *expected);
 
 /**
  * Compare a JSON token with an expected number value.
  *
- * `key` is the JSON token to compare. This token should have been returned by a
- * previous call to `bxr_jsonr_read` and should have type `BXR_JSON_NUMBER`.
+ * `value` is the JSON token to compare. This token should have been returned by
+ * a previous call to `bxr_jsonr_read` and should have type `BXR_JSON_NUMBER`.
  *
  * `expected` is the expected number value to compare against.
  *
  * `return` true if the JSON token's number value matches the expected number,
  * or false otherwise.
  */
-BXR_API bool bxr_json_reader_eq_number(bxr_json_token_t *key, float expected);
+BXR_API bool bxr_json_reader_eq_number(bxr_json_token_t *value, float expected);
 
 /**
  * Compare a JSON token with an expected boolean value.
@@ -160,7 +161,7 @@ BXR_API bool bxr_json_reader_eq_number(bxr_json_token_t *key, float expected);
  * `return` true if the JSON token's boolean value matches the expected boolean,
  * or false otherwise.
  */
-BXR_API bool bxr_json_reader_eq_bool(bxr_json_token_t *key, bool expected);
+BXR_API bool bxr_json_reader_eq_bool(bxr_json_token_t *value, bool expected);
 
 /**
  * Get the string value of a JSON token.
@@ -170,9 +171,10 @@ BXR_API bool bxr_json_reader_eq_bool(bxr_json_token_t *key, bool expected);
  * type `BXR_JSON_STRING`.
  *
  * `return` a pointer to the string value of the JSON token, or NULL if the
- * token does not have a string value.
+ * token does not have a string value. The caller is responsible for freeing the
+ * returned string using `BXR_FREE` when it is no longer needed.
  */
-BXR_API const char *bxr_json_read_token_str(bxr_json_token_t *token);
+BXR_API char *bxr_json_read_token_str(bxr_json_token_t *token);
 
 /**
  * Get the number value of a JSON token.

@@ -24,7 +24,7 @@
 
 #include "bxr_context.h"
 
-#define BXR_SHADER_INVALID_ID SDL_GP_INVALID_ID
+#define BXR_SHADER_INVALID_ID 0
 
 typedef enum
 {
@@ -86,12 +86,7 @@ bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc);
 /**
  * Returns the SDL vertex shader associated with the given boxer shader.
  */
-SDL_GPUShader *bxr_get_sdl_vertex_shader(bxr_shader_t shader);
-
-/**
- * Returns the SDL fragment shader associated with the given boxer shader.
- */
-SDL_GPUShader *bxr_get_sdl_fragment_shader(bxr_shader_t shader);
+SDL_GPUShader *bxr_get_sdl_shader(bxr_shader_t shader);
 
 /**
  * Destroys a shader, freeing any resources associated with it.

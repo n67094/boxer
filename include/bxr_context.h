@@ -42,6 +42,20 @@ typedef struct bxr_context_s
 BXR_API bxr_context_t *bxr_context_get(void);
 
 /**
+ * Get the GPU device associated with the context.
+ *
+ * `return` Pointer to the SDL_GPUDevice associated with the context.
+ */
+BXR_API SDL_GPUDevice *bxr_context_get_gpu_device(void);
+
+/**
+ * Get the SDL_Window associated with the context.
+ *
+ * `return` Pointer to the SDL_Window associated with the context.
+ */
+BXR_API SDL_Window *bxr_context_get_window(void);
+
+/**
  * Set the window dimensions.
  *
  * `width`  The new width of the window in pixels.

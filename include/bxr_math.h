@@ -4,6 +4,8 @@
  * Copyright (c) 2025 nsix. All rights reserved.
  *
  * # Mathematical and Geometric Utilities
+ *
+ * TODO: add matrix and 3D vector math.
  */
 
 #ifndef BXR_MATH_H_
