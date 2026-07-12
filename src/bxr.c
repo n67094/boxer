@@ -225,48 +225,40 @@ SDL_AppIterate(void *appstate)
     lag_ms = max_lag_ms;
   }
 
-  while (lag_ms >= delta_ms) {
-    // --- Update here (fixed timestep) ---
-
-    bxr_game_update(delta_ms);
-
-    lag_ms -= delta_ms;
-    ++update_count;
-  }
-
-  double alpha_ms = (double)(lag_ms / delta_ms);
-
-  // --- Render here (use alpha_ms for interpolation if needed) ---
-
   // Acquire a command buffer for the current frame
   SDL_GPUCommandBuffer *cmd_buffer
-      = SDL_AcquireGPUCommandBuffer(_gp.desc.gpu_device);
+      = SDL_AcquireGPUCommandBuffer(context->gpu_device);
 
   SDL_GPBegin(context->config.virtual_width, context->config.virtual_height);
   {
-    bxr_game_render(alpha_ms);
+    while (lag_ms >= delta_ms) {
+      // --- Update here (fixed timestep) ---
 
-    SDL_GPUpload(cmd_buffer);
+      bxr_game_update(delta_ms); // this use SDL_GP API
 
+      lag_ms -= delta_ms;
+      ++update_count;
+    }
+
+    double alpha_ms = (double)(lag_ms / delta_ms);
+
+    // --- Render here (use alpha_ms for interpolation if needed) ---
+
+    bxr_game_render(alpha_ms); // this use SDL_GP API
+
+    // Acquire the swapchain texture for the current frame
     SDL_GPUTexture *swapchain_texture = NULL;
 
     SDL_WaitAndAcquireGPUSwapchainTexture(
         cmd_buffer, _gp.desc.window, &swapchain_texture, NULL, NULL);
 
-    SDL_GPUColorTargetInfo color_target_info = {
-      .texture     = swapchain_texture,
-      .clear_color = { 0, 0, 0, 1 },
-      .load_op     = SDL_GPU_LOADOP_CLEAR,
-      .store_op    = SDL_GPU_STOREOP_STORE,
-      .cycle       = false,
-    };
+    if (!swapchain_texture) {
+      BXR_LOG_ERROR("Failed to acquire swapchain texture: %s", SDL_GetError());
+      SDL_CancelGPUCommandBuffer(cmd_buffer);
+      return SDL_APP_FAILURE;
+    }
 
-    SDL_GPURenderPass *render_pass
-        = SDL_BeginGPURenderPass(cmd_buffer, &color_target_info, 1, NULL);
-
-    SDL_GPFlush(render_pass);
-
-    SDL_EndGPURenderPass(render_pass);
+    SDL_GPFlush(cmd_buffer, swapchain_texture);
   }
   SDL_GPEnd();
   SDL_SubmitGPUCommandBuffer(cmd_buffer);
