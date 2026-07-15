@@ -60,7 +60,7 @@
 #define bxr_ultoa SDL_ultoao
 #define bxr_lltoa SDL_llttoa
 #define bxr_ulltoa SDL_ulltoa
-#define bxr_atio SDL_atoi
+#define bxr_atoi SDL_atoi
 #define bxr_atof SDL_atof
 #define bxr_strtol SDL_strtol
 #define bxr_strtoul SDL_strtoul
