@@ -219,7 +219,7 @@ SDL_AppIterate(void *appstate)
 
   // Cap lag to avoid spiral of death (max  5 frames behind)
   double max_lag_ms = delta_ms * 5.0;
-  if (lag_ms > delta_ms * 5.0) {
+  if (lag_ms > max_lag_ms) {
     BXR_LOG_WARN(
         "High lag detected: %.2f ms, capping to %.2f ms", lag_ms, max_lag_ms);
     lag_ms = max_lag_ms;
