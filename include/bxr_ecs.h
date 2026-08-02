@@ -1,7 +1,7 @@
 /**
  * File `bxr_ecs.h`.
  *
- * This ECS is based on "pico_ecs.h" Copyright (c) 2025 James Mclean.
+ * This ECS is derived from "pico_ecs.h" Copyright (c) 2025 James Mclean.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
@@ -61,7 +61,7 @@ BXR_API void bxr_ecs_reset(bxr_ecs_t *ecs);
  */
 
 /**
- * Callback called when a component is created.
+ * Callback called when a component is added.
  *
  * `ecs` is the ECS instance the component belongs to.
  *
@@ -72,13 +72,13 @@ BXR_API void bxr_ecs_reset(bxr_ecs_t *ecs);
  * `args` is the arguments passed to `bxr_ecs_entity_add_component` when adding
  * the component (can be NULL).
  */
-typedef void (*bxr_ecs_component_create_cb)(bxr_ecs_t *ecs,
-                                            bxr_ecs_entity_t entity,
-                                            void *component_ptr,
-                                            void *args);
+typedef void (*bxr_ecs_component_add_cb)(bxr_ecs_t *ecs,
+                                         bxr_ecs_entity_t entity,
+                                         void *component_ptr,
+                                         void *args);
 
 /**
- * Callback called when a component is destroyed.
+ * Callback called when a component is removed.
  *
  * `ecs` is the ECS instance the component belongs to.
  *
@@ -86,9 +86,9 @@ typedef void (*bxr_ecs_component_create_cb)(bxr_ecs_t *ecs,
  *
  * `component_ptr` is a pointer to the component data.
  */
-typedef void (*bxr_ecs_component_destroy_cb)(bxr_ecs_t *ecs,
-                                             bxr_ecs_entity_t entity,
-                                             void *component_ptr);
+typedef void (*bxr_ecs_component_remove_cb)(bxr_ecs_t *ecs,
+                                            bxr_ecs_entity_t entity,
+                                            void *component_ptr);
 
 /**
  * Define a new component type in the ECS instance.
@@ -97,11 +97,11 @@ typedef void (*bxr_ecs_component_destroy_cb)(bxr_ecs_t *ecs,
  *
  * `component_size` is the size of the component data in bytes.
  *
- * `create_cb` called when a component of this type is created. (NULL if no
+ * `add_cb` called when a component of this type is added. (NULL if no
  * callback is needed).
  *
- * `destroy_cb` called when a component of this type is
- * destroyed. (NULL if no callback is needed).
+ * `remove_cb` called when a component of this type is
+ * removed. (NULL if no callback is needed).
  *
  * `return` the ID of the defined component, or an invalid ID if the component
  * could not be defined.
@@ -109,8 +109,8 @@ typedef void (*bxr_ecs_component_destroy_cb)(bxr_ecs_t *ecs,
 BXR_API bxr_ecs_component_t
 bxr_ecs_component_define(bxr_ecs_t *ecs,
                          size_t component_size,
-                         bxr_ecs_component_create_cb create_cb,
-                         bxr_ecs_component_destroy_cb destroy_cb);
+                         bxr_ecs_component_add_cb add_cb,
+                         bxr_ecs_component_remove_cb remove_cb);
 
 /**
  * ECS Entity API

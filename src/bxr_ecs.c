@@ -128,8 +128,8 @@ typedef struct bxr_ecs_component_array_s_
 
 typedef struct bxr_ecs_component_data_s_
 {
-  bxr_ecs_component_create_cb create_cb;
-  bxr_ecs_component_destroy_cb destroy_cb;
+  bxr_ecs_component_add_cb add_cb;
+  bxr_ecs_component_remove_cb remove_cb;
 } bxr_ecs_component_data_t_;
 
 typedef struct bxr_ecs_entity_data_s_
@@ -313,10 +313,10 @@ bxr_ecs_destruct_(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
        component++) {
     if (bxr_ecs_bitset_test_(&entity_data->component_bits, component)) {
       bxr_ecs_component_data_t_ *component_data = &ecs->components[component];
-      if (component_data->destroy_cb) {
+      if (component_data->remove_cb) {
         void *component_ptr
             = bxr_ecs_entity_get_component(ecs, entity, component);
-        component_data->destroy_cb(ecs, entity, component_ptr);
+        component_data->remove_cb(ecs, entity, component_ptr);
       }
     }
   }
@@ -471,8 +471,8 @@ bxr_ecs_reset(bxr_ecs_t *ecs)
 bxr_ecs_component_t
 bxr_ecs_component_define(bxr_ecs_t *ecs,
                          size_t component_size,
-                         bxr_ecs_component_create_cb create_cb,
-                         bxr_ecs_component_destroy_cb destroy_cb)
+                         bxr_ecs_component_add_cb add_cb,
+                         bxr_ecs_component_remove_cb remove_cb)
 {
   BXR_ASSERT(ecs);
   BXR_ASSERT(ecs->component_count < BXR_ECS_MAX_COMPONENT);
@@ -490,8 +490,8 @@ bxr_ecs_component_define(bxr_ecs_t *ecs,
 
   // Set component data for the new component type
   bxr_ecs_component_data_t_ *component_data = &ecs->components[id];
-  component_data->create_cb                 = create_cb;
-  component_data->destroy_cb                = destroy_cb;
+  component_data->add_cb                    = add_cb;
+  component_data->remove_cb                 = remove_cb;
 
   ecs->component_count++;
 
@@ -601,8 +601,8 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
   void *component_ptr = bxr_ecs_entity_get_component(ecs, entity, component);
   BXR_MEMSET(component_ptr, 0, component_array->size);
 
-  if (component_data->create_cb)
-    component_data->create_cb(ecs, entity, component_ptr, args);
+  if (component_data->add_cb)
+    component_data->add_cb(ecs, entity, component_ptr, args);
 
   // Set the entity's component bit
   bxr_ecs_bitset_set_(&entity_data->component_bits, component);
@@ -812,9 +812,9 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
 
   bxr_ecs_component_data_t_ *component_data = &ecs->components[component];
 
-  if (component_data->destroy_cb) {
+  if (component_data->remove_cb) {
     void *component_ptr = bxr_ecs_entity_get_component(ecs, entity, component);
-    component_data->destroy_cb(ecs, entity, component_ptr);
+    component_data->remove_cb(ecs, entity, component_ptr);
   }
 
   // Apply the component bit unset to the entity
