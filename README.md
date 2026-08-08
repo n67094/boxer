@@ -4,9 +4,9 @@
 
 _The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form. The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine's flat design._
 
-# Boxer (Work in Progress)
+# Boxer
 
-A full-featured, lightweight and cross-platform 2D game library written in C.
+A full-featured, lightweight and cross-platform easy to use 2D game library written in C.
 
 Features:
 
@@ -17,15 +17,6 @@ Features:
 - Math utilities for vectors, matrices, and transformations.
 - A 2D stack painter for drawing sprites, shapes, and text with support for custom shaders.
 - An entity-component system (ECS) for flexible game object management.
-
-TODO:
-
-- Immediate mode GUI system
-- Audio support
-- Physics utilities
-- coroutine support
-- Networking utilities
-- and more
 
 ## Prerequisites
 

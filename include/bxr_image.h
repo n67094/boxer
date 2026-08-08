@@ -11,6 +11,8 @@
 #ifndef BXR_IMAGE_H_
 #define BXR_IMAGE_H_
 
+#include <SDL3/SDL.h>
+
 #include "bxr_context.h"
 #include "bxr_defs.h"
 #include "bxr_pixel.h"
