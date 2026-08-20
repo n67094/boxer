@@ -4,7 +4,7 @@
  * Copyright (c) 2026 nsix. All rights reserved.
  *
  * A Data Oriented Design (DOD) multimap implementation in C This hash map is
- * designed to map keys to set of values.
+ * designed to map keys to set of values (Uint32, boxer resource ids).
  */
 
 #ifndef BXR_MULTIMAP_H_
