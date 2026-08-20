@@ -1,5 +1,5 @@
 /**
- * File `bxr_str.h`.
+ * File `bxr_string.h`.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *

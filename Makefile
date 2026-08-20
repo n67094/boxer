@@ -156,7 +156,7 @@ $(DOCS_OUT_DIR)/%.md: $(BOXER_INC_DIR)/%.h | $(DOCS_OUT_DIR)
 	node $(BOXER_DOCS_DIR)/docgen/docgen.js $< -o $@
 
 # --- Test ------------------------------------------------------------------
-tests: $(TEST_TARGET)
+test: $(TEST_TARGET)
 
 $(TEST_TARGET): $(TEST_OBJS) $(STATIC_LIB)
 	$(CC) $(TEST_LDFLAGS) -o $@ $(TEST_OBJS) $(TEST_LDLIBS)
