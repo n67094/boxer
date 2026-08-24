@@ -11,7 +11,7 @@ typedef SDL_TimerCallback bxr_timer_cb_t;
 /**
  * `return` the current value of the timer counter in milliseconds.
  */
-BXR_INLINE uint64_t
+BXR_INLINE Uint64
 bxr_time_get_ticks()
 {
   return SDL_GetTicks();
@@ -26,7 +26,7 @@ bxr_time_get_ticks()
  * callback.
  *
  * ```c
- * uint32_t callback(void *udata, bxr_timer_t timer_id, uint32_t interval);
+ * Uint32 callback(void *udata, bxr_timer_t timer_id, uint32_t interval);
  * ```
  *
  * `interval_ms` the timer delay, in milliseconds, passed to `callback`.
@@ -34,7 +34,7 @@ bxr_time_get_ticks()
  * `udata` a pointer that is passed to `callback`.
  */
 BXR_INLINE bxr_timer_t
-bxr_time_add_timer(uint32_t interval_ms, bxr_timer_cb_t callback, void *udata)
+bxr_time_add_timer(Uint32 interval_ms, bxr_timer_cb_t callback, void *udata)
 {
   return SDL_AddTimer(interval_ms, callback, udata);
 }
@@ -56,7 +56,7 @@ bxr_time_remove_timer(bxr_timer_t timer_id)
  * `ms` the number of milliseconds to delay.
  */
 BXR_INLINE void
-bxr_time_delay(uint32_t ms)
+bxr_time_delay(Uint32 ms)
 {
   SDL_Delay(ms);
 }
