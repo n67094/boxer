@@ -186,6 +186,15 @@ BXR_API const char *bxr_gamepad_serial(int index);
 BXR_API bool bxr_gamepad_held(int index, bxr_gamepad_button_e button);
 
 /**
+ * Check if any gamepad button was just pressed this frame.
+ *
+ * `index` is the index of the gamepad to check.
+ *
+ * `return` true if any button was just pressed this frame, false otherwise.
+ */
+BXR_API bool bxr_gamepad_any_just_pressed(int index);
+
+/**
  * Check if a gamepad button was just pressed this frame.
  *
  * `index` is the index of the gamepad to check.

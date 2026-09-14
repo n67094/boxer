@@ -198,3 +198,19 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
 
   return true;
 }
+
+BXR_API bool
+bxr_asset_delete(const char *path)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
+
+  if (!PHYSFS_delete(path)) {
+    BXR_LOG_ERROR("Failed to delete file: %s (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    return false;
+  }
+
+  return true;
+}

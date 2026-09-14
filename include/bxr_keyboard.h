@@ -229,6 +229,13 @@ BXR_API const char *bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod);
 BXR_API bool bxr_key_held(bxr_key_e key);
 
 /**
+ * Check if any key was just pressed this frame.
+ *
+ * `return` true if any key was just pressed this frame, false otherwise.
+ */
+BXR_API bool bxr_key_any_just_pressed(void);
+
+/**
  * Check if a key was just pressed this frame.
  *
  * `key` is the scancode of the key to check.

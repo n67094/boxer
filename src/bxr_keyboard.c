@@ -17,6 +17,7 @@ typedef struct bxr_key_state_s_
 typedef struct bxr_keyboard_s_
 {
   bxr_key_state_t_ keys[BXR_KEY_SIZE];
+  bool any_just_pressed;
 } bxr_keyboard_t_;
 
 static Uint32 initialized_  = 0;
@@ -34,7 +35,13 @@ bxr_keyboard_begin_frame(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
+  key_.any_just_pressed = false;
+
   for (int i = 0; i < BXR_KEY_SIZE; ++i) {
+    if (key_.keys[i].pending_just_pressed) {
+      key_.any_just_pressed = true;
+    }
+
     key_.keys[i].just_pressed  = key_.keys[i].pending_just_pressed;
     key_.keys[i].just_released = key_.keys[i].pending_just_released;
 
@@ -119,6 +126,14 @@ bxr_key_held(bxr_key_e key)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
   return key_.keys[key].is_down;
+}
+
+bool
+bxr_key_any_just_pressed(void)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  return key_.any_just_pressed;
 }
 
 bool

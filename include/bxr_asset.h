@@ -86,8 +86,8 @@ BXR_API bool bxr_asset_unmount(const char *path);
 /**
  * Check if a file or directory exists at the given path.
  *
- * `path` is the path to the file or directory to check, relative to the data
- * directory.
+ * `path` is the path to the file or directory to check,l relative relative to
+ * the mounted data directories.
  *
  * `return` true if the file or directory exists, false otherwise.
  */
@@ -141,5 +141,21 @@ BXR_API Uint8 *bxr_asset_read(const char *path, size_t *length);
  */
 BXR_API bool
 bxr_asset_write(const char *path, const void *data, size_t length, bool append);
+
+/**
+ * Delete a file at the given path.
+ *
+ * The file will be deleted from those platform `preferred write directory`:
+ *
+ * - **Linux:** `~/.local/share/<config->name>/`
+ * - **Windows:** `C:\Users\<username>\AppData\Roaming\<config->name>\`
+ * - **macOS:** `~/Library/Application Support/<config->name>/`
+ *
+ * `path` is the path to the file to delete, relative to the preferred write
+ * directory.
+ *
+ * `return` true if the delete operation was successful, false otherwise.
+ */
+BXR_API bool bxr_asset_delete(const char *path);
 
 #endif // BXR_ASSET_H_
