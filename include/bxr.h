@@ -13,6 +13,7 @@
 
 #include "bxr_assert.h"
 #include "bxr_asset.h"
+#include "bxr_audio.h"
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_context.h"

@@ -7,6 +7,8 @@
 
 typedef struct SDL_GPPool bxr_pool_t;
 
+#define BXR_POOL_INVALID_SLOT SDL_GP_POOL_INVALID_SLOT
+
 bxr_pool_t *bxr_pool_create(size_t number_of_slots);
 
 void bxr_pool_destroy(bxr_pool_t *pool);

@@ -94,6 +94,18 @@ BXR_API bool bxr_asset_unmount(const char *path);
 BXR_API bool bxr_asset_exists(const char *path);
 
 /**
+ * Check if a file at the given path has the given extension.
+ *
+ * `path` is the path to the file to check, relative to the mounted data
+ * directories.
+ *
+ * `extension` is the extension to check for (e.g. ".png").
+ *
+ * `return` true if the file has the given extension, false otherwise.
+ */
+BXR_API bool bxr_asset_has_extension(const char *path, const char *extension);
+
+/**
  * Check if the given path is a directory.
  *
  * `path` is the path to check, relative to the data directory.

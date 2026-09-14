@@ -170,8 +170,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   bxr_keyboard_setup();
   bxr_mouse_setup();
   bxr_gamepad_setup();
-  bxr_image_setup(context);
   bxr_shader_setup(context);
+  bxr_audio_setup();
 
   // Call user setup
   bxr_game_setup();
@@ -354,6 +354,7 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 
   bxr_game_teardown();
 
+  bxr_audio_teardown();
   bxr_shader_teardown();
   bxr_image_teardown();
   bxr_gamepad_teardown();

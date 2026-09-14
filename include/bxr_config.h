@@ -81,6 +81,11 @@
 #define BXR_PAINTER_MAX_OPTIMIZER_DEPTH 8
 
 /**
+ * ## Audio Configuration
+ */
+#define BXR_AUDIO_MAX 64
+
+/**
  * ## INI Reader/Writer Configuration
  */
 

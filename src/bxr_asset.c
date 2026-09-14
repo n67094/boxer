@@ -102,6 +102,21 @@ bxr_asset_exists(const char *path)
 }
 
 bool
+bxr_asset_has_extension(const char *path, const char *extension)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(path);
+  BXR_ASSERT(extension);
+
+  const char *dot = SDL_strrchr(path, '.');
+  if (!dot || dot == path) {
+    return false;
+  }
+
+  return SDL_strcmp(dot, extension) == 0;
+}
+
+bool
 bxr_asset_is_directory(const char *path)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
