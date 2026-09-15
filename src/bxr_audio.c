@@ -19,13 +19,17 @@ typedef struct bxr_audio_s_
   Uint8 *data;
   Uint32 length;
   Uint32 position;
+  bool playing;
+  float volume;
 
   SDL_AudioSpec spec;
 } bxr_audio_t_;
 
-static bxr_pool_t *pool_;
-static bxr_audio_t_ *audios_;
-static Uint32 initialized_ = 0;
+static Uint32 initialized_       = 0;
+static bxr_pool_t *audio_pool_   = NULL;
+static bxr_audio_t_ *audios_     = NULL;
+static bxr_pool_t *stream_pool_  = NULL;
+static SDL_AudioStream *streams_ = NULL;
 
 /**
  * ## Internal API
@@ -37,9 +41,15 @@ bxr_audio_setup(void)
   BXR_ASSERT(initialized_ == 0);
   initialized_ = BXR_INIT_COOKIE;
 
-  pool_ = bxr_pool_create(BXR_AUDIO_MAX);
+  audio_pool_ = bxr_pool_create(BXR_AUDIO_MAX);
 
   BXR_ALLOC(audios_, sizeof(bxr_audio_t_) * (BXR_AUDIO_MAX));
+}
+
+BXR_API void
+bxr_audio_update(void)
+{
+  //
 }
 
 BXR_API void
@@ -58,9 +68,9 @@ bxr_audio_teardown(void)
     audios_ = NULL;
   }
 
-  if (pool_) {
-    bxr_pool_destroy(pool_);
-    pool_ = NULL;
+  if (audio_pool_) {
+    bxr_pool_destroy(audio_pool_);
+    audio_pool_ = NULL;
   }
 }
 
@@ -152,14 +162,14 @@ bxr_audio_create(const char *path)
     return (bxr_audio_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
-  int slot = bxr_pool_aquire_slot(pool_);
+  int slot = bxr_pool_aquire_slot(audio_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
     return (bxr_audio_t){ .id = SDL_GP_INVALID_ID };
   }
 
   audios_[slot] = *audio;
 
-  return (bxr_audio_t){ .id = bxr_pool_generate_id(pool_, slot) };
+  return (bxr_audio_t){ .id = bxr_pool_generate_id(audio_pool_, slot) };
 }
 
 void
@@ -171,7 +181,7 @@ bxr_audio_destroy(bxr_audio_t audio)
     return;
   }
 
-  int slot = bxr_pool_get_slot_from_id(pool_, audio.id);
+  int slot = bxr_pool_get_slot_from_id(audio_pool_, audio.id);
   if (slot == BXR_POOL_INVALID_SLOT) {
     return;
   }
@@ -179,5 +189,5 @@ bxr_audio_destroy(bxr_audio_t audio)
   BXR_FREE(audios_[slot].data);
   audios_[slot] = (bxr_audio_t_){ 0 };
 
-  bxr_pool_release_slot(pool_, slot);
+  bxr_pool_release_slot(audio_pool_, slot);
 }
