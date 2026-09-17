@@ -400,6 +400,8 @@ bxr_audio_play_(bxr_audio_t audio, float volume, bool auto_play, bool one_shot)
   t->stream       = SDL_CreateAudioStream(&a->spec, &device_spec_);
 
   SDL_ClearAudioStream(t->stream);
+
+  return (bxr_track_t){ .id = bxr_pool_generate_id(track_pool_, slot) };
 }
 
 bxr_track_t
