@@ -4,6 +4,9 @@
 #define ASSET_PATH "assets/"
 
 static bxr_image_t _image;
+static bxr_audio_t _audio;
+
+static bxr_track_t _music;
 
 static bxr_game_config_t _config = { 0 };
 
@@ -30,14 +33,15 @@ bxr_game_setup(void)
 {
   bxr_asset_mount(ASSET_MOUNT);
 
-  // Load an image
   _image = bxr_image_create(ASSET_PATH "images/logo.png");
+  _audio = bxr_audio_create(ASSET_PATH "audio/music.wav");
+
+  _music = bxr_track_play(_audio, true);
 }
 
 void
 bxr_game_update(Uint64 delta_time_ms)
 {
-
   // Update game logic here
 }
 

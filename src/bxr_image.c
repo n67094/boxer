@@ -18,7 +18,6 @@ void
 bxr_image_setup(void)
 {
   BXR_ASSERT(initialized_ == 0);
-
   initialized_ = BXR_INIT_COOKIE;
 }
 
@@ -26,7 +25,6 @@ void
 bxr_image_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
-
   initialized_ = 0;
 }
 

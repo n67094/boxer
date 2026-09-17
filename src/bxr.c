@@ -162,8 +162,6 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     .gpu_device   = context->gpu_device,
   };
 
-  bxr_painter_setup(&painter_desc);
-
   // Setup subsystems
   bxr_log_setup();
   bxr_asset_setup(context);
@@ -172,6 +170,9 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   bxr_gamepad_setup();
   bxr_shader_setup(context);
   bxr_audio_setup();
+  bxr_image_setup();
+
+  bxr_painter_setup(&painter_desc);
 
   // Call user setup
   bxr_game_setup();

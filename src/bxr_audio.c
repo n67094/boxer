@@ -60,22 +60,30 @@ bxr_audio_setup(void)
   }
 
   // Get the audio device format
-  if (SDL_GetAudioDeviceFormat(device_id_, &device_spec_, NULL) != 0) {
+  if (SDL_GetAudioDeviceFormat(device_id_, &device_spec_, NULL) == false) {
     BXR_LOG_ERROR("Failed to get audio device format: %s", SDL_GetError());
     return;
   }
 
   // Audio pool for loaded audio slots
   audio_pool_ = bxr_pool_create(BXR_AUDIO_MAX);
+  if (!audio_pool_) {
+    BXR_LOG_ERROR("Failed to create audio pool");
+    return;
+  }
+
   BXR_ALLOC(audios_, sizeof(bxr_audio_t_) * (BXR_AUDIO_MAX));
   memset(audios_, 0, sizeof(bxr_audio_t_) * (BXR_AUDIO_MAX));
 
   // Create a pool for audio tracks
-  track_pool_ = bxr_pool_create(BXR_AUDIO_MAX_VOICES);
-  BXR_ALLOC(tracks_, sizeof(bxr_track_t_) * BXR_AUDIO_MAX_VOICES);
-  memset(tracks_, 0, sizeof(bxr_track_t_) * BXR_AUDIO_MAX_VOICES);
+  track_pool_ = bxr_pool_create(BXR_AUDIO_MAX_TRACKS);
+  if (!track_pool_) {
+    BXR_LOG_ERROR("Failed to create track pool");
+    return;
+  }
 
-  for (int i = 0; i < BXR_AUDIO_MAX_VOICES; ++i) {
+  BXR_ALLOC(tracks_, sizeof(bxr_track_t_) * BXR_AUDIO_MAX_TRACKS);
+  for (int i = 0; i < BXR_AUDIO_MAX_TRACKS; ++i) {
     tracks_[i].stream     = NULL;
     tracks_[i].audio_slot = -1;
     tracks_[i].volume     = 1.0f;
@@ -97,7 +105,7 @@ bxr_audio_begin_frame(void)
     return;
   }
 
-  for (int i = 0; i < BXR_AUDIO_MAX_VOICES; ++i) {
+  for (int i = 0; i < BXR_AUDIO_MAX_TRACKS; ++i) {
     bxr_track_t_ *track = &tracks_[i];
 
     // Skip tracks that are not playing or have no stream
@@ -105,28 +113,39 @@ bxr_audio_begin_frame(void)
       continue;
     }
 
-    const int target_queue = 8192; // 8192 bytes of audio data in the queue
-    if (SDL_GetAudioStreamQueued(track->stream) < target_queue) {
-      int audio_slot = track->audio_slot;
-      if (audio_slot < 0 || audio_slot >= BXR_AUDIO_MAX) {
-        BXR_LOG_ERROR("Invalid audio slot for track %d", i);
-        continue;
-      }
+    // Get the audio slot for this track
+    int audio_slot = track->audio_slot;
+    if (audio_slot < 0 || audio_slot >= BXR_AUDIO_MAX) {
+      BXR_LOG_ERROR("Invalid audio slot for track %d", i);
+      continue;
+    }
 
-      bxr_audio_t_ *audio = &audios_[audio_slot];
-      if (!audio || !audio->data || audio->length == 0) {
-        BXR_LOG_ERROR("Audio data not available for slot %d", audio_slot);
-        continue;
-      }
+    // Get the audio data for this slot
+    bxr_audio_t_ *audio = &audios_[audio_slot];
+    if (!audio || !audio->data || audio->length == 0) {
+      BXR_LOG_ERROR("Audio data not available for slot %d", audio_slot);
+      continue;
+    }
+
+    // FIXME this calculate is not correct
+    // Calculate the target queue size (in bytes) for this track
+    const size_t target_queue
+        = audio->spec.freq * sizeof(float) / 2; // 0.5 seconds of audio
+    if (SDL_GetAudioStreamQueued(track->stream) < target_queue) {
 
       // Calculate how much data to queue
-      Uint32 remaining  = audio->length - track->position;
-      Uint32 chunk_size = remaining < target_queue ? remaining : target_queue;
+      Uint32 remaining = audio->length - track->position;
+      int chunk_size   = remaining < target_queue ? remaining : target_queue;
+
+      if (chunk_size == 0) {
+        track->position = 0;
+        continue;
+      }
 
       // Queue the audio data to the stream
       if (SDL_PutAudioStreamData(
               track->stream, audio->data + track->position, chunk_size)
-          != 0) {
+          == false) {
         BXR_LOG_ERROR(
             "Failed to queue audio data for track %d: %s", i, SDL_GetError());
         continue;
@@ -162,7 +181,7 @@ bxr_audio_teardown(void)
   }
 
   if (tracks_) {
-    for (int i = 0; i < BXR_AUDIO_MAX_VOICES; ++i) {
+    for (int i = 0; i < BXR_AUDIO_MAX_TRACKS; ++i) {
       if (tracks_[i].stream) {
         SDL_DestroyAudioStream(tracks_[i].stream);
         tracks_[i].stream = NULL;
@@ -258,6 +277,7 @@ bxr_audio_create(const char *path)
 {
   BXR_ASSERT(path);
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(audio_pool_ != NULL);
 
   BXR_LOG_INFO("Loading audio from: %s", path);
 
@@ -308,7 +328,7 @@ bxr_audio_destroy(bxr_audio_t audio)
     return;
   }
 
-  int slot = bxr_pool_get_slot_from_id(audio_pool_, audio.id);
+  int slot = bxr_pool_get_slot_from_id(audio.id);
   if (slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_WARN("Audio slot not found for ID: %u", audio.id);
     return;
@@ -356,6 +376,8 @@ static bxr_track_t
 bxr_audio_play_(bxr_audio_t audio, float volume, bool auto_play, bool one_shot)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(audio_pool_ != NULL);
+  BXR_ASSERT(track_pool_ != NULL);
 
   // Check if the audio device is initialized
   if (device_id_ == 0) {
@@ -370,7 +392,7 @@ bxr_audio_play_(bxr_audio_t audio, float volume, bool auto_play, bool one_shot)
   }
 
   // Get the audio slot from the pool
-  int audio_slot = bxr_pool_get_slot_from_id(audio_pool_, audio.id);
+  int audio_slot = bxr_pool_get_slot_from_id(audio.id);
   if (audio_slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("Audio slot not found for ID: %u", audio.id);
     return (bxr_track_t){ .id = BXR_AUDIO_INVALID_ID };
@@ -399,7 +421,22 @@ bxr_audio_play_(bxr_audio_t audio, float volume, bool auto_play, bool one_shot)
   t->one_shot     = one_shot;
   t->stream       = SDL_CreateAudioStream(&a->spec, &device_spec_);
 
-  SDL_ClearAudioStream(t->stream);
+  if (!t->stream) {
+    BXR_LOG_ERROR("Failed to create audio stream for track: %s",
+                  SDL_GetError());
+    bxr_pool_release_slot(track_pool_, slot);
+    return (bxr_track_t){ .id = BXR_AUDIO_INVALID_ID };
+  }
+
+  if (SDL_BindAudioStream(device_id_, t->stream) == false) {
+    BXR_LOG_ERROR("Failed to bind audio stream to device: %s", SDL_GetError());
+    SDL_DestroyAudioStream(t->stream);
+    t->stream = NULL;
+    bxr_pool_release_slot(track_pool_, slot);
+    return (bxr_track_t){ .id = BXR_AUDIO_INVALID_ID };
+  }
+
+  SDL_SetAudioStreamGain(t->stream, volume);
 
   return (bxr_track_t){ .id = bxr_pool_generate_id(track_pool_, slot) };
 }
@@ -431,7 +468,7 @@ bxr_track_set_volume(bxr_track_t track, float volume)
     return;
   }
 
-  int track_slot = bxr_pool_get_slot_from_id(track_pool_, track.id);
+  int track_slot = bxr_pool_get_slot_from_id(track.id);
   if (track_slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("Track slot not found for ID: %u", track.id);
     return;
@@ -456,7 +493,7 @@ bxr_track_get_volume(bxr_track_t track)
     return 0.0f;
   }
 
-  int track_slot = bxr_pool_get_slot_from_id(track_pool_, track.id);
+  int track_slot = bxr_pool_get_slot_from_id(track.id);
   if (track_slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("Track slot not found for ID: %u", track.id);
     return 0.0f;
@@ -481,7 +518,7 @@ bxr_track_is_paused(bxr_track_t track)
     return false;
   }
 
-  int track_slot = bxr_pool_get_slot_from_id(track_pool_, track.id);
+  int track_slot = bxr_pool_get_slot_from_id(track.id);
   if (track_slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("Track slot not found for ID: %u", track.id);
     return false;
@@ -506,7 +543,7 @@ bxr_track_pause(bxr_track_t track)
     return;
   }
 
-  int track_slot = bxr_pool_get_slot_from_id(track_pool_, track.id);
+  int track_slot = bxr_pool_get_slot_from_id(track.id);
   if (track_slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("Track slot not found for ID: %u", track.id);
     return;
@@ -531,7 +568,7 @@ bxr_track_resume(bxr_track_t track)
     return;
   }
 
-  int track_slot = bxr_pool_get_slot_from_id(track_pool_, track.id);
+  int track_slot = bxr_pool_get_slot_from_id(track.id);
   if (track_slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("Track slot not found for ID: %u", track.id);
     return;
@@ -556,7 +593,7 @@ bxr_track_stop(bxr_track_t track)
     return;
   }
 
-  int track_slot = bxr_pool_get_slot_from_id(track_pool_, track.id);
+  int track_slot = bxr_pool_get_slot_from_id(track.id);
   if (track_slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("Track slot not found for ID: %u", track.id);
     return;
