@@ -83,7 +83,12 @@
 /**
  * ## Audio Configuration
  */
+
 #define BXR_AUDIO_MAX 64
+
+#define BXR_AUDIO_MAX_VOICES 32
+
+#define BXR_AUDIO_STREAM_BUFFER_SIZE 4096
 
 /**
  * ## INI Reader/Writer Configuration

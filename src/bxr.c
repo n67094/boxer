@@ -191,6 +191,7 @@ SDL_AppIterate(void *appstate)
   bxr_keyboard_begin_frame();
   bxr_mouse_begin_frame();
   bxr_gamepad_begin_frame();
+  bxr_audio_begin_frame();
 
   static Uint64 fps            = 0;
   static Uint64 ups            = 0;
