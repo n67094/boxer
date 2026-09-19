@@ -54,54 +54,42 @@ BXR_API void bxr_audio_teardown(void);
  */
 
 BXR_API bxr_audio_t bxr_audio_create(const char *path);
+BXR_API Uint32 bxr_audio_get_length(bxr_audio_t audio); // ms
 BXR_API void bxr_audio_destroy(bxr_audio_t audio);
 
 // Global controls
 BXR_API void bxr_audio_set_global_volume(float volume);
 BXR_API float bxr_audio_get_global_volume(void);
+// TODO pan
+// TODO pitch
 
-// Mixer controls
-BXR_API bxr_track_t bxr_track_play(bxr_audio_t audio, bool auto_play);
-BXR_API void bxr_track_play_once(bxr_audio_t audio, float volume);
+BXR_API void bxr_audio_play_once(bxr_audio_t audio, float volume);
+
+// Track playback
+BXR_API bxr_track_t bxr_track_create(bxr_audio_t audio,
+                                     float volume,
+                                     bool auto_play);
 BXR_API void bxr_track_set_volume(bxr_track_t track, float volume);
 BXR_API float bxr_track_get_volume(bxr_track_t track);
-BXR_API bool bxr_track_is_paused(bxr_track_t track);
+BXR_API void bxr_track_play(bxr_track_t track);
 BXR_API void bxr_track_pause(bxr_track_t track);
-BXR_API void bxr_track_resume(bxr_track_t track);
+BXR_API bool bxr_track_is_paused(bxr_track_t track);
 BXR_API void bxr_track_stop(bxr_track_t track);
-
-/*
-// Controls
-BXR_API void bxr_audio_set_pan(bxr_audio_t audio,
-                               float pan); // -1.0 left to 1.0 right
-BXR_API void bxr_audio_set_loop(bxr_audio_t audio, bool loop);
-BXR_API void bxr_audio_fade_in(bxr_audio_t audio, Uint32 duration_ms);
-BXR_API void bxr_audio_fade_out(bxr_audio_t audio, Uint32 duration_ms);
-
-// Seeking
-BXR_API Uint32 bxr_audio_get_length(bxr_audio_t audio);   // ms
-BXR_API Uint32 bxr_audio_get_position(bxr_audio_t audio); // ms
-BXR_API void bxr_audio_set_position(bxr_audio_t audio, Uint32 position);
+BXR_API Uint32 bxr_track_get_position(bxr_track_t track); // ms
+BXR_API bool bxr_track_set_position(bxr_track_t track, Uint32 position_ms);
+// TODO pan
+// TODO pitch
+// TODO callback for when the track finishes playing
+BXR_API void bxr_track_destroy(bxr_track_t track);
 
 // Groups
-BXR_API bool bxr_audio_group_add(bxr_audio_t audio, const char *group_name);
-BXR_API bool bxr_audio_group_remove(bxr_audio_t audio, const char *group_name);
+BXR_API bool bxr_audio_group_add(const char *group_name, bxr_track_t track);
+BXR_API bool bxr_audio_group_remove(const char *group_name, bxr_track_t track);
 
 // Group playback
-BXR_API void bxr_audio_group_play(const char *group_name);
-BXR_API void bxr_audio_group_stop(const char *group_name);
-BXR_API void bxr_audio_group_pause(const char *group_name);
-BXR_API void bxr_audio_group_resume(const char *group_name);
-BXR_API bool bxr_audio_group_is_playing(const char *group_name);
-BXR_API bool bxr_audio_group_is_paused(const char *group_name);
-
-// Group controls
 BXR_API void bxr_audio_group_set_volume(const char *group_name, float volume);
-BXR_API float bxr_audio_group_get_volume(const char *group_name);
-BXR_API void bxr_audio_group_set_pan(const char *group_name, float pan);
-BXR_API void bxr_audio_group_set_loop(const char *group_name, bool loop);
-BXR_API void bxr_audio_group_fade_in(const char *group_name, float duration);
-BXR_API void bxr_audio_group_fade_out(const char *group_name, float duration);
-*/
+BXR_API void bxr_audio_group_play(const char *group_name);
+BXR_API void bxr_audio_group_pause(const char *group_name);
+BXR_API void bxr_audio_group_stop(const char *group_name);
 
 #endif // BXR_AUDIO_H_

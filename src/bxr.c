@@ -189,11 +189,6 @@ SDL_AppIterate(void *appstate)
     return SDL_APP_FAILURE;
   }
 
-  bxr_keyboard_begin_frame();
-  bxr_mouse_begin_frame();
-  bxr_gamepad_begin_frame();
-  bxr_audio_begin_frame();
-
   static Uint64 fps            = 0;
   static Uint64 ups            = 0;
   static Uint64 frame_count    = 0;
@@ -234,6 +229,11 @@ SDL_AppIterate(void *appstate)
   SDL_GPBegin(context->config.virtual_width, context->config.virtual_height);
   {
     while (lag_ms >= delta_ms) {
+      bxr_mouse_begin_frame();
+      bxr_gamepad_begin_frame();
+      bxr_audio_begin_frame();
+      bxr_keyboard_begin_frame();
+
       // --- Update here (fixed timestep) ---
 
       bxr_game_update(delta_ms); // this use SDL_GP API

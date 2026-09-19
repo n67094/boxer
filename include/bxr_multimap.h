@@ -38,7 +38,7 @@ typedef struct bxr_multimap_s bxr_multimap_t;
 bxr_multimap_t *bxr_multimap_create(size_t initial_size);
 
 /**
- * Push a value to the multimap.
+ * Add a value to the multimap.
  *
  * `map` The multimap to push the value to. Cannot be NULL.
  *
@@ -48,7 +48,7 @@ bxr_multimap_t *bxr_multimap_create(size_t initial_size);
  *
  * `return` true on success, false on failure.
  */
-bool bxr_multimap_push(bxr_multimap_t *map, const char *key, Uint32 value);
+bool bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value);
 
 /**
  * Remove a value from the multimap. All duplicates of the value will be removed

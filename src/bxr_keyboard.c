@@ -11,7 +11,7 @@ typedef struct bxr_key_state_s_
   bool just_released;
   bool pending_just_pressed;
   bool pending_just_released;
-  Uint64 pressed_at[BXR_KEY_SIZE];
+  Uint64 pressed_at;
 } bxr_key_state_t_;
 
 typedef struct bxr_keyboard_s_
@@ -66,7 +66,7 @@ bxr_key_down(bxr_key_e key)
   BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   if (!key_.keys[key].is_down) {
-    key_.keys[key].pressed_at[key]      = SDL_GetTicks();
+    key_.keys[key].pressed_at           = SDL_GetTicks();
     key_.keys[key].pending_just_pressed = true;
   }
 
@@ -83,8 +83,8 @@ bxr_key_up(bxr_key_e key)
     key_.keys[key].pending_just_released = true;
   }
 
-  key_.keys[key].pressed_at[key] = 0;
-  key_.keys[key].is_down         = false;
+  key_.keys[key].pressed_at = 0;
+  key_.keys[key].is_down    = false;
 }
 
 const char *
@@ -161,7 +161,7 @@ bxr_key_held_time(bxr_key_e key)
   BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   if (key_.keys[key].is_down) {
-    return SDL_GetTicks() - key_.keys[key].pressed_at[key];
+    return SDL_GetTicks() - key_.keys[key].pressed_at;
   } else {
     return 0;
   }

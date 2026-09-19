@@ -88,7 +88,9 @@
 
 #define BXR_AUDIO_MAX_TRACKS 32
 
-#define BXR_AUDIO_STREAM_BUFFER_SIZE 8192
+#define BXR_AUDIO_TARGET_LATENCY_MS 50
+
+#define BXR_AUDIO_DEFAULT_GROUP_CAPACITY 8
 
 /**
  * ## INI Reader/Writer Configuration

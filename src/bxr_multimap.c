@@ -182,7 +182,7 @@ bxr_multimap_create(size_t initial_size)
 }
 
 bool
-bxr_multimap_push(bxr_multimap_t *map, const char *key, Uint32 value)
+bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value)
 {
   BXR_ASSERT(map);
 
