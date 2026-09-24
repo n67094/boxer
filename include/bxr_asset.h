@@ -13,7 +13,6 @@
  * 1. The write directory (mounted first by `bxr_asset_setup()`).
  * 2. Mounted directories and archives, in the order they were mounted.
  *
- *
  * Supported archive types:
  *
  *    .ZIP (pkZip/WinZip/Info-ZIP compatible)
