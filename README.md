@@ -6,7 +6,7 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 # Boxer
 
-A full-featured, lightweight and cross-platform easy to use 2D game library written in C.
+A lightweight and cross-platform easy to use 2D game library written in C.
 
 Features:
 
@@ -98,7 +98,7 @@ static bxr_game_config_t _config = { 0 };
 bxr_game_config_t *
 bxr_game_config(void)
 {
-  _config.name  = "application name";
+  _config.name  = "application_name";
   _config.title = "Window Title";
 
   _config.width  = 1280;
@@ -136,6 +136,12 @@ bxr_game_teardown(void)
     // Clean up game state here
 }
 ```
+
+# AI Usage Policy
+
+> The code should stay human-written and the workflow shoulds remain human-driven.
+
+I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md) file for more details on what is allowed and what is not.
 
 # Sponsors
 

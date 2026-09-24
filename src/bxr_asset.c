@@ -15,9 +15,6 @@ bxr_asset_setup(bxr_context_t *context)
   BXR_ASSERT(initialized_ == 0);
   BXR_ASSERT(context != NULL);
 
-  initialized_ = BXR_INIT_COOKIE;
-  context_     = context;
-
   if (!PHYSFS_init(NULL)) {
     BXR_LOG_ERROR("Failed to init PhysFS (error: %s)",
                   PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -32,6 +29,12 @@ bxr_asset_setup(bxr_context_t *context)
   //
   const char *write_dir
       = PHYSFS_getPrefDir(BXR_ORGANIZATION_NAME, context->config.name);
+  if (!write_dir) {
+    BXR_LOG_ERROR("Failed to get write dir: (error: %s)",
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    return;
+  }
+
   if (!PHYSFS_setWriteDir(write_dir)) {
     BXR_LOG_ERROR("Failed to set write dir to %s: (error: %s)",
                   write_dir,
@@ -48,6 +51,9 @@ bxr_asset_setup(bxr_context_t *context)
   }
 
   BXR_LOG_INFO("Write directory: %s", write_dir);
+
+  initialized_ = BXR_INIT_COOKIE;
+  context_     = context;
 }
 
 void
@@ -104,16 +110,18 @@ bxr_asset_exists(const char *path)
 bool
 bxr_asset_has_extension(const char *path, const char *extension)
 {
-  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(path);
   BXR_ASSERT(extension);
 
-  const char *dot = SDL_strrchr(path, '.');
-  if (!dot || dot == path) {
+  const char *name = SDL_strrchr(path, '/');
+  name             = name ? name + 1 : path;
+
+  const char *dot = SDL_strrchr(name, '.');
+  if (!dot || dot == name) {
     return false;
   }
 
-  return SDL_strcmp(dot, extension) == 0;
+  return SDL_strcasecmp(dot, extension) == 0;
 }
 
 bool
@@ -123,8 +131,8 @@ bxr_asset_is_directory(const char *path)
   BXR_ASSERT(path);
 
   PHYSFS_Stat statbuf = { 0 };
-  if (!PHYSFS_stat(path, &statbuf)) {
-    return (statbuf.filetype == PHYSFS_FILETYPE_SYMLINK);
+  if (PHYSFS_stat(path, &statbuf)) {
+    return (statbuf.filetype == PHYSFS_FILETYPE_DIRECTORY);
   }
 
   return false;
@@ -137,7 +145,7 @@ bxr_asset_read(const char *path, size_t *length)
   BXR_ASSERT(path);
 
   if (!PHYSFS_exists(path)) {
-    BXR_LOG_ERROR("File not found: %s", path);
+    BXR_LOG_WARN("File not found: %s", path);
     return NULL;
   }
 
@@ -149,30 +157,45 @@ bxr_asset_read(const char *path, size_t *length)
     return NULL;
   }
 
-  size_t len = PHYSFS_fileLength(file);
-
-  if (length) {
-    *length = len;
-  }
-
-  if (len == 0) {
-    BXR_LOG_ERROR("Reading an empty file: %s", path);
+  Sint64 len = PHYSFS_fileLength(file);
+  if (len <= 0) {
+    BXR_LOG_WARN("Empty file: %s", path);
+    PHYSFS_close(file);
+    if (length) {
+      *length = 0;
+    }
     return NULL;
   }
 
   Uint8 *buffer = NULL;
   BXR_ALLOC(buffer, len);
+  if (!buffer) {
+    BXR_LOG_ERROR("Failed to allocate memory for file: %s", path);
+    PHYSFS_close(file);
+    return NULL;
+  }
 
   Sint64 read_size = PHYSFS_readBytes(file, buffer, len);
   if (read_size != len) {
     BXR_LOG_ERROR("Failed to read file: %s (error: %s)",
                   path,
                   PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    BXR_FREE(buffer);
     PHYSFS_close(file);
     return NULL;
   }
 
-  PHYSFS_close(file);
+  if (!PHYSFS_close(file)) {
+    BXR_LOG_ERROR("Failed to close file: %s (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    BXR_FREE(buffer);
+    return NULL;
+  }
+
+  if (length) {
+    *length = (size_t)len;
+  }
 
   return buffer;
 }
@@ -182,6 +205,10 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(path);
+
+  if (!data || length == 0) {
+    return false;
+  }
 
   PHYSFS_File *file = NULL;
   if (append) {
@@ -197,10 +224,6 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
     return false;
   }
 
-  if (!data || length == 0) {
-    return true;
-  }
-
   if (PHYSFS_writeBytes(file, data, length) != (Sint64)length) {
     BXR_LOG_ERROR("Failed to write to file: %s (error: %s)",
                   path,
@@ -209,12 +232,17 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
     return false;
   }
 
-  PHYSFS_close(file);
+  if (!PHYSFS_close(file)) {
+    BXR_LOG_ERROR("Failed to close file: %s (error: %s)",
+                  path,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    return false;
+  }
 
   return true;
 }
 
-BXR_API bool
+bool
 bxr_asset_delete(const char *path)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
