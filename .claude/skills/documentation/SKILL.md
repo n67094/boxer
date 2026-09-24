@@ -33,8 +33,7 @@ Callers of boxer should be able to use any public function correctly by reading 
 2. Read implementation
 3. Prepare a branch named `doc-<file>` to merge into the current branch.
 4. Write the documentation
-5. Verify, run make that the project still run.
-6. Commit and ask validation by the user.
+5. Commit and ask validation by the user.
 
 ## 4. Rules
 
