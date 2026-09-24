@@ -4,7 +4,7 @@ Generative AI, including large language models (LLMs), should only be used for:
 
 - Code exploration
 - Code review suggestions
-- Header file documentation generation (I'm dislexic, so I need help with this)
+- Header file documentation generation (I'm dislexic, so I need help with this, but I first write myself and then ask for help to improve it)
 
 But never for:
 

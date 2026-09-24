@@ -160,6 +160,10 @@ bxr_asset_read(const char *path, size_t *length)
   Sint64 len = PHYSFS_fileLength(file);
   if (len <= 0) {
     BXR_LOG_WARN("Empty file: %s", path);
+    PHYSFS_close(file);
+    if (length) {
+      *length = 0;
+    }
     return NULL;
   }
 
@@ -202,6 +206,10 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(path);
 
+  if (!data || length == 0) {
+    return false;
+  }
+
   PHYSFS_File *file = NULL;
   if (append) {
     file = PHYSFS_openAppend(path);
@@ -213,11 +221,6 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append)
     BXR_LOG_ERROR("Failed to open file for writing: %s (error: %s)",
                   path,
                   PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-    PHYSFS_close(file);
-    return false;
-  }
-
-  if (!data || length == 0) {
     return false;
   }
 
