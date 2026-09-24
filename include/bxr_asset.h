@@ -3,16 +3,17 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Asset Management
+ * Virtual file system for reading game assets and writing user data.
  *
- * The asset system provides an interface for loading and managing game assets
- * such as images, sounds, and other data files. It uses a virtual file system
- * to allow mounting directories and archives (e.g. zip files).
+ * Built on PhysicsFS. Directories and archives are mounted into a single
+ * read-only search path, and one write directory.
  *
- * The asset system is built on top of the PhysicsFS library, which provides an
- * abstraction layer for file I/O and supports various archive formats:
+ * Lookup order when a path exists in several places:
  *
- * Currently supported archive types:
+ * 1. The write directory (mounted first by `bxr_asset_setup()`).
+ * 2. Mounted directories and archives, in the order they were mounted.
+ *
+ * Supported archive types:
  *
  *    .ZIP (pkZip/WinZip/Info-ZIP compatible)
  *    .7Z (7zip archives)
@@ -42,15 +43,12 @@
  */
 
 /**
- * Initialize the asset subsystem. Must be called before using any other asset
- * functions.
- *
- * `context` is the bxr context to use for asset operations.
+ * Initialize the asset subsystem.
  */
 BXR_API void bxr_asset_setup(bxr_context_t *context);
 
 /**
- * Tears down the asset subsystem.
+ * Shut down the asset subsystem and unmount everything.
  */
 BXR_API void bxr_asset_teardown(void);
 
@@ -59,114 +57,121 @@ BXR_API void bxr_asset_teardown(void);
  */
 
 /**
- * Mount a directory or archive (e.g. zip file) to the virtual file system.
+ * Add a directory or archive to the end of the read search path.
  *
- * If this is a duplicate, the entry is not added again, even though the
- * function succeeds.
+ * Its content is mounted at the root of the virtual file system and merged with
+ * what is already mounted. When a file exists in several places, the write
+ * directory wins, then the earliest mounted entry.
  *
- * If two archive are mounted with the same path they are merged together, if
- * there is a conflict file of the first mounted archive will be used.
+ * Mounting an already mounted path does nothing and succeeds.
  *
- * `path` directory or archive to mount (in platform-dependent
- * notation).
+ * `path` directory or archive to mount, in platform-dependent notation. Must
+ * not be NULL.
  *
- * `return` true if the mount operation was successful, false otherwise.
+ * `return` true on success, false on failure.
  */
 BXR_API bool bxr_asset_mount(const char *path);
 
 /**
- * Unmount a directory or archive from the virtual file system.
+ * Remove a directory or archive from the read search path.
  *
- * `path` directory or archive to unmount (in platform-dependent notation).
+ * `path` directory or archive to unmount, exactly as given to
+ * `bxr_asset_mount()`. Must not be NULL.
  *
- * `return` true if the unmount operation was successful, false otherwise.
+ * `return` true on success, false if it was not mounted or is still in use.
  */
 BXR_API bool bxr_asset_unmount(const char *path);
 
 /**
- * Check if a file or directory exists at the given path.
+ * Check if a file or directory exists in the virtual file system.
  *
- * `path` is the path to the file or directory to check,l relative relative to
- * the mounted data directories.
+ * Searches the write directory and every mounted directory and archive.
  *
- * `return` true if the file or directory exists, false otherwise.
+ * `path` virtual path to check. Must not be NULL.
+ *
+ * `return` true if it exists, false otherwise.
  */
 BXR_API bool bxr_asset_exists(const char *path);
 
 /**
- * Check if a file at the given path has the given extension.
+ * Check if a path ends with the given extension.
  *
- * `path` is the path to the file to check, relative to the mounted data
- * directories.
+ * Pure string check, the file does not need to exist and the asset subsystem
+ * does not need to be initialized.
  *
- * `extension` is the extension to check for (e.g. ".png").
+ * Comparison is case-insensitive and only looks at the last extension of the
+ * file name (`a.tar.gz` has `.gz`). A file name starting with a dot and no
+ * other dot (`.hidden`) has no extension.
  *
- * `return` true if the file has the given extension, false otherwise.
+ * `path` path to check. Must not be NULL.
+ * `extension` extension including the leading dot (e.g. ".png"). Must not be
+ * NULL.
+ *
+ * `return` true if the extension matches, false otherwise.
  */
 BXR_API bool bxr_asset_has_extension(const char *path, const char *extension);
 
 /**
- * Check if the given path is a directory.
+ * Check if a path in the virtual file system is a directory.
  *
- * `path` is the path to check, relative to the data directory.
+ * `path` virtual path to check. Must not be NULL.
  *
- * `return` true if the path is a directory, false otherwise.
+ * `return` true if it is a directory, false if it is not or does not exist.
  */
 BXR_API bool bxr_asset_is_directory(const char *path);
 
 /**
- * Read a file from the given path and return its contents.
+ * Read a whole file from the virtual file system into memory.
  *
- * `path` is the path to the file to read, relative to the mounted data
- * directories.
+ * The returned buffer is not NUL-terminated; do not use it as a C string
+ * without copying it.
  *
- * `length` is an optional output parameter to store the length of the returned
- * data.
+ * `path` virtual path of the file to read. Must not be NULL.
+ * `length` receives the size of the returned data in bytes. May be NULL. Left
+ * untouched on failure.
  *
- * `return` the contents of the file or NULL if an error occurred.
+ * `return` the file contents, or NULL if the file does not exist, is empty, or
+ * cannot be read.
  *
- * The caller is responsible for freeing the returned data using `SDL_free` when
- * it is no longer needed.
+ * **Note**: the caller must free the result with `BXR_FREE()`.
  */
 BXR_API Uint8 *bxr_asset_read(const char *path, size_t *length);
 
 /**
- * Write data to a file at the given path.
+ * Write data to a file in the write directory.
  *
- * The file will be written to those platform `preferred write directory`:
+ * The write directory is the platform user data directory:
  *
- * - **Linux:** `~/.local/share/<config->name>/`
- * - **Windows:** `C:\Users\<username>\AppData\Roaming\<config->name>\`
- * - **macOS:** `~/Library/Application Support/<config->name>/`
+ * - **Linux:** `~/.local/share/<config.name>/`
+ * - **Windows:** `C:\Users\<username>\AppData\Roaming\boxer\<config.name>\`
+ * - **macOS:** `~/Library/Application Support/<config.name>/`
  *
- * `path` is the path to the file to write, relative to the preferred write
- * directory.
+ * The file is created if needed, but parent directories must already exist.
  *
- * `data` is a pointer to the data to write.
+ * Since the write directory has the highest lookup priority, the written file
+ * hides any mounted file with the same path.
  *
- * `length` is the length of the data in bytes.
+ * `path` virtual path of the file, relative to the write directory. Must not be
+ * NULL.
+ * `data` bytes to write. Must not be NULL.
+ * `length` number of bytes to write. Must be greater than 0.
+ * `append` true to append to the end of the file, false to truncate it first.
  *
- * `append` is a boolean flag indicating whether to append to the file (if true)
- * or overwrite it (if false).
- *
- * `return` true if the write operation was successful, false otherwise.
+ * `return` true on success, false on failure
  */
 BXR_API bool
 bxr_asset_write(const char *path, const void *data, size_t length, bool append);
 
 /**
- * Delete a file at the given path.
+ * Delete a file or an empty directory from the write directory.
  *
- * The file will be deleted from those platform `preferred write directory`:
+ * See `bxr_asset_write()` for the write directory location. Mounted
+ * directories and archives are never modified.
  *
- * - **Linux:** `~/.local/share/<config->name>/`
- * - **Windows:** `C:\Users\<username>\AppData\Roaming\<config->name>\`
- * - **macOS:** `~/Library/Application Support/<config->name>/`
+ * `path` virtual path to delete, relative to the write directory. Must not be
+ * NULL.
  *
- * `path` is the path to the file to delete, relative to the preferred write
- * directory.
- *
- * `return` true if the delete operation was successful, false otherwise.
+ * `return` true on success, false on failure.
  */
 BXR_API bool bxr_asset_delete(const char *path);
 
