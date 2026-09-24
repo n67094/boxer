@@ -125,7 +125,7 @@ BXR_API bool bxr_asset_is_directory(const char *path);
  *
  * `return` the contents of the file or NULL if an error occurred.
  *
- * The caller is responsible for freeing the returned data using `SDL_free` when
+ * The caller is responsible for freeing the returned data using `BXR_FREE` when
  * it is no longer needed.
  */
 BXR_API Uint8 *bxr_asset_read(const char *path, size_t *length);
