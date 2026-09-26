@@ -36,14 +36,14 @@ bxr_image_create(const char *path)
 
   BXR_LOG_INFO("Loading image from: %s", path);
 
-  if (!bxr_asset_has_extension(path, ".png")
-      && !bxr_asset_has_extension(path, ".bmp")) {
-    BXR_LOG_ERROR("Unsupported image format: %s", path);
+  if (!bxr_asset_exists(path)) {
+    BXR_LOG_ERROR("File not found: %s", path);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
-  if (!bxr_asset_exists(path)) {
-    BXR_LOG_ERROR("File not found: %s", path);
+  if (!bxr_asset_has_extension(path, ".png")
+      && !bxr_asset_has_extension(path, ".bmp")) {
+    BXR_LOG_ERROR("Unsupported image format: %s", path);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 

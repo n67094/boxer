@@ -260,6 +260,7 @@ bool
 bxr_multimap_remove_value(bxr_multimap_t *map, const char *key, Uint32 value)
 {
   BXR_ASSERT(map);
+  BXR_ASSERT(key);
 
   if (map->count == 0 || map->size == 0) {
     return false;

@@ -84,13 +84,26 @@
  * ## Audio Configuration
  */
 
+/**
+ * Max number of audio that can be loaded at the same time
+ */
 #define BXR_AUDIO_MAX 32
 
+/**
+ * Max number of audio tracks that can be played at the same time
+ */
 #define BXR_AUDIO_MAX_TRACKS 32
 
-#define BXR_AUDIO_TARGET_LATENCY_MS 50
+/**
+ * Max number of tags that can be associated with an audio track
+ */
+#define BXR_AUDIO_MAX_TAGS 8
 
-#define BXR_AUDIO_DEFAULT_GROUP_CAPACITY 8
+/**
+ * Target audio latency in milliseconds. Amount of time loaded per voice in the
+ * audio buffer.
+ */
+#define BXR_AUDIO_TARGET_LATENCY_MS 50
 
 /**
  * ## INI Reader/Writer Configuration

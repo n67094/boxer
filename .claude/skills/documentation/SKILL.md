@@ -1,5 +1,5 @@
 ---
-name: documentation
+name: bxr-documentation
 description: Code documentation for boxer (C99/SDL3 game library)
 argument-hint: [header.h]
 arguments: [header]
@@ -7,10 +7,6 @@ disable-model-invocation: true
 context: fork
 allowed-tools: Bash(gh:*), Read, Grep, Glob
 ---
-
-# SKILL.md: documentation
-
-Add or improve doc comments for every public function declared in one boxer header.
 
 ## 1. Input
 

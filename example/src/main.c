@@ -6,7 +6,7 @@
 static bxr_image_t _image;
 static bxr_audio_t _audio;
 
-static bxr_track_t _music;
+static bxr_voice_t _music;
 
 static bxr_game_config_t _config = { 0 };
 
@@ -36,49 +36,49 @@ bxr_game_setup(void)
   _image = bxr_image_create(ASSET_PATH "images/logo.png");
   _audio = bxr_audio_create(ASSET_PATH "audio/music.wav");
 
-  _music = bxr_track_create(_audio, 1.0f, true);
+  _music = bxr_voice_create(_audio, 1.0f, true);
 }
 
 void
 bxr_game_update(Uint64 delta_time_ms)
 {
-  BXR_LOG_INFO("Use Space to pause/resume the music track");
-  BXR_LOG_INFO("Use Left to decrease the volume of the music track");
-  BXR_LOG_INFO("Use Right to increase the volume of the music track");
+  BXR_LOG_INFO("Use Space to pause/resume the music voice");
+  BXR_LOG_INFO("Use Left to decrease the volume of the music voice");
+  BXR_LOG_INFO("Use Right to increase the volume of the music voice");
   BXR_LOG_INFO("--- Track Information -----------------------------");
   BXR_LOG_INFO("Length: %u s", bxr_audio_get_length(_audio) / 1000);
-  BXR_LOG_INFO("Position: %u ms", bxr_track_get_position(_music));
-  BXR_LOG_INFO("Volume: %f", bxr_track_get_volume(_music));
+  BXR_LOG_INFO("Position: %u ms", bxr_voice_get_position(_music));
+  BXR_LOG_INFO("Volume: %f", bxr_voice_get_volume(_music));
   BXR_LOG_INFO("Status : %s",
-               bxr_track_is_paused(_music) ? "PAUSED" : "PLAYING");
+               bxr_voice_is_paused(_music) ? "PAUSED" : "PLAYING");
 
   if (bxr_key_just_pressed(BXR_KEY_SPACE)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_SOUTH)) {
-    if (bxr_track_is_paused(_music)) {
-      bxr_track_play(_music);
+    if (bxr_voice_is_paused(_music)) {
+      bxr_voice_play(_music);
     } else {
-      bxr_track_pause(_music);
+      bxr_voice_pause(_music);
     }
   }
 
   if (bxr_key_just_pressed(BXR_KEY_LEFT)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_LEFT)) {
-    float volume = bxr_track_get_volume(_music);
+    float volume = bxr_voice_get_volume(_music);
     volume -= 0.1f;
     if (volume < 0.0f) {
       volume = 0.0f;
     }
-    bxr_track_set_volume(_music, volume);
+    bxr_voice_set_volume(_music, volume);
   }
 
   if (bxr_key_just_pressed(BXR_KEY_RIGHT)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_RIGHT)) {
-    float volume = bxr_track_get_volume(_music);
+    float volume = bxr_voice_get_volume(_music);
     volume += 0.1f;
     if (volume > 1.0f) {
       volume = 1.0f;
     }
-    bxr_track_set_volume(_music, volume);
+    bxr_voice_set_volume(_music, volume);
   }
 }
 
@@ -122,7 +122,7 @@ bxr_game_teardown(void)
 {
   bxr_asset_unmount(ASSET_MOUNT);
 
-  bxr_track_destroy(_music);
+  bxr_voice_destroy(_music);
 
   bxr_audio_destroy(_audio);
 

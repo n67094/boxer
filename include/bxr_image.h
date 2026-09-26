@@ -31,12 +31,12 @@ typedef struct bxr_image_s
  * Initialize the image subsystem. Must be called before using any other image
  * functions.
  */
-BXR_API void bxr_image_setup(void);
+void bxr_image_setup(void);
 
 /**
  * Tears down the image subsystem.
  */
-BXR_API void bxr_image_teardown(void);
+void bxr_image_teardown(void);
 
 /**
  * ## Public API

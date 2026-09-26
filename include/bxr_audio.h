@@ -2,8 +2,6 @@
  * @file bxr_audio.h
  *
  * @copyright Copyright (c) 2026 nsix. All rights reserved.
- *
- * TODO rename group to tag ?
  */
 
 #ifndef BXR_AUDIO_H_
@@ -38,25 +36,25 @@ typedef struct bxr_audio_s
 
 #define BXR_TRACK_INVALID_ID 0
 
-typedef struct bxr_track_s
+typedef struct bxr_voice_s
 {
   Uint32 id;
-} bxr_track_t;
+} bxr_voice_t;
 
 /**
  * ## Internal API
  */
 
-BXR_API void bxr_audio_setup(void);
-BXR_API void bxr_audio_begin_frame(void);
-BXR_API void bxr_audio_teardown(void);
+void bxr_audio_setup(void);
+void bxr_audio_begin_frame(void);
+void bxr_audio_teardown(void);
 
 /**
  * ## Public API
  */
 
 BXR_API bxr_audio_t bxr_audio_create(const char *path);
-BXR_API Uint32 bxr_audio_get_length(bxr_audio_t audio); // ms
+BXR_API Uint64 bxr_audio_get_length(bxr_audio_t audio); // ms
 BXR_API void bxr_audio_destroy(bxr_audio_t audio);
 
 // Global controls
@@ -68,30 +66,30 @@ BXR_API float bxr_audio_get_global_volume(void);
 BXR_API void bxr_audio_play_once(bxr_audio_t audio, float volume);
 
 // Track playback
-BXR_API bxr_track_t bxr_track_create(bxr_audio_t audio,
+BXR_API bxr_voice_t bxr_voice_create(bxr_audio_t audio,
                                      float volume,
                                      bool auto_play);
-BXR_API void bxr_track_set_volume(bxr_track_t track, float volume);
-BXR_API float bxr_track_get_volume(bxr_track_t track);
-BXR_API void bxr_track_play(bxr_track_t track);
-BXR_API void bxr_track_pause(bxr_track_t track);
-BXR_API bool bxr_track_is_paused(bxr_track_t track);
-BXR_API void bxr_track_stop(bxr_track_t track);
-BXR_API Uint32 bxr_track_get_position(bxr_track_t track); // ms
-BXR_API bool bxr_track_set_position(bxr_track_t track, Uint32 position_ms);
+BXR_API void bxr_voice_set_volume(bxr_voice_t voice, float volume);
+BXR_API float bxr_voice_get_volume(bxr_voice_t voice);
+BXR_API void bxr_voice_play(bxr_voice_t voice);
+BXR_API void bxr_voice_pause(bxr_voice_t voice);
+BXR_API bool bxr_voice_is_paused(bxr_voice_t voice);
+BXR_API void bxr_voice_stop(bxr_voice_t voice);
+BXR_API Uint64 bxr_voice_get_position(bxr_voice_t voice); // ms
+BXR_API bool bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms);
 // TODO pan
 // TODO pitch
-// TODO callback for when the track finishes playing
-BXR_API void bxr_track_destroy(bxr_track_t track);
+// TODO callback for when the voice finishes playing
+BXR_API void bxr_voice_destroy(bxr_voice_t voice);
 
-// Groups
-BXR_API bool bxr_audio_group_add(const char *group_name, bxr_track_t track);
-BXR_API bool bxr_audio_group_remove(const char *group_name, bxr_track_t track);
+// Tags
+BXR_API bool bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice);
+BXR_API bool bxr_audio_tag_remove(const char *tag_name, bxr_voice_t voice);
 
 // Group playback
-BXR_API void bxr_audio_group_set_volume(const char *group_name, float volume);
-BXR_API void bxr_audio_group_play(const char *group_name);
-BXR_API void bxr_audio_group_pause(const char *group_name);
-BXR_API void bxr_audio_group_stop(const char *group_name);
+BXR_API void bxr_audio_tag_set_volume(const char *tag_name, float volume);
+BXR_API void bxr_audio_tag_play(const char *tag_name);
+BXR_API void bxr_audio_tag_pause(const char *tag_name);
+BXR_API void bxr_audio_tag_stop(const char *tag_name);
 
 #endif // BXR_AUDIO_H_

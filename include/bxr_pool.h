@@ -22,6 +22,8 @@ void bxr_pool_release_slot(bxr_pool_t *pool, size_t slot_index);
 
 Uint32 bxr_pool_generate_id(bxr_pool_t *pool, size_t slot_index);
 
-int bxr_pool_get_slot_from_id(Uint32 id);
+bool bxr_pool_is_valid_id(bxr_pool_t *pool, Uint32 id);
+
+int bxr_pool_get_slot_from_id(bxr_pool_t *pool, Uint32 id);
 
 #endif // BXR_POOL_H_

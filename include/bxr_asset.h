@@ -45,12 +45,12 @@
 /**
  * Initialize the asset subsystem.
  */
-BXR_API void bxr_asset_setup(bxr_context_t *context);
+void bxr_asset_setup(bxr_context_t *context);
 
 /**
  * Shut down the asset subsystem and unmount everything.
  */
-BXR_API void bxr_asset_teardown(void);
+void bxr_asset_teardown(void);
 
 /**
  * ## Public API

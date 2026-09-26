@@ -81,18 +81,18 @@ void bxr_shader_teardown(void);
  * The caller is responsible for destroying the returned shader using
  * `bxr_shader_destroy` when it is no longer needed.
  */
-bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc);
+BXR_API bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc);
 
 /**
  * Returns the SDL vertex shader associated with the given boxer shader.
  */
-SDL_GPUShader *bxr_get_sdl_shader(bxr_shader_t shader);
+BXR_API SDL_GPUShader *bxr_get_sdl_shader(bxr_shader_t shader);
 
 /**
  * Destroys a shader, freeing any resources associated with it.
  *
  * `shader` is the shader to destroy.
  */
-void bxr_shader_destroy(bxr_shader_t shader);
+BXR_API void bxr_shader_destroy(bxr_shader_t shader);
 
 #endif // BXR_SHADER_H_

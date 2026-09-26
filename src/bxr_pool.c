@@ -10,6 +10,12 @@ bxr_pool_create(size_t number_of_slots)
   }
 
   p->pool = SDL_GPCreatePool(number_of_slots);
+  if (!p->pool) {
+    BXR_LOG_ERROR("Failed to create pool with %zu slots", number_of_slots);
+    BXR_FREE(p);
+    return NULL;
+  }
+
   return p;
 }
 
@@ -48,11 +54,17 @@ bxr_pool_generate_id(bxr_pool_t *pool, size_t slot_index)
   if (!pool) {
     return 0;
   }
-  return SDL_GPGeneratePoolId(pool->pool, slot_index);
+  return SDL_GPGeneratePoolID(pool->pool, slot_index);
+}
+
+bool
+bxr_pool_is_valid_id(bxr_pool_t *pool, Uint32 id)
+{
+  return SDL_GPPoolIsValidID(pool->pool, id);
 }
 
 int
-bxr_pool_get_slot_from_id(Uint32 id)
+bxr_pool_get_slot_from_id(bxr_pool_t *pool, Uint32 id)
 {
-  return SDL_GPPoolIdToSlot(id);
+  return SDL_GPPoolIDToSlot(pool->pool, id);
 }
