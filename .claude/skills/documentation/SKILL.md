@@ -25,11 +25,10 @@ Callers of boxer should be able to use any public function correctly by reading 
 
 ## 3. Workflow
 
-1. Locate files
-2. Read implementation
-3. Prepare a branch named `doc-<file>` to merge into the current branch.
+1. Make sure the user as commit every change (so he can revert if needed).
+2. Locate files
+3. Read implementation
 4. Write the documentation matching already existing style for public function in the header file only.
-5. Commit and ask validation by the user.
 
 ## 4. Rules
 
