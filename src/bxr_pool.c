@@ -1,4 +1,6 @@
 #include "bxr_pool.h"
+#include "bxr_log.h"
+#include "bxr_mem.h"
 
 bxr_pool_t *
 bxr_pool_create(size_t number_of_slots)

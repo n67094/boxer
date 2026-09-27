@@ -1,9 +1,9 @@
 #ifndef BXR_POOL_H_
 #define BXR_POOL_H_
 
-#include <boxer/bxr.h>
+#include <SDL3/SDL.h>
 
-#include <SDL_gp.h>
+#include "bxr_sdl_gp.h"
 
 typedef struct bxr_pool_s
 {

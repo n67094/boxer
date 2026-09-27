@@ -3,14 +3,13 @@
 #include <physfs.h>
 #include <physfssdl3.h>
 
-#include <SDL_gp.h>
-
 #include "bxr_assert.h"
 #include "bxr_asset.h"
 #include "bxr_defs.h"
 #include "bxr_image.h"
 #include "bxr_log.h"
 #include "bxr_pixel.h"
+#include "bxr_sdl_gp.h"
 
 static Uint32 initialized_ = 0;
 

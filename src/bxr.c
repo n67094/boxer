@@ -4,25 +4,12 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
-// Override SDL_gp configuration.
-
-#define SDL_GP_PATH_MAX BXR_PATH_MAX_LENGTH
-#define SDL_GP_TEXTURE_DIMENSION_MAX BXR_PAINTER_MAX_TEXTURE_DIMENSION
-#define SDL_GP_IMAGE_MAX BXR_PAINTER_MAX_IMAGE
-#define SDL_GP_SHADER_MAX BXR_PAINTER_MAX_SHADER
-#define SDL_GP_PIPELINE_MAX BXR_PAINTER_MAX_PIPELINE
-#define SDL_GP_STATE_MAX BXR_PAINTER_MAX_STATE
-#define SDL_GP_TEXTURE_SLOTS_MAX BXR_PAINTER_MAX_TEXTURE_SLOTS
-#define SDL_GP_TRANSFORMS_MAX BXR_PAINTER_MAX_TRANSFORMS
-#define SDL_GP_UNIFORM_FLOATS_MAX BXR_PAINTER_MAX_UNIFORM_FLOATS
-#define SDL_GP_OPTIMIZER_DEPTH BXR_PAINTER_MAX_OPTIMIZER_DEPTH
-
 #include "bxr.h"
 
 // SDL_gp is defined and included here to prevent duplicate implementation
 // inclusions from other SDL_gp headers within the bxr file.
 #define SDL_GP_IMPLEMENTATION
-#include <SDL_gp.h>
+#include "bxr_sdl_gp.h"
 
 static bool
 update_refresh_rate_(bxr_context_t *context)

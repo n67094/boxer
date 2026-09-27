@@ -14,6 +14,7 @@
 #include "bxr_mem.h"
 #include "bxr_multimap.h"
 #include "bxr_pool.h"
+#include "bxr_string.h"
 
 typedef struct bxr_audio_s_
 {

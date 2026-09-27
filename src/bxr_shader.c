@@ -1,6 +1,6 @@
 #include <SDL3/SDL.h>
 
-#include <SDL_gp.h>
+#include "bxr_sdl_gp.h"
 
 #include <physfs.h>
 
