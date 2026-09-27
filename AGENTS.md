@@ -1,13 +1,10 @@
 > The code should stay human-written and the workflow shoulds remain human-driven.
 
-Generative AI, including large language models (LLMs), should only be used for:
+AI tools may assist with the following tasks, where they can improve quality or save time, as long as the final result is reviewed, edited, and owned by a human contributor:
 
-- Code exploration
-- Code review suggestions
-- Header file documentation generation (I'm dislexic, so I need help with this, but I first write myself and then ask for help to improve it)
+- Exploring and understanding the codebase.
+- Suggesting improvements during code review.
+- Drafting documentation for header files.
+- Automating parts of the Git workflow, such as drafting commit messages and pull request descriptions.
 
-But never for:
-
-- Generating new code or implementing features.
-- Generating comments in source file code.
-- Git workflow automation (like commit messages, PR descriptions, etc.)
+AI must never be used to generate source code.

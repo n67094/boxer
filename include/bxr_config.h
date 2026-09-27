@@ -123,15 +123,6 @@
  */
 
 /**
- * Max number of characters in a line of an INI file (including section headers,
- * key-value pairs, and comments).
- *
- * FIXME: unused, the INI reader does not enforce any line length. Enforce it
- * or remove it.
- */
-#define BXR_INI_MAX_ROW_SIZE 256
-
-/**
  * Initial capacity in bytes of the INI writer buffer.
  *
  * The buffer doubles in size when it is full.
@@ -156,35 +147,5 @@
  * Max number of systems that can be registered in an ECS instance.
  */
 #define BXR_ECS_MAX_SYSTEM 16
-
-/**
- * ## UI Configuration
- */
-
-/* TODO re-add UI implementation
-
-// Max number of painters state that can be used simultaneously (per frame)
-#define BXR_UI_STATE_MAX 16
-// Max number of commands that can be issued in a single flush (per ui state)
-#define BXR_UI_COMMAND_MAX 256
-// Max number of root containers (e.g window without parent) that can use in the
-// same time (per ui state)
-#define BXR_UI_ROOT_MAX 32
-// Max number of clip that can be used at the same time (per ui state)
-#define BXR_UI_CLIP_MAX 32
-// Max number of id that can be used at the same time (per ui state)
-#define BXR_UI_ID_MAX 32
-// Max number of containers (root and non-root) that can be created at the same
-// time (per ui state)
-#define BXR_UI_CONTAINER_SLOTS_MAX 32
-// Max number of items in a layout row
-#define BXR_UI_LAYOUT_SLOTS_MAX 32
-
-// Atom
-// ---------------------------------------------------------------------------
-
-// Max number of unique strings
-#define BXR_ATOM_MAX 2048
-*/
 
 #endif // BXR_CONFIG_H_

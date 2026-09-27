@@ -26,16 +26,13 @@ typedef struct bxr_color_s
 
 /**
  * Predefined opaque colors, plus `BXR_COLOR_TRANSPARENT`.
- *
- * FIXME: `ENGIEN_COLOR_MAGENTA` is a typo, rename it to `BXR_COLOR_MAGENTA`.
  */
 #define BXR_COLOR_WHITE (bxr_color_t){ .r = 255, .g = 255, .b = 255, .a = 255 }
 #define BXR_COLOR_BLACK (bxr_color_t){ .r = 0, .g = 0, .b = 0, .a = 255 }
 #define BXR_COLOR_RED (bxr_color_t){ .r = 255, .g = 0, .b = 0, .a = 255 }
 #define BXR_COLOR_GREEN (bxr_color_t){ .r = 0, .g = 255, .b = 0, .a = 255 }
 #define BXR_COLOR_BLUE (bxr_color_t){ .r = 0, .g = 0, .b = 255, .a = 255 }
-#define ENGIEN_COLOR_MAGENTA                                                   \
-  (bxr_color_t){ .r = 255, .g = 0, .b = 255, .a = 255 }
+#define BXR_COLOR_MAGENTA (bxr_color_t){ .r = 255, .g = 0, .b = 255, .a = 255 }
 #define BXR_COLOR_CYAN (bxr_color_t){ .r = 0, .g = 255, .b = 255, .a = 255 }
 #define BXR_COLOR_YELLOW (bxr_color_t){ .r = 255, .g = 255, .b = 0, .a = 255 }
 #define BXR_COLOR_TRANSPARENT (bxr_color_t){ .r = 0, .g = 0, .b = 0, .a = 0 }
