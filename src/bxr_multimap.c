@@ -278,6 +278,8 @@ bxr_multimap_remove_value(bxr_multimap_t *map, const char *key, Uint32 value)
 
   bxr_multimap_bucket_t *bucket = &map->buckets[i];
 
+  bool removed = false;
+
   // Find the value in the bucket and remove it
   for (size_t j = 0; j < bucket->count; ++j) {
 
@@ -285,14 +287,26 @@ bxr_multimap_remove_value(bxr_multimap_t *map, const char *key, Uint32 value)
       // Move the last element to the current position
       bucket->values[j] = bucket->values[bucket->count - 1];
       bucket->count--;
+      removed = true;
       break;
     }
   }
 
   // If the bucket is empty, mark the slot as a tombstone
   if (bucket->count == 0) {
+    BXR_FREE(map->keys[i]);
+    map->keys[i] = NULL;
+
+    BXR_FREE(bucket->values);
+    bucket->values = NULL;
+    bucket->size   = 0;
+
     map->state[i] = BXR_MULTIMAP_SLOT_TOMBSTONE;
     map->count--;
+  }
+
+  if (!removed) {
+    return false;
   }
 
   return true;

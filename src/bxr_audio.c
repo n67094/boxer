@@ -84,17 +84,9 @@ bxr_audio_release_(void)
     device_id_ = 0;
   }
 
-  if (audio_tags_) {
-    bxr_multimap_destroy(audio_tags_);
-    audio_tags_ = NULL;
-  }
-
   if (voices_) {
     for (int i = 0; i < BXR_AUDIO_MAX_TRACKS; ++i) {
       if (voices_[i].stream) {
-        SDL_DestroyAudioStream(voices_[i].stream);
-        voices_[i].stream = NULL;
-
         bxr_voice_release_(i);
       }
     }
@@ -104,6 +96,11 @@ bxr_audio_release_(void)
   if (voice_pool_) {
     bxr_pool_destroy(voice_pool_);
     voice_pool_ = NULL;
+  }
+
+  if (audio_tags_) {
+    bxr_multimap_destroy(audio_tags_);
+    audio_tags_ = NULL;
   }
 
   if (audios_) {
@@ -800,8 +797,15 @@ bxr_voice_get_position(bxr_voice_t voice)
     return 0;
   }
 
-  return ((Uint64)t->position * 1000)
-         / byte_per_sec; // position in milliseconds
+  Uint64 position
+      = (t->position * 1000) / byte_per_sec; // position in milliseconds
+
+  Uint64 queued_bytes = SDL_GetAudioStreamQueued(t->stream);
+  Uint64 queued_ms    = (queued_bytes * 1000) / byte_per_sec;
+
+  // Add queued time to the current position in order to get the total playback
+  // position
+  return position += queued_ms;
 }
 
 bool
@@ -844,6 +848,9 @@ bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms)
   }
 
   t->position = position_bytes;
+  // Clear the audio stream to reset the queued data and start from the new
+  // position
+  SDL_ClearAudioStream(t->stream);
 
   return true;
 }
