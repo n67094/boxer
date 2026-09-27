@@ -29,17 +29,25 @@ typedef enum
 
 #define BXR_AUDIO_INVALID_ID 0
 
+#define BXR_VOICE_INVALID_ID 0
+
 typedef struct bxr_audio_s
 {
   Uint32 id;
 } bxr_audio_t;
 
-#define BXR_TRACK_INVALID_ID 0
-
 typedef struct bxr_voice_s
 {
   Uint32 id;
 } bxr_voice_t;
+
+typedef struct bxr_voice_desc_s
+{
+  bxr_audio_t audio;
+  float volume;
+  bool auto_play;
+  bool play_once;
+} bxr_voice_desc_t;
 
 /**
  * ## Internal API
@@ -63,12 +71,8 @@ BXR_API float bxr_audio_get_global_volume(void);
 // TODO pan
 // TODO pitch
 
-BXR_API void bxr_audio_play_once(bxr_audio_t audio, float volume);
-
 // Track playback
-BXR_API bxr_voice_t bxr_voice_create(bxr_audio_t audio,
-                                     float volume,
-                                     bool auto_play);
+BXR_API bxr_voice_t bxr_voice_create(bxr_voice_desc_t *desc);
 BXR_API void bxr_voice_set_volume(bxr_voice_t voice, float volume);
 BXR_API float bxr_voice_get_volume(bxr_voice_t voice);
 BXR_API void bxr_voice_play(bxr_voice_t voice);
@@ -79,7 +83,6 @@ BXR_API Uint64 bxr_voice_get_position(bxr_voice_t voice); // ms
 BXR_API bool bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms);
 // TODO pan
 // TODO pitch
-// TODO callback for when the voice finishes playing
 BXR_API void bxr_voice_destroy(bxr_voice_t voice);
 
 // Tags

@@ -90,9 +90,9 @@
 #define BXR_AUDIO_MAX 32
 
 /**
- * Max number of audio tracks that can be played at the same time
+ * Max number of audio voices that can be played at the same time
  */
-#define BXR_AUDIO_MAX_TRACKS 32
+#define BXR_AUDIO_MAX_VOICES 32
 
 /**
  * Max number of tags that can be associated with an audio track
@@ -103,6 +103,7 @@
  * Target audio latency in milliseconds. Amount of time loaded per voice in the
  * audio buffer.
  */
+// FIXME convert this to bytes
 #define BXR_AUDIO_TARGET_LATENCY_MS 50
 
 /**

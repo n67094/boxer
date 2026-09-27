@@ -10,6 +10,13 @@ static bxr_voice_t _music;
 
 static bxr_game_config_t _config = { 0 };
 
+void
+voice_finished_cb(bxr_voice_t voice, void *udata)
+{
+  BXR_LOG_INFO("Voice finished callback called for voice ID: %u", voice.id);
+  bxr_quit();
+}
+
 bxr_game_config_t *
 bxr_game_config(void)
 {
@@ -36,7 +43,16 @@ bxr_game_setup(void)
   _image = bxr_image_create(ASSET_PATH "images/logo.png");
   _audio = bxr_audio_create(ASSET_PATH "audio/music.wav");
 
-  _music = bxr_voice_create(_audio, 1.0f, true);
+  bxr_voice_desc_t music_desc = {
+    .audio       = _audio,
+    .volume      = 1.0f,
+    .auto_play   = true,
+    .play_once   = false,
+    .finished_cb = voice_finished_cb,
+    .udata       = NULL,
+  };
+
+  _music = bxr_voice_create(&music_desc);
 }
 
 void
