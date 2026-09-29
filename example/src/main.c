@@ -58,6 +58,8 @@ bxr_game_update(Uint64 delta_time_ms)
   BXR_LOG_INFO("Volume: %f", bxr_voice_get_volume(_music));
   BXR_LOG_INFO("Status : %s",
                bxr_voice_is_paused(_music) ? "PAUSED" : "PLAYING");
+  BXR_LOG_INFO("Pitch  : %f", bxr_voice_get_pitch(_music));
+  BXR_LOG_INFO("Pan    : %f", bxr_voice_get_pan(_music));
 
   if (bxr_key_just_pressed(BXR_KEY_SPACE)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_SOUTH)) {
@@ -68,6 +70,7 @@ bxr_game_update(Uint64 delta_time_ms)
     }
   }
 
+  // Volume control decrease
   if (bxr_key_just_pressed(BXR_KEY_LEFT)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_LEFT)) {
     float volume = bxr_voice_get_volume(_music);
@@ -78,6 +81,7 @@ bxr_game_update(Uint64 delta_time_ms)
     bxr_voice_set_volume(_music, volume);
   }
 
+  // Volume control increase
   if (bxr_key_just_pressed(BXR_KEY_RIGHT)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_RIGHT)) {
     float volume = bxr_voice_get_volume(_music);
@@ -86,6 +90,77 @@ bxr_game_update(Uint64 delta_time_ms)
       volume = 1.0f;
     }
     bxr_voice_set_volume(_music, volume);
+  }
+
+  // Seek control decrease
+  if (bxr_key_just_pressed(BXR_KEY_DOWN)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_DOWN)) {
+    Uint64 position = bxr_voice_get_position(_music);
+    if (position >= 1000) {
+      position -= 1000;
+    } else {
+      position = 0;
+    }
+    bxr_voice_set_position(_music, position);
+  }
+
+  // Seek control increase
+  if (bxr_key_just_pressed(BXR_KEY_UP)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_UP)) {
+    Uint64 position = bxr_voice_get_position(_music);
+    position += 1000;
+    if (position > bxr_audio_get_length(_audio)) {
+      position = bxr_audio_get_length(_audio);
+    }
+    bxr_voice_set_position(_music, position);
+  }
+
+  // Pan control left
+  if (bxr_key_just_pressed(BXR_KEY_A)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_LEFT_SHOULDER)) {
+    float pan = bxr_voice_get_pan(_music);
+    pan -= 0.1f;
+    if (pan < -1.0f) {
+      pan = -1.0f;
+    }
+
+    bxr_voice_set_pan(_music, pan);
+  }
+
+  // Pan control right
+  if (bxr_key_just_pressed(BXR_KEY_D)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_RIGHT_SHOULDER)) {
+    float pan = bxr_voice_get_pan(_music);
+    pan += 0.1f;
+    if (pan > 1.0f) {
+      pan = 1.0f;
+    }
+
+    bxr_voice_set_pan(_music, pan);
+  }
+
+  // Pitch control decrease
+  if (bxr_key_just_pressed(BXR_KEY_W)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_NORTH)) {
+    float pitch = bxr_voice_get_pitch(_music);
+    pitch -= 0.1f;
+    if (pitch < 0.01f) {
+      pitch = 0.01f;
+    }
+
+    bxr_voice_set_pitch(_music, pitch);
+  }
+
+  // Pitch control increase
+  if (bxr_key_just_pressed(BXR_KEY_S)
+      || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_EAST)) {
+    float pitch = bxr_voice_get_pitch(_music);
+    pitch += 0.1f;
+    if (pitch > 100.0f) {
+      pitch = 100.0f;
+    }
+
+    bxr_voice_set_pitch(_music, pitch);
   }
 }
 

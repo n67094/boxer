@@ -11,24 +11,7 @@
 
 #include "bxr_defs.h"
 
-typedef enum
-{
-  BXR_AUDIO_FORMAT_UNKNOWN = SDL_AUDIO_UNKNOWN,
-  BXR_AUDIO_U8             = SDL_AUDIO_U8,
-  BXR_AUDIO_S8             = SDL_AUDIO_S8,
-  BXR_AUDIO_S16LE          = SDL_AUDIO_S16LE,
-  BXR_AUDIO_S16BE          = SDL_AUDIO_S16BE,
-  BXR_AUDIO_S32LE          = SDL_AUDIO_S32LE,
-  BXR_AUDIO_S32BE          = SDL_AUDIO_S32BE,
-  BXR_AUDIO_F32LE          = SDL_AUDIO_F32LE,
-  BXR_AUDIO_F32BE          = SDL_AUDIO_F32BE,
-  BXR_AUDIO_S16            = SDL_AUDIO_S16,
-  BXR_AUDIO_S32            = SDL_AUDIO_S32,
-  BXR_AUDIO_F32            = SDL_AUDIO_F32
-} bxr_audio_format_e;
-
 #define BXR_AUDIO_INVALID_ID 0
-
 #define BXR_VOICE_INVALID_ID 0
 
 typedef struct bxr_audio_s
@@ -68,8 +51,6 @@ BXR_API void bxr_audio_destroy(bxr_audio_t audio);
 // Global controls
 BXR_API void bxr_audio_set_global_volume(float volume);
 BXR_API float bxr_audio_get_global_volume(void);
-// TODO pan
-// TODO pitch
 
 // Track playback
 BXR_API bxr_voice_t bxr_voice_create(bxr_voice_desc_t *desc);
@@ -81,8 +62,10 @@ BXR_API bool bxr_voice_is_paused(bxr_voice_t voice);
 BXR_API void bxr_voice_stop(bxr_voice_t voice);
 BXR_API Uint64 bxr_voice_get_position(bxr_voice_t voice); // ms
 BXR_API bool bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms);
-// TODO pan
-// TODO pitch
+BXR_API bool bxr_voice_set_pitch(bxr_voice_t voice, float pitch);
+BXR_API float bxr_voice_get_pitch(bxr_voice_t voice);
+BXR_API bool bxr_voice_set_pan(bxr_voice_t voice, float pan);
+BXR_API float bxr_voice_get_pan(bxr_voice_t voice);
 BXR_API void bxr_voice_destroy(bxr_voice_t voice);
 
 // Tags

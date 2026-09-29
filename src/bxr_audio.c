@@ -16,6 +16,22 @@
 #include "bxr_pool.h"
 #include "bxr_string.h"
 
+typedef enum
+{
+  BXR_AUDIO_FORMAT_UNKNOWN = SDL_AUDIO_UNKNOWN,
+  BXR_AUDIO_U8             = SDL_AUDIO_U8,
+  BXR_AUDIO_S8             = SDL_AUDIO_S8,
+  BXR_AUDIO_S16LE          = SDL_AUDIO_S16LE,
+  BXR_AUDIO_S16BE          = SDL_AUDIO_S16BE,
+  BXR_AUDIO_S32LE          = SDL_AUDIO_S32LE,
+  BXR_AUDIO_S32BE          = SDL_AUDIO_S32BE,
+  BXR_AUDIO_F32LE          = SDL_AUDIO_F32LE,
+  BXR_AUDIO_F32BE          = SDL_AUDIO_F32BE,
+  BXR_AUDIO_S16            = SDL_AUDIO_S16,
+  BXR_AUDIO_S32            = SDL_AUDIO_S32,
+  BXR_AUDIO_F32            = SDL_AUDIO_F32
+} bxr_audio_format_e;
+
 typedef struct bxr_audio_s_
 {
   Uint8 *data;
@@ -34,6 +50,8 @@ typedef struct bxr_voice_s_
   bool one_shot;
   char *tags[BXR_AUDIO_MAX_TAGS]; // tags associated with this voice
   size_t tag_count;
+  float pitch; // pan (0.01 to 100.0, 1.0 is the base)
+  float pan;   // pan adjustment (-1.0 left, 0.0 center, 1.0 right)
 } bxr_voice_t_;
 
 static Uint32 initialized_ = 0;
@@ -189,6 +207,41 @@ bxr_audio_setup(void)
   initialized_ = BXR_INIT_COOKIE;
 }
 
+static bool
+bxr_audio_put_panned_(bxr_voice_t_ *voice,
+                      const float *in,
+                      int frames,
+                      int channels)
+{
+  float out[BXR_AUDIO_LOAD_CHUNK * 2];
+
+  const float l = (voice->pan > 0.0f) ? 1.0f - voice->pan : 1.0f;
+  const float r = (voice->pan < 0.0f) ? 1.0f + voice->pan : 1.0f;
+
+  while (frames > 0) {
+    int n = frames < BXR_AUDIO_LOAD_CHUNK ? frames : BXR_AUDIO_LOAD_CHUNK;
+
+    if (channels == 1) {
+      for (int i = 0; i < n; ++i) {
+        out[i * 2 + 0] = in[i] * l;
+        out[i * 2 + 1] = in[i] * r;
+      }
+    } else { /* stereo */
+      for (int i = 0; i < n; ++i) {
+        out[i * 2 + 0] = in[i * 2 + 0] * l;
+        out[i * 2 + 1] = in[i * 2 + 1] * r;
+      }
+    }
+
+    if (!SDL_PutAudioStreamData(voice->stream, out, n * 2 * (int)sizeof(float)))
+      return false;
+
+    in += n * channels;
+    frames -= n;
+  }
+  return true;
+}
+
 void
 bxr_audio_begin_frame(void)
 {
@@ -234,65 +287,55 @@ bxr_audio_begin_frame(void)
 
     SDL_SetAudioStreamGain(voice->stream, voice->volume);
 
-    // Calculate how much data is queued in the stream
-    size_t bytes_per_sample = SDL_AUDIO_BYTESIZE(audio->spec.format);
-    size_t bytes_per_frame  = bytes_per_sample * audio->spec.channels;
-    size_t bytes_per_second = bytes_per_frame * audio->spec.freq;
+    if (SDL_GetAudioStreamQueued(voice->stream) >= BXR_AUDIO_LOAD_CHUNK) {
+      // Already have enough queued data, skip feeding
+      continue;
+    }
 
-    double target_latency_seconds = BXR_AUDIO_TARGET_LATENCY_MS / 1000.0;
+    // Calculate the number of bytes for a single frame
+    const Uint64 single_frame = (Uint64)audio->spec.channels * sizeof(float);
+    // Calculate the number of frames to feed in each chunk
+    const int chunk_frames = BXR_AUDIO_LOAD_CHUNK / single_frame;
 
-    // SDL accept whole frame sizes, so we need to round down to the nearest
-    // frame size
-    size_t target_queue_bytes
-        = (size_t)(bytes_per_second * target_latency_seconds);
-    int remainder = target_queue_bytes % bytes_per_frame;
-    target_queue_bytes -= remainder;
-
-    if (SDL_GetAudioStreamQueued(voice->stream) < target_queue_bytes) {
-      // Guard: If the voice position is already at or beyond the audio length,
-      // handle looping or stopping
-      if (voice->position >= audio->length) {
-        if (voice->one_shot) {
-          voice->feeding  = false;
-          voice->position = 0;
-          continue;
-        } else {
-          // Loop back to the beginning
-          voice->position = 0;
-        }
+    // Guard: If the voice position is already at or beyond the audio length,
+    // handle looping or stopping for one-shot voices.
+    if (voice->position + single_frame >= audio->length) {
+      voice->position = 0;
+      if (voice->one_shot) {
+        voice->feeding = false;
+        continue; // Skip feeding for one-shot voices that have finished
       }
+    }
 
-      // Calculate how much data to queue
-      Uint64 remaining = audio->length - (Uint64)voice->position;
-      int chunk_size
-          = remaining < target_queue_bytes ? remaining : target_queue_bytes;
+    // Calculate the remaining frames to feed (in case the audio is shorter than
+    // the chunk size)
+    Uint64 remaining_frames
+        = audio->length - (Uint64)voice->position / single_frame;
 
-      if (chunk_size == 0) {
-        voice->position = 0;
-        continue;
-      }
+    // Determine how many frames to feed in this iteration (up to chunk_frames)
+    int frames = remaining_frames < (Uint64)chunk_frames ? (int)remaining_frames
+                                                         : chunk_frames;
 
-      // Queue the audio data to the stream
-      if (SDL_PutAudioStreamData(
-              voice->stream, audio->data + voice->position, chunk_size)
-          == false) {
-        BXR_LOG_ERROR(
-            "Failed to queue audio data for voice %d: %s", i, SDL_GetError());
-        continue;
-      }
+    if (frames == 0) {
+      continue;
+    }
 
-      // Update the voice position
-      voice->position += chunk_size;
+    // Pan and queue the audio data to the stream
+    const float *src = (const float *)(audio->data + voice->position);
+    if (!bxr_audio_put_panned_(voice, src, frames, audio->spec.channels)) {
+      BXR_LOG_ERROR(
+          "Failed to queue audio data for voice %d: %s", i, SDL_GetError());
+      continue;
+    }
 
-      // If we've reached the end of the audio data, stop the voice
-      if (voice->position >= audio->length) {
-        if (voice->one_shot) {
-          voice->feeding  = false;
-          voice->position = 0;
-        } else {
-          // Loop back to the beginning
-          voice->position = 0;
-        }
+    // Update the voice position
+    voice->position += (Uint64)frames * single_frame;
+
+    // If we've reached the end of the audio data, stop the voice
+    if (voice->position + single_frame >= audio->length) {
+      voice->position = 0;
+      if (voice->one_shot) {
+        voice->feeding = false;
       }
     }
   }
@@ -413,9 +456,31 @@ bxr_audio_create(const char *path)
     return (bxr_audio_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
+  // Convert audio to float for pan support
+  SDL_AudioSpec dst = { SDL_AUDIO_F32, audio->spec.channels, audio->spec.freq };
+  Uint8 *converted  = NULL;
+  int converted_len = 0;
+
+  if (!SDL_ConvertAudioSamples(&audio->spec,
+                               audio->data,
+                               (int)audio->length,
+                               &dst,
+                               &converted,
+                               &converted_len)) {
+    BXR_LOG_ERROR("Failed to convert audio samples: %s", SDL_GetError());
+    if (audio->data) {
+      BXR_FREE(audio->data);
+    }
+  }
+
+  BXR_FREE(audio->data);
+  audio->data   = converted;
+  audio->length = converted_len;
+  audio->spec   = dst;
+
   int slot = bxr_pool_aquire_slot(audio_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
-    // no free slots
+    // No free slots
     if (audio->data) {
       BXR_FREE(audio->data);
     }
@@ -424,7 +489,7 @@ bxr_audio_create(const char *path)
   }
 
   audios_[slot] = *audio;
-  // we copied contents, free temporary structure pointer
+  // We copied contents, free temporary structure pointer
   BXR_FREE(audio);
 
   return (bxr_audio_t){ .id = bxr_pool_generate_id(audio_pool_, slot) };
@@ -588,6 +653,7 @@ bxr_voice_create(bxr_voice_desc_t *desc)
   v->feeding      = desc->auto_play;
   v->one_shot     = desc->play_once;
   v->tag_count    = 0;
+  v->pitch        = 1.0f;
 
   v->stream = SDL_CreateAudioStream(&a->spec, &device_spec_);
   if (!v->stream) {
@@ -596,6 +662,10 @@ bxr_voice_create(bxr_voice_desc_t *desc)
     bxr_pool_release_slot(voice_pool_, slot);
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
+
+  // Force the audio stream to be stereo for panning support
+  SDL_AudioSpec in = { a->spec.format, 2, a->spec.freq };
+  SDL_SetAudioStreamFormat(v->stream, &in, NULL);
 
   if (SDL_BindAudioStream(device_id_, v->stream) == false) {
     BXR_LOG_ERROR("Failed to bind audio stream to device: %s", SDL_GetError());
@@ -766,6 +836,62 @@ bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms)
   SDL_ClearAudioStream(v->stream);
 
   return true;
+}
+
+bool
+bxr_voice_set_pitch(bxr_voice_t voice, float pitch)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  bxr_voice_t_ *v = bxr_void_get_(voice);
+
+  pitch = bxr_clamp(pitch, 0.01f, 100.0f); // Clamp pitch to a reasonable range
+
+  v->pitch = pitch;
+
+  if (!SDL_SetAudioStreamFrequencyRatio(v->stream, pitch)) {
+    SDL_Log("Failed to set pitch: %s", SDL_GetError());
+    return false;
+  }
+
+  return true;
+}
+
+float
+bxr_voice_get_pitch(bxr_voice_t voice)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  bxr_voice_t_ *v = bxr_void_get_(voice);
+
+  return v->pitch;
+}
+
+bool
+bxr_voice_set_pan(bxr_voice_t voice, float pan)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  bxr_voice_t_ *v = bxr_void_get_(voice);
+
+  pan = bxr_clamp(pan, -1.0f, 1.0f);
+
+  v->pan = pan;
+
+  //  v->pan_l = (pan > 0.0f) ? 1.0f - pan : 1.0f;
+  //  v->pan_r = (pan < 0.0f) ? 1.0f + pan : 1.0f;
+
+  return true;
+}
+
+float
+bxr_voice_get_pan(bxr_voice_t voice)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  bxr_voice_t_ *v = bxr_void_get_(voice);
+
+  return v->pan;
 }
 
 void

@@ -51,9 +51,6 @@
 /**
  * Max number of commands that are looked back and batched together for
  * optimization.
- *
- * FIXME: unused and duplicates `BXR_PAINTER_MAX_OPTIMIZER_DEPTH`, which is the
- * value actually forwarded to SDL_gp. Remove one of the two.
  */
 #define BXR_PAINTER_OPTIMIZER_DEPTH 8
 
@@ -63,10 +60,6 @@
 
 /**
  * Max texture width or height in pixels.
- *
- * FIXME: forwarded as `SDL_GP_TEXTURE_DIMENSION_MAX`, which SDL_gp never reads
- * (it uses `SDL_GP_TEXTURE_SIZE_MAX`, a transfer buffer size in bytes), so
- * this value has no effect. Map it to the right SDL_gp option or remove it.
  */
 #define BXR_PAINTER_MAX_TEXTURE_DIMENSION 4096
 
@@ -111,12 +104,10 @@
 #define BXR_AUDIO_MAX_TAGS 8
 
 /**
- * Target audio latency in milliseconds.
- *
- * Each voice keeps about this much audio queued in its stream.
+ * The number of bytes to read from an audio file at a time when loading it into
+ * memory.
  */
-// FIXME convert this to bytes
-#define BXR_AUDIO_TARGET_LATENCY_MS 50
+#define BXR_AUDIO_LOAD_CHUNK (1024 * 16) // 16 KB
 
 /**
  * ## INI Reader/Writer Configuration
