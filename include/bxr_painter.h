@@ -51,7 +51,7 @@ typedef struct bxr_vertex_s
  *
  * `desc` is the description of the painter system to setup.
  */
-void bxr_painter_setup(bxr_painter_desc_t *desc);
+void bxr_painter_setup(const bxr_painter_desc_t *desc);
 
 /**
  * Tears down the painter system.

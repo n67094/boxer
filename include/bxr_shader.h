@@ -81,7 +81,7 @@ void bxr_shader_teardown(void);
  * The caller is responsible for destroying the returned shader using
  * `bxr_shader_destroy` when it is no longer needed.
  */
-BXR_API bxr_shader_t bxr_shader_create(bxr_shader_desc_t *desc);
+BXR_API bxr_shader_t bxr_shader_create(const bxr_shader_desc_t *desc);
 
 /**
  * Returns the SDL vertex shader associated with the given boxer shader.

@@ -42,14 +42,7 @@
  * ## Internal API
  */
 
-/**
- * Initialize the asset subsystem.
- */
 void bxr_asset_setup(bxr_context_t *context);
-
-/**
- * Shut down the asset subsystem and unmount everything.
- */
 void bxr_asset_teardown(void);
 
 /**
