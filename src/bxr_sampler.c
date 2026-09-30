@@ -1,7 +1,5 @@
 #include <SDL3/SDL.h>
 
-#include <SDL_gp.h>
-
 #include "bxr_assert.h"
 #include "bxr_context.h"
 #include "bxr_log.h"

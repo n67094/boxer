@@ -68,25 +68,25 @@ typedef enum
  * Initializes the gamepad subsystem. Must be called before using any other
  * gamepad functions.
  */
-BXR_API void bxr_gamepad_setup(void);
+void bxr_gamepad_setup(void);
 
 /**
  * Tears down the gamepad subsystem. Must be called when the application is
  * shutting down.
  */
-BXR_API void bxr_gamepad_teardown(void);
+void bxr_gamepad_teardown(void);
 
 /**
  * Listens for gamepad events and updates the internal state of the gamepads.
  * Must be called every frame to ensure that the gamepad state is updated.
  */
-BXR_API void bxr_gamepad_listen(void);
+void bxr_gamepad_listen(void);
 
 /**
  * Update the gamepad state for the current frame. Must be called at the
  * beginning of each frame before processing input.
  */
-BXR_API void bxr_gamepad_begin_frame(void);
+void bxr_gamepad_begin_frame(void);
 
 /**
  * Handles a gamepad button down event. Must be called when a gamepad button
@@ -96,7 +96,7 @@ BXR_API void bxr_gamepad_begin_frame(void);
  *
  * `button` is the button that was pressed.
  */
-BXR_API void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
+void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
 
 /**
  * Handles a gamepad button up event. Must be called when a gamepad button up
@@ -106,7 +106,7 @@ BXR_API void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
  *
  * `button` is the button that was released.
  */
-BXR_API void bxr_gamepad_button_up(int index, bxr_gamepad_button_e button);
+void bxr_gamepad_button_up(int index, bxr_gamepad_button_e button);
 
 /**
  * Handles a gamepad axis motion event. Must be called when a gamepad axis
@@ -118,8 +118,7 @@ BXR_API void bxr_gamepad_button_up(int index, bxr_gamepad_button_e button);
  *
  * `value` is the new value of the axis, normalized to the range [-1, 1].
  */
-BXR_API void
-bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, float value);
+void bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, float value);
 
 /**
  * ## Public API
@@ -184,6 +183,15 @@ BXR_API const char *bxr_gamepad_serial(int index);
  * `return` true if the button is currently held down, false otherwise.
  */
 BXR_API bool bxr_gamepad_held(int index, bxr_gamepad_button_e button);
+
+/**
+ * Check if any gamepad button was just pressed this frame.
+ *
+ * `index` is the index of the gamepad to check.
+ *
+ * `return` true if any button was just pressed this frame, false otherwise.
+ */
+BXR_API bool bxr_gamepad_any_just_pressed(int index);
 
 /**
  * Check if a gamepad button was just pressed this frame.

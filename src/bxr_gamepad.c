@@ -23,6 +23,7 @@ typedef struct bxr_gamepad_s_
   const char *serial;
 
   bxr_gamepad_button_state_t_ buttons[BXR_GAMEPAD_BUTTON_SIZE];
+  bool any_just_pressed;
 
   float axis[BXR_GAMEPAD_AXIS_SIZE];
   float axis_prev[BXR_GAMEPAD_AXIS_SIZE];
@@ -126,8 +127,14 @@ bxr_gamepad_begin_frame(void)
       continue;
     }
 
+    gamepads_[i].any_just_pressed = false;
+
     // Update just pressed/released accumulators
     for (int j = 0; j < BXR_GAMEPAD_BUTTON_SIZE; ++j) {
+      if (gamepads_[i].buttons[j].pending_just_pressed) {
+        gamepads_[i].any_just_pressed = true;
+      }
+
       gamepads_[i].buttons[j].just_pressed
           = gamepads_[i].buttons[j].pending_just_pressed;
       gamepads_[i].buttons[j].just_released
@@ -299,6 +306,19 @@ bxr_gamepad_held(int index, bxr_gamepad_button_e button)
   }
 
   return gamepads_[index].buttons[button].is_down;
+}
+
+bool
+bxr_gamepad_any_just_pressed(int index)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+
+  if (!bxr_gamepad_connected(index)) {
+    return false;
+  }
+
+  return gamepads_[index].any_just_pressed;
 }
 
 bool

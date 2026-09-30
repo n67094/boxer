@@ -1,19 +1,18 @@
 /**
  * File `bxr_assert.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Assertion macro for checking internal invariants.
  *
- * # Assertion macro
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_ASSERT_H_
 #define BXR_ASSERT_H_
 
+#include <SDL3/SDL.h>
+
 /**
- * Assertion macro
- *
- * `expr` is the expression to evaluate. If the expression evaluates to false,
- * the program will be aborted.
+ * Check that `expr` is true, and abort the program if it is false.
  */
 #define BXR_ASSERT(expr) SDL_assert(expr)
 

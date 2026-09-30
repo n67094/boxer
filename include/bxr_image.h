@@ -11,7 +11,8 @@
 #ifndef BXR_IMAGE_H_
 #define BXR_IMAGE_H_
 
-#include "bxr_context.h"
+#include <SDL3/SDL.h>
+
 #include "bxr_defs.h"
 #include "bxr_pixel.h"
 
@@ -29,15 +30,13 @@ typedef struct bxr_image_s
 /**
  * Initialize the image subsystem. Must be called before using any other image
  * functions.
- *
- * `context` is the bxr context to use for image operations.
  */
-BXR_API void bxr_image_setup(bxr_context_t *context);
+void bxr_image_setup(void);
 
 /**
  * Tears down the image subsystem.
  */
-BXR_API void bxr_image_teardown(void);
+void bxr_image_teardown(void);
 
 /**
  * ## Public API

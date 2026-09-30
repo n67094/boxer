@@ -4,6 +4,7 @@
 #include "ini.h"
 #include "json.h"
 #include "math.h"
+#include "multimap.h"
 #include "sparse_set.h"
 
 static bxr_game_config_t _config = { 0 };
@@ -36,6 +37,7 @@ bxr_game_setup(void)
   BXR_UNIT_RUN_SUITE(suite_ini);
   BXR_UNIT_RUN_SUITE(suite_sparse_set);
   BXR_UNIT_RUN_SUITE(suite_ecs);
+  BXR_UNIT_RUN_SUITE(suite_multimap);
 
   bxr_unit_report();
 }

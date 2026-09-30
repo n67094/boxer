@@ -40,19 +40,19 @@ typedef enum
  * Initialize the mouse subsystem. Must be called before using any other mouse
  * functions.
  */
-BXR_API void bxr_mouse_setup(void);
+void bxr_mouse_setup(void);
 
 /**
  * Update the mouse state for the current frame. Must be called at the beginning
  * of each frame before processing input.
  */
-BXR_API void bxr_mouse_begin_frame(void);
+void bxr_mouse_begin_frame(void);
 
 /**
  * Tears down the mouse subsystem. Must be called when the application is
  * shutting down.
  */
-BXR_API void bxr_mouse_teardown(void);
+void bxr_mouse_teardown(void);
 
 /**
  * Handles a mouse button down event. Must be called when a mouse button event
@@ -62,7 +62,7 @@ BXR_API void bxr_mouse_teardown(void);
  *
  * `click` is the type of click (single or double).
  */
-BXR_API void bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click);
+void bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click);
 
 /**
  * Handles a mouse button up event. Must be called when a mouse button up event
@@ -70,7 +70,7 @@ BXR_API void bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click);
  *
  * `button` is the mouse button that was released.
  */
-BXR_API void bxr_mouse_button_up(bxr_mouse_e button);
+void bxr_mouse_button_up(bxr_mouse_e button);
 
 /**
  * Handles a mouse motion event. Must be called when a mouse motion event is
@@ -80,7 +80,7 @@ BXR_API void bxr_mouse_button_up(bxr_mouse_e button);
  *
  * `y` is the new y position of the mouse cursor.
  */
-BXR_API void bxr_mouse_motion(float x, float y);
+void bxr_mouse_motion(float x, float y);
 
 /**
  * Handles a mouse wheel motion event. Must be called when a mouse wheel motion
@@ -90,7 +90,7 @@ BXR_API void bxr_mouse_motion(float x, float y);
  *
  * `y` is the amount of vertical scroll.
  */
-BXR_API void bxr_mouse_wheel_motion(float x, float y);
+void bxr_mouse_wheel_motion(float x, float y);
 
 /**
  * Public API

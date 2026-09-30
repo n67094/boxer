@@ -3,46 +3,46 @@
 #include <physfs.h>
 #include <physfssdl3.h>
 
-#include <SDL_gp.h>
-
 #include "bxr_assert.h"
-#include "bxr_context.h"
+#include "bxr_asset.h"
 #include "bxr_defs.h"
 #include "bxr_image.h"
 #include "bxr_log.h"
 #include "bxr_pixel.h"
+#include "bxr_sdl_gp.h"
 
-static Uint32 initialized_     = 0;
-static bxr_context_t *context_ = NULL;
+static Uint32 initialized_ = 0;
 
 void
-bxr_image_setup(bxr_context_t *context)
+bxr_image_setup(void)
 {
   BXR_ASSERT(initialized_ == 0);
-  BXR_ASSERT(context != NULL);
-
   initialized_ = BXR_INIT_COOKIE;
-  context_     = context;
 }
 
 void
 bxr_image_teardown(void)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
-
   initialized_ = 0;
-  context_     = NULL;
 }
 
 bxr_image_t
 bxr_image_create(const char *path)
 {
   BXR_ASSERT(path);
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   BXR_LOG_INFO("Loading image from: %s", path);
 
-  if (!PHYSFS_exists(path)) {
+  if (!bxr_asset_exists(path)) {
     BXR_LOG_ERROR("File not found: %s", path);
+    return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
+  }
+
+  if (!bxr_asset_has_extension(path, ".png")
+      && !bxr_asset_has_extension(path, ".bmp")) {
+    BXR_LOG_ERROR("Unsupported image format: %s", path);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 

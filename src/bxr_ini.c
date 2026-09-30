@@ -8,7 +8,7 @@
 #include "bxr_config.h"
 #include "bxr_ini.h"
 #include "bxr_mem.h"
-#include "bxr_str.h"
+#include "bxr_string.h"
 
 struct bxr_ini_reader_s
 {

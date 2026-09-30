@@ -21,6 +21,8 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_defs.h"
+
 typedef enum
 {
   BXR_LOG_PRIORITY_ERROR = 0,
@@ -49,7 +51,7 @@ void bxr_log_teardown(void);
  *
  * `fmt` is the format string, similar to printf, followed by its arguments.
  */
-void bxr_log(bxr_log_priority_e priority, const char *fmt, ...);
+BXR_API void bxr_log(bxr_log_priority_e priority, const char *fmt, ...);
 
 /**
  * Set the minimum log priority level. Messages with a priority lower than this
@@ -57,14 +59,14 @@ void bxr_log(bxr_log_priority_e priority, const char *fmt, ...);
  *
  * `priority` is the minimum log priority level to set.
  */
-void bxr_log_set_priority(bxr_log_priority_e priority);
+BXR_API void bxr_log_set_priority(bxr_log_priority_e priority);
 
 /**
  * Enable or disable ANSI terminal colors for log messages.
  *
  * `enabled` is true to enable colors, false to disable.
  */
-void bxr_log_enable_colors(bool enabled);
+BXR_API void bxr_log_enable_colors(bool enabled);
 
 /**
  * Convenience logging macros for different log levels.

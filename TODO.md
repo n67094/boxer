@@ -1,4 +1,5 @@
 # TODO
 
-[ ] simple audio system that allows group playing
-[ ] move hidden details to internal.h files
+[ ] Simple audio system that allows group playing
+[ ] Move hidden details to internal.h files
+[ ] Add coroutines to the library (using minicoro by edubart)

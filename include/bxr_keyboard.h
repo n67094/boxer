@@ -163,19 +163,19 @@ typedef enum
  * Initialize the keyboard input system. Must be called before using any
  * other keyboard functions.
  */
-BXR_API void bxr_keyboard_setup(void);
+void bxr_keyboard_setup(void);
 
 /**
  * Update the keyboard state for the current frame. Must be called at the
  * beginning of each frame before processing input.
  */
-BXR_API void bxr_keyboard_begin_frame(void);
+void bxr_keyboard_begin_frame(void);
 
 /**
  * Tears down the keyboard input system. Must be called when the
  * application is closing to free any resources used by the keyboard system.
  */
-BXR_API void bxr_keyboard_teardown(void);
+void bxr_keyboard_teardown(void);
 
 /**
  * Handle a key down event for the given scancode. Must be called when a
@@ -183,7 +183,7 @@ BXR_API void bxr_keyboard_teardown(void);
  *
  * `scancode` is the scancode of the key that was pressed.
  */
-BXR_API void bxr_key_down(bxr_key_e scancode);
+void bxr_key_down(bxr_key_e scancode);
 
 /**
  * Handle a key up event for the given scancode. Must be called when a
@@ -191,7 +191,7 @@ BXR_API void bxr_key_down(bxr_key_e scancode);
  *
  * `scancode` is the scancode of the key that was released.
  */
-BXR_API void bxr_key_up(bxr_key_e scancode);
+void bxr_key_up(bxr_key_e scancode);
 
 /**
  * ## Public API
@@ -227,6 +227,13 @@ BXR_API const char *bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod);
  * `return` true if the key is currently held down, false otherwise.
  */
 BXR_API bool bxr_key_held(bxr_key_e key);
+
+/**
+ * Check if any key was just pressed this frame.
+ *
+ * `return` true if any key was just pressed this frame, false otherwise.
+ */
+BXR_API bool bxr_key_any_just_pressed(void);
 
 /**
  * Check if a key was just pressed this frame.

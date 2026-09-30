@@ -41,6 +41,7 @@ LIB_DIR := lib
 
 PHYSFS_DIR := $(LIB_DIR)/physfs
 SDL_GP_DIR := $(LIB_DIR)/SDL_gp
+STB_DIR := $(LIB_DIR)/stb
 
 # Options
 DEBUG ?= 0
@@ -61,7 +62,7 @@ AR = ar
 LDLIBS  = -lSDL3 -lm
 LDFLAGS =
 
-CFLAGS = -std=c99 -Wall -DBOXER_BUILD -I$(PHYSFS_DIR) -I$(SDL_GP_DIR) -I$(BOXER_INC_DIR)
+CFLAGS = -std=c99 -Wall -DBOXER_BUILD -I$(PHYSFS_DIR) -I$(SDL_GP_DIR) -I$(BOXER_INC_DIR) -I$(STB_DIR)
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -O0 -DDEBUG
@@ -156,7 +157,7 @@ $(DOCS_OUT_DIR)/%.md: $(BOXER_INC_DIR)/%.h | $(DOCS_OUT_DIR)
 	node $(BOXER_DOCS_DIR)/docgen/docgen.js $< -o $@
 
 # --- Test ------------------------------------------------------------------
-tests: $(TEST_TARGET)
+test: $(TEST_TARGET)
 
 $(TEST_TARGET): $(TEST_OBJS) $(STATIC_LIB)
 	$(CC) $(TEST_LDFLAGS) -o $@ $(TEST_OBJS) $(TEST_LDLIBS)

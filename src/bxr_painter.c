@@ -1,13 +1,12 @@
 #include <SDL3/SDL.h>
 
-#include <SDL_gp.h>
-
 #include "bxr_assert.h"
 #include "bxr_context.h"
 #include "bxr_painter.h"
+#include "bxr_sdl_gp.h"
 
 void
-bxr_painter_setup(bxr_painter_desc_t *desc)
+bxr_painter_setup(const bxr_painter_desc_t *desc)
 {
   BXR_ASSERT(desc);
   BXR_ASSERT(desc->window);

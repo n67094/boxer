@@ -4,25 +4,12 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
-// Override SDL_gp configuration.
-
-#define SDL_GP_PATH_MAX BXR_PATH_MAX_LENGTH
-#define SDL_GP_TEXTURE_DIMENSION_MAX BXR_PAINTER_MAX_TEXTURE_DIMENSION
-#define SDL_GP_IMAGE_MAX BXR_PAINTER_MAX_IMAGE
-#define SDL_GP_SHADER_MAX BXR_PAINTER_MAX_SHADER
-#define SDL_GP_PIPELINE_MAX BXR_PAINTER_MAX_PIPELINE
-#define SDL_GP_STATE_MAX BXR_PAINTER_MAX_STATE
-#define SDL_GP_TEXTURE_SLOTS_MAX BXR_PAINTER_MAX_TEXTURE_SLOTS
-#define SDL_GP_TRANSFORMS_MAX BXR_PAINTER_MAX_TRANSFORMS
-#define SDL_GP_UNIFORM_FLOATS_MAX BXR_PAINTER_MAX_UNIFORM_FLOATS
-#define SDL_GP_OPTIMIZER_DEPTH BXR_PAINTER_MAX_OPTIMIZER_DEPTH
-
 #include "bxr.h"
 
 // SDL_gp is defined and included here to prevent duplicate implementation
 // inclusions from other SDL_gp headers within the bxr file.
 #define SDL_GP_IMPLEMENTATION
-#include <SDL_gp.h>
+#include "bxr_sdl_gp.h"
 
 static bool
 update_refresh_rate_(bxr_context_t *context)
@@ -162,16 +149,17 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     .gpu_device   = context->gpu_device,
   };
 
-  bxr_painter_setup(&painter_desc);
-
   // Setup subsystems
   bxr_log_setup();
   bxr_asset_setup(context);
   bxr_keyboard_setup();
   bxr_mouse_setup();
   bxr_gamepad_setup();
-  bxr_image_setup(context);
   bxr_shader_setup(context);
+  bxr_audio_setup();
+  bxr_image_setup();
+
+  bxr_painter_setup(&painter_desc);
 
   // Call user setup
   bxr_game_setup();
@@ -187,10 +175,6 @@ SDL_AppIterate(void *appstate)
     BXR_LOG_ERROR("Invalid context in SDL_AppIterate");
     return SDL_APP_FAILURE;
   }
-
-  bxr_keyboard_begin_frame();
-  bxr_mouse_begin_frame();
-  bxr_gamepad_begin_frame();
 
   static Uint64 fps            = 0;
   static Uint64 ups            = 0;
@@ -232,6 +216,11 @@ SDL_AppIterate(void *appstate)
   SDL_GPBegin(context->config.virtual_width, context->config.virtual_height);
   {
     while (lag_ms >= delta_ms) {
+      bxr_mouse_begin_frame();
+      bxr_gamepad_begin_frame();
+      bxr_audio_begin_frame();
+      bxr_keyboard_begin_frame();
+
       // --- Update here (fixed timestep) ---
 
       bxr_game_update(delta_ms); // this use SDL_GP API
@@ -354,6 +343,7 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 
   bxr_game_teardown();
 
+  bxr_audio_teardown();
   bxr_shader_teardown();
   bxr_image_teardown();
   bxr_gamepad_teardown();

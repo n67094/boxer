@@ -13,6 +13,7 @@
 
 #include "bxr_assert.h"
 #include "bxr_asset.h"
+#include "bxr_audio.h"
 #include "bxr_color.h"
 #include "bxr_config.h"
 #include "bxr_context.h"
@@ -28,13 +29,14 @@
 #include "bxr_math.h"
 #include "bxr_mem.h"
 #include "bxr_mouse.h"
+#include "bxr_multimap.h"
 #include "bxr_painter.h"
 #include "bxr_pipeline.h"
 #include "bxr_pixel.h"
 #include "bxr_sampler.h"
 #include "bxr_shader.h"
 #include "bxr_sparse_set.h"
-#include "bxr_str.h"
+#include "bxr_string.h"
 #include "bxr_time.h"
 #include "bxr_unit.h"
 

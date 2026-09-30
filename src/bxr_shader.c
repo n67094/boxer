@@ -1,6 +1,6 @@
 #include <SDL3/SDL.h>
 
-#include <SDL_gp.h>
+#include "bxr_sdl_gp.h"
 
 #include <physfs.h>
 
@@ -101,7 +101,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 }
 
 bxr_shader_t
-bxr_shader_create(bxr_shader_desc_t *desc)
+bxr_shader_create(const bxr_shader_desc_t *desc)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
