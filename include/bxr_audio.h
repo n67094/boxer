@@ -254,13 +254,10 @@ BXR_API void bxr_voice_destroy(bxr_voice_t voice);
 /**
  * Add a voice to a tag.
  *
- * `tag_name` the tag; must not be NULL. The string is copied.
+ * `tag_name` the tag; must not be NULL (The string is copied).
  * `voice` the voice to tag.
  *
  * `return` true on success, false on failure.
- *
- * FIXME: if `bxr_multimap_add()` fails, the tag stays in the voice's own list,
- * leaving both out of sync. Roll back the voice entry on failure.
  */
 BXR_API bool bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice);
 
@@ -270,11 +267,7 @@ BXR_API bool bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice);
  * `tag_name` the tag; must not be NULL.
  * `voice` the voice to untag.
  *
- * `return` true on success or if the voice has no tags, false if the voice
- * was not in the tag.
- *
- * FIXME: returns true when the voice has no tags at all but false when it has
- * other tags; the result should be consistent in both cases.
+ * `return` true if a tag was removed, false otherwise.
  */
 BXR_API bool bxr_audio_tag_remove(const char *tag_name, bxr_voice_t voice);
 

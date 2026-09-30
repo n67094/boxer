@@ -1007,6 +1007,11 @@ bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice)
     }
   }
 
+  if (!bxr_multimap_add(audio_tags_, tag_name, voice.id)) {
+    BXR_LOG_ERROR("Failed to add tag '%s' to multimap", tag_name);
+    return false;
+  }
+
   // Add the tag to the voice's tag list
   v->tags[v->tag_count] = bxr_strdup(tag_name);
   if (!v->tags[v->tag_count]) {
@@ -1015,7 +1020,7 @@ bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice)
   }
   v->tag_count++;
 
-  return bxr_multimap_add(audio_tags_, tag_name, voice.id);
+  return true;
 }
 
 bool
@@ -1031,7 +1036,7 @@ bxr_audio_tag_remove(const char *tag_name, bxr_voice_t voice)
   }
 
   if (v->tag_count == 0) {
-    return true; // No tags to remove
+    return false; // No tags to remove
   }
 
   // Remove the tag from the voice's tag list
