@@ -8,6 +8,19 @@
  * Once done, call `bxr_voice_destroy()` and `bxr_audio_destroy()` to free the
  * resources.
  *
+ * When the number of voices exceeds `BXR_AUDIO_MAX_VOICES`, the oldest voice is
+ * stopped and destroyed to make room for the new one. This is a simple voice
+ * management strategy. So any handle to a voice may become invalid, operations
+ * like `bxr_voice_set_volume()` will then do nothing. `bxr_voice_validity()`
+ * can be used to check if a voice is still valid.
+ *
+ * //TODO
+ *
+ * 1. when adding a voice save the frame number.
+ * 2. line 1011: if the multimap is full, remove the oldest voice from
+ * voice_pool_ and destroy it (this should remove it from the multimap too).
+ * 3. Then add the new voice to the multimap.
+ *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
 
@@ -224,10 +237,15 @@ BXR_API float bxr_voice_get_pitch(bxr_voice_t voice);
 /**
  * Set the stereo balance of a voice.
  *
+ * Only mono and stereo sources can be panned. Sources with more channels play
+ * with their own layout.
+ *
  * `voice` the voice to change.
  * `pan` balance clamped to [-1.0, 1.0]: -1.0 left, 0.0 center, 1.0 right.
  *
  * `return` true on success, false on failure.
+ *
+ * **NOTE:** Only mono and stereo sources can be panned.
  */
 BXR_API bool bxr_voice_set_pan(bxr_voice_t voice, float pan);
 

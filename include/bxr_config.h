@@ -1,9 +1,7 @@
 /**
  * File `bxr_config.h`.
  *
- * Compile-time limits and default sizes used by boxer modules.
- *
- * Values are fixed at build time; change them here and rebuild boxer.
+ * Boxer's compile-time configuration header.
  *
  * Copyright (c) 2025 nsix. All rights reserved.
  */
@@ -19,8 +17,6 @@
 
 /**
  * Max length of a file path in bytes, including the NUL terminator.
- *
- * Longer paths are truncated.
  */
 #define BXR_PATH_MAX_LENGTH 512
 
@@ -49,10 +45,9 @@
 #define BXR_PAINTER_MAX_UNIFORM_FLOATS 8
 
 /**
- * Max number of commands that are looked back and batched together for
- * optimization.
+ * Max number of draw call that are looked back and batched together.
  */
-#define BXR_PAINTER_OPTIMIZER_DEPTH 8
+#define BXR_PAINTER_MAX_OPTIMIZER_DEPTH 8
 
 /**
  * ## Painter Resources Configuration
@@ -61,7 +56,7 @@
 /**
  * Max texture width or height in pixels.
  */
-#define BXR_PAINTER_MAX_TEXTURE_DIMENSION 4096
+#define BXR_PAINTER_MAX_TEXTURE_SIZE (16 * 1024 * 1024) // 16 mb
 
 /**
  * Max number of images that can be loaded at the same time.
@@ -79,17 +74,11 @@
 #define BXR_PAINTER_MAX_PIPELINE 64
 
 /**
- * Max number of commands that are looked back and batched together for
- * optimization.
- */
-#define BXR_PAINTER_MAX_OPTIMIZER_DEPTH 8
-
-/**
  * ## Audio Configuration
  */
 
 /**
- * Max number of audio tracks that can be loaded at the same time.
+ * Max number of audio that can be loaded at the same time.
  */
 #define BXR_AUDIO_MAX 32
 
@@ -104,19 +93,19 @@
 #define BXR_AUDIO_MAX_TAGS 8
 
 /**
- * The number of bytes to read from an audio file at a time when loading it into
- * memory.
+ * Size of the audio chunk fed to a playing voice's stream.
+ *
+ * 2048 frames * 2 channels * 4 bytes = 16 KB per chunk.
  */
-#define BXR_AUDIO_LOAD_CHUNK (1024 * 16) // 16 KB
+#define BXR_AUDIO_LOAD_FRAMES 2048
 
 /**
  * ## INI Reader/Writer Configuration
  */
 
 /**
- * Initial capacity in bytes of the INI writer buffer.
- *
- * The buffer doubles in size when it is full.
+ * Initial capacity in bytes of the INI writer buffer. The buffer doubles in
+ * size when it is full.
  */
 #define BXR_INI_DEFAULT_DATA_CAPACITY 512
 

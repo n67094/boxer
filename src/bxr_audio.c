@@ -41,17 +41,18 @@ typedef struct bxr_audio_s_
 
 typedef struct bxr_voice_s_
 {
-  bxr_voice_t voice; // pointer to the public voice handle
+  bxr_voice_t voice;
   SDL_AudioStream *stream;
-  int audio_slot; // slot in audios_
+  int audio_slot;
   float volume;
   Uint32 position; // in bytes
-  bool feeding;    // playing/feeding audio data
+  bool feeding;
   bool one_shot;
   char *tags[BXR_AUDIO_MAX_TAGS]; // tags associated with this voice
   size_t tag_count;
   float pitch; // pan (0.01 to 100.0, 1.0 is the base)
   float pan;   // pan adjustment (-1.0 left, 0.0 center, 1.0 right)
+  int channels;
 } bxr_voice_t_;
 
 static Uint32 initialized_ = 0;
@@ -213,13 +214,13 @@ bxr_audio_put_panned_(bxr_voice_t_ *voice,
                       int frames,
                       int channels)
 {
-  float out[BXR_AUDIO_LOAD_CHUNK * 2];
+  float out[BXR_AUDIO_LOAD_FRAMES * 2];
 
   const float l = (voice->pan > 0.0f) ? 1.0f - voice->pan : 1.0f;
   const float r = (voice->pan < 0.0f) ? 1.0f + voice->pan : 1.0f;
 
   while (frames > 0) {
-    int n = frames < BXR_AUDIO_LOAD_CHUNK ? frames : BXR_AUDIO_LOAD_CHUNK;
+    int n = frames < BXR_AUDIO_LOAD_FRAMES ? frames : BXR_AUDIO_LOAD_FRAMES;
 
     if (channels == 1) {
       for (int i = 0; i < n; ++i) {
@@ -287,15 +288,15 @@ bxr_audio_begin_frame(void)
 
     SDL_SetAudioStreamGain(voice->stream, voice->volume);
 
-    if (SDL_GetAudioStreamQueued(voice->stream) >= BXR_AUDIO_LOAD_CHUNK) {
+    // Panned voices are stereo, others keep the source channel count.
+    size_t load_bytes = BXR_AUDIO_LOAD_FRAMES * voice->channels * sizeof(float);
+    if (SDL_GetAudioStreamQueued(voice->stream) >= load_bytes) {
       // Already have enough queued data, skip feeding
       continue;
     }
 
     // Calculate the number of bytes for a single frame
     const Uint64 single_frame = (Uint64)audio->spec.channels * sizeof(float);
-    // Calculate the number of frames to feed in each chunk
-    const int chunk_frames = BXR_AUDIO_LOAD_CHUNK / single_frame;
 
     // Guard: If the voice position is already at or beyond the audio length,
     // handle looping or stopping for one-shot voices.
@@ -310,19 +311,27 @@ bxr_audio_begin_frame(void)
     // Calculate the remaining frames to feed (in case the audio is shorter than
     // the chunk size)
     Uint64 remaining_frames
-        = audio->length - (Uint64)voice->position / single_frame;
+        = (audio->length - (Uint64)voice->position) / single_frame;
 
-    // Determine how many frames to feed in this iteration (up to chunk_frames)
-    int frames = remaining_frames < (Uint64)chunk_frames ? (int)remaining_frames
-                                                         : chunk_frames;
+    // Determine how many frames to feed in this iteration (up to
+    // BXR_AUDIO_LOAD_FRAMES)
+    int frames = remaining_frames < (Uint64)BXR_AUDIO_LOAD_FRAMES
+                     ? (int)remaining_frames
+                     : BXR_AUDIO_LOAD_FRAMES;
 
     if (frames == 0) {
       continue;
     }
 
-    // Pan and queue the audio data to the stream
+    // Pan and queue the audio data to the stream. Sources with more than two
+    // channels are not panned and are queued as is.
     const float *src = (const float *)(audio->data + voice->position);
-    if (!bxr_audio_put_panned_(voice, src, frames, audio->spec.channels)) {
+    bool queued
+        = audio->spec.channels <= 2
+              ? bxr_audio_put_panned_(voice, src, frames, audio->spec.channels)
+              : SDL_PutAudioStreamData(
+                    voice->stream, src, frames * (int)single_frame);
+    if (!queued) {
       BXR_LOG_ERROR(
           "Failed to queue audio data for voice %d: %s", i, SDL_GetError());
       continue;
@@ -664,9 +673,14 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
-  // Force the audio stream to be stereo for panning support
-  SDL_AudioSpec in = { a->spec.format, 2, a->spec.freq };
-  SDL_SetAudioStreamFormat(v->stream, &in, NULL);
+  // Force mono and stereo streams to be stereo for panning support. Sources
+  // with more channels keep their layout and let SDL map it to the device.
+  v->channels = a->spec.channels;
+  if (a->spec.channels <= 2) {
+    SDL_AudioSpec in = { a->spec.format, 2, a->spec.freq };
+    SDL_SetAudioStreamFormat(v->stream, &in, NULL);
+    v->channels = 2;
+  }
 
   if (SDL_BindAudioStream(device_id_, v->stream) == false) {
     BXR_LOG_ERROR("Failed to bind audio stream to device: %s", SDL_GetError());
@@ -817,11 +831,11 @@ bxr_voice_get_position(bxr_voice_t voice)
     return 0;
   }
 
-  // The audio data keeps the source channel count, but the stream input is
+  // The audio data keeps the source channel count, but the stream input may be
   // forced to stereo for pan support, so each side has its own frame size.
   const Uint64 bytesize     = SDL_AUDIO_BYTESIZE(a->spec.format);
   const Uint64 src_frame    = (Uint64)a->spec.channels * bytesize;
-  const Uint64 stream_frame = 2 * bytesize;
+  const Uint64 stream_frame = (Uint64)v->channels * bytesize;
   if (src_frame == 0 || a->spec.freq <= 0) {
     return 0;
   }
@@ -938,6 +952,12 @@ bxr_voice_set_pan(bxr_voice_t voice, float pan)
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
     BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    return false;
+  }
+
+  if (v->channels != 2) {
+    BXR_LOG_WARN("Pan is only supported for mono and stereo voices, ID: %u",
+                 voice.id);
     return false;
   }
 
