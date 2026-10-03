@@ -7,4 +7,4 @@ AI tools may assist with the following tasks, where they can improve quality or 
 - Drafting documentation for header files.
 - Automating parts of the Git workflow, such as drafting commit messages and pull request descriptions.
 
-AI must never be used to generate source code.
+AI must never be used to generate source code elsewhere than in the context of code review.

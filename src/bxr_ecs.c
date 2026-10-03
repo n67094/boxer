@@ -1,3 +1,13 @@
+/**
+ * File `bxr_ecs.c`.
+ *
+ * Copyright (c) 2026 nsix.
+ *
+ * This is an altered version of pico_ecs by James McLean
+ * (https://github.com/empyreanx/pico_headers).
+ * Copyright (c) 2025 James McLean. Used under the zlib License (see LICENSE).
+ */
+
 #include <SDL3/SDL.h>
 
 #include "bxr_assert.h"
@@ -328,7 +338,7 @@ bxr_ecs_create(size_t entity_count)
   bxr_ecs_t *ecs = NULL;
   BXR_NEW(ecs);
   if (!ecs) {
-    goto free;
+    return NULL;
   }
   BXR_MEMSET(ecs, 0, sizeof(bxr_ecs_t));
 
@@ -396,7 +406,9 @@ free:
 void
 bxr_ecs_destroy(bxr_ecs_t *ecs)
 {
-  BXR_ASSERT(ecs);
+  if (!ecs) {
+    return;
+  }
 
   // Free system data
   for (size_t i = 0; i < ecs->system_count; i++) {
@@ -437,6 +449,7 @@ void
 bxr_ecs_reset(bxr_ecs_t *ecs)
 {
   BXR_ASSERT(ecs);
+  BXR_ASSERT(ecs->active_system < 0);
 
   // Reset entity ID stacks
   ecs->entity_free_current    = 0;
@@ -487,6 +500,9 @@ bxr_ecs_component_define(bxr_ecs_t *ecs,
       = ecs->entity_count; // Start with capacity equal to max entities
   BXR_CALLOC(
       component_array->data, component_array->capacity, component_array->size);
+  if (!component_array->data) {
+    return BXR_ECS_INVALID_COMPONENT;
+  }
 
   // Set component data for the new component type
   bxr_ecs_component_data_t_ *component_data = &ecs->components[id];
@@ -515,23 +531,28 @@ bxr_ecs_entity_create(bxr_ecs_t *ecs)
   }
   // If no free entity IDs, create a new one
   else {
-    entity_id = ecs->next_entity_id++;
+    entity_id = ecs->next_entity_id;
 
     // Grow the entity data array if necessary
     if (entity_id >= ecs->entity_count) {
       size_t old_count = ecs->entity_count;
       size_t new_count = old_count * 2;
 
-      BXR_RESIZE(ecs->entities, new_count * sizeof(bxr_ecs_entity_data_t_));
-      if (!ecs->entities) {
+      bxr_ecs_entity_data_t_ *new_entities = SDL_realloc(
+          ecs->entities, new_count * sizeof(bxr_ecs_entity_data_t_));
+      if (!new_entities) {
         return BXR_ECS_INVALID_ENTITY;
       }
+
+      ecs->entities = new_entities;
       BXR_MEMSET(&ecs->entities[old_count],
                  0,
                  (new_count - old_count) * sizeof(bxr_ecs_entity_data_t_));
 
       ecs->entity_count = new_count;
     }
+
+    ecs->next_entity_id++;
   }
 
   ecs->entities[entity_id].component_bits = (bxr_ecs_bitset_t_){ 0 };
@@ -545,6 +566,7 @@ bool
 bxr_ecs_entity_is_ready(const bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
 {
   BXR_ASSERT(ecs);
+  BXR_ASSERT(entity < ecs->entity_count);
 
   return ecs->entities[entity].ready;
 }
@@ -576,6 +598,10 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
   BXR_ASSERT(component < ecs->component_count);
   BXR_ASSERT(ecs->entities[entity].ready);
 
+  if (bxr_ecs_bitset_test_(&ecs->entities[entity].component_bits, component)) {
+    return NULL; // Component already exists for this entity
+  }
+
   // Get the entity
   bxr_ecs_entity_data_t_ *entity_data = &ecs->entities[entity];
 
@@ -586,15 +612,19 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
 
   // Grow component_array if needed
   if (entity >= component_array->capacity) {
+    size_t new_capacity = component_array->capacity;
     do {
-      component_array->capacity *= 2;
-    } while (entity >= component_array->capacity);
+      new_capacity *= 2;
+    } while (entity >= new_capacity);
 
-    BXR_RESIZE(component_array->data,
-               component_array->capacity * component_array->size);
-    if (!component_array->data) {
+    void *new_data = SDL_realloc(component_array->data,
+                                 new_capacity * component_array->size);
+    if (!new_data) {
       return NULL;
     }
+
+    component_array->data     = new_data;
+    component_array->capacity = new_capacity;
   }
 
   // Get a pointer to the component's data and set it to zero
@@ -631,8 +661,8 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
           system_data->add_cb(ecs, entity, system_data->udata);
       }
     }
-    // If the added component causes the entity to be excluded, check if it was
-    // in the system and remove it
+    // If the added component causes the entity to be excluded, check if it
+    // was in the system and remove it
     else if (bxr_ecs_bitset_true_(&exclude_overlap)) {
       if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
         if (system_data->remove_cb)
@@ -678,8 +708,8 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
         }
       }
     }
-    // If the added component causes the entity to be excluded, check if it was
-    // in the system and remove it
+    // If the added component causes the entity to be excluded, check if it
+    // was in the system and remove it
     else if (bxr_ecs_bitset_true_(&exclude_overlap)) {
       if (bxr_sparse_set_contains(set, entity, NULL)) {
         if (system_data->remove_cb)
@@ -702,6 +732,8 @@ bxr_ecs_entity_get_component(bxr_ecs_t *ecs,
   BXR_ASSERT(component < BXR_ECS_MAX_COMPONENT);
   BXR_ASSERT(component < ecs->component_count);
   BXR_ASSERT(ecs->entities[entity].ready);
+  BXR_ASSERT(
+      bxr_ecs_bitset_test_(&ecs->entities[entity].component_bits, component));
 
   bxr_ecs_component_array_t_ *component_array
       = &ecs->component_arrays[component];
@@ -743,8 +775,8 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
     bxr_ecs_bitset_t_ require_overlap
         = bxr_ecs_bitset_and_(&component_bits, &system_data->require_bits);
 
-    // If not excluded and required then the entity is in the system and should
-    // be removed.
+    // If not excluded and required then the entity is in the system and
+    // should be removed.
     if (!bxr_ecs_bitset_true_(&exclude_overlap)
         && bxr_ecs_bitset_true_(&require_overlap)) {
       if (bxr_sparse_set_remove(system_data->entity_ids, entity)) {
@@ -752,8 +784,8 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
           system_data->remove_cb(ecs, entity, system_data->udata);
       }
     }
-    // If the entity was excluded because of it's removed component, check if it
-    // now eligible to be added to the system and add it
+    // If the entity was excluded because of it's removed component, check if
+    // it now eligible to be added to the system and add it
     else if (bxr_ecs_bitset_true_(&exclude_overlap)
              && bxr_ecs_bitset_equal_(&next_component_bits,
                                       &system_data->require_bits)) {
@@ -773,8 +805,8 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
     bxr_ecs_bitset_t_ require_overlap
         = bxr_ecs_bitset_and_(&component_bits, &system_data->require_bits);
 
-    // If not excluded and required then the entity is in the system and should
-    // be removed.
+    // If not excluded and required then the entity is in the system and
+    // should be removed.
     if (!bxr_ecs_bitset_true_(&exclude_overlap)
         && bxr_ecs_bitset_true_(&require_overlap)) {
       if (bxr_sparse_set_contains(system_data->entity_ids, entity, NULL)) {
@@ -784,8 +816,8 @@ bxr_ecs_entity_remove_component(bxr_ecs_t *ecs,
         bxr_ecs_push_remove_entity_(ecs, entity);
       }
     }
-    // If the entity was excluded because of it's removed component, check if it
-    // now eligible to be added to the system and add it
+    // If the entity was excluded because of it's removed component, check if
+    // it now eligible to be added to the system and add it
     else if (bxr_ecs_bitset_true_(&exclude_overlap)
              && bxr_ecs_bitset_equal_(&next_component_bits,
                                       &system_data->require_bits)) {
@@ -885,8 +917,8 @@ bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
 
   bxr_ecs_destruct_(ecs, entity);
 
-  // If no system is running, clean up the entity immediately and push it to the
-  // free stack for re-use
+  // If no system is running, clean up the entity immediately and push it to
+  // the free stack for re-use
   if (ecs->active_system < 0) {
     bxr_ecs_push_free_entity_(ecs, entity);
     BXR_MEMSET(entity_data, 0, sizeof(bxr_ecs_entity_data_t_));
@@ -1056,6 +1088,7 @@ int
 bxr_ecs_system_run(bxr_ecs_t *ecs, bxr_ecs_system_t system, bxr_ecs_mask_t mask)
 {
   BXR_ASSERT(ecs);
+  BXR_ASSERT(ecs->active_system < 0);
   BXR_ASSERT(system < BXR_ECS_MAX_SYSTEM);
   BXR_ASSERT(system < ecs->system_count);
 
