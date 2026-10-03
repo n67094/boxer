@@ -285,7 +285,8 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
     update_refresh_rate_(context);
     break;
   case SDL_EVENT_WINDOW_RESIZED:
-    bxr_context_set_window_dimensions(event->window.data1, event->window.data2);
+    context->config.width  = event->window.data1;
+    context->config.height = event->window.data2;
     break;
   case SDL_EVENT_MOUSE_WHEEL:
     bxr_mouse_wheel_motion(event->wheel.x, event->wheel.y);
@@ -367,6 +368,8 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
       SDL_DestroyWindow(context->window);
     }
   }
+
+  BXR_FREE(context);
 }
 
 void

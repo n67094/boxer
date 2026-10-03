@@ -38,7 +38,7 @@ bxr_context_get_window(void)
   return context_->window;
 }
 
-void
+bool
 bxr_context_set_window_dimensions(int width, int height)
 {
   BXR_ASSERT(context_);
@@ -46,7 +46,7 @@ bxr_context_set_window_dimensions(int width, int height)
   context_->config.width  = width;
   context_->config.height = height;
 
-  SDL_SetWindowSize(context_->window, width, height);
+  return SDL_SetWindowSize(context_->window, width, height);
 }
 
 void
@@ -76,14 +76,14 @@ bxr_context_get_window_dimensions(void)
                        .y = context_->config.height };
 }
 
-void
+bool
 bxr_context_set_fullscreen(bool fullscreen)
 {
   BXR_ASSERT(context_);
 
   context_->config.fullscreen = fullscreen;
 
-  SDL_SetWindowFullscreen(context_->window, fullscreen);
+  return SDL_SetWindowFullscreen(context_->window, fullscreen);
 }
 
 bool
@@ -91,17 +91,17 @@ bxr_context_is_fullscreen(void)
 {
   BXR_ASSERT(context_);
 
-  return context_->config.fullscreen;
+  return SDL_GetWindowFlags(context_->window) & SDL_WINDOW_FULLSCREEN;
 }
 
-void
+bool
 bxr_context_set_resizable(bool resizable)
 {
   BXR_ASSERT(context_);
 
   context_->config.resizable = resizable;
 
-  SDL_SetWindowResizable(context_->window, resizable);
+  return SDL_SetWindowResizable(context_->window, resizable);
 }
 
 bool

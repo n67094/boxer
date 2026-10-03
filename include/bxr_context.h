@@ -1,12 +1,9 @@
 /**
  * File `bxr_context.h`.
  *
+ * Global engine context (singleton).
+ *
  * Copyright (c) 2026 nsix. All rights reserved.
- *
- * # Boxer context
- *
- * The context module provides a global context for the game, which holds
- * important information about the engine state and configuration.
  */
 
 #ifndef BXR_CONTEXT_H_
@@ -22,98 +19,100 @@ typedef struct bxr_context_s
 {
   bxr_game_config_t config;
 
-  Uint64 fps; // Frames per second (rendering fixed timestep)
-  Uint64 ups; // Updates per second (game logic)
-
-  float target_delta_ms;
-
-  SDL_GPUDevice *gpu_device;
-  SDL_AudioDeviceID *audio_devices;
   SDL_Window *window;
-  SDL_GPUTextureFormat texture_format;
   SDL_PixelFormat pixel_format;
+  SDL_GPUTextureFormat texture_format;
+  SDL_GPUDevice *gpu_device;
+
+  float target_delta_ms; // best guess for the target time between updates.
 } bxr_context_t;
 
 /**
- * Get the global context instance.
+ * Get the global context and create it if it doesn't exist yet.
  *
- * `return` Pointer to the global context instance.
+ * `return` the global context, or `NULL` if the allocation failed.
+ *
+ * **Note**: the context is owned by the engine, the caller must not free it.
  */
 BXR_API bxr_context_t *bxr_context_get(void);
 
 /**
- * Get the GPU device associated with the context.
+ * Get the GPU device used for rendering.
  *
- * `return` Pointer to the SDL_GPUDevice associated with the context.
+ * `return` the GPU device, or `NULL` if not created yet.
+ *
+ * **Note**: the device is owned by the engine, the caller must not destroy it.
  */
 BXR_API SDL_GPUDevice *bxr_context_get_gpu_device(void);
 
 /**
- * Get the SDL_Window associated with the context.
+ * Get the game window.
  *
- * `return` Pointer to the SDL_Window associated with the context.
+ * `return` the window, or `NULL` if not created yet.
+ *
+ * **Note**: the window is owned by the engine, the caller must not destroy it.
  */
 BXR_API SDL_Window *bxr_context_get_window(void);
 
 /**
- * Set the window dimensions.
+ * Resize the window and store the new size in the configuration.
  *
- * `width`  The new width of the window in pixels.
- * `height` The new height of the window in pixels.
+ * `width` new width in window coordinates.
+ * `height` new height in window coordinates.
+ *
+ * return `true` if the window was resized successfully, `false` otherwise.
  */
-BXR_API void bxr_context_set_window_dimensions(int width, int height);
+BXR_API bool bxr_context_set_window_dimensions(int width, int height);
 
 /**
- * Get the current window dimensions.
+ * Get the window size stored in the configuration.
  *
- * `return` The current window dimensions as a `bxr_vec2_t` (x = width, y =
- * height).
+ * `return` the size in window coordinates (x = width, y = height).
  */
 BXR_API bxr_vec2_t bxr_context_get_window_dimensions(void);
 
 /**
- * Set the virtual window dimensions.
+ * Set the virtual resolution the game renders at.
  *
- * `width`  The new virtual width of the window in pixels.
- * `height` The new virtual height of the window in pixels.
+ * Takes effect on the next frame, the window itself is not resized.
+ *
+ * `width` virtual width in pixels.
+ * `height` virtual height in pixels.
  */
 BXR_API void bxr_context_set_virtual_window_dimensions(int width, int height);
 
 /**
- * Get the current virtual window dimensions.
+ * Get the virtual resolution the game renders at.
  *
- * `return` The current virtual window dimensions as a `bxr_vec2_t` (x = width,
- * y = height).
+ * `return` the virtual size in pixels (x = width, y = height).
  */
 BXR_API bxr_vec2_t bxr_context_get_virtual_window_dimensions(void);
 
 /**
- * Set the fullscreen mode of the window.
+ * Switch the window between fullscreen and windowed mode.
  *
- * `fullscreen` `true` to set the window to fullscreen mode, `false` to set it
- * to windowed mode.
+ * `fullscreen` `true` for fullscreen, `false` for windowed.
  */
-BXR_API void bxr_context_set_fullscreen(bool fullscreen);
+BXR_API bool bxr_context_set_fullscreen(bool fullscreen);
 
 /**
- * Check if the window is currently in fullscreen mode.
+ * Check whether the window is in fullscreen mode.
  *
- * `return` `true` if the window is in fullscreen mode, `false` otherwise.
+ * `return` true if fullscreen, `false` otherwise.
  */
 BXR_API bool bxr_context_is_fullscreen(void);
 
 /**
- * Set the resizable property of the window.
+ * Allow or forbid the user to resize the window.
  *
- * `resizable` `true` to make the window resizable, `false` to make it
- * non-resizable.
+ * `resizable` `true` to allow resizing, `false` to forbid it.
  */
-BXR_API void bxr_context_set_resizable(bool resizable);
+BXR_API bool bxr_context_set_resizable(bool resizable);
 
 /**
- * Check if the window is currently resizable.
+ * Check whether the window can be resized.
  *
- * `return` `true` if the window is resizable, `false` otherwise.
+ * `return` true if the window is resizable, `false` otherwise.
  */
 BXR_API bool bxr_context_is_resizable(void);
 
