@@ -3,9 +3,6 @@
  *
  * Common macros shared by every boxer module.
  *
- * Provides symbol export (`BXR_API`), forced inlining (`BXR_INLINE`),
- * initialization cookies, small utility macros and ANSI terminal escape codes.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
 
@@ -18,9 +15,6 @@
  * On Windows it expands to `__declspec(dllexport)` when `BOXER_BUILD` is
  * defined (building boxer) and `__declspec(dllimport)` otherwise. Elsewhere it
  * expands to `extern`.
- *
- * FIXME: on Windows a static build still gets `dllimport` in client code; add a
- * `BOXER_STATIC` switch that expands to nothing.
  */
 #if defined(_WIN32)
 #ifdef BOXER_BUILD
@@ -32,64 +26,30 @@
 #define BXR_API extern
 #endif
 
-/**
- * Declares a header function as `static inline` and forces it to be inlined.
- *
- * FIXME: the MSVC and fallback branches define `INLINE` instead of
- * `BXR_INLINE`, so every header using `BXR_INLINE` fails to compile there, and
- * `INLINE` clashes with the one defined in `SDL_gp.h`. Define `BXR_INLINE` as
- * `static __forceinline` (MSVC) and `static inline` (fallback) instead.
- * FIXME: `__attribute` is a GNU alternate spelling; prefer `__attribute__`.
- */
 #if defined(_MSC_VER)
-#define INLINE __forceinline
+#define BXR_INLINE static __forceinline
 #elif defined(__GNUC__) || defined(__clang__)
-#define BXR_INLINE static inline __attribute((always_inline))
+#define BXR_INLINE static inline __attribute__((always_inline))
 #else
-#define INLINE
+#define BXR_INLINE static inline
 #endif
 
-/**
- * Organization name used to build the per-user preference directory.
- */
 #define BXR_ORGANIZATION_NAME "boxer"
 
-/**
- * Magic value stored by a subsystem once initialized, checked by its functions
- * with `BXR_ASSERT()`.
- */
 #define BXR_INIT_COOKIE 0xC0DED1ED
 
 /**
- * Substitutes a default for a zero value, typically an unset parameter.
- *
- * `val` value to check; evaluated twice, so it must have no side effects.
- * `def` value used when `val` is 0; evaluated only in that case.
- *
- * `return` `def` if `val` is 0, otherwise `val`.
+ * Returns `def` if `val` is 0, otherwise returns `val`.
  */
 #define BXR_DEFAULT(val, def) (((val) == 0) ? (def) : (val))
 
 /**
- * Gets the byte offset of a member within a struct.
- *
- * `TYPE` struct type.
- * `ELEMENT` member name.
- *
- * `return` the offset as a `size_t`.
- *
- * FIXME: dereferencing a null pointer is undefined behavior; use `offsetof()`
- * from `<stddef.h>` instead.
+ * Returns the offset of `ELEMENT` in `TYPE`, in bytes.
  */
-#define BXR_OFFSET_OF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
+#define BXR_OFFSET_OF(TYPE, ELEMENT) SDL_offsetof(TYPE, ELEMENT)
 
 /**
- * Gets the number of elements of a fixed-size array.
- *
- * `arr` array object; must not be a pointer (e.g. an array function parameter),
- * otherwise the result is silently wrong.
- *
- * `return` the element count as a `size_t`.
+ * Returns the number of elements in an array. Must not be a pointer.
  */
 #define BXR_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
