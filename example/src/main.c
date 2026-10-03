@@ -143,7 +143,7 @@ bxr_game_update(Uint64 delta_time_ms)
   if (bxr_key_just_pressed(BXR_KEY_W)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_NORTH)) {
     float pitch = bxr_voice_get_pitch(_music);
-    pitch -= 0.1f;
+    pitch -= 0.01f;
     if (pitch < 0.01f) {
       pitch = 0.01f;
     }
@@ -155,7 +155,7 @@ bxr_game_update(Uint64 delta_time_ms)
   if (bxr_key_just_pressed(BXR_KEY_S)
       || bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_EAST)) {
     float pitch = bxr_voice_get_pitch(_music);
-    pitch += 0.1f;
+    pitch += 0.01f;
     if (pitch > 100.0f) {
       pitch = 100.0f;
     }
