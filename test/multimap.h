@@ -31,10 +31,10 @@ multimap_test_teardown(void)
 
 BXR_UNIT_CASE(case_multimap_push)
 {
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "ui", audio_1));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "ui", audio_2));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "ui", audio_1));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "ui", audio_2));
   // Should not add a new value to the bucket since audio_2 already exist
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "ui", audio_2));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "ui", audio_2));
 
   BXR_UNIT_ASSERT(bxr_multimap_count(multimap) == 1);
 
@@ -43,9 +43,9 @@ BXR_UNIT_CASE(case_multimap_push)
   BXR_UNIT_ASSERT(ui_count == 2);
   BXR_FREE(ui_values);
 
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_3));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_4));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_5));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_3));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_4));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_5));
 
   BXR_UNIT_ASSERT(bxr_multimap_count(multimap) == 2);
 
@@ -63,7 +63,7 @@ BXR_UNIT_CASE(case_multimap_grow)
   for (int i = 0; i < 100; i++) {
     char key[32];
     SDL_snprintf(key, sizeof(key), "key_%d", i);
-    BXR_UNIT_ASSERT(bxr_multimap_push(multimap, key, (Uint32)i));
+    BXR_UNIT_ASSERT(bxr_multimap_add(multimap, key, (Uint32)i));
   }
 
   BXR_UNIT_ASSERT(bxr_multimap_count(multimap) == 100);
@@ -73,9 +73,9 @@ BXR_UNIT_CASE(case_multimap_grow)
 
 BXR_UNIT_CASE(case_multimap_remove_value)
 {
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_3));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_4));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_5));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_3));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_4));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_5));
 
   BXR_UNIT_ASSERT(bxr_multimap_count(multimap) == 1);
 
@@ -99,14 +99,14 @@ BXR_UNIT_CASE(case_multimap_remove_value)
 
 BXR_UNIT_CASE(case_multimap_remove)
 {
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "ui", audio_1));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "ui", audio_2));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "ui", audio_1));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "ui", audio_2));
 
   BXR_UNIT_ASSERT(bxr_multimap_count(multimap) == 1);
 
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_3));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_4));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "gameplay", audio_5));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_3));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_4));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "gameplay", audio_5));
 
   BXR_UNIT_ASSERT(bxr_multimap_count(multimap) == 2);
 
@@ -122,8 +122,8 @@ BXR_UNIT_CASE(case_multimap_remove)
 
 BXR_UNIT_CASE(case_multimap_get_values)
 {
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "ui", audio_1));
-  BXR_UNIT_ASSERT(bxr_multimap_push(multimap, "ui", audio_2));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "ui", audio_1));
+  BXR_UNIT_ASSERT(bxr_multimap_add(multimap, "ui", audio_2));
 
   BXR_UNIT_ASSERT(bxr_multimap_count(multimap) == 1);
 
