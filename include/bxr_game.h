@@ -15,10 +15,11 @@
  * Boxer configuration.
  *
  * `name` application name, also used to build the save directory
- * (e.g. `~/.local/share/<name>/` on Linux). Must not be `NULL`. (string
- * literal).
+ * (e.g. `~/.local/share/<name>/` on Linux). Must not be `NULL` and must stay
+ * valid until exit since only the pointer is kept (e.g. a string literal).
  *
- * `title` window title. Must not be `NULL`. (string literal).
+ * `title` window title. Must not be `NULL` and must stay valid until exit
+ * (e.g. a string literal).
  *
  * `width` and `height` initial window size in window coordinates, > 0.
  *
@@ -48,11 +49,12 @@ typedef struct bxr_game_config_s
  * Provide the game configuration, implemented by the user.
  *
  * Called once at startup, before SDL and any subsystem are initialized, so it
- * must not call any boxer.
+ * must not call any boxer function.
  *
- * `return` the configuration, must not be `NULL`.
+ * `return` the configuration, must not be `NULL`. Its fields are copied right
+ * after the call, so a `static` variable is enough and nothing is freed.
  */
-extern bxr_game_config_t *bxr_game_config(void);
+extern const bxr_game_config_t *bxr_game_config(void);
 
 /**
  * Initialize the game state, implemented by the user.
@@ -71,14 +73,16 @@ extern void bxr_game_setup(void);
  *
  * `delta_time_ms` duration of the fixed step in milliseconds (e.g. 16.67 at
  * 60 Hz), the same value on every call until the refresh rate changes.
+ *
+ * **NOTE:** Input state is refreshed before each step.
  */
 extern void bxr_game_update(double delta_time_ms);
 
 /**
  * Draw the current game state, implemented by the user.
  *
- * Called once per frame after the updates, drawing coordinates are in the
- * virtual resolution from the configuration.
+ * Called once per frame after the updates. Drawing
+ * coordinates are in the virtual resolution from the configuration.
  *
  * `alpha` how far the current time is between the last update and the next
  * one, in [0, 1), used to interpolate between the previous and current update
