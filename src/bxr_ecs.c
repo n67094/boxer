@@ -316,12 +316,11 @@ bxr_ecs_flush_destroy_entity_(bxr_ecs_t *ecs, bxr_ecs_system_t system)
 static void
 bxr_ecs_destruct_(bxr_ecs_t *ecs, bxr_ecs_entity_t entity)
 {
-  bxr_ecs_entity_data_t_ *entity_data = &ecs->entities[entity];
-
   // Call component destroy callbacks
   for (bxr_ecs_component_t component = 0; component < ecs->component_count;
        component++) {
-    if (bxr_ecs_bitset_test_(&entity_data->component_bits, component)) {
+    if (bxr_ecs_bitset_test_(&ecs->entities[entity].component_bits,
+                             component)) {
       bxr_ecs_component_data_t_ *component_data = &ecs->components[component];
       if (component_data->remove_cb) {
         void *component_ptr
@@ -627,15 +626,15 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
     component_array->capacity = new_capacity;
   }
 
+  // Set the entity's component bit
+  bxr_ecs_bitset_set_(&entity_data->component_bits, component);
+
   // Get a pointer to the component's data and set it to zero
   void *component_ptr = bxr_ecs_entity_get_component(ecs, entity, component);
   BXR_MEMSET(component_ptr, 0, component_array->size);
 
   if (component_data->add_cb)
     component_data->add_cb(ecs, entity, component_ptr, args);
-
-  // Set the entity's component bit
-  bxr_ecs_bitset_set_(&entity_data->component_bits, component);
 
   for (bxr_ecs_id_t_ system_id = 0; system_id < ecs->system_count;
        system_id++) {

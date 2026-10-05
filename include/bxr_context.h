@@ -24,7 +24,7 @@ typedef struct bxr_context_s
   SDL_GPUTextureFormat texture_format;
   SDL_GPUDevice *gpu_device;
 
-  float target_delta_ms; // best guess for the target time between updates.
+  Uint64 target_delta_ns; // fixed time between updates, never 0.
 } bxr_context_t;
 
 /**

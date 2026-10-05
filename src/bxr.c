@@ -26,11 +26,20 @@ update_refresh_rate_(bxr_context_t *context)
     return false;
   }
 
-  // context->target_delta_ms = 1000.0 / (double)mode->refresh_rate;
-  context->target_delta_ms = 1000.0 / (double)mode->refresh_rate;
-  BXR_LOG_INFO("Updated display refresh rate: %.2f Hz (delta: %2.f ms)",
+  // SDL reports 0 when the refresh rate is unknown.
+  if (mode->refresh_rate <= 0.0f) {
+    BXR_LOG_WARN("Unknown display refresh rate");
+    return false;
+  }
+
+  // Rounded to the nearest nanosecond and never 0, otherwise the fixed update
+  // loop in SDL_AppIterate would never end.
+  Uint64 delta_ns
+      = (Uint64)SDL_lround((double)SDL_NS_PER_SECOND / mode->refresh_rate);
+  context->target_delta_ns = SDL_max(delta_ns, 1);
+  BXR_LOG_INFO("Updated display refresh rate: %.2f Hz (delta: %.2f ms)",
                mode->refresh_rate,
-               context->target_delta_ms);
+               (double)context->target_delta_ns / SDL_NS_PER_MS);
 
   return true;
 }
@@ -132,12 +141,12 @@ SDL_AppInit(void **appstate, int argc, char **argv)
                SDL_GetPixelFormatName(context->pixel_format));
 
   // Default fixed timestep fallback (60 Hz)
-  context->target_delta_ms = 1000.0 / 60.0;
+  context->target_delta_ns = SDL_NS_PER_SECOND / 60;
 
   if (!update_refresh_rate_(context)) {
     BXR_LOG_WARN(
-        "Failed to get display refresh rate, using default delta: %2.f ms",
-        context->target_delta_ms);
+        "Failed to get display refresh rate, using default delta: %.2f ms",
+        (double)context->target_delta_ns / SDL_NS_PER_MS);
   }
 
   // --- Init here ---
@@ -180,33 +189,34 @@ SDL_AppIterate(void *appstate)
   static Uint64 ups            = 0;
   static Uint64 frame_count    = 0;
   static Uint64 update_count   = 0;
-  static double lag_ms         = 0;
-  static double last_ticks     = 0;
-  static Uint64 accumulator_ms = 0; // Track time for FPS counter
+  static Uint64 lag_ns         = 0;
+  static Uint64 last_ticks_ns  = 0;
+  static Uint64 accumulator_ns = 0; // Track time for FPS counter
   static bool first_frame      = true;
 
   if (first_frame) {
-    last_ticks  = SDL_GetTicks();
+    last_ticks_ns = SDL_GetTicksNS();
     first_frame = false;
     return SDL_APP_CONTINUE;
   }
 
-  Uint64 current_ticks = SDL_GetTicks();
-  double elapsed_ms    = (double)(current_ticks - last_ticks);
+  Uint64 current_ticks_ns = SDL_GetTicksNS();
+  Uint64 elapsed_ns       = current_ticks_ns - last_ticks_ns;
 
-  last_ticks = current_ticks;
+  last_ticks_ns = current_ticks_ns;
 
-  lag_ms += elapsed_ms;
-  accumulator_ms += elapsed_ms;
+  lag_ns += elapsed_ns;
+  accumulator_ns += elapsed_ns;
 
-  double delta_ms = context->target_delta_ms;
+  Uint64 delta_ns = context->target_delta_ns;
 
   // Cap lag to avoid spiral of death (max  5 frames behind)
-  double max_lag_ms = delta_ms * 5.0;
-  if (lag_ms > max_lag_ms) {
-    BXR_LOG_WARN(
-        "High lag detected: %.2f ms, capping to %.2f ms", lag_ms, max_lag_ms);
-    lag_ms = max_lag_ms;
+  Uint64 max_lag_ns = delta_ns * 5;
+  if (lag_ns > max_lag_ns) {
+    BXR_LOG_WARN("High lag detected: %.2f ms, capping to %.2f ms",
+                 (double)lag_ns / SDL_NS_PER_MS,
+                 (double)max_lag_ns / SDL_NS_PER_MS);
+    lag_ns = max_lag_ns;
   }
 
   // Acquire a command buffer for the current frame
@@ -215,7 +225,7 @@ SDL_AppIterate(void *appstate)
 
   SDL_GPBegin(context->config.virtual_width, context->config.virtual_height);
   {
-    while (lag_ms >= delta_ms) {
+    while (lag_ns >= delta_ns) {
       bxr_mouse_begin_frame();
       bxr_gamepad_begin_frame();
       bxr_audio_begin_frame();
@@ -223,17 +233,17 @@ SDL_AppIterate(void *appstate)
 
       // --- Update here (fixed timestep) ---
 
-      bxr_game_update(delta_ms); // this use SDL_GP API
+      bxr_game_update((double)delta_ns / SDL_NS_PER_MS); // this use SDL_GP API
 
-      lag_ms -= delta_ms;
+      lag_ns -= delta_ns;
       ++update_count;
     }
 
-    double alpha_ms = (double)(lag_ms / delta_ms);
+    double alpha = (double)lag_ns / (double)delta_ns;
 
-    // --- Render here (use alpha_ms for interpolation if needed) ---
+    // --- Render here (use alpha for interpolation if needed) ---
 
-    bxr_game_render(alpha_ms); // this use SDL_GP API
+    bxr_game_render(alpha); // this use SDL_GP API
 
     // Acquire the swapchain texture for the current frame
     SDL_GPUTexture *swapchain_texture = NULL;
@@ -255,15 +265,15 @@ SDL_AppIterate(void *appstate)
   ++frame_count;
 
   // Calculate FPS and UPS every second
-  if (accumulator_ms >= 1000) {
+  if (accumulator_ns >= SDL_NS_PER_SECOND) {
     fps = frame_count;
     ups = update_count;
 
-    BXR_LOG_INFO("FPS: %lu, UPS: %lu", fps, ups);
+    BXR_LOG_INFO("FPS: %" SDL_PRIu64 ", UPS: %" SDL_PRIu64, fps, ups);
 
     frame_count  = 0;
     update_count = 0;
-    accumulator_ms -= 1000;
+    accumulator_ns -= SDL_NS_PER_SECOND;
   }
 
   return SDL_APP_CONTINUE;

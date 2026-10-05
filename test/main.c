@@ -43,13 +43,13 @@ bxr_game_setup(void)
 }
 
 void
-bxr_game_update(Uint64 delta_time_ms)
+bxr_game_update(double delta_time_ms)
 {
   bxr_quit();
 }
 
 void
-bxr_game_render(Uint64 alpha_time_ms)
+bxr_game_render(double alpha)
 {
 }
 

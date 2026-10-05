@@ -47,7 +47,7 @@ bxr_game_setup(void)
 }
 
 void
-bxr_game_update(Uint64 delta_time_ms)
+bxr_game_update(double delta_time_ms)
 {
   BXR_LOG_INFO("Use Space to pause/resume the music voice");
   BXR_LOG_INFO("Use Left to decrease the volume of the music voice");
@@ -165,7 +165,7 @@ bxr_game_update(Uint64 delta_time_ms)
 }
 
 void
-bxr_game_render(Uint64 alpha_time_ms)
+bxr_game_render(double alpha)
 {
   bxr_vec2_t window_size = bxr_context_get_virtual_window_dimensions();
 
