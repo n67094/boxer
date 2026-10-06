@@ -266,8 +266,8 @@ BXR_API float bxr_gamepad_axis_prev(int index, bxr_gamepad_axis_e axis);
  * scale as `SDL_RumbleGamepad()`; 0 turns the motor off.
  * `duration_ms` duration of the effect in milliseconds; 0 stops the rumble.
  *
- * `return` true on success, false on failure; the reason is available from
- * `SDL_GetError()`.
+ * `return` true on success, false on failure or if the gamepad is not
+ * connected.
  */
 BXR_API bool bxr_gamepad_rumble(int index,
                                 Uint16 low_frequency,
