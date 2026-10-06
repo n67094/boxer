@@ -196,7 +196,7 @@ SDL_AppIterate(void *appstate)
 
   if (first_frame) {
     last_ticks_ns = SDL_GetTicksNS();
-    first_frame = false;
+    first_frame   = false;
     return SDL_APP_CONTINUE;
   }
 
@@ -320,21 +320,21 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
   case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
     SDL_JoystickID id = event->gbutton.which;
     int index         = SDL_GetGamepadPlayerIndexForID(id);
-    if (index < 0 || index > BXR_GAMEPAD_MAX)
+    if (index < 0 || index >= BXR_GAMEPAD_MAX)
       break;
     bxr_gamepad_button_down(index, event->gbutton.button);
   } break;
   case SDL_EVENT_GAMEPAD_BUTTON_UP: {
     SDL_JoystickID id = event->gbutton.which;
     int index         = SDL_GetGamepadPlayerIndexForID(id);
-    if (index < 0 || index > BXR_GAMEPAD_MAX)
+    if (index < 0 || index >= BXR_GAMEPAD_MAX)
       break;
     bxr_gamepad_button_up(index, event->gbutton.button);
   } break;
   case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
     SDL_JoystickID id = event->gaxis.which;
     int index         = SDL_GetGamepadPlayerIndexForID(id);
-    if (index < 0 || index > BXR_GAMEPAD_MAX)
+    if (index < 0 || index >= BXR_GAMEPAD_MAX)
       break;
     bxr_gamepad_axis_motion(index, event->gaxis.axis, event->gaxis.value);
   } break;

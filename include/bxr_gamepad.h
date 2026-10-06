@@ -1,9 +1,16 @@
 /**
  * File `bxr_gamepad.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Gamepad input subsystem.
  *
- * # Gamepad Input Handling
+ * Up to `BXR_GAMEPAD_MAX` gamepads are tracked.
+ *
+ * Each one is identified by an `index` in [0, `BXR_GAMEPAD_MAX`), the slot
+ * (player index) it was assigned when connected.
+ *
+ * Boxer polls connections and feeds events itself.
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_GAMEPAD_H_
@@ -65,201 +72,202 @@ typedef enum
  */
 
 /**
- * Initializes the gamepad subsystem. Must be called before using any other
- * gamepad functions.
+ * Initialize the gamepad subsystem.
  */
 void bxr_gamepad_setup(void);
 
 /**
- * Tears down the gamepad subsystem. Must be called when the application is
- * shutting down.
+ * Close every open gamepad.
  */
 void bxr_gamepad_teardown(void);
 
 /**
- * Listens for gamepad events and updates the internal state of the gamepads.
- * Must be called every frame to ensure that the gamepad state is updated.
+ * Close disconnected gamepads and assign newly connected ones to the first
+ * free slot, resetting its button and axis state.
  */
 void bxr_gamepad_listen(void);
 
 /**
- * Update the gamepad state for the current frame. Must be called at the
+ * Update the gamepad state for the new frame. Must be called once at the
  * beginning of each frame before processing input.
  */
 void bxr_gamepad_begin_frame(void);
 
 /**
- * Handles a gamepad button down event. Must be called when a gamepad button
- * down event is received from SDL.
+ * Record a button press.
  *
- * `index` is the index of the gamepad that the event occurred on.
- *
- * `button` is the button that was pressed.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `button` button pressed, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
  */
 void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
 
 /**
- * Handles a gamepad button up event. Must be called when a gamepad button up
- * event is received from SDL.
+ * Record a button release.
  *
- * `index` is the index of the gamepad that the event occurred on.
- *
- * `button` is the button that was released.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `button` button released, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
  */
 void bxr_gamepad_button_up(int index, bxr_gamepad_button_e button);
 
 /**
- * Handles a gamepad axis motion event. Must be called when a gamepad axis
- * motion event is received from SDL.
+ * Record an axis motion.
  *
- * `index` is the index of the gamepad that the event occurred on.
- *
- * `axis` is the axis that was moved.
- *
- * `value` is the new value of the axis, normalized to the range [-1, 1].
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `axis` axis moved, in [0, `BXR_GAMEPAD_AXIS_SIZE`).
+ * `value` new axis value, in [-32768, 32767].
  */
-void bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, float value);
+void bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, Sint16 value);
 
 /**
  * ## Public API
  */
 
 /**
- * Get the number of connected gamepads.
+ * Get the number of gamepads currently connected.
  *
- * `return` the number of connected gamepads.
+ * `return` the count, in [0, `BXR_GAMEPAD_MAX`].
  */
 BXR_API int bxr_gamepad_count(void);
 
 /**
- * Set the deadzone for gamepad axes.
+ * Set the deadzone shared by every gamepad axis.
  *
- * `deadzone` is the deadzone to set.
+ * `deadzone` normalized magnitude below which an axis reads 0, in [0, 1].
  */
 BXR_API void bxr_gamepad_set_deadzone(float deadzone);
 
 /**
- * Get the current deadzone for gamepad axes.
+ * Get the deadzone shared by every gamepad axis.
  *
- * `return` the current deadzone for gamepad axes.
+ * `return` the deadzone, in [0, 1].
  */
 BXR_API float bxr_gamepad_get_deadzone(void);
 
 /**
  * Check if a gamepad is connected.
  *
- * `index` is the index of the gamepad to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
  *
- * `return` true if the gamepad is connected, false otherwise.
+ * `return` true if a gamepad is assigned to the slot and still connected,
+ * false otherwise.
  */
 BXR_API bool bxr_gamepad_connected(int index);
 
 /**
  * Get the name of a gamepad.
  *
- * `index` is the index of the gamepad to get the name of.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
  *
- * `return` the name of the gamepad, or NULL if the gamepad is not connected.
+ * `return` the name, or `NULL` if the gamepad is not connected or has no name.
+ *
+ * **Note**: the string is owned by Boxer, do not free it.
  */
 BXR_API const char *bxr_gamepad_name(int index);
 
 /**
  * Get the serial number of a gamepad.
  *
- * `index` is the index of the gamepad to get the serial number of.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
  *
- * `return` the serial number of the gamepad, or NULL if the gamepad is not
- * connected.
+ * `return` the serial number, or `NULL` if the gamepad is not connected.
+ *
+ * **Note**: the string is owned by Boxer, do not free it.
  */
 BXR_API const char *bxr_gamepad_serial(int index);
 
 /**
- * Check if a gamepad button is currently held down.
+ * Check if a button is held down.
  *
- * `index` is the index of the gamepad to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `button` button to check, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
  *
- * `button` is the button to check.
- *
- * `return` true if the button is currently held down, false otherwise.
+ * `return` true if held, false otherwise or if the gamepad is not connected.
  */
 BXR_API bool bxr_gamepad_held(int index, bxr_gamepad_button_e button);
 
 /**
- * Check if any gamepad button was just pressed this frame.
+ * Check if any button was pressed this frame.
  *
- * `index` is the index of the gamepad to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
  *
- * `return` true if any button was just pressed this frame, false otherwise.
+ * `return` true if at least one button was pressed since the previous frame,
+ * false otherwise or if the gamepad is not connected.
  */
 BXR_API bool bxr_gamepad_any_just_pressed(int index);
 
 /**
- * Check if a gamepad button was just pressed this frame.
+ * Check if a button was pressed this frame.
  *
- * `index` is the index of the gamepad to check.
+ * True for exactly one frame per press.
  *
- * `button` is the button to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `button` button to check, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
  *
- * `return` true if the button was just pressed this frame, false otherwise.
+ * `return` true if pressed since the previous frame, false otherwise or if the
+ * gamepad is not connected.
  */
 BXR_API bool bxr_gamepad_just_pressed(int index, bxr_gamepad_button_e button);
 
 /**
- * Check if a gamepad button was just released this frame.
+ * Check if a button was released this frame.
  *
- * `index` is the index of the gamepad to check.
+ * True for exactly one frame per release.
  *
- * `button` is the button to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `button` button to check, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
  *
- * `return` true if the button was just released this frame, false otherwise.
+ * `return` true if released since the previous frame, false otherwise or if
+ * the gamepad is not connected.
  */
 BXR_API bool bxr_gamepad_just_released(int index, bxr_gamepad_button_e button);
 
 /**
- * Get the amount of time a gamepad button has been held down.
+ * Get how long a button has been held down.
  *
- * `index` is the index of the gamepad to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `button` button to check, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
  *
- * `button` is the button to check.
- *
- * `return` the amount of time the button has been held down in milliseconds.
+ * `return` the time in milliseconds since the press, or 0 if the button is
+ * not held or the gamepad is not connected.
  */
 BXR_API Uint64 bxr_gamepad_held_time(int index, bxr_gamepad_button_e button);
 
 /**
- * Get the current value of a gamepad axis.
+ * Get the current value of an axis, after the deadzone is applied.
  *
- * `index` is the index of the gamepad to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`) .
+ * `axis` axis to read, in [0, `BXR_GAMEPAD_AXIS_SIZE`).
  *
- * `axis` is the axis to check.
- *
- * `return` the current value of the axis.
+ * `return` the value in [-1, 1) for sticks (positive is right/down) and [0, 1)
+ * for triggers, 0 inside the deadzone or if the gamepad is not connected.
  */
 BXR_API float bxr_gamepad_axis(int index, bxr_gamepad_axis_e axis);
 
 /**
- * Get the value of a gamepad axis in the previous frame.
+ * Get the value an axis had at the end of the previous frame.
  *
- * `index` is the index of the gamepad to check.
+ * Compare with `bxr_gamepad_axis()` to detect a change this frame.
  *
- * `axis` is the axis to check.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `axis` axis to read, in [0, `BXR_GAMEPAD_AXIS_SIZE`).
  *
- * `return` the value of the axis in the previous frame.
+ * `return` the value, same range as `bxr_gamepad_axis()`, or 0 if the gamepad
+ * is not connected.
  */
 BXR_API float bxr_gamepad_axis_prev(int index, bxr_gamepad_axis_e axis);
 
 /**
- * Set the rumble state of a gamepad.
+ * Start a rumble effect, replacing any effect in progress.
  *
- * `index` is the index of the gamepad to set the rumble state of.
+ * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
+ * `low_frequency` intensity of the low frequency motor, in [0, 0xFFFF], same
+ * scale as `SDL_RumbleGamepad()`; 0 turns the motor off.
+ * `high_frequency` intensity of the high frequency motor, in [0, 0xFFFF], same
+ * scale as `SDL_RumbleGamepad()`; 0 turns the motor off.
+ * `duration_ms` duration of the effect in milliseconds; 0 stops the rumble.
  *
- * `low_frequency` is the intensity of the low frequency rumble motor.
- *
- * `high_frequency` is the intensity of the high frequency rumble motor.
- *
- * `duration_ms` is the duration of the rumble effect in milliseconds.
- *
- * `return` true if the rumble state was successfully set, false otherwise.
+ * `return` true on success, false on failure; the reason is available from
+ * `SDL_GetError()`.
  */
 BXR_API bool bxr_gamepad_rumble(int index,
                                 Uint16 low_frequency,
