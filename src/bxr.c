@@ -385,7 +385,11 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 void
 bxr_quit(void)
 {
-  SDL_Event quit_event;
-  quit_event.type = SDL_EVENT_QUIT;
-  SDL_PushEvent(&quit_event);
+  SDL_Event quit_event = { 0 };
+  quit_event.type      = SDL_EVENT_QUIT;
+  if (!SDL_PushEvent(&quit_event)) {
+    BXR_LOG_ERROR("Failed to push quit event: %s. Exiting immediately.",
+                  SDL_GetError());
+    SDL_Quit();
+  }
 }
