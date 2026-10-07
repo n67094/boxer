@@ -67,7 +67,10 @@ bxr_ini_reader_unescape_quoted_value_(bxr_ini_reader_t *ini, char *cursor)
   }
 
 end:
-  *dest = '\0';
+  while (dest < cursor) {
+    *dest = '\0'; // Null-terminate for simplify parsing
+    dest++;
+  }
 
   // Skip closing quote if present
   if (cursor < ini->end && *cursor == '"') {
@@ -158,7 +161,7 @@ bxr_ini_reader_parse_(bxr_ini_reader_t *ini)
         cursor            = bxr_ini_reader_unescape_quoted_value_(ini, cursor);
 
         // If the string is empty, ignore the line
-        if (cursor == value_start) {
+        if (*value_start == '\0') {
           cursor = bxr_ini_reader_discard_line_(ini, line_start);
           break;
         }
@@ -168,7 +171,7 @@ bxr_ini_reader_parse_(bxr_ini_reader_t *ini)
 
       } else {
         // Normal value
-        cursor += bxr_strcspn(cursor, "\n");
+        cursor += bxr_strcspn(cursor, ";\n");
 
         // Trim whitespace at the end of value
         bxr_ini_reader_trim_back_(cursor - 1, line_start);
@@ -209,11 +212,10 @@ bxr_ini_create_reader(const Uint8 *data, size_t length)
 void
 bxr_ini_destroy_reader(bxr_ini_reader_t *ini)
 {
-  if (ini->data) {
+  if (ini) {
     BXR_FREE(ini->data);
+    BXR_FREE(ini);
   }
-
-  BXR_FREE(ini);
 }
 
 const char *
@@ -364,12 +366,6 @@ bxr_ini_writer_append_escaped_(bxr_ini_writer_t *ini, const char *str)
     case '\\':
       is_ok = bxr_ini_writer_append_(ini, "\\\\");
       break;
-    case '\b':
-      is_ok = bxr_ini_writer_append_(ini, "\\b");
-      break;
-    case '\f':
-      is_ok = bxr_ini_writer_append_(ini, "\\f");
-      break;
     case '\n':
       is_ok = bxr_ini_writer_append_(ini, "\\n");
       break;
@@ -379,16 +375,10 @@ bxr_ini_writer_append_escaped_(bxr_ini_writer_t *ini, const char *str)
     case '\t':
       is_ok = bxr_ini_writer_append_(ini, "\\t");
       break;
-    default:
-      if ((unsigned char)*c < 0x20) {
-        char buf[7];
-        SDL_snprintf(buf, sizeof(buf), "\\u%04x", (unsigned char)*c);
-        is_ok = bxr_ini_writer_append_(ini, buf);
-      } else {
-        char buf[2] = { *c, '\0' };
-        is_ok       = bxr_ini_writer_append_(ini, buf);
-      }
-      break;
+    default: {
+      char buf[2] = { *c, '\0' };
+      is_ok       = bxr_ini_writer_append_(ini, buf);
+    } break;
     }
   }
 
@@ -404,6 +394,9 @@ bxr_ini_create_writer()
 {
   bxr_ini_writer_t *ini = NULL;
   BXR_NEW(ini);
+  if (!ini) {
+    return NULL;
+  }
 
   ini->data = NULL;
   BXR_ALLOC(ini->data, BXR_INI_DEFAULT_DATA_CAPACITY);
@@ -435,6 +428,9 @@ bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
   BXR_ASSERT(ini);
   BXR_ASSERT(section);
   BXR_ASSERT(!ini->in_section);
+  BXR_ASSERT(bxr_strstr(section, "[") == NULL);
+  BXR_ASSERT(bxr_strstr(section, "]") == NULL);
+  BXR_ASSERT(bxr_strstr(section, "\n") == NULL);
 
   size_t line_len = SDL_strlen(section) + 4; // + 3 for [ ] \n and \0
   char *line      = NULL;
@@ -498,7 +494,9 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value)
     return false;
   }
 
-  bxr_ini_writer_append_(ini, "\n");
+  if (!bxr_ini_writer_append_(ini, "\n")) {
+    return false;
+  }
 
   return true;
 }

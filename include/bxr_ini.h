@@ -1,14 +1,16 @@
 /**
  * File `bxr_ini.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * INI reader and writer.
  *
- * # INI File Reader and Writer
+ * Supported types:
  *
- * Support strings and numbers. Booleans are not supported, but you can use `0`
- * and `1` to represent false and true respectively.
+ * - string
+ * - integer
+ * - float
+ * - boolean (0 or 1)
  *
- * File extension doesn't matter, but recommended to use `.ini`.
+ * File extension doesn't matter, but `.ini` is recommended.
  *
  * Example INI file:
  *
@@ -24,6 +26,8 @@
  * name="nsix\ttest" ; Please note that the name contains a tab character
  * test= ; this will be ignored
  * ```
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_INI_H_
@@ -40,73 +44,70 @@ typedef struct bxr_ini_reader_s bxr_ini_reader_t;
  */
 
 /**
- * Load an INI file from the given data and return a reader for it.
+ * Parse INI data and return a reader for it.
  *
- * `data` is a pointer to the INI data to load.
+ * Malformed lines are skipped silently, so parsing itself never fails.
  *
- * `length` is the length of the INI data in bytes.
+ * `data` INI text. Must not be `NULL`. Remains owned by the caller and may be
+ * freed once the call returns.
+ * `length` size of `data` in bytes.
  *
- * `return` a reader for the loaded INI file, or NULL if an error occurred.
+ * `return` the reader, or `NULL` on failure.
  *
- * The caller is responsible for destroying the returned reader using
- * `bxr_ini_destroy_reader` when it is no longer needed.
+ * **Note**: the caller must free the result with `bxr_ini_destroy_reader()`.
  */
 BXR_API bxr_ini_reader_t *bxr_ini_create_reader(const Uint8 *data,
                                                 size_t length);
 
 /**
- * Destroy an INI reader and free its resources.
+ * Destroy a reader and free its resources.
  *
- * `ini` is the INI reader to destroy.
+ * `ini` reader to destroy.
+ *
+ * **NOTE:** String returned by the `bxr_ini_read_*()` functions become invalid.
  */
 BXR_API void bxr_ini_destroy_reader(bxr_ini_reader_t *ini);
 
 /**
- * Get the string value associated with the given section and key.
+ * Get the string value of a key.
  *
- * `ini` is the INI reader to query.
+ * If the key appears several times in the section, the first one wins.
  *
- * `section` is the section name to look for.
+ * `ini` reader to query. Must not be `NULL`.
+ * `section` section name, case-insensitive. Must not be `NULL`.
+ * `key` key name, case-insensitive. Must not be `NULL`.
  *
- * `key` is the key name to look for within the section.
+ * `return` the unquoted and unescaped value, or `NULL` if not found.
  *
- * `return` the string value associated with the given section and key, or NULL
- * if the section or key was not found.
+ * **Note**: the result is owned by the reader and stays valid until
+ * `bxr_ini_destroy_reader()`.
  */
 BXR_API const char *
 bxr_ini_read_str(bxr_ini_reader_t *ini, const char *section, const char *key);
 
 /**
- * Get the number value associated with the given section and key.
+ * Get the value of a key parsed as a number.
  *
- * `ini` is the INI reader to query.
+ * `ini` reader to query. Must not be `NULL`.
+ * `section` section name, case-insensitive. Must not be `NULL`.
+ * `key` key name, case-insensitive. Must not be `NULL`.
  *
- * `section` is the section name to look for.
- *
- * `key` is the key name to look for within the section.
- *
- * `return` the number value associated with the given section and key, or 0.0
- * if the section or key was not found.
+ * `return` the parsed value, or `0.0f` if not found.
  */
 BXR_API float bxr_ini_read_number(bxr_ini_reader_t *ini,
                                   const char *section,
                                   const char *key);
 
 /**
- * Get the string value associated with the given section and key, or return a
- * default value if the section or key was not found.
+ * Get the string value of a key, or a fallback if it is missing.
  *
- * `ini` is the INI reader to query.
+ * `ini` reader to query. Must not be `NULL`.
+ * `section` section name, case-insensitive. Must not be `NULL`.
+ * `key` key name, case-insensitive. Must not be `NULL`.
+ * `default_value` returned as is when the key is not found. May be `NULL`.
  *
- * `section` is the section name to look for.
- *
- * `key` is the key name to look for within the section.
- *
- * `default_value` is the default value to return if the section or key was not
- * found.
- *
- * `return` the string value associated with the given section and key, or
- * `default_value` if the section or key was not found.
+ * `return` the value (owned by the reader, see `bxr_ini_read_str()`), or
+ * `default_value` if not found.
  */
 BXR_API const char *bxr_ini_read_str_or_else(bxr_ini_reader_t *ini,
                                              const char *section,
@@ -114,20 +115,14 @@ BXR_API const char *bxr_ini_read_str_or_else(bxr_ini_reader_t *ini,
                                              const char *default_value);
 
 /**
- * Get the number value associated with the given section and key, or return a
- * default value if the section or key was not found.
+ * Get the value of a key parsed as a number, or a fallback if it is missing.
  *
- * `ini` is the INI reader to query.
+ * `ini` reader to query. Must not be `NULL`.
+ * `section` section name, case-insensitive. Must not be `NULL`.
+ * `key` key name, case-insensitive. Must not be `NULL`.
+ * `default_value` returned when the key is not found.
  *
- * `section` is the section name to look for.
- *
- * `key` is the key name to look for within the section.
- *
- * `default_value` is the default value to return if the section or key was not
- * found.
- *
- * `return` the number value associated with the given section and key, or
- * `default_value` if the section or key was not found.
+ * `return` the parsed value, or `default_value` if not found.
  */
 BXR_API float bxr_ini_read_number_or_else(bxr_ini_reader_t *ini,
                                           const char *section,
@@ -141,88 +136,93 @@ BXR_API float bxr_ini_read_number_or_else(bxr_ini_reader_t *ini,
 typedef struct bxr_ini_writer_s bxr_ini_writer_t;
 
 /**
- * Create a new INI writer.
+ * Create an empty INI writer.
  *
- * `return` a new INI writer, or NULL an error occurred.
+ * `return` the writer, or `NULL` on failure.
  *
- * The caller is responsible for destroying the returned writer using
- * `bxr_ini_destroy_writer` when it is no longer needed.
+ * **Note**: the caller must free the result with `bxr_ini_destroy_writer()`.
  */
 BXR_API bxr_ini_writer_t *bxr_ini_create_writer(void);
 
 /**
- * Destroy an INI writer and free its resources.
+ * Destroy a writer and free its resources.
  *
- * `ini` is the INI writer to destroy.
+ * `ini` writer to destroy. `NULL` is allowed and does nothing.
  */
 BXR_API void bxr_ini_destroy_writer(bxr_ini_writer_t *ini);
 
 /**
- * Begin a new section in the INI writer.
+ * Start a section by writing its `[section]` header.
  *
- * `ini` is the INI writer to use.
+ * Sections cannot be nested: the previous one must be closed with
+ * `bxr_ini_writer_section_end()` first.
  *
- * `section` is the name of the section to begin.
+ * `ini` writer to use. Must not be `NULL`.
+ * `section` section name, written as is. Must not be `NULL`.
  *
- * `return` true if the section was successfully begun, or false if an error
- * occurred.
+ * `return` true on success, false on failure.
  */
 BXR_API bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini,
                                           const char *section);
 
 /**
- * End the current section in the INI writer.
+ * Close the current section by writing an empty line.
  *
- * `ini` is the INI writer to use.
+ * `ini` writer to use, with a section open. Must not be `NULL`.
  *
- * `return` true if the section was successfully ended, or false if an error
- * occurred.
+ * `return` true on success, false on failure.
  */
 BXR_API bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini);
 
 /**
- * Add a key-value pair with a string value to the current section in the INI
- * writer.
+ * Write a `key="value"` line in the current section.
  *
- * `ini` is the INI writer to use.
+ * The value is quoted and escaped.
  *
- * `key` is the name of the key to add.
+ * `ini` writer to use, with a section open. Must not be `NULL`.
+ * `key` key name, written as is. Must not be `NULL`.
+ * `value` string value. Must not be `NULL`.
  *
- * `value` is the string value to associate with the key.
- *
- * `return` true if the key-value pair was successfully added, or false if an
- * error occurred.
+ * `return` true on success, false on failure.
  */
 BXR_API bool
 bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
 
 /**
- * Add a key-value pair with a number value to the current section in the INI
- * writer.
+ * Write a `key=number` line in the current section.
  *
- * `ini` is the INI writer to use.
+ * The number is formatted with `%g`, so only 6 significant digits are kept.
  *
- * `key` is the name of the key to add.
+ * `ini` writer to use, with a section open. Must not be `NULL`.
+ * `key` key name, written as is. Must not be `NULL`.
+ * `number` value to write.
  *
- * `number` is the number value to associate with the key.
- *
- * `return` true if the key-value pair was successfully added, or false if an
- * error occurred.
+ * `return` true on success, false on failure.
  */
 BXR_API bool
 bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number);
 
 /**
- * Get the INI data from the writer.
+ * Save the INI text written so far to a file.
  *
- * `ini` is the INI writer to get the data from.
+ * `ini` writer to read from. Must not be `NULL`.
+ * `path` path to write to. Must not be `NULL`.
  *
- * `length` is an optional output parameter to store the length of the returned
- * data in bytes.
+ * `return` true on success, false on failure.
+ */
+BXR_API bool bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path);
+
+/**
+ * Get the INI text written so far.
  *
- * *
- * `return` a pointer to the Ini data written by the writer. The caller should
- * not modify or free this pointer, as it is owned by the JSON writer.
+ * `ini` writer to read from. Must not be `NULL`.
+ * `length` receives the size of the data in bytes, without the null
+ * terminator. May be `NULL`.
+ *
+ * `return` the null-terminated INI text. Never `NULL`.
+ *
+ * **Note**: the result is owned by the writer. Do not modify or free it; it
+ * becomes invalid after the next write or `bxr_ini_destroy_writer()`.
  */
 BXR_API const Uint8 *bxr_ini_writer_get_data(const bxr_ini_writer_t *ini,
                                              size_t *length);
