@@ -1,11 +1,14 @@
 /**
  * File `bxr_image.h`.
  *
+ * GPU image loading and management.
+ *
+ * Images are handles (`bxr_image_t`) created from asset files mounted with the
+ * `bxr_asset.h` API or from raw pixels in memory, and released with
+ * `bxr_image_destroy()`. A handle whose `id` is `BXR_IMAGE_INVALID_ID` is
+ * invalid.
+ *
  * Copyright (c) 2026 nsix. All rights reserved.
- *
- * # Image Management and Utilities
- *
- * Image are loaded from mounted directories using `bxr_asset.h` API.
  */
 
 #ifndef BXR_IMAGE_H_
@@ -28,8 +31,7 @@ typedef struct bxr_image_s
  */
 
 /**
- * Initialize the image subsystem. Must be called before using any other image
- * functions.
+ * Initialize the image subsystem.
  */
 void bxr_image_setup(void);
 
@@ -43,63 +45,67 @@ void bxr_image_teardown(void);
  */
 
 /**
- * Load an image from a file.
+ * Load a PNG image from a mounted asset file.
  *
- * `path` is the path to the image file to load, relative mounted directories.
+ * The pixels are converted to the swapchain format and uploaded to the GPU.
  *
- * `return` the loaded image, or an invalid image if the image could not be
- * loaded.
+ * `path` path of the file, relative to the mounted directories. Must not be
+ * `NULL` and must end with `.png` or `.bmp`.
  *
- * The caller is responsible for destroying the returned image using
- * `bxr_image_destroy` when it is no longer needed.
+ * `return` the image, or an image with id `BXR_IMAGE_INVALID_ID` on failure.
+ *
+ * **Note**: the caller must destroy the result with `bxr_image_destroy()`.
  */
 BXR_API bxr_image_t bxr_image_create(const char *path);
 
 /**
- * Create an image from memory.
+ * Create an image from raw pixels in memory.
  *
- * `width` is the width of the image in pixels.
+ * The pixels are copied, converted to the swapchain format if needed, and
+ * uploaded to the GPU.
  *
- * `height` is the height of the image in pixels.
+ * `width` width in pixels.
+ * `height` height in pixels.
+ * `format` pixel format of `pixels` (e.g. `BXR_PIXEL_FORMAT_RGBA32`).
+ * `pixels` pixel data, at least `pitch * height` bytes. Remains owned by the
+ * caller and may be freed once the call returns.
+ * `pitch` bytes per row, or 0 to compute it as `width` times the format's
+ * bytes per pixel.
  *
- * `format` is the pixel format of the image (e.g. SDL_PIXELFORMAT_RGBA32).
+ * `return` the image, or an image with id `BXR_IMAGE_INVALID_ID` on failure.
  *
- * `pixels` is a pointer to the pixel data in memory.
- *
- * `pitch` is the number of bytes per row (stride). Pass 0 to auto-calculate.
- *
- * `return` the created image, or an invalid image if the image could not be
- * created.
- *
- * The caller is responsible for destroying the returned image using
- * `bxr_image_destroy` when it is no longer needed.
+ * **Note**: the caller must destroy the result with `bxr_image_destroy()`.
  */
 BXR_API bxr_image_t bxr_image_create_mem(
     int width, int height, bxr_pixel_format_e format, void *pixels, int pitch);
 
 /**
- * Get the width of an image in pixels.
+ * Get the width of an image.
  *
- * `image` is the image to get the width of.
+ * `image` image to query.
  *
- * `return` the width of the image in pixels,
- * or 0 if the image is invalid.
+ * `return` the width in pixels, or 0 if the image id is `BXR_IMAGE_INVALID_ID`.
  */
 BXR_API int bxr_image_get_width(bxr_image_t image);
 
 /**
- * Get the height of an image in pixels.
+ * Get the height of an image.
  *
- * `image` is the image to get the height of.
+ * `image` image to query.
  *
- * `return` the height of the image in pixels, or 0 if the image is invalid.
+ * `return` the height in pixels, or 0 if the image id is
+ * `BXR_IMAGE_INVALID_ID`.
  */
 BXR_API int bxr_image_get_height(bxr_image_t image);
 
 /**
- * Destroy an image and free its resources.
+ * Destroy an image and release its GPU texture.
  *
- * `image` is the image to destroy.
+ * `image` image to destroy.
+ *
+ * FIXME: the texture is released immediately, even if the image is still
+ * pending upload or referenced by queued draws this frame; defer the release
+ * until after the next flush (see the FIXME in `SDL_GPDestroyImage()`).
  */
 BXR_API void bxr_image_destroy(bxr_image_t image);
 
