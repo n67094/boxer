@@ -102,10 +102,6 @@ BXR_API int bxr_image_get_height(bxr_image_t image);
  * Destroy an image and release its GPU texture.
  *
  * `image` image to destroy.
- *
- * FIXME: the texture is released immediately, even if the image is still
- * pending upload or referenced by queued draws this frame; defer the release
- * until after the next flush (see the FIXME in `SDL_GPDestroyImage()`).
  */
 BXR_API void bxr_image_destroy(bxr_image_t image);
 
