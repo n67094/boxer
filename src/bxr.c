@@ -249,7 +249,7 @@ SDL_AppIterate(void *appstate)
     SDL_GPUTexture *swapchain_texture = NULL;
 
     SDL_WaitAndAcquireGPUSwapchainTexture(
-        cmd_buffer, _gp.desc.window, &swapchain_texture, NULL, NULL);
+        cmd_buffer, context->window, &swapchain_texture, NULL, NULL);
 
     if (!swapchain_texture) {
       BXR_LOG_ERROR("Failed to acquire swapchain texture: %s", SDL_GetError());

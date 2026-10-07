@@ -10,7 +10,7 @@ static bxr_voice_t _music;
 
 static bxr_game_config_t _config = { 0 };
 
-bxr_game_config_t *
+const bxr_game_config_t *
 bxr_game_config(void)
 {
   _config.name  = "boxer_bxr";
