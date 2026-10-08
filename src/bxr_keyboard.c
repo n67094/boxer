@@ -88,36 +88,25 @@ bxr_key_up(bxr_key_e key)
 }
 
 const char *
-bxr_key_name(bxr_key_e key)
+bxr_key_name_ex(bxr_key_e key, bxr_keymod_e mod)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
 
   SDL_Scancode scancode = (SDL_Scancode)key;
   if (scancode == SDL_SCANCODE_UNKNOWN) {
-    return "Unknown";
-  }
-
-  SDL_Keycode keycode
-      = SDL_GetKeyFromScancode(scancode, SDL_GetModState(), true);
-
-  return SDL_GetKeyName(keycode);
-}
-
-const char *
-bxr_key_name_ex(bxr_key_e key, bxr_keymode_e mod)
-{
-  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
-  BXR_ASSERT(key >= 0 && key < BXR_KEY_SIZE);
-
-  SDL_Scancode scancode = (SDL_Scancode)key;
-  if (scancode == SDL_SCANCODE_UNKNOWN) {
-    return "Unknown";
+    return "";
   }
 
   SDL_Keycode keycode = SDL_GetKeyFromScancode(scancode, (SDL_Keymod)mod, true);
 
   return SDL_GetKeyName(keycode);
+}
+
+const char *
+bxr_key_name(bxr_key_e key)
+{
+  return bxr_key_name_ex(key, BXR_KEYMOD_NONE);
 }
 
 bool
@@ -168,7 +157,7 @@ bxr_key_held_time(bxr_key_e key)
 }
 
 bool
-bxr_keymod_pressed(bxr_keymode_e mod)
+bxr_keymod_pressed(bxr_keymod_e mod)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   return (SDL_GetModState() & (SDL_Keymod)mod) != 0;

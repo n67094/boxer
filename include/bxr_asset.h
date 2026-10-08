@@ -1,9 +1,7 @@
 /**
  * File `bxr_asset.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
- *
- * Virtual file system for reading game assets and writing user data.
+ * Game asset management.
  *
  * Built on PhysicsFS. Directories and archives are mounted into a single
  * read-only search path, and one write directory.
@@ -28,6 +26,8 @@
  *    .SLB (Independence War archives)
  *    .POD (Terminal Velocity POD archives)
  *    .DAT (Resident Evil 3 rofs.dat archives)
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_ASSET_H_

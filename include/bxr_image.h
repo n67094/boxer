@@ -1,7 +1,7 @@
 /**
  * File `bxr_image.h`.
  *
- * GPU image loading and management.
+ * Image management.
  *
  * Images are handles (`bxr_image_t`) created from asset files mounted with the
  * `bxr_asset.h` API or from raw pixels in memory, and released with

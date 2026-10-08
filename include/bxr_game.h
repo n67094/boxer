@@ -1,7 +1,7 @@
 /**
  * File `bxr_game.h`.
  *
- * Game lifecycle callbacks that the user must implement.
+ * Game lifecycle.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

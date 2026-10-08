@@ -1,7 +1,7 @@
 /**
  * File `bxr_color.h`.
  *
- * RGBA color type, predefined colors, and a constructor macro.
+ * Color utilities.
  *
  * Copyright (c) 2025 nsix. All rights reserved.
  */

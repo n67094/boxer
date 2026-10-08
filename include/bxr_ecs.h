@@ -2,6 +2,7 @@
  * File `bxr_ecs.h`.
  *
  * Entity Component System:
+ *
  * - Entities are IDs.
  * - Components are plain data blocks attached to entities.
  * - Systems run logic over every entity that matches their required and

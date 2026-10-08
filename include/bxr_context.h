@@ -1,7 +1,7 @@
 /**
  * File `bxr_context.h`.
  *
- * Global engine context (singleton).
+ * Boxer's global context.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

@@ -1,10 +1,10 @@
 /**
  * File `bxr.h`.
  *
- * Main boxer header, includes every public module.
+ * Boxer's main header file.
  *
- * Boxer owns the program entry point through SDL main callbacks: do not write
- * a `main()`, implement the callbacks of `bxr_game.h` instead.
+ * **NOTE:** Boxer owns the program entry point through SDL main callbacks: do
+ * not write a `main()`, implement the callbacks of `bxr_game.h` instead.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

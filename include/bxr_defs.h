@@ -1,7 +1,7 @@
 /**
  * File `bxr_defs.h`.
  *
- * Common macros shared by every boxer module.
+ * Boxer's global definitions and constants.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

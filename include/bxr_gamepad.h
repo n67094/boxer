@@ -1,7 +1,7 @@
 /**
  * File `bxr_gamepad.h`.
  *
- * Gamepad input subsystem.
+ * Gamepad input handling.
  *
  * Up to `BXR_GAMEPAD_MAX` gamepads are tracked.
  *
