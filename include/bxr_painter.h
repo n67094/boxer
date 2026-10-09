@@ -42,6 +42,19 @@ typedef struct bxr_vertex_s
   bxr_color_t color;
 } bxr_vertex_t;
 
+typedef struct bxr_textured_rect_s
+{
+  bxr_rect_t src;
+  bxr_rect_t dst;
+} bxr_textured_rect_t;
+
+/**
+ * Constructs a `bxr_textured_rect_t` compound literal from the `src` region
+ * in the texture and the `dst` destination region.
+ */
+#define bxr_textured_rect_create(src, dst)                                     \
+  ((const bxr_textured_rect_t){ src, dst })
+
 /**
  * ## Internal API
  */
