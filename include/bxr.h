@@ -26,7 +26,6 @@
 #include "bxr_gamepad.h"
 #include "bxr_image.h"
 #include "bxr_ini.h"
-#include "bxr_json.h"
 #include "bxr_keyboard.h"
 #include "bxr_log.h"
 #include "bxr_math.h"
