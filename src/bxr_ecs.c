@@ -209,11 +209,14 @@ bxr_ecs_push_free_entity_(bxr_ecs_t *ecs, bxr_ecs_id_t_ entity)
   }
 
   if (ecs->entity_free_capacity < ecs->entity_count) {
-    BXR_RESIZE(ecs->entity_free_stack,
-               ecs->entity_count * sizeof(bxr_ecs_id_t_));
-    if (!ecs->entity_free_stack) {
+    bxr_ecs_id_t_ *new_data = BXR_RESIZE(
+        ecs->entity_free_stack, ecs->entity_count * sizeof(bxr_ecs_id_t_));
+    if (!new_data) {
       return;
     }
+
+    ecs->entity_free_stack    = new_data;
+    ecs->entity_free_capacity = ecs->entity_count;
   }
 
   ecs->entity_free_stack[ecs->entity_free_current++] = entity;
@@ -227,11 +230,14 @@ bxr_ecs_push_add_entity_(bxr_ecs_t *ecs, bxr_ecs_id_t_ entity)
   }
 
   if (ecs->entity_add_capacity < ecs->entity_count) {
-    BXR_RESIZE(ecs->entity_add_queue,
-               ecs->entity_count * sizeof(bxr_ecs_id_t_));
-    if (!ecs->entity_add_queue) {
+    bxr_ecs_id_t_ *new_data = BXR_RESIZE(
+        ecs->entity_add_queue, ecs->entity_count * sizeof(bxr_ecs_id_t_));
+    if (!new_data) {
       return;
     }
+
+    ecs->entity_add_queue    = new_data;
+    ecs->entity_add_capacity = ecs->entity_count;
   }
 
   ecs->entity_add_queue[ecs->entity_add_current++] = entity;
@@ -256,11 +262,14 @@ bxr_ecs_push_remove_entity_(bxr_ecs_t *ecs, bxr_ecs_id_t_ entity)
   }
 
   if (ecs->entity_remove_capacity < ecs->entity_count) {
-    BXR_RESIZE(ecs->entity_remove_queue,
-               ecs->entity_count * sizeof(bxr_ecs_id_t_));
-    if (!ecs->entity_remove_queue) {
+    bxr_ecs_id_t_ *new_data = BXR_RESIZE(
+        ecs->entity_remove_queue, ecs->entity_count * sizeof(bxr_ecs_id_t_));
+    if (!new_data) {
       return;
     }
+
+    ecs->entity_remove_queue    = new_data;
+    ecs->entity_remove_capacity = ecs->entity_count;
   }
 
   ecs->entity_remove_queue[ecs->entity_remove_current++] = entity;
@@ -285,11 +294,14 @@ bxr_ecs_push_destroy_entity_(bxr_ecs_t *ecs, bxr_ecs_id_t_ entity)
   }
 
   if (ecs->entity_destroy_capacity < ecs->entity_count) {
-    BXR_RESIZE(ecs->entity_destroy_queue,
-               ecs->entity_count * sizeof(bxr_ecs_id_t_));
-    if (!ecs->entity_destroy_queue) {
+    bxr_ecs_id_t_ *new_data = BXR_RESIZE(
+        ecs->entity_destroy_queue, ecs->entity_count * sizeof(bxr_ecs_id_t_));
+    if (!new_data) {
       return;
     }
+
+    ecs->entity_destroy_queue    = new_data;
+    ecs->entity_destroy_capacity = ecs->entity_count;
   }
 
   ecs->entity_destroy_queue[ecs->entity_destroy_current++] = entity;
@@ -346,28 +358,28 @@ bxr_ecs_create(size_t entity_count)
   entity_count = BXR_DEFAULT(entity_count, BXR_ECS_DEFAULT_ENTITY);
 
   // Allocate entity ID stacks and initialize them to zero (no entities created)
-  BXR_CALLOC(ecs->entity_free_stack, entity_count, sizeof(bxr_ecs_id_t_));
+  ecs->entity_free_stack = BXR_CALLOC(entity_count, sizeof(bxr_ecs_id_t_));
   if (!ecs->entity_free_stack) {
     goto free;
   }
   ecs->entity_free_capacity = entity_count;
   ecs->entity_free_current  = 0;
 
-  BXR_CALLOC(ecs->entity_add_queue, entity_count, sizeof(bxr_ecs_id_t_));
+  ecs->entity_add_queue = BXR_CALLOC(entity_count, sizeof(bxr_ecs_id_t_));
   if (!ecs->entity_add_queue) {
     goto free;
   }
   ecs->entity_add_capacity = entity_count;
   ecs->entity_add_current  = 0;
 
-  BXR_CALLOC(ecs->entity_remove_queue, entity_count, sizeof(bxr_ecs_id_t_));
+  ecs->entity_remove_queue = BXR_CALLOC(entity_count, sizeof(bxr_ecs_id_t_));
   if (!ecs->entity_remove_queue) {
     goto free;
   }
   ecs->entity_remove_capacity = entity_count;
   ecs->entity_remove_current  = 0;
 
-  BXR_CALLOC(ecs->entity_destroy_queue, entity_count, sizeof(bxr_ecs_id_t_));
+  ecs->entity_destroy_queue = BXR_CALLOC(entity_count, sizeof(bxr_ecs_id_t_));
   if (!ecs->entity_destroy_queue) {
     goto free;
   }
@@ -376,7 +388,7 @@ bxr_ecs_create(size_t entity_count)
 
   // Allocate entity data array and initialize it to zero (inactive entities
   // with no components)
-  BXR_CALLOC(ecs->entities, entity_count, sizeof(bxr_ecs_entity_data_t_));
+  ecs->entities = BXR_CALLOC(entity_count, sizeof(bxr_ecs_entity_data_t_));
   if (!ecs->entities) {
     goto free;
   }
@@ -497,8 +509,8 @@ bxr_ecs_component_define(bxr_ecs_t *ecs,
   component_array->size                       = component_size;
   component_array->capacity
       = ecs->entity_count; // Start with capacity equal to max entities
-  BXR_CALLOC(
-      component_array->data, component_array->capacity, component_array->size);
+  component_array->data
+      = BXR_CALLOC(component_array->capacity, component_array->size);
   if (!component_array->data) {
     return BXR_ECS_INVALID_COMPONENT;
   }
@@ -616,8 +628,8 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
       new_capacity *= 2;
     } while (entity >= new_capacity);
 
-    void *new_data = SDL_realloc(component_array->data,
-                                 new_capacity * component_array->size);
+    void *new_data = BXR_RESIZE(component_array->data,
+                                new_capacity * component_array->size);
     if (!new_data) {
       return NULL;
     }

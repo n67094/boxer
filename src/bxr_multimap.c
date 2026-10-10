@@ -38,10 +38,10 @@ bxr_multimap_alloc_arrays_(bxr_multimap_t *out, size_t size)
 {
   BXR_ASSERT(out);
 
-  BXR_CALLOC(out->state, size, sizeof(bxr_multimap_slot_e));
-  BXR_ALLOC(out->hashes, size * sizeof(Uint64));
-  BXR_ALLOC(out->keys, size * sizeof(char *));
-  BXR_ALLOC(out->buckets, size * sizeof(bxr_multimap_bucket_t));
+  out->state   = BXR_CALLOC(size, sizeof(bxr_multimap_slot_e));
+  out->hashes  = BXR_ALLOC(size * sizeof(Uint64));
+  out->keys    = BXR_ALLOC(size * sizeof(char *));
+  out->buckets = BXR_ALLOC(size * sizeof(bxr_multimap_bucket_t));
 
   bool is_ok = true;
   is_ok &= out->state != NULL;
@@ -227,8 +227,8 @@ bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value)
   if (bucket->count == bucket->size) {
     size_t new_size = bucket->size ? bucket->size * 2 : 4;
 
-    BXR_RESIZE(bucket->values, new_size * sizeof(Uint32));
-    if (!bucket->values) {
+    Uint32 *new_values = BXR_RESIZE(bucket->values, new_size * sizeof(Uint32));
+    if (!new_values) {
 
       // If we failed to allocate memory for the bucket, we need to clean up the
       // key and mark the slot as a tombstone.
@@ -242,7 +242,8 @@ bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value)
       return false;
     }
 
-    bucket->size = new_size;
+    bucket->values = new_values;
+    bucket->size   = new_size;
   }
 
   for (size_t j = 0; j < bucket->count; ++j) {
@@ -371,7 +372,7 @@ bxr_multimap_get_values(bxr_multimap_t *map,
   }
 
   if (out_values) {
-    BXR_ALLOC(*out_values, map->buckets[i].count * sizeof(Uint32));
+    *out_values = BXR_ALLOC(map->buckets[i].count * sizeof(Uint32));
     BXR_MEMCPY(*out_values,
                map->buckets[i].values,
                map->buckets[i].count * sizeof(Uint32));

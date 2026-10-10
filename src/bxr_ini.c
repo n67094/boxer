@@ -193,7 +193,7 @@ bxr_ini_create_reader(const Uint8 *data, size_t length)
     return NULL;
   }
 
-  BXR_ALLOC(ini->data, length + 1); // +1 for null-terminator
+  ini->data = BXR_ALLOC(length + 1); // +1 for null-terminator
   if (!ini->data) {
     BXR_FREE(ini);
     return NULL;
@@ -332,7 +332,7 @@ bxr_ini_writer_append_(bxr_ini_writer_t *ini, const char *str)
   while (new_size >= ini->capacity) {
     size_t new_capacity = ini->capacity * 2;
     char *new_data      = NULL;
-    BXR_ALLOC(new_data, new_capacity);
+    new_data            = BXR_ALLOC(new_capacity);
     if (new_data == NULL) {
       return false;
     }
@@ -399,7 +399,7 @@ bxr_ini_create_writer()
   }
 
   ini->data = NULL;
-  BXR_ALLOC(ini->data, BXR_INI_DEFAULT_DATA_CAPACITY);
+  ini->data = BXR_ALLOC(BXR_INI_DEFAULT_DATA_CAPACITY);
   if (ini->data == NULL) {
     BXR_FREE(ini);
     return NULL;
@@ -434,7 +434,7 @@ bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
 
   size_t line_len = SDL_strlen(section) + 4; // + 3 for [ ] \n and \0
   char *line      = NULL;
-  BXR_ALLOC(line, line_len);
+  line            = BXR_ALLOC(line_len);
   if (line == NULL) {
     return false;
   }
@@ -476,7 +476,7 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value)
 
   size_t left_len = SDL_strlen(key) + 2; // + 1 for = and + 1 for \n
   char *left      = NULL;
-  BXR_ALLOC(left, left_len + 2);
+  left            = BXR_ALLOC(left_len + 2);
   if (!left) {
     return false;
   }
@@ -514,7 +514,7 @@ bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
   size_t line_len
       = SDL_strlen(key) + SDL_strlen(number_str) + 3; // + 2 for = \n and \0
   char *line = NULL;
-  BXR_ALLOC(line, line_len);
+  line       = BXR_ALLOC(line_len);
   if (!line) {
     return false;
   }

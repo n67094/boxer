@@ -168,7 +168,7 @@ bxr_asset_read(const char *path, size_t *length)
   }
 
   Uint8 *buffer = NULL;
-  BXR_ALLOC(buffer, len);
+  buffer        = BXR_ALLOC(len);
   if (!buffer) {
     BXR_LOG_ERROR("Failed to allocate memory for file: %s", path);
     PHYSFS_close(file);

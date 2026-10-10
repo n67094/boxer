@@ -164,7 +164,7 @@ bxr_audio_setup(void)
     return;
   }
 
-  BXR_CALLOC(audios_, BXR_AUDIO_MAX, sizeof(bxr_audio_t_));
+  audios_ = BXR_CALLOC(BXR_AUDIO_MAX, sizeof(bxr_audio_t_));
   if (!audios_) {
     BXR_LOG_ERROR("Failed to allocate audio slots");
     bxr_audio_release_();
@@ -179,7 +179,7 @@ bxr_audio_setup(void)
     return;
   }
 
-  BXR_ALLOC(voices_, sizeof(bxr_voice_t_) * BXR_AUDIO_MAX_VOICES);
+  voices_ = BXR_ALLOC(sizeof(bxr_voice_t_) * BXR_AUDIO_MAX_VOICES);
   if (!voices_) {
     BXR_LOG_ERROR("Failed to allocate voice slots");
     bxr_audio_release_();

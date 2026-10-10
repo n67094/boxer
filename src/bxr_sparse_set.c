@@ -35,14 +35,14 @@ bxr_sparse_set_create(size_t default_capacity)
   }
 
   set->dense = NULL;
-  BXR_ALLOC(set->dense, default_capacity * sizeof(size_t));
+  set->dense = BXR_ALLOC(default_capacity * sizeof(size_t));
   if (!set->dense) {
     bxr_sparse_set_destroy(set);
     goto error;
   }
 
   set->sparse = NULL;
-  BXR_ALLOC(set->sparse, default_capacity * sizeof(size_t));
+  set->sparse = BXR_ALLOC(default_capacity * sizeof(size_t));
   if (!set->sparse) {
     bxr_sparse_set_destroy(set);
     goto error;
@@ -97,8 +97,19 @@ bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle)
       new_capacity *= 2;
     }
 
-    BXR_RESIZE(set->dense, new_capacity * sizeof(size_t));
-    BXR_RESIZE(set->sparse, new_capacity * sizeof(size_t));
+    // Keep each array as soon as it grows: a larger array is still valid, and
+    // the capacity is only updated once both succeeded.
+    size_t *new_dense = BXR_RESIZE(set->dense, new_capacity * sizeof(size_t));
+    if (!new_dense) {
+      return false;
+    }
+    set->dense = new_dense;
+
+    size_t *new_sparse = BXR_RESIZE(set->sparse, new_capacity * sizeof(size_t));
+    if (!new_sparse) {
+      return false;
+    }
+    set->sparse = new_sparse;
 
     set->capacity = new_capacity;
   }

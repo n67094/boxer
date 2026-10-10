@@ -1,10 +1,7 @@
 /**
  * File `bxr_mem.h`.
  *
- * Memroy allocation and memory manipulation utilities.
- *
- * Allocation macros assign the result to `ptr` directly, so `ptr` must be a
- * modifiable lvalue. Every allocation must be released with `BXR_FREE()`.
+ * Memory allocation and memory manipulation utilities.
  *
  * Copyright (c) 2025 nsix. All rights reserved.
  */
@@ -15,30 +12,27 @@
 #include <SDL3/SDL.h>
 
 /**
- * Allocate uninitialized memory and assign it to `ptr`.
+ * Allocate uninitialized memory.
  *
- * `ptr` lvalue receiving the allocated block.
  * `nbytes` size of the block in bytes.
  *
- * `return` the new pointer (also stored in `ptr`), or NULL on failure.
+ * `return` the new pointer, or NULL on failure.
  *
  * **Note**: the caller must free the result with `BXR_FREE()`.
  */
-#define BXR_ALLOC(ptr, nbytes) ((ptr) = SDL_malloc((size_t)nbytes))
+#define BXR_ALLOC(nbytes) SDL_malloc((size_t)(nbytes))
 
 /**
- * Allocate zero-initialized memory for an array and assign it to `ptr`.
+ * Allocate zero-initialized memory for an array.
  *
- * `ptr` lvalue receiving the allocated block.
  * `count` number of elements.
  * `nbytes` size of one element in bytes.
  *
- * `return` the new pointer (also stored in `ptr`), or NULL on failure.
+ * `return` the new pointer, or NULL on failure.
  *
  * **Note**: the caller must free the result with `BXR_FREE()`.
  */
-#define BXR_CALLOC(ptr, count, nbytes)                                         \
-  ((ptr) = SDL_calloc((size_t)(count), (size_t)(nbytes)))
+#define BXR_CALLOC(count, nbytes) SDL_calloc((size_t)(count), (size_t)(nbytes))
 
 /**
  * Allocate one uninitialized object of the type pointed to by `ptr`.
@@ -49,7 +43,7 @@
  *
  * **Note**: the caller must free the result with `BXR_FREE()`.
  */
-#define BXR_NEW(ptr) BXR_ALLOC((ptr), sizeof *(ptr))
+#define BXR_NEW(ptr) ((ptr) = BXR_ALLOC(sizeof *(ptr)))
 
 /**
  * Allocate one zero-initialized object of the type pointed to by `ptr`.
@@ -60,7 +54,7 @@
  *
  * **Note**: the caller must free the result with `BXR_FREE()`.
  */
-#define BXR_NEW0(ptr) BXR_CALLOC((ptr), 1, sizeof *(ptr))
+#define BXR_NEW0(ptr) ((ptr) = BXR_CALLOC(1, sizeof *(ptr)))
 
 /**
  * Free memory and set `ptr` to NULL.
@@ -71,22 +65,16 @@
 #define BXR_FREE(ptr) ((void)(SDL_free(ptr), (ptr) = NULL))
 
 /**
- * Resize a block of memory and assign the new pointer to `ptr`.
+ * Resize a block of memory.
  *
- * `ptr` lvalue pointing to the block to resize, NULL behaves like
- * `BXR_ALLOC()`.
+ * `ptr` pointer to the block to resize, NULL behaves like `BXR_ALLOC()`.
  * `nbytes` new size of the block in bytes.
  *
- * `return` the new pointer (also stored in `ptr`), or NULL on failure.
+ * `return` the new pointer, or NULL on failure.
  *
  * **Note**: the caller must free the result with `BXR_FREE()`.
- *
- * FIXME: on failure `ptr` is overwritten with NULL and the original block is
- * leaked. Realloc into a temporary and only assign it to `ptr` on success
- * (callers in `bxr_ecs.c`, `bxr_multimap.c` and `bxr_sparse_set.c` also never
- * check the result).
  */
-#define BXR_RESIZE(ptr, nbytes) ((ptr) = SDL_realloc((ptr), (size_t)(nbytes)))
+#define BXR_RESIZE(ptr, nbytes) SDL_realloc((ptr), (size_t)(nbytes))
 
 /**
  * Fill `nbytes` of memory at `ptr` with the byte `value`.
