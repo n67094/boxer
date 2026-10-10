@@ -312,7 +312,7 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
     break;
   case SDL_EVENT_MOUSE_BUTTON_DOWN:
     bxr_mouse_button_down((bxr_mouse_e)event->button.button,
-                          (bxr_mouse_click_e)event->button.clicks);
+                          event->button.clicks);
     break;
   case SDL_EVENT_MOUSE_BUTTON_UP:
     bxr_mouse_button_up((bxr_mouse_e)event->button.button);

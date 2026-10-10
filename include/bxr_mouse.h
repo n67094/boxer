@@ -1,9 +1,9 @@
 /**
  * File `bxr_mouse.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Mouse input handling.
  *
- * # Mouse Input Handling
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_MOUSE_H_
@@ -11,15 +11,8 @@
 
 #include <SDL3/SDL.h>
 
-#include "bxr_context.h"
 #include "bxr_defs.h"
-
-typedef enum
-{
-  BXR_MOUSE_NONE = 0,
-  BXR_MOUSE_SINGLE,
-  BXR_MOUSE_DOUBLE,
-} bxr_mouse_click_e;
+#include "bxr_math.h"
 
 typedef enum
 {
@@ -33,48 +26,43 @@ typedef enum
 } bxr_mouse_e;
 
 /**
- * Internal API
+ * ## Internal API
  */
 
 /**
- * Initialize the mouse subsystem. Must be called before using any other mouse
- * functions.
+ * Initialize the mouse subsystem.
  */
 void bxr_mouse_setup(void);
 
 /**
- * Update the mouse state for the current frame. Must be called at the beginning
- * of each frame before processing input.
+ * Update the mouse state for the current frame.
  */
 void bxr_mouse_begin_frame(void);
 
 /**
- * Tears down the mouse subsystem. Must be called when the application is
- * shutting down.
+ * Tears down the mouse subsystem.
  */
 void bxr_mouse_teardown(void);
 
 /**
- * Handles a mouse button down event. Must be called when a mouse button event
- * is received from SDL.
+ * Handles a mouse button down event.
  *
- * `button` is the mouse button that was pressed or released.
+ * `button` is the mouse button that was pressed.
  *
- * `click` is the type of click (single or double).
+ * `clicks` is the SDL click count, 1 for a single click, 2 for a double click,
+ * etc.
  */
-void bxr_mouse_button_down(bxr_mouse_e button, bxr_mouse_click_e click);
+void bxr_mouse_button_down(bxr_mouse_e button, Uint8 click);
 
 /**
- * Handles a mouse button up event. Must be called when a mouse button up event
- * is received from SDL.
+ * Handles a mouse button up event.
  *
  * `button` is the mouse button that was released.
  */
 void bxr_mouse_button_up(bxr_mouse_e button);
 
 /**
- * Handles a mouse motion event. Must be called when a mouse motion event is
- * received from SDL.
+ * Handles a mouse motion event.
  *
  * `x` is the new x position of the mouse cursor.
  *
@@ -83,8 +71,7 @@ void bxr_mouse_button_up(bxr_mouse_e button);
 void bxr_mouse_motion(float x, float y);
 
 /**
- * Handles a mouse wheel motion event. Must be called when a mouse wheel motion
- * event is received from SDL.
+ * Handles a mouse wheel motion event.
  *
  * `x` is the amount of horizontal scroll.
  *
@@ -93,87 +80,113 @@ void bxr_mouse_motion(float x, float y);
 void bxr_mouse_wheel_motion(float x, float y);
 
 /**
- * Public API
+ * ## Public API
  */
 
 /**
- * Get the current position of the mouse cursor.
+ * Get the position of the mouse cursor in the game's virtual resolution.
  *
- * `return` the current position of the mouse cursor.
+ * `return` the cursor position in virtual resolution coordinates.
  */
 BXR_API bxr_vec2_t bxr_mouse_pos(void);
 
 /**
- * Get the position of the mouse cursor in the previous frame.
+ * Get the current position of the mouse cursor in window coordinates.
  *
- * `return` the position of the mouse cursor in the previous frame.
+ * `return` the cursor position in window coordinates.
+ */
+BXR_API bxr_vec2_t bxr_mouse_window_pos(void);
+
+/**
+ * Get the position of the mouse cursor in the previous frame in the game's
+ * virtual resolution.
+ *
+ * `return` the cursor position in virtual resolution coordinates.
  */
 BXR_API bxr_vec2_t bxr_mouse_prev_pos(void);
 
 /**
+ * Get the position of the mouse cursor in the previous frame in window
+ * coordinates.
+ *
+ * `return` the cursor position in window coordinates.
+ */
+BXR_API bxr_vec2_t bxr_mouse_prev_window_pos(void);
+
+/**
  * Check if a mouse button is currently held down.
  *
- * `button` is the mouse button to check.
+ * `button` button to check, in `[BXR_MOUSE_LEFT, BXR_MOUSE_X2]`.
  *
- * `return` true if the button is currently held down, false otherwise.
+ * `return` true if the button is held, false otherwise.
  */
 BXR_API bool bxr_mouse_held(bxr_mouse_e button);
 
 /**
- * Check if a mouse button was just pressed this frame.
+ * Check if a mouse button was pressed during the previous frame.
  *
- * `button` is the mouse button to check.
+ * `button` button to check, in `[BXR_MOUSE_LEFT, BXR_MOUSE_X2]`.
  *
- * `return` true if the button was just pressed this frame, false otherwise.
+ * `return` true if the button was just pressed, false otherwise.
  */
 BXR_API bool bxr_mouse_just_pressed(bxr_mouse_e button);
 
 /**
- * Check if a mouse button was just released this frame.
+ * Check if a mouse button was released during the previous frame.
  *
- * `button` is the mouse button to check.
+ * `button` button to check, in `[BXR_MOUSE_LEFT, BXR_MOUSE_X2]`.
  *
- * `return` true if the button was just released this frame, false otherwise.
+ * `return` true if the button was just released, false otherwise.
  */
 BXR_API bool bxr_mouse_just_released(bxr_mouse_e button);
 
 /**
- * Check if a mouse button was double clicked this frame.
+ * Get the number of clicks for a mouse button.
  *
- * `button` is the mouse button to check.
+ * `button` button to check, in `[BXR_MOUSE_LEFT, BXR_MOUSE_X2]`.
  *
- * `return` true if the button was double clicked this frame, false otherwise.
+ * `return` the number of clicks for the button.
  */
-BXR_API bool bxr_mouse_double_clicked(bxr_mouse_e button);
+BXR_API Uint8 bxr_mouse_get_clicks(bxr_mouse_e button);
 
 /**
- * Get the amount of time a mouse button has been held down.
+ * Check if a mouse button was double clicked during the previous frame.
  *
- * `button` is the mouse button to check.
+ * `button` button to check, in `[BXR_MOUSE_LEFT, BXR_MOUSE_X2]`.
  *
- * `return` the amount of time the button has been held down in milliseconds.
+ * `return` true if the button was double clicked, false otherwise.
+ */
+BXR_API bool bxr_mouse_is_double_click(bxr_mouse_e button);
+
+/**
+ * Get how long a mouse button has been held down.
+ *
+ * `button` button to check, in `[BXR_MOUSE_LEFT, BXR_MOUSE_X2]`.
+ *
+ * `return` the time since the button was pressed in milliseconds, or 0 if it is
+ * not held.
  */
 BXR_API Uint64 bxr_mouse_held_time(bxr_mouse_e button);
 
 /**
- * Get the amount of scroll from the mouse wheel in the current frame.
+ * Get the mouse wheel scroll for the current frame.
  *
- * `return` the amount of scroll from the mouse wheel in the current frame.
+ * `return` the scroll amount in the x and y directions.
  */
 BXR_API bxr_vec2_t bxr_mouse_wheel(void);
 
 /**
  * Hide or show the mouse cursor.
  *
- * `hide` true to hide the mouse cursor, false to show it.
+ * `hide` true to hide the cursor, false to show it.
  */
 BXR_API void bxr_mouse_hide(bool hide);
 
 /**
- * Check if the mouse cursor is currently hidden.
+ * Check if the mouse cursor is currently visible.
  *
- * `return` true if the mouse cursor is currently hidden, false otherwise.
+ * `return` true if the cursor is visible, false otherwise.
  */
-BXR_API bool bxr_mouse_is_hidden(void);
+BXR_API bool bxr_mouse_is_visible(void);
 
 #endif // BXR_MOUSE_H_

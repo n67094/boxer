@@ -78,7 +78,7 @@ bxr_image_create(const char *path)
   return image;
 }
 
-BXR_API bxr_image_t
+bxr_image_t
 bxr_image_create_mem(
     int width, int height, bxr_pixel_format_e format, void *pixels, int pitch)
 {
