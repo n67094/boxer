@@ -416,3 +416,4 @@ bxr_multimap_destroy(bxr_multimap_t *map)
   BXR_FREE(map->keys);
   BXR_FREE(map->buckets);
   BXR_FREE(map);
+}
