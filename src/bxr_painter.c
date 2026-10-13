@@ -187,6 +187,13 @@ bxr_painter_reset_image(int channel)
 }
 
 void
+bxr_painter_set_sampler(int channel, bxr_sampler_t *sampler)
+{
+  SDL_GPUSampler *gp_sampler = sampler->sampler;
+  SDL_GPSetSampler(channel, gp_sampler);
+}
+
+void
 bxr_painter_unset_sampler(int channel)
 {
   SDL_GPUnsetSampler(channel);
@@ -205,14 +212,17 @@ bxr_painter_scissor(int x, int y, int w, int h)
 
   bxr_context_t *context = bxr_context_get();
 
-  int width  = context->config.width;
-  int height = context->config.height;
+  float width  = context->config.width;
+  float height = context->config.height;
 
   int virtual_width  = context->config.virtual_width;
   int virtual_height = context->config.virtual_height;
 
-  int factor_x = width / virtual_width;
-  int factor_y = height / virtual_height;
+  BXR_ASSERT(virtual_width > 0);
+  BXR_ASSERT(virtual_height > 0);
+
+  float factor_x = width / virtual_width;
+  float factor_y = height / virtual_height;
 
   SDL_GPScissor(x * factor_x, y * factor_y, w * factor_x, h * factor_y);
 }
