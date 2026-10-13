@@ -1,3 +1,11 @@
+/**
+ * File `bxr_pixel.h`.
+ *
+ * Pixel formats used by boxer images.
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
+ */
+
 #ifndef BXR_PIXEL_H_
 #define BXR_PIXEL_H_
 
@@ -75,6 +83,8 @@ typedef enum bxr_pixel_format_e
   BXR_PIXEL_FORMAT_MJPG         = SDL_PIXELFORMAT_MJPG,
 
 /* Aliases for RGBA byte arrays of color data, for the current platform */
+/* FIXME: both branches are identical because the SDL_PIXELFORMAT_*32 aliases
+ * already resolve endianness; drop the #if and keep a single list. */
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
   BXR_PIXEL_FORMAT_RGBA32 = SDL_PIXELFORMAT_RGBA32,
   BXR_PIXEL_FORMAT_ARGB32 = SDL_PIXELFORMAT_ARGB32,

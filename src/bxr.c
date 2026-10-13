@@ -167,6 +167,7 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   bxr_shader_setup(context);
   bxr_audio_setup();
   bxr_image_setup();
+  bxr_sampler_setup();
 
   bxr_painter_setup(&painter_desc);
 
@@ -356,6 +357,7 @@ SDL_AppQuit(void *appstate, SDL_AppResult result)
 
   bxr_audio_teardown();
   bxr_shader_teardown();
+  bxr_sampler_teardown();
   bxr_image_teardown();
   bxr_gamepad_teardown();
   bxr_mouse_teardown();

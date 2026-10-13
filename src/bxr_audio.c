@@ -488,7 +488,7 @@ bxr_audio_create(const char *path)
   audio->length = converted_len;
   audio->spec   = dst;
 
-  int slot = bxr_pool_aquire_slot(audio_pool_);
+  int slot = bxr_pool_acquire_slot(audio_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
     // No free slots
     if (audio->data) {
@@ -649,7 +649,7 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
   }
 
   // Borrow a voice slot for playback
-  int slot = bxr_pool_aquire_slot(voice_pool_);
+  int slot = bxr_pool_acquire_slot(voice_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("No free voice slots available");
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
