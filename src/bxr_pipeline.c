@@ -1,5 +1,6 @@
 #include "bxr_pipeline.h"
 #include "bxr_sdl_gp.h"
+#include "bxr_shader.h"
 
 bxr_pipeline_t
 bxr_pipeline_create(bxr_shader_t shader_vert,
