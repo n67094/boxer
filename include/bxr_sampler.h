@@ -1,6 +1,8 @@
 /**
  * File `bxr_sampler.h`.
  *
+ * # Boxer's GPU Samplers.
+ *
  * GPU samplers used to sample textures in shaders.
  *
  * Create a sampler from one of the `bxr_sampler_e` presets, bind it with

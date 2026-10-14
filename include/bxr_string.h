@@ -1,9 +1,9 @@
 /**
  * File `bxr_string.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * # Boxer's String Utilities.
  *
- * # String Utilities
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_STR_H_

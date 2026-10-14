@@ -1,7 +1,9 @@
 /**
  * File `bxr_ecs.h`.
  *
- * Entity Component System:
+ * # Boxer's Entity Component System.
+ *
+ * Overview:
  *
  * - Entities are IDs.
  * - Components are plain data blocks attached to entities.

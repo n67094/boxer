@@ -1,6 +1,8 @@
 /**
  * File `bxr_pool.h`.
  *
+ * # Boxer's Resource Pool.
+ *
  * Fixed-size slot pool handing out generational ids, used to manage resources.
  *
  * Typical usage: create the pool, acquire a slot, generate an id for it and

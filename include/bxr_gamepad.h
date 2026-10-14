@@ -1,7 +1,7 @@
 /**
  * File `bxr_gamepad.h`.
  *
- * Gamepad input handling.
+ * # Boxer's Gamepad Input Handling.
  *
  * Up to `BXR_GAMEPAD_MAX` gamepads are tracked.
  *

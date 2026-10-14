@@ -1,6 +1,8 @@
 /**
  * File `bxr_shader.h`.
  *
+ * # Boxer's GPU Shaders.
+ *
  * GPU shaders loaded from bytecode files in the mounted asset directories.
  *
  * Shader files are read with the `bxr_asset.h` API and must be named

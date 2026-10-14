@@ -1,6 +1,8 @@
 /**
  * File `bxr_sparse_set.h`.
  *
+ * # Boxer's Sparse Set.
+ *
  * Set of integer handles (e.g. entity ids) with O(1) insert, remove and lookup.
  *
  * The set is backed by two arrays:

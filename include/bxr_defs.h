@@ -1,7 +1,7 @@
 /**
  * File `bxr_defs.h`.
  *
- * Boxer's global definitions and constants.
+ * # Boxer's Global Definitions and Constants.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

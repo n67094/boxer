@@ -1,7 +1,7 @@
 /**
  * File `bxr_mouse.h`.
  *
- * Mouse input handling.
+ * # Boxer's Mouse Input Handling.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

@@ -1,7 +1,7 @@
 /**
  * File `bxr_audio.h`.
  *
- * Audio management and playback.
+ * # Boxer's Audio Management and Playback.
  *
  * Typical usage: `bxr_audio_create()`, then `bxr_voice_create()` for as many
  * voices as you need, then `bxr_voice_play()`, `bxr_voice_pause()`, etc.

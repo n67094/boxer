@@ -1,6 +1,8 @@
 /**
  * File `bxr_painter.h`.
  *
+ * # Boxer's 2D Painter.
+ *
  * Immediate-mode 2D renderer (thin wrapper over SDL_gp).
  *
  * Public API below may only be called from `bxr_game_update()` or

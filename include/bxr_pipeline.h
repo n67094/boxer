@@ -1,7 +1,7 @@
 /**
  * File `bxr_pipeline.h`.
  *
- * Custom graphics pipelines for the painter.
+ * # Boxer's Custom Graphics Pipelines for the Painter.
  *
  * Typical usage: create shaders with `bxr_shader_create()`, combine them with
  * `bxr_pipeline_create()`, select the pipeline with
