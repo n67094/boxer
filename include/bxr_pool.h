@@ -15,15 +15,10 @@
 
 #include <SDL3/SDL.h>
 
-#include "bxr_sdl_gp.h"
-
-typedef struct bxr_pool_s
-{
-  SDL_GPPool *pool;
-} bxr_pool_t;
+typedef struct bxr_pool_s bxr_pool_t;
 
 // Slot index returned when no slot is available or the pool is NULL.
-#define BXR_POOL_INVALID_SLOT SDL_GP_POOL_INVALID_SLOT
+#define BXR_POOL_INVALID_SLOT (-1)
 
 /**
  * Create a pool with every slot free.

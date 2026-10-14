@@ -28,9 +28,8 @@
 
 #include "bxr_context.h"
 #include "bxr_defs.h"
-#include "bxr_sdl_gp.h"
 
-#define BXR_SHADER_INVALID_ID SDL_GP_INVALID_ID
+#define BXR_SHADER_INVALID_ID 0
 
 typedef enum
 {

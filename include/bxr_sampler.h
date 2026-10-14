@@ -15,7 +15,6 @@
 #include <SDL3/SDL.h>
 
 #include "bxr_defs.h"
-#include "bxr_sdl_gp.h"
 
 /**
  * Sampler presets: filtering (point = nearest, linear) and address mode
@@ -23,11 +22,11 @@
  */
 typedef enum
 {
-  BXR_SAMPLER_POINT_CLAMP  = SDL_GP_SAMPLER_POINT_CLAMP,
-  BXR_SAMPLER_POINT_WRAP   = SDL_GP_SAMPLER_POINT_WRAP,
-  BXR_SAMPLER_LINEAR_CLAMP = SDL_GP_SAMPLER_LINEAR_CLAMP,
-  BXR_SAMPLER_LINEAR_WRAP  = SDL_GP_SAMPLER_LINEAR_WRAP,
-  BXR_GP_SAMPLER_SIZE      = SDL_GP_SAMPLER_SIZE,
+  BXR_SAMPLER_POINT_CLAMP = 0,
+  BXR_SAMPLER_POINT_WRAP,
+  BXR_SAMPLER_LINEAR_CLAMP,
+  BXR_SAMPLER_LINEAR_WRAP,
+  BXR_GP_SAMPLER_SIZE,
 } bxr_sampler_e;
 
 typedef struct bxr_sampler_s

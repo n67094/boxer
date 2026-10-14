@@ -18,7 +18,7 @@ bxr_ecs_t *ecs = NULL;
 
 static int
 dummy_system(bxr_ecs_t *ecs,
-             bxr_ecs_entity_t *entities,
+             const bxr_ecs_entity_t *entities,
              size_t entity_count,
              void *udata)
 {
@@ -71,7 +71,7 @@ typedef struct
 
 static int
 exclude_system(bxr_ecs_t *ecs,
-               bxr_ecs_entity_t *entities,
+               const bxr_ecs_entity_t *entities,
                size_t entity_count,
                void *udata)
 {
@@ -268,7 +268,7 @@ bxr_ecs_component_t _c1;
 
 static int
 remove_exclude_system(bxr_ecs_t *ecs,
-                      bxr_ecs_entity_t *entities,
+                      const bxr_ecs_entity_t *entities,
                       size_t entity_count,
                       void *udata)
 {
@@ -319,7 +319,7 @@ BXR_UNIT_CASE(case_ecs_system_exclude_remove)
 
 static int
 add_exclude_system(bxr_ecs_t *ecs,
-                   bxr_ecs_entity_t *entities,
+                   const bxr_ecs_entity_t *entities,
                    size_t entity_count,
                    void *udata)
 {
@@ -595,7 +595,7 @@ BXR_UNIT_CASE(case_ecs_entity_remove)
 
 static int
 remove_system(bxr_ecs_t *ecs,
-              bxr_ecs_entity_t *entities,
+              const bxr_ecs_entity_t *entities,
               size_t entity_count,
               void *udata)
 {
@@ -677,7 +677,7 @@ BXR_UNIT_CASE(case_ecs_entity_destroy)
 
 static int
 destroy_system(bxr_ecs_t *ecs,
-               bxr_ecs_entity_t *entities,
+               const bxr_ecs_entity_t *entities,
                size_t entity_count,
                void *udata)
 {
@@ -727,7 +727,7 @@ static bxr_ecs_system_t _s1;
 
 static int
 queue_add_system(bxr_ecs_t *ecs,
-                 bxr_ecs_entity_t *entities,
+                 const bxr_ecs_entity_t *entities,
                  size_t entity_count,
                  void *udata)
 {
@@ -763,7 +763,7 @@ BXR_UNIT_CASE(case_ecs_queue_add)
 
 static int
 queue_remove_system(bxr_ecs_t *ecs,
-                    bxr_ecs_entity_t *entities,
+                    const bxr_ecs_entity_t *entities,
                     size_t entity_count,
                     void *udata)
 {
@@ -804,7 +804,7 @@ BXR_UNIT_CASE(case_ecs_queue_remove)
 
 static int
 queue_destroy_system(bxr_ecs_t *ecs,
-                     bxr_ecs_entity_t *entities,
+                     const bxr_ecs_entity_t *entities,
                      size_t entity_count,
                      void *udata)
 {
@@ -845,7 +845,7 @@ BXR_UNIT_CASE(case_ecs_queue_destroy)
 
 static int
 disable_system(bxr_ecs_t *ecs,
-               bxr_ecs_entity_t *entities,
+               const bxr_ecs_entity_t *entities,
                size_t entity_count,
                void *udata)
 {
@@ -901,7 +901,7 @@ BXR_UNIT_CASE(case_ecs_system_enable_disable)
 
 static int
 system_mask(bxr_ecs_t *ecs,
-            bxr_ecs_entity_t *entities,
+            const bxr_ecs_entity_t *entities,
             size_t entity_count,
             void *udata)
 {
@@ -990,7 +990,7 @@ BXR_UNIT_CASE(case_ecs_system_add_remove_cb)
 
 static int
 ret_system(bxr_ecs_t *ecs,
-           bxr_ecs_entity_t *entities,
+           const bxr_ecs_entity_t *entities,
            size_t entity_count,
            void *udata)
 {
@@ -1004,7 +1004,7 @@ ret_system(bxr_ecs_t *ecs,
 
 static int
 alt_ret_system(bxr_ecs_t *ecs,
-               bxr_ecs_entity_t *entities,
+               const bxr_ecs_entity_t *entities,
                size_t entity_count,
                void *udata)
 {

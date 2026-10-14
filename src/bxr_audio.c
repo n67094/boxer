@@ -603,7 +603,6 @@ static bxr_voice_t_ *
 bxr_voice_get_(bxr_voice_t voice)
 {
   if (voice.id == BXR_AUDIO_INVALID_ID) {
-    BXR_LOG_ERROR("Invalid voice ID");
     return NULL;
   }
 
@@ -692,10 +691,13 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
 
   SDL_SetAudioStreamGain(v->stream, desc->volume);
 
-  bxr_voice_t voice_id = { .id = bxr_pool_generate_id(voice_pool_, slot) };
-  v->voice             = voice_id;
+  bxr_voice_t voice = { .id = bxr_pool_generate_id(voice_pool_, slot) };
+  v->voice          = voice;
 
-  return voice_id;
+  BXR_LOG_INFO(
+      "Created voice ID: %u for audio ID: %u", voice.id, desc->audio.id);
+
+  return voice;
 }
 
 void
