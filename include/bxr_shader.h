@@ -14,7 +14,6 @@
  * fragment shader).
  * - `<format>` is the shader bytecode format (e.g. "spv" for SPIR-V, "msl" for
  * Metal Shading Language, etc.).
- *
  */
 
 #ifndef BXR_SHADER_H_
