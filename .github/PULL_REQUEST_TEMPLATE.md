@@ -1,3 +1,3 @@
 - [ ] **I followed the [AI policy](https://github.com/n67094/boxer/blob/main/AGENTS.md).** I confirm that:
-  - No source code in this PR was written by generative AI.
-  - Any AI use was limited to exploring the codebase, suggesting improvements during review, or drafting header docs, commit messages, and PR descriptions.
+- No source code in this PR was written by generative AI.
+- Any AI use was limited to exploring the codebase, suggesting improvements during review, or drafting header docs, commit messages, and PR descriptions.
