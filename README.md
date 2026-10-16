@@ -141,7 +141,7 @@ bxr_game_teardown(void)
 
 > The code should stay human-written and the workflow shoulds remain human-driven.
 
-I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md) file for more details on what is allowed and what is not.
+I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md).
 
 # Sponsors
 
