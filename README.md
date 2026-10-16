@@ -139,8 +139,6 @@ bxr_game_teardown(void)
 
 # AI Usage Policy
 
-> The code should stay human-written and the workflow shoulds remain human-driven.
-
 I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md).
 
 # Sponsors
