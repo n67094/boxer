@@ -4,7 +4,7 @@
 
 _The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form. The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine's flat design._
 
-# Boxer
+# Boxer (In Progress)
 
 A lightweight and cross-platform easy to use 2D game library written in C.
 
