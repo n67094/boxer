@@ -75,6 +75,9 @@ _painter_sampler(bxr_sampler_e sampler_type)
 bxr_sampler_t
 bxr_sampler_create(bxr_sampler_e sampler_type)
 {
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(sampler_type < BXR_GP_SAMPLER_SIZE);
+
   bxr_sampler_t sampler;
 
   SDL_GPUSamplerCreateInfo sampler_info = _painter_sampler(sampler_type);

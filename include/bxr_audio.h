@@ -1,7 +1,7 @@
 /**
  * File `bxr_audio.h`.
  *
- * Audio loading and playback module for the Boxer engine.
+ * # Boxer's Audio Management and Playback.
  *
  * Typical usage: `bxr_audio_create()`, then `bxr_voice_create()` for as many
  * voices as you need, then `bxr_voice_play()`, `bxr_voice_pause()`, etc.
@@ -66,10 +66,6 @@ typedef struct bxr_voice_desc_s
   bool auto_play;
   bool play_once;
 } bxr_voice_desc_t;
-
-/**
- * ## Internal API
- */
 
 void bxr_audio_setup(void);
 void bxr_audio_begin_frame(void);

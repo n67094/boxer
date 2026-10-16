@@ -10,7 +10,7 @@ static bxr_voice_t _music;
 
 static bxr_game_config_t _config = { 0 };
 
-bxr_game_config_t *
+const bxr_game_config_t *
 bxr_game_config(void)
 {
   _config.name  = "boxer_bxr";
@@ -47,7 +47,7 @@ bxr_game_setup(void)
 }
 
 void
-bxr_game_update(Uint64 delta_time_ms)
+bxr_game_update(double delta_time_ms)
 {
   BXR_LOG_INFO("Use Space to pause/resume the music voice");
   BXR_LOG_INFO("Use Left to decrease the volume of the music voice");
@@ -165,7 +165,7 @@ bxr_game_update(Uint64 delta_time_ms)
 }
 
 void
-bxr_game_render(Uint64 alpha_time_ms)
+bxr_game_render(double alpha)
 {
   bxr_vec2_t window_size = bxr_context_get_virtual_window_dimensions();
 

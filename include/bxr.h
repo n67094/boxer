@@ -1,9 +1,12 @@
 /**
  * File `bxr.h`.
  *
- * Copyright (c) 2025 nsix. All rights reserved.
+ * # Boxer's Main Header File.
  *
- * # Boxer Main Header File
+ * **NOTE:** Boxer owns the program entry point through SDL main callbacks: do
+ * not write a `main()`, implement the callbacks of `bxr_game.h` instead.
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_H_
@@ -23,7 +26,6 @@
 #include "bxr_gamepad.h"
 #include "bxr_image.h"
 #include "bxr_ini.h"
-#include "bxr_json.h"
 #include "bxr_keyboard.h"
 #include "bxr_log.h"
 #include "bxr_math.h"
@@ -41,7 +43,11 @@
 #include "bxr_unit.h"
 
 /**
- * Quit the game loop and exit the application.
+ * Request the application to exit.
+ *
+ * Asynchronous: pushes an `SDL_EVENT_QUIT` and returns immediately. The
+ * current frame finishes, then `bxr_game_teardown()` and the subsystem
+ * teardowns run before the process exits. Safe to call from any thread.
  */
 void bxr_quit(void);
 

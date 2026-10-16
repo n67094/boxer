@@ -164,7 +164,7 @@ bxr_audio_setup(void)
     return;
   }
 
-  BXR_CALLOC(audios_, BXR_AUDIO_MAX, sizeof(bxr_audio_t_));
+  audios_ = BXR_CALLOC(BXR_AUDIO_MAX, sizeof(bxr_audio_t_));
   if (!audios_) {
     BXR_LOG_ERROR("Failed to allocate audio slots");
     bxr_audio_release_();
@@ -179,7 +179,7 @@ bxr_audio_setup(void)
     return;
   }
 
-  BXR_ALLOC(voices_, sizeof(bxr_voice_t_) * BXR_AUDIO_MAX_VOICES);
+  voices_ = BXR_ALLOC(sizeof(bxr_voice_t_) * BXR_AUDIO_MAX_VOICES);
   if (!voices_) {
     BXR_LOG_ERROR("Failed to allocate voice slots");
     bxr_audio_release_();
@@ -488,7 +488,7 @@ bxr_audio_create(const char *path)
   audio->length = converted_len;
   audio->spec   = dst;
 
-  int slot = bxr_pool_aquire_slot(audio_pool_);
+  int slot = bxr_pool_acquire_slot(audio_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
     // No free slots
     if (audio->data) {
@@ -603,7 +603,6 @@ static bxr_voice_t_ *
 bxr_voice_get_(bxr_voice_t voice)
 {
   if (voice.id == BXR_AUDIO_INVALID_ID) {
-    BXR_LOG_ERROR("Invalid voice ID");
     return NULL;
   }
 
@@ -649,7 +648,7 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
   }
 
   // Borrow a voice slot for playback
-  int slot = bxr_pool_aquire_slot(voice_pool_);
+  int slot = bxr_pool_acquire_slot(voice_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
     BXR_LOG_ERROR("No free voice slots available");
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
@@ -692,10 +691,13 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
 
   SDL_SetAudioStreamGain(v->stream, desc->volume);
 
-  bxr_voice_t voice_id = { .id = bxr_pool_generate_id(voice_pool_, slot) };
-  v->voice             = voice_id;
+  bxr_voice_t voice = { .id = bxr_pool_generate_id(voice_pool_, slot) };
+  v->voice          = voice;
 
-  return voice_id;
+  BXR_LOG_INFO(
+      "Created voice ID: %u for audio ID: %u", voice.id, desc->audio.id);
+
+  return voice;
 }
 
 void

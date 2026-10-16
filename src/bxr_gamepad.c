@@ -69,6 +69,19 @@ bxr_gamepad_listen(void)
   for (int i = 0; i < gamepad_count; ++i) {
     SDL_JoystickID id = gamepad_ids[i];
 
+    // Find the first empty slot for the new gamepad
+    int slot = -1;
+    for (int j = 0; j < BXR_GAMEPAD_MAX; ++j) {
+      if (gamepads_[j].gamepad == NULL) {
+        slot = j;
+        break;
+      }
+    }
+
+    if (slot < 0) {
+      break; // No empty slot available, skip this gamepad
+    }
+
     // Try to connect the gamepad
     SDL_Gamepad *gamepad = SDL_GetGamepadFromID(id);
     if (gamepad == NULL) { // Not connected yet try to open it
@@ -81,10 +94,11 @@ bxr_gamepad_listen(void)
       }
     }
 
+    const char *serial = SDL_GetGamepadSerial(gamepad);
+
     // If the gamepad is already in the list continue
     bool found = false;
     for (int j = 0; j < BXR_GAMEPAD_MAX; ++j) {
-      const char *serial = SDL_GetGamepadSerial(gamepad);
       if (gamepads_[j].id == id
           || (serial && gamepads_[j].serial
               && SDL_strcmp(gamepads_[j].serial, serial) == 0)) {
@@ -96,22 +110,16 @@ bxr_gamepad_listen(void)
       continue;
     }
 
-    // New gamepad map it to the first empty slot
-    for (int j = 0; j < BXR_GAMEPAD_MAX; ++j) {
-      if (gamepads_[j].gamepad == NULL) {
-        // If the slot is empty use it for the new gamepad
-        SDL_SetGamepadPlayerIndex(gamepad, j);
+    // New gamepad map it to the empty slot
+    SDL_SetGamepadPlayerIndex(gamepad, slot);
 
-        gamepads_[j].gamepad = gamepad;
-        gamepads_[j].id      = id;
-        gamepads_[j].serial  = SDL_GetGamepadSerial(gamepad);
+    gamepads_[slot].gamepad = gamepad;
+    gamepads_[slot].id      = id;
+    gamepads_[slot].serial  = serial;
 
-        BXR_MEMSET(gamepads_[j].buttons, 0, sizeof(gamepads_[j].buttons));
-        BXR_MEMSET(gamepads_[j].axis, 0, sizeof(gamepads_[j].axis));
-        BXR_MEMSET(gamepads_[j].axis_prev, 0, sizeof(gamepads_[j].axis_prev));
-        break;
-      }
-    }
+    BXR_MEMSET(gamepads_[slot].buttons, 0, sizeof(gamepads_[slot].buttons));
+    BXR_MEMSET(gamepads_[slot].axis, 0, sizeof(gamepads_[slot].axis));
+    BXR_MEMSET(gamepads_[slot].axis_prev, 0, sizeof(gamepads_[slot].axis_prev));
   }
 
   SDL_free(gamepad_ids);
@@ -160,7 +168,7 @@ bxr_gamepad_teardown(void)
   for (int i = 0; i < BXR_GAMEPAD_MAX; ++i) {
     if (gamepads_[i].gamepad != NULL) {
       SDL_CloseGamepad(gamepads_[i].gamepad);
-      gamepads_[i].gamepad = NULL;
+      BXR_MEMSET(&gamepads_[i], 0, sizeof(bxr_gamepad_t_));
     }
   }
 
@@ -172,6 +180,7 @@ bxr_gamepad_button_down(int index, bxr_gamepad_button_e button)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return;
@@ -190,6 +199,7 @@ bxr_gamepad_button_up(int index, bxr_gamepad_button_e button)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
+  BXR_ASSERT(button >= 0 && button < BXR_GAMEPAD_BUTTON_SIZE);
 
   if (!bxr_gamepad_connected(index)) {
     return;
@@ -204,7 +214,7 @@ bxr_gamepad_button_up(int index, bxr_gamepad_button_e button)
 }
 
 void
-bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, float value)
+bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, Sint16 value)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
   BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
@@ -214,13 +224,13 @@ bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, float value)
     return;
   }
 
-  value /= 32768.0f; // Convert to (-1.0f to 1.0f)
+  float result = value / 32767.0f; // Convert to (-1.0f to 1.0f)
 
-  if (SDL_fabsf(value) < deadzone_) { // Apply deadzone
-    value = 0.0f;
+  if (SDL_fabsf(result) < deadzone_) { // Apply deadzone
+    result = 0.0f;
   }
 
-  gamepads_[index].axis[axis] = value;
+  gamepads_[index].axis[axis] = result;
 }
 
 int
@@ -230,7 +240,7 @@ bxr_gamepad_count(void)
 
   int count = 0;
   for (int i = 0; i < BXR_GAMEPAD_MAX; ++i) {
-    if (gamepads_[i].gamepad != NULL) {
+    if (bxr_gamepad_connected(i)) {
       count++;
     }
   }
@@ -402,22 +412,21 @@ bxr_gamepad_rumble(int index,
                    Uint32 duration_ms)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (gamepads_[index].gamepad == NULL) {
     return false;
   }
 
-  low_frequency  = SDL_clamp(low_frequency, 0, 100);
-  high_frequency = SDL_clamp(high_frequency, 0, 100);
+  if (!SDL_RumbleGamepad(gamepads_[index].gamepad,
+                         low_frequency,
+                         high_frequency,
+                         duration_ms)) {
+    BXR_LOG_ERROR("Failed to start rumble for gamepad %d (error: %s)",
+                  index,
+                  SDL_GetError());
+    return false;
+  }
 
-  // Convert from percentage (0-100) to hex value (0x0000-0xFFFF)
-  // 0xFFFF is max rumble value (from SDL3 docs)
-  int low_frequency_hex  = (0xFFFF / 100) * low_frequency;
-  int high_frequency_hex = (0xFFFF / 100) * high_frequency;
-
-  // Start rumble
-  return SDL_RumbleGamepad(gamepads_[index].gamepad,
-                           low_frequency_hex,
-                           high_frequency_hex,
-                           duration_ms);
+  return true;
 }

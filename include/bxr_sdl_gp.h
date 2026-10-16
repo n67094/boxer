@@ -1,7 +1,14 @@
 /**
- * @file bxr_sdl_gp.h
+ * File `bxr_sdl_gp.h`.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * # Boxer's SDL_gp Include.
+ *
+ * Includes SDL_gp configured with boxer limits from `bxr_config.h`.
+ *
+ * Always include this header instead of `<SDL_gp.h>`: the `SDL_GP_*` limits
+ * must be defined before SDL_gp is included, otherwise its defaults are used.
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_SDL_GP_H_

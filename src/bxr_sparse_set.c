@@ -29,41 +29,27 @@ bxr_sparse_set_create(size_t default_capacity)
   }
 
   bxr_sparse_set_t *set = NULL;
-  BXR_NEW(set);
+  BXR_NEW0(set);
   if (!set) {
-    goto error;
+    return NULL;
   }
 
-  set->dense = NULL;
-  BXR_ALLOC(set->dense, default_capacity * sizeof(size_t));
+  set->dense = BXR_ALLOC(default_capacity * sizeof(size_t));
   if (!set->dense) {
     bxr_sparse_set_destroy(set);
-    goto error;
+    return NULL;
   }
 
-  set->sparse = NULL;
-  BXR_ALLOC(set->sparse, default_capacity * sizeof(size_t));
+  set->sparse = BXR_CALLOC(default_capacity, sizeof(size_t));
   if (!set->sparse) {
     bxr_sparse_set_destroy(set);
-    goto error;
-  }
-
-  // Set to zero since it can be read before being written to.
-  BXR_MEMSET(set->sparse, 0, default_capacity * sizeof(size_t));
-  if (!set->sparse) {
-    bxr_sparse_set_destroy(set);
-    goto error;
+    return NULL;
   }
 
   set->count    = 0;
   set->capacity = default_capacity;
 
   return set;
-
-error:
-  BXR_FREE(set->dense);
-  BXR_FREE(set->sparse);
-  BXR_FREE(set);
 
   return NULL;
 }
@@ -94,11 +80,31 @@ bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle)
 
     size_t new_capacity = set->capacity;
     while (handle >= new_capacity) {
+      // *2 to cunter the *2 below since it's a pre-check for overflow.
+      if (new_capacity >= SIZE_MAX / (2 * sizeof(size_t))) {
+        return false; // Cannot grow further
+      }
+
       new_capacity *= 2;
     }
 
-    BXR_RESIZE(set->dense, new_capacity * sizeof(size_t));
-    BXR_RESIZE(set->sparse, new_capacity * sizeof(size_t));
+    // Keep each array as soon as it grows: a larger array is still valid, and
+    // the capacity is only updated once both succeeded.
+    size_t *new_dense = BXR_RESIZE(set->dense, new_capacity * sizeof(size_t));
+    if (!new_dense) {
+      return false;
+    }
+    set->dense = new_dense;
+
+    size_t *new_sparse = BXR_RESIZE(set->sparse, new_capacity * sizeof(size_t));
+    if (!new_sparse) {
+      return false;
+    }
+    set->sparse = new_sparse;
+    // Zero the new part of the sparse array
+    BXR_MEMSET(set->sparse + set->capacity,
+               0,
+               (new_capacity - set->capacity) * sizeof(size_t));
 
     set->capacity = new_capacity;
   }
@@ -122,7 +128,7 @@ bxr_sparse_set_remove(bxr_sparse_set_t *set, size_t handle)
   }
 
   // Move the last handle to the position of the handle to remove
-  Uint32 last_handle              = set->dense[set->count - 1];
+  size_t last_handle              = set->dense[set->count - 1];
   set->dense[set->sparse[handle]] = last_handle;
 
   // Make the last_handle value equal to the value of the remove
@@ -148,7 +154,7 @@ bxr_sparse_set_contains(const bxr_sparse_set_t *set,
     return true;
   } else {
     if (found) {
-      *found = UINT32_MAX;
+      *found = SIZE_MAX;
     }
     return false;
   }
@@ -178,7 +184,7 @@ bxr_sparse_set_clear(bxr_sparse_set_t *set)
   set->count = 0;
 }
 
-size_t *
+const size_t *
 bxr_sparse_set_get_dense(const bxr_sparse_set_t *set)
 {
   BXR_ASSERT(set);

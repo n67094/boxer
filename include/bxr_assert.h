@@ -1,7 +1,7 @@
 /**
  * File `bxr_assert.h`.
  *
- * Assertion macro for checking internal invariants.
+ * # Boxer's Assertion Macro.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

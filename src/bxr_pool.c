@@ -1,6 +1,12 @@
 #include "bxr_pool.h"
 #include "bxr_log.h"
 #include "bxr_mem.h"
+#include "bxr_sdl_gp.h"
+
+struct bxr_pool_s
+{
+  SDL_GPPool *pool;
+};
 
 bxr_pool_t *
 bxr_pool_create(size_t number_of_slots)
@@ -33,29 +39,20 @@ bxr_pool_destroy(bxr_pool_t *pool)
 }
 
 int
-bxr_pool_aquire_slot(bxr_pool_t *pool)
+bxr_pool_acquire_slot(bxr_pool_t *pool)
 {
-  if (!pool) {
-    return BXR_POOL_INVALID_SLOT;
-  }
   return SDL_GPAcquirePoolSlot(pool->pool);
 }
 
 void
-bxr_pool_release_slot(bxr_pool_t *pool, size_t slot_index)
+bxr_pool_release_slot(bxr_pool_t *pool, int slot_index)
 {
-  if (!pool) {
-    return;
-  }
   SDL_GPReleasePoolSlot(pool->pool, slot_index);
 }
 
 Uint32
-bxr_pool_generate_id(bxr_pool_t *pool, size_t slot_index)
+bxr_pool_generate_id(bxr_pool_t *pool, int slot_index)
 {
-  if (!pool) {
-    return 0;
-  }
   return SDL_GPGeneratePoolID(pool->pool, slot_index);
 }
 

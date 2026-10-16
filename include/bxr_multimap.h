@@ -1,10 +1,11 @@
 /**
- * File `bxr_multimap_t.h`.
+ * File `bxr_multimap.h`.
+ *
+ * # Boxer's String Multimap.
+ *
+ * Hash map from string keys to sets of `Uint32` values (boxer resource ids).
  *
  * Copyright (c) 2026 nsix. All rights reserved.
- *
- * A Data Oriented Design (DOD) multimap implementation in C This hash map is
- * designed to map keys to set of values (Uint32, boxer resource ids).
  */
 
 #ifndef BXR_MULTIMAP_H_
@@ -28,77 +29,87 @@ typedef enum
 typedef struct bxr_multimap_s bxr_multimap_t;
 
 /**
- * Create a new multimap.
+ * Create an empty multimap.
  *
- * `initial_size` The initial size of the multimap. Must be a power of two. If
- * not it will be rouned up to the next power of two.
+ * `initial_size` initial slot count. Rounded up to the next power of two, with
+ * a minimum of `BXR_MULTIMAP_MIN_SIZE`; 0 is allowed.
  *
- * `return` A pointer to the newly created multimap, or NULL on failure.
+ * `return` the new multimap, or NULL on allocation failure.
+ *
+ * **Note**: the caller must free the result with `bxr_multimap_destroy()`.
  */
 bxr_multimap_t *bxr_multimap_create(size_t initial_size);
 
 /**
- * Add a value to the multimap.
+ * Add a value to the set of values of a key.
  *
- * `map` The multimap to push the value to. Cannot be NULL.
+ * The key is created if missing. Adding a value already present for the key
+ * is a no-op that succeeds.
  *
- * `key` The key to push the value to.
+ * `map` the multimap; must not be NULL.
+ * `key` the key; must not be NULL. The string is copied.
+ * `value` the value to add.
  *
- * `value` The value to push to the multimap.
- *
- * `return` true on success, false on failure.
+ * `return` true on success, false on allocation failure.
  */
 bool bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value);
 
 /**
- * Remove a value from the multimap. All duplicates of the value will be removed
- * from the bucket.
+ * Remove a value from the set of values of a key.
  *
- * `map` The multimap to remove the value from. Cannot be NULL.
+ * Value order in the bucket is not preserved. The key is removed when its last
+ * value is removed.
  *
- * `key` The key to remove the value from.
+ * `map` the multimap; must not be NULL.
+ * `key` the key; must not be NULL.
+ * `value` the value to remove.
  *
- * `value` The value to remove from the multimap.
- *
- * `return` true on success, false on failure.
+ * `return` true if the value was removed, false if the key or the value was
+ * not found.
  */
 bool
 bxr_multimap_remove_value(bxr_multimap_t *map, const char *key, Uint32 value);
 
 /**
- * Remove the key and all its values from the multimap.
+ * Remove a key and all its values.
  *
- * `map` The multimap to remove the bucket from. Cannot be NULL.
+ * `map` the multimap; must not be NULL.
+ * `key` the key; must not be NULL.
  *
- * `key` The key to remove the bucket from.
- *
- * `return` true on success, false on failure.
+ * `return` true if the key was removed, false if it was not found.
  */
 bool bxr_multimap_remove(bxr_multimap_t *map, const char *key);
 
 /**
- * Get the values from a bucket in the multimap.
+ * Get a copy of the values of a key, in no particular order.
  *
- * `map` The multimap to get the bucket from. Cannot be NULL.
+ * `map` the multimap; must not be NULL.
+ * `key` the key; must not be NULL.
+ * `out_values` receives a newly allocated array of the values, or NULL if the
+ * key does not exist. May be NULL to only query the count.
  *
- * `key` The key to get the bucket from.
+ * `return` the number of values, or 0 if the key does not exist or the
+ * allocation fails.
  *
- * `out_values` A pointer a copy of the values in the bucket. The caller is
- * responsible for freeing the memory allocated for the values.
- *
- * `return` the number of values in the bucket, or 0 if the bucket does not
- * exist.
+ * **Note**: the caller must free `*out_values` with `BXR_FREE()`.
  */
 size_t bxr_multimap_get_values(bxr_multimap_t *map,
                                const char *key,
                                Uint32 **out_values);
 
+/**
+ * Get the number of keys.
+ *
+ * `map` the multimap; must not be NULL.
+ *
+ * `return` the number of keys, not the total number of values.
+ */
 size_t bxr_multimap_count(bxr_multimap_t *map);
 
 /**
- * Destroy a multimap.
+ * Destroy a multimap and free all its keys and values.
  *
- * `map` The multimap to destroy. Cannot be NULL.
+ * `map` the multimap to destroy.
  */
 void bxr_multimap_destroy(bxr_multimap_t *map);
 

@@ -1,7 +1,7 @@
 /**
  * File `bxr_config.h`.
  *
- * Boxer's compile-time configuration header.
+ * # Boxer's Configuration.
  *
  * Copyright (c) 2025 nsix. All rights reserved.
  */
