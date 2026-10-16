@@ -1,15 +1,13 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
 
-const tokenizer = require("./lib/tokenizer.js");
-const generator = require("./lib/generator.js");
-const pattern = require(`./lib/c.js`);
+import * as tokenizer from "./lib/tokenizer.js";
+import * as Generator from "./lib/generator.js";
+import * as pattern from "./lib/c.js";
 
-// process.argv contains: ['node', 'script.js', ... and args]
-// We slice from index 2 to get only the user-provided args
-// e.g: "node script.js -h => args = ['-h']
+// Get the args
 const args = process.argv.slice(2);
 
+// Default parsed args
 const parsed = {
   help: false,
   line: false,
@@ -18,6 +16,7 @@ const parsed = {
   input: [],
 };
 
+// Aliases for flags
 const aliases = {
   h: "help",
   o: "output",
@@ -67,39 +66,39 @@ for (let i = 0; i < args.length; i++) {
 if (parsed.help) {
   console.log(
     fs
-      .readFileSync(__dirname + "/help.txt")
+      .readFileSync(new URL("help.txt", import.meta.url))
       .toString()
       .trim(),
   );
-  return;
+  process.exit();
 }
 
 // The remaining arguments (those that don't start with - or --) are considered as file paths. We expect exactly one file path.
 if (parsed.input.length != 1) {
   console.error("No file.");
-  return;
+  process.exit();
 }
 
 // Read the file content
 var text = fs.readFileSync(parsed.input[0]).toString();
 
 // Tokenize the file content
-var tokens = tokenizer.parseCode(text);
+var tokens = tokenizer.parse_code(text);
 
 console.log(`Parsed ${tokens.length} tokens from file ${parsed.input[0]}.`);
 
 // Create a generator instance with the provided options
-var gen = new generator.Generator({
-  addLineNumber: parsed.line,
-  addFileHeader: parsed.file,
+var generator = new Generator.Generator({
+  add_line_number: parsed.line,
+  add_file_header: parsed.file,
   file: parsed.input[0],
 });
 
-pattern.applyToGenerator(gen);
+pattern.apply_to_generator(generator);
 
-gen.generate(tokens);
+generator.generate(tokens);
 
-var md = gen.doc.join("\n");
+var md = generator.doc.join("\n");
 
 if (parsed.output) {
   fs.writeFileSync(parsed.output, md);
