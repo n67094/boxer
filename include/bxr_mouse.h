@@ -25,58 +25,12 @@ typedef enum
   BXR_MOUSE_SIZE    = 6,
 } bxr_mouse_e;
 
-/**
- * ## Internal API
- */
-
-/**
- * Initialize the mouse subsystem.
- */
 void bxr_mouse_setup(void);
-
-/**
- * Update the mouse state for the current frame.
- */
 void bxr_mouse_begin_frame(void);
-
-/**
- * Tears down the mouse subsystem.
- */
 void bxr_mouse_teardown(void);
-
-/**
- * Handles a mouse button down event.
- *
- * `button` is the mouse button that was pressed.
- *
- * `clicks` is the SDL click count, 1 for a single click, 2 for a double click,
- * etc.
- */
 void bxr_mouse_button_down(bxr_mouse_e button, Uint8 click);
-
-/**
- * Handles a mouse button up event.
- *
- * `button` is the mouse button that was released.
- */
 void bxr_mouse_button_up(bxr_mouse_e button);
-
-/**
- * Handles a mouse motion event.
- *
- * `x` is the new x position of the mouse cursor.
- *
- * `y` is the new y position of the mouse cursor.
- */
 void bxr_mouse_motion(float x, float y);
-
-/**
- * Handles a mouse wheel motion event.
- *
- * `x` is the amount of horizontal scroll.
- *
- * `y` is the amount of vertical scroll.
- */
 void bxr_mouse_wheel_motion(float x, float y);
 
 /**

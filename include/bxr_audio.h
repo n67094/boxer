@@ -67,10 +67,6 @@ typedef struct bxr_voice_desc_s
   bool play_once;
 } bxr_voice_desc_t;
 
-/**
- * ## Internal API
- */
-
 void bxr_audio_setup(void);
 void bxr_audio_begin_frame(void);
 void bxr_audio_teardown(void);

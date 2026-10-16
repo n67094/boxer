@@ -94,7 +94,7 @@ var generator = new Generator.Generator({
   file: parsed.input[0],
 });
 
-pattern.apply_to_generator(generator);
+// pattern.apply_to_generator(generator);
 
 generator.generate(tokens);
 

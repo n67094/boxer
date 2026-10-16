@@ -104,22 +104,17 @@ export class Generator {
 
     if (token.code) {
       this.apply_code_pattern(token);
-      this.add_sub_header(token.header || token.code);
-      this.add_code_line(token);
+      // this.add_sub_header(token.header || token.code);
       this.add_lines(token.text, true);
+      this.add_code_line(token);
+      this.add_line("---");
       this.add_line("");
-      this.add_separator();
     } else {
       // Free text block: copied as-is, its headings set this.level
       this.add_lines(token.text);
     }
 
     this.add_line("");
-  }
-
-  // Markdown horizontal rule between documented items
-  add_separator() {
-    this.add_line("---");
   }
 
   /**
@@ -200,7 +195,7 @@ export class Generator {
   }
 
   /**
-   * Adds several comment lines, see addTextLine.
+   * Adds several comment lines.
    *
    * @param {string[]} lines - The comment lines.
    * @param {boolean} relative - Passed to addTextLine.

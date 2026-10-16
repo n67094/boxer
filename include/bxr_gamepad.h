@@ -67,55 +67,12 @@ typedef enum
   BXR_GAMEPAD_AXIS_SIZE,
 } bxr_gamepad_axis_e;
 
-/**
- * ## Internal API
- */
-
-/**
- * Initialize the gamepad subsystem.
- */
 void bxr_gamepad_setup(void);
-
-/**
- * Close every open gamepad.
- */
 void bxr_gamepad_teardown(void);
-
-/**
- * Close disconnected gamepads and assign newly connected ones to the first
- * free slot, resetting its button and axis state.
- */
 void bxr_gamepad_listen(void);
-
-/**
- * Update the gamepad state for the new frame. Must be called once at the
- * beginning of each frame before processing input.
- */
 void bxr_gamepad_begin_frame(void);
-
-/**
- * Record a button press.
- *
- * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
- * `button` button pressed, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
- */
 void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
-
-/**
- * Record a button release.
- *
- * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
- * `button` button released, in [0, `BXR_GAMEPAD_BUTTON_SIZE`).
- */
 void bxr_gamepad_button_up(int index, bxr_gamepad_button_e button);
-
-/**
- * Record an axis motion.
- *
- * `index` slot of the gamepad, in [0, `BXR_GAMEPAD_MAX`).
- * `axis` axis moved, in [0, `BXR_GAMEPAD_AXIS_SIZE`).
- * `value` new axis value, in [-32768, 32767].
- */
 void bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, Sint16 value);
 
 /**

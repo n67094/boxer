@@ -154,33 +154,10 @@ typedef enum
   BXR_KEYMOD_GUI    = SDL_KMOD_GUI,
 } bxr_keymod_e;
 
-/**
- * ## Internal API
- */
-
-/**
- * Initialize the keyboard input system.
- */
 void bxr_keyboard_setup(void);
-
-/**
- * Start a new input frame.
- */
 void bxr_keyboard_begin_frame(void);
-
-/**
- * Shut down the keyboard input system and reset all key state.
- */
 void bxr_keyboard_teardown(void);
-
-/**
- * Record a key down event from SDL.
- */
 void bxr_key_down(bxr_key_e scancode);
-
-/**
- * Record a key up event from SDL.
- */
 void bxr_key_up(bxr_key_e scancode);
 
 /**

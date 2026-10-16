@@ -26,18 +26,7 @@ typedef struct bxr_image_s
   Uint32 id;
 } bxr_image_t;
 
-/**
- * ## Internal API
- */
-
-/**
- * Initialize the image subsystem.
- */
 void bxr_image_setup(void);
-
-/**
- * Tears down the image subsystem.
- */
 void bxr_image_teardown(void);
 
 /**
