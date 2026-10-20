@@ -1,9 +1,7 @@
 /**
  * File `bxr_unit.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
- *
- * # Simple Unit Testing API
+ * # Boxer's Simple Unit Testing API.
  *
  * Example usage:
  *
@@ -18,6 +16,8 @@
  * }
  *
  * BXR_UNIT_RUN_SUITE(test_suite) // Run suite
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_UNIT_H

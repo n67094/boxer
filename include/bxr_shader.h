@@ -1,20 +1,26 @@
 /**
  * File `bxr_shader.h`.
  *
- * Copyright (c) 2025 nsix. All rights reserved.
+ * # Boxer's GPU Shaders.
  *
- * # Shader Management System.
+ * GPU shaders loaded from bytecode files in the mounted asset directories.
  *
- * Shader are loaded from mounted directories using `bxr_asset.h` API.
+ * Shader files are read with the `bxr_asset.h` API and must be named
+ * `<name>.<stage>.<format>`, where:
  *
- * Shader should be name like this `<name>.<stage>.<format>`, where:
+ * - `<name>` is the name of the shader (e.g. "basic", "sprite").
+ * - `<stage>` is "vert" for a vertex shader or "frag" for a fragment shader.
+ * - `<format>` is the bytecode format: "spv" (SPIR-V), "msl" (Metal Shading
+ * Language), "dxil" or "dxbc". It is picked at runtime from the formats
+ * supported by the GPU device, in that order of preference.
  *
- * - `<name>` is the name of the shader (e.g. "basic", "sprite", etc.).
- * - `<stage>` is the shader stage (e.g. "vert" for vertex shader, "frag" for
- * fragment shader).
- * - `<format>` is the shader bytecode format (e.g. "spv" for SPIR-V, "msl" for
- * Metal Shading Language, etc.).
+ * Example: "shaders/basic.vert.spv" is a vertex shader named "basic" in SPIR-V.
  *
+ * Typical usage: create a vertex and a fragment shader with
+ * `bxr_shader_create()`, combine them with `bxr_pipeline_create()`, and
+ * release them with `bxr_shader_destroy()`.
+ *
+ * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_SHADER_H_
@@ -24,9 +30,8 @@
 
 #include "bxr_context.h"
 #include "bxr_defs.h"
-#include "bxr_sdl_gp.h"
 
-#define BXR_SHADER_INVALID_ID SDL_GP_INVALID_ID
+#define BXR_SHADER_INVALID_ID 0
 
 typedef enum
 {
@@ -40,6 +45,15 @@ typedef struct bxr_shader_s
   size_t id;
 } bxr_shader_t;
 
+/**
+ * Shader creation parameters.
+ *
+ * `name` asset path without the format extension (e.g. "shaders/basic.vert").
+ * Must not be NULL.
+ * `entrypoint` name of the entry function in the bytecode (e.g. "main").
+ * `stage` must match the `<stage>` part of `name`.
+ * `num_*` number of resources of each kind used by the shader.
+ */
 typedef struct bxr_shader_desc_s
 {
   const char *name;
@@ -56,8 +70,7 @@ typedef struct bxr_shader_desc_s
  */
 
 /**
- * Initializes the shader system. Must be called before using any other shader
- * functions.
+ * Initializes the shader system.
  *
  * `context` is the bxr context to use for shader operations.
  */
@@ -73,27 +86,37 @@ void bxr_shader_teardown(void);
  */
 
 /**
- * Creates a shader from the given description.
+ * Load a shader bytecode file and create a GPU shader from it.
  *
- * `desc` is the description of the shader to create.
+ * `desc` the shader description. Must not be NULL.
  *
- * `return` the created shader, or an invalid shader if the shader could not
- * be created.
+ * `return` the new shader, or a shader with `id` `BXR_SHADER_INVALID_ID` on
+ * failure.
  *
- * The caller is responsible for destroying the returned shader using
- * `bxr_shader_destroy` when it is no longer needed.
+ * **Note**: the caller owns the shader and must release it with
+ * `bxr_shader_destroy()`.
  */
 BXR_API bxr_shader_t bxr_shader_create(const bxr_shader_desc_t *desc);
 
 /**
- * Returns the SDL vertex shader associated with the given boxer shader.
+ * Get the underlying SDL GPU shader.
+ *
+ * `shader` a shader from `bxr_shader_create()`.
+ *
+ * `return` the SDL shader, or NULL if `shader` is invalid.
+ *
+ * **Note**: the returned pointer is owned by boxer and stays valid until
+ * `bxr_shader_destroy()` is called on `shader`.
  */
-BXR_API SDL_GPUShader *bxr_get_sdl_shader(bxr_shader_t shader);
+BXR_API SDL_GPUShader *bxr_shader_get_sdl(bxr_shader_t shader);
 
 /**
- * Destroys a shader, freeing any resources associated with it.
+ * Destroy a shader and release its GPU resources.
  *
- * `shader` is the shader to destroy.
+ * Invalid or already destroyed shaders are ignored.
+ *
+ * `shader` a shader from `bxr_shader_create()`. Pipelines already created from
+ * it remain valid.
  */
 BXR_API void bxr_shader_destroy(bxr_shader_t shader);
 

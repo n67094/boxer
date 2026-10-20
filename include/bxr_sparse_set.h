@@ -1,18 +1,23 @@
 /**
  * File `bxr_sparse_set.h`.
  *
+ * # Boxer's Sparse Set.
+ *
+ * Set of integer handles (e.g. entity ids) with O(1) insert, remove and lookup.
+ *
+ * The set is backed by two arrays:
+ *
+ * - `Sparse array`: indexed by handle, stores the handle position in the dense
+ *   array.
+ * - `Dense array`: stores the handles contiguously, for fast iteration.
+ *
+ * Both arrays are sized by the largest handle inserted, not by the number of
+ * handles, so handles should be small, densely allocated integers.
+ *
+ * Typical usage: create the set, insert / remove / check handles, iterate the
+ * dense array, destroy the set.
+ *
  * Copyright (c) 2026 nsix. All rights reserved.
- *
- * # Sparse Set Data Structure
- *
- * Sparse set allow insertion, deletion and lookup of hanldes (e.g. entity IDs)
- * in O(1) time complexity.
- *
- * The sparse set is implemented as two arrays: a sparse array and a dense
- * array:
- *
- * - `Sparse array`: store the indices of handles in the dense array.
- * - `Dense array`: store the actuale handles in a contiguous manner.
  */
 
 #ifndef BXR_SPARSE_SET_H_
@@ -23,87 +28,104 @@
 typedef struct bxr_sparse_set_s bxr_sparse_set_t;
 
 /**
- * Create a new sparse set with the given default capacity.
+ * Create an empty sparse set.
  *
- * The sparse set will automatically resize if the handles inserted exceed the
- * current capacity.
+ * The set grows automatically when a handle `>=` the capacity is inserted.
  *
- * `default_capacity` is the initial capacity of the sparse set (the max number
- * of handles that can be stored in the sparse set without resizing).
+ * `default_capacity` initial capacity, handles in `[0, default_capacity)` can
+ * be inserted without resizing. Must be greater than 0.
  *
- * `return` a pointer to the created sparse set, or NULL if an error occurred.
+ * `return` the new set, or NULL if `default_capacity` is 0 or allocation
+ * failed.
  *
- * The caller is responsible for destroying the returned sparse set using
- * `bxr_sparse_set_destroy` when it is no longer needed.
+ * **Note**: the caller must free the result with `bxr_sparse_set_destroy()`.
  */
 bxr_sparse_set_t *bxr_sparse_set_create(size_t default_capacity);
 
 /**
- * Destroy the given sparse set and free its memory.
+ * Destroy a sparse set and free its memory.
+ *
+ * `set` the set to destroy, may be NULL.
  */
 void bxr_sparse_set_destroy(bxr_sparse_set_t *set);
 
 /**
- * Insert an handle into the sparse set.
+ * Insert a handle into the set.
  *
- * `set` is the sparse set to insert into.
+ * `set` the set. Must not be NULL.
+ * `handle` the handle to insert.
  *
- * `handle` is the handle to insert into the sparse set.
- *
- * `return` `true` if the element was successfully inserted, `false` if the
- * element already exists in the set or if an error occurred.
+ * `return` true on success, false if the handle is already in the set or if
+ * resizing failed.
  */
 bool bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle);
 
 /**
- * Remove an element from the sparse set.
+ * Remove a handle from the set.
  *
- * `set` is the sparse set to remove from.
+ * `set` the set. Must not be NULL.
+ * `handle` the handle to remove.
  *
- * 'handle` is the handle to remove from the sparse set.
- *
- * `return` `true` if the element was successfully removed, `false` if the
- * element does not exist in the set or if an error occurred.
+ * `return` true on success, false if the handle is not in the set.
  */
 bool bxr_sparse_set_remove(bxr_sparse_set_t *set, size_t handle);
 
 /**
- * Check if an element exists in the sparse set.
+ * Check whether a handle is in the set.
  *
- * `set` is the sparse set to check.
+ * `set` the set. Must not be NULL.
+ * `handle` the handle to look up.
+ * `found` optional output, may be NULL. Receives the handle index in the dense
+ * array, or `SIZE_MAX` if the handle is not in the set.
  *
- * `handle` is the handle to check for existence in the sparse set.
- *
- * `found` is an optional output parameter that will be set to the index of the
- * handle. Or UINT32_MAX if the handle does not exist in the set.
- *
- * `return` `true` if the element exists in the set, `false` otherwise.
+ * `return` true if the handle is in the set, false otherwise.
  */
 bool bxr_sparse_set_contains(const bxr_sparse_set_t *set,
                              size_t handle,
                              size_t *found);
 
 /**
+ * Get the capacity of the set.
  *
- * `return` the capacity of the sparse set (the max number of handles that can
- * be stored in the sparse set without resizing).
+ * `set` the set. Must not be NULL.
+ *
+ * `return` the capacity, handles in `[0, capacity)` can be inserted without
+ * resizing.
  */
 size_t bxr_sparse_set_capacity(const bxr_sparse_set_t *set);
 
 /**
- * `return` the number of handles stored in the sparse set.
+ * Get the number of handles in the set.
+ *
+ * `set` the set. Must not be NULL.
+ *
+ * `return` the number of handles, also the number of valid entries in the
+ * dense array.
  */
 size_t bxr_sparse_set_count(const bxr_sparse_set_t *set);
 
 /**
- * Clear all handles from the sparse set (but keep the allocated memory for
- * future insertions).
+ * Remove all handles from the set.
+ *
+ * The capacity and allocated memory are kept for future insertions.
+ *
+ * `set` the set. Must not be NULL.
  */
 void bxr_sparse_set_clear(bxr_sparse_set_t *set);
 
 /**
- * `return` a pointer to the dense array of the sparse set.
+ * Get the dense array of the set, to iterate over its handles.
+ *
+ * Only the first `bxr_sparse_set_count()` entries are valid. The order is
+ * unspecified and can changes.
+ *
+ * `set` the set. Must not be NULL.
+ *
+ * `return` the dense array, owned by the set.
+ *
+ * **Note**: the pointer is invalidated by `bxr_sparse_set_insert()` (the array
+ * may be reallocated) and `bxr_sparse_set_destroy()`. Do not free it.
  */
-size_t *bxr_sparse_set_get_dense(const bxr_sparse_set_t *set);
+const size_t *bxr_sparse_set_get_dense(const bxr_sparse_set_t *set);
 
 #endif // BXR_SPARSE_SET_H_

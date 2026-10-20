@@ -44,9 +44,9 @@ bxr_shader_teardown(void)
 
 // Return value must be freed as well as the data inside it.
 static bxr_shader_bytecode_t_ *
-_be_shader_load_bytecode(SDL_GPUDevice *device,
-                         const char *name,
-                         bxr_shader_stage_e stage)
+_bxr_shader_load_bytecode(SDL_GPUDevice *device,
+                          const char *name,
+                          bxr_shader_stage_e stage)
 {
   BXR_ASSERT(device);
   BXR_ASSERT(name);
@@ -83,6 +83,7 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
     BXR_LOG_ERROR(
         "GPU Device does not support any known shader formats (SPIR-V, MSL, "
         "DXIL, DXBC).");
+    BXR_FREE(shader_bytecode);
     return NULL;
   }
 
@@ -103,11 +104,13 @@ _be_shader_load_bytecode(SDL_GPUDevice *device,
 bxr_shader_t
 bxr_shader_create(const bxr_shader_desc_t *desc)
 {
+  BXR_ASSERT(desc != NULL);
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
-  bxr_shader_bytecode_t_ *bytecode
-      = _be_shader_load_bytecode(context_->gpu_device, desc->name, desc->stage);
+  bxr_shader_bytecode_t_ *bytecode = _bxr_shader_load_bytecode(
+      context_->gpu_device, desc->name, desc->stage);
   if (!bytecode) {
+    BXR_LOG_ERROR("Failed to load shader bytecode for shader: %s", desc->name);
     return (bxr_shader_t){ .id = BXR_SHADER_INVALID_ID };
   }
 
@@ -126,6 +129,25 @@ bxr_shader_create(const bxr_shader_desc_t *desc)
 
   bxr_shader_t shader = { .id = SDL_GPCreateShader(&shader_desc).id };
 
+  if (shader.id == BXR_SHADER_INVALID_ID) {
+    if (bytecode->format == SDL_GPU_SHADERFORMAT_SPIRV) {
+      BXR_LOG_ERROR("Failed to create shader from SPIR-V bytecode: %s",
+                    desc->name);
+    } else if (bytecode->format == SDL_GPU_SHADERFORMAT_MSL) {
+      BXR_LOG_ERROR("Failed to create shader from MSL bytecode: %s",
+                    desc->name);
+    } else if (bytecode->format == SDL_GPU_SHADERFORMAT_DXIL) {
+      BXR_LOG_ERROR("Failed to create shader from DXIL bytecode: %s",
+                    desc->name);
+    } else if (bytecode->format == SDL_GPU_SHADERFORMAT_DXBC) {
+      BXR_LOG_ERROR("Failed to create shader from DXBC bytecode: %s",
+                    desc->name);
+    } else {
+      BXR_LOG_ERROR("Failed to create shader from unknown format bytecode: %s",
+                    desc->name);
+    }
+  }
+
   BXR_FREE(bytecode->data);
   BXR_FREE(bytecode);
 
@@ -133,7 +155,7 @@ bxr_shader_create(const bxr_shader_desc_t *desc)
 }
 
 SDL_GPUShader *
-bxr_get_sdl_shader(bxr_shader_t shader)
+bxr_shader_get_sdl(bxr_shader_t shader)
 {
   return SDL_GPGetGPUShader((SDL_GPShader){ .id = shader.id });
 }

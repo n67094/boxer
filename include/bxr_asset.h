@@ -1,7 +1,7 @@
 /**
  * File `bxr_asset.h`.
  *
- * Game asset management.
+ * # Boxer's Game Asset Management.
  *
  * Built on PhysicsFS. Directories and archives are mounted into a single
  * read-only search path, and one write directory.
@@ -11,21 +11,21 @@
  * 1. The write directory (mounted first by `bxr_asset_setup()`).
  * 2. Mounted directories and archives, in the order they were mounted.
  *
- * Supported archive types:
+ * Supported archive types by PhysicsFS:
  *
- *    .ZIP (pkZip/WinZip/Info-ZIP compatible)
- *    .7Z (7zip archives)
- *    .ISO (ISO9660 files, CD-ROM images)
- *    .GRP (Build Engine groupfile archives)
- *    .PAK (Quake I/II archive format)
- *    .HOG (Descent I/II/III HOG file archives)
- *    .MVL (Descent II movielib archives)
- *    .WAD (DOOM engine archives)
- *    .BIN (Chasm: The Rift engine archives)
- *    .VDF (Gothic I/II engine archives)
- *    .SLB (Independence War archives)
- *    .POD (Terminal Velocity POD archives)
- *    .DAT (Resident Evil 3 rofs.dat archives)
+ * - .ZIP (pkZip/WinZip/Info-ZIP compatible)
+ * - .7Z (7zip archives)
+ * - .ISO (ISO9660 files, CD-ROM images)
+ * - .GRP (Build Engine groupfile archives)
+ * - .PAK (Quake I/II archive format)
+ * - .HOG (Descent I/II/III HOG file archives)
+ * - .MVL (Descent II movielib archives)
+ * - .WAD (DOOM engine archives)
+ * - .BIN (Chasm: The Rift engine archives)
+ * - .VDF (Gothic I/II engine archives)
+ * - .SLB (Independence War archives)
+ * - .POD (Terminal Velocity POD archives)
+ * - .DAT (Resident Evil 3 rofs.dat archives)
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
@@ -37,10 +37,6 @@
 
 #include "bxr_context.h"
 #include "bxr_defs.h"
-
-/**
- * ## Internal API
- */
 
 void bxr_asset_setup(bxr_context_t *context);
 void bxr_asset_teardown(void);

@@ -6,9 +6,6 @@
 
 #include "bxr.h"
 
-// SDL_gp is defined and included here to prevent duplicate implementation
-// inclusions from other SDL_gp headers within the bxr file.
-#define SDL_GP_IMPLEMENTATION
 #include "bxr_sdl_gp.h"
 
 static bool

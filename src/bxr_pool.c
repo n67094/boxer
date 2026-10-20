@@ -1,6 +1,12 @@
 #include "bxr_pool.h"
 #include "bxr_log.h"
 #include "bxr_mem.h"
+#include "bxr_sdl_gp.h"
+
+struct bxr_pool_s
+{
+  SDL_GPPool *pool;
+};
 
 bxr_pool_t *
 bxr_pool_create(size_t number_of_slots)
