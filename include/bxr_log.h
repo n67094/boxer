@@ -1,7 +1,7 @@
 /**
  * File `bxr_log.h`.
  *
- * Logging utilities.
+ * # Boxer's Logging Utilities.
  *
  * The default minimum priority is `BXR_LOG_PRIORITY_DEBUG`, so every level is
  * shown until `bxr_log_set_priority()` is called.
@@ -25,6 +25,13 @@
 
 #include "bxr_defs.h"
 
+void bxr_log_setup(void);
+void bxr_log_teardown(void);
+
+/**
+ * ## Public API
+ */
+
 /**
  * Log priority levels.
  */
@@ -36,18 +43,6 @@ typedef enum
   BXR_LOG_PRIORITY_ERROR,
   BXR_LOG_PRIORITY_SIZE
 } bxr_log_priority_e;
-
-/**
- * ## Internal API
- */
-
-void bxr_log_setup(void);
-
-void bxr_log_teardown(void);
-
-/**
- * ## Public API
- */
 
 /**
  * Log a printf-style message at the given priority.

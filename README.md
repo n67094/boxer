@@ -4,7 +4,7 @@
 
 _The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form. The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine's flat design._
 
-# Boxer
+# Boxer (In Progress)
 
 A lightweight and cross-platform easy to use 2D game library written in C.
 
@@ -139,9 +139,7 @@ bxr_game_teardown(void)
 
 # AI Usage Policy
 
-> The code should stay human-written and the workflow shoulds remain human-driven.
-
-I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md) file for more details on what is allowed and what is not.
+I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md).
 
 # Sponsors
 

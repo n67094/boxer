@@ -1,6 +1,8 @@
 /**
  * File `bxr_painter.h`.
  *
+ * # Boxer's 2D Painter.
+ *
  * Immediate-mode 2D renderer (thin wrapper over SDL_gp).
  *
  * Public API below may only be called from `bxr_game_update()` or
@@ -32,6 +34,16 @@ typedef struct bxr_painter_desc_t
   SDL_GPUDevice *gpu_device;
 } bxr_painter_desc_t;
 
+void bxr_painter_setup(const bxr_painter_desc_t *desc);
+void bxr_painter_teardown(void);
+
+/**
+ * ## Public API
+ */
+
+/**
+ * A vertex with position, texture coordinates and color.
+ */
 typedef struct bxr_vertex_s
 {
   bxr_vec2_t position;
@@ -39,6 +51,9 @@ typedef struct bxr_vertex_s
   bxr_color_t color;
 } bxr_vertex_t;
 
+/**
+ * A rectangle with a destination region and a source region in the texture.
+ */
 typedef struct bxr_textured_rect_s
 {
   bxr_rect_t dst;
@@ -52,24 +67,6 @@ typedef struct bxr_textured_rect_s
  */
 #define bxr_textured_rect_create(dst, src)                                     \
   ((const bxr_textured_rect_t){ dst, src })
-
-/**
- * ## Internal API
- */
-
-/**
- * Setup the painter system.
- */
-void bxr_painter_setup(const bxr_painter_desc_t *desc);
-
-/**
- * Tears down the painter system and releases its GPU resources.
- */
-void bxr_painter_teardown(void);
-
-/**
- * ## Public API
- */
 
 /**
  * Set the coordinate space boundaries mapped onto the current viewport.

@@ -1,7 +1,7 @@
 /**
  * File `bxr_math.h`.
  *
- * Math Utilities.
+ * # Boxer's Math Utilities.
  *
  * Copyright (c) 2025 nsix. All rights reserved.
  */

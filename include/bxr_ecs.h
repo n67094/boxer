@@ -1,7 +1,9 @@
 /**
  * File `bxr_ecs.h`.
  *
- * Entity Component System:
+ * # Boxer's Entity Component System.
+ *
+ * Overview:
  *
  * - Entities are IDs.
  * - Components are plain data blocks attached to entities.
@@ -223,7 +225,7 @@ BXR_API void bxr_ecs_entity_destroy(bxr_ecs_t *ecs, bxr_ecs_entity_t entity);
  * `return` 0 on success, non-zero on failure.
  */
 typedef int (*bxr_ecs_system_logic_cb)(bxr_ecs_t *ecs,
-                                       bxr_ecs_entity_t *entities,
+                                       const bxr_ecs_entity_t *entities,
                                        size_t entity_count,
                                        void *udata);
 

@@ -1,6 +1,8 @@
 /**
  * File `bxr_mem.h`.
  *
+ * # Boxer's Memory Utilities.
+ *
  * Memory allocation and memory manipulation utilities.
  *
  * Copyright (c) 2025 nsix. All rights reserved.

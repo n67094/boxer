@@ -1,7 +1,7 @@
 /**
  * File `bxr_context.h`.
  *
- * Boxer's global context.
+ * # Boxer's Global Context.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

@@ -1,6 +1,8 @@
 /**
  * File `bxr_sdl_gp.h`.
  *
+ * # Boxer's SDL_gp Include.
+ *
  * Includes SDL_gp configured with boxer limits from `bxr_config.h`.
  *
  * Always include this header instead of `<SDL_gp.h>`: the `SDL_GP_*` limits

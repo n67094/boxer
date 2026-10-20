@@ -1,7 +1,7 @@
 /**
  * File `bxr_audio.h`.
  *
- * Audio management and playback.
+ * # Boxer's Audio Management and Playback.
  *
  * Typical usage: `bxr_audio_create()`, then `bxr_voice_create()` for as many
  * voices as you need, then `bxr_voice_play()`, `bxr_voice_pause()`, etc.
@@ -59,10 +59,6 @@ typedef struct bxr_voice_desc_s
   bool play_once;
   bool keep_alive; // keep it, don't evict it when the voice limit is reached
 } bxr_voice_desc_t;
-
-/**
- * ## Internal API
- */
 
 void bxr_audio_setup(void);
 void bxr_audio_begin_frame(void);
@@ -292,7 +288,7 @@ BXR_API void bxr_voice_destroy(bxr_voice_t voice);
 /**
  * Add a voice to a tag.
  *
- * `tag_name` the tag; must not be NULL. The string is copied.
+ * `tag_name` the tag; must not be NULL (The string is copied).
  * `voice` the voice to tag.
  *
  * `return` true on success or if the voice already has this tag, false on

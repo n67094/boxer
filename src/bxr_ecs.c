@@ -1119,8 +1119,8 @@ bxr_ecs_system_run(bxr_ecs_t *ecs, bxr_ecs_system_t system, bxr_ecs_mask_t mask)
 
   ecs->active_system = system;
 
-  size_t *entities      = bxr_sparse_set_get_dense(system_data->entity_ids);
-  size_t entities_count = bxr_sparse_set_count(system_data->entity_ids);
+  const size_t *entities = bxr_sparse_set_get_dense(system_data->entity_ids);
+  size_t entities_count  = bxr_sparse_set_count(system_data->entity_ids);
 
   int retval = system_data->logic_cb(
       ecs, entities, entities_count, system_data->udata);

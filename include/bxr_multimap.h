@@ -1,6 +1,8 @@
 /**
  * File `bxr_multimap.h`.
  *
+ * # Boxer's String Multimap.
+ *
  * Hash map from string keys to sets of `Uint32` values (boxer resource ids).
  *
  * Copyright (c) 2026 nsix. All rights reserved.
