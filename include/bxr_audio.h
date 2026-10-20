@@ -10,10 +10,7 @@
  *
  * When `BXR_AUDIO_MAX_VOICES` voices are alive, creating a new one stops and
  * destroys the oldest voice that was not created with `keep_alive` set. If
- * every voice is kept alive, the creation fails instead. As a consequence, any
- * voice handle not marked `keep_alive` may become invalid at any time;
- * operations like `bxr_voice_set_volume()` on it will then do nothing. Use
- * `bxr_voice_is_valid()` to check if a voice handle is still valid.
+ * every voice is kept alive, the creation fails instead.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
@@ -137,9 +134,6 @@ BXR_API float bxr_audio_get_global_volume(void);
  * `return` the voice handle, or an id of `BXR_VOICE_INVALID_ID` if the audio
  * is invalid, all `BXR_AUDIO_MAX_VOICES` voices are marked `keep_alive`, or
  * the stream cannot be created.
- *
- * **Note**: when the voice limit is reached, the oldest voice not marked
- * `keep_alive` is destroyed to make room, invalidating its handle.
  *
  * **Note**: the caller must free the voice with `bxr_voice_destroy()`, unless
  * `play_once` is set, in which case it is freed automatically once finished.
