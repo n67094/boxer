@@ -738,7 +738,7 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
 
   ++voice_count_;
 
-  return voice_id;
+  return voice;
 }
 
 void
