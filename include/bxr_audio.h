@@ -8,18 +8,12 @@
  * Once done, call `bxr_voice_destroy()` and `bxr_audio_destroy()` to free the
  * resources.
  *
- * When the number of voices exceeds `BXR_AUDIO_MAX_VOICES`, the oldest voice is
- * stopped and destroyed to make room for the new one. This is a simple voice
- * management strategy. So any handle to a voice may become invalid, operations
- * like `bxr_voice_set_volume()` will then do nothing. `bxr_voice_validity()`
- * can be used to check if a voice is still valid.
- *
- * //TODO
- *
- * 1. when adding a voice save the frame number.
- * 2. line 1011: if the multimap is full, remove the oldest voice from
- * voice_pool_ and destroy it (this should remove it from the multimap too).
- * 3. Then add the new voice to the multimap.
+ * When `BXR_AUDIO_MAX_VOICES` voices are alive, creating a new one stops and
+ * destroys the oldest voice that was not created with `keep_alive` set. If
+ * every voice is kept alive, the creation fails instead. As a consequence, any
+ * voice handle not marked `keep_alive` may become invalid at any time;
+ * operations like `bxr_voice_set_volume()` on it will then do nothing. Use
+ * `bxr_voice_is_valid()` to check if a voice handle is still valid.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
@@ -58,6 +52,7 @@ typedef struct bxr_voice_s
  * `auto_play` start playing immediately when true.
  * `play_once` play a single time and then destroy the voice automatically;
  * when false the voice loops.
+ * `keep_alive` never evict this voice when the voice limit is reached.
  */
 typedef struct bxr_voice_desc_s
 {
@@ -65,6 +60,7 @@ typedef struct bxr_voice_desc_s
   float volume;
   bool auto_play;
   bool play_once;
+  bool keep_alive; // keep it, don't evict it when the voice limit is reached
 } bxr_voice_desc_t;
 
 /**
@@ -139,8 +135,11 @@ BXR_API float bxr_audio_get_global_volume(void);
  * `desc` voice parameters; must not be NULL. Not retained after the call.
  *
  * `return` the voice handle, or an id of `BXR_VOICE_INVALID_ID` if the audio
- * is invalid, no slot is free (`BXR_AUDIO_MAX_VOICES`), or the stream cannot
- * be created.
+ * is invalid, all `BXR_AUDIO_MAX_VOICES` voices are marked `keep_alive`, or
+ * the stream cannot be created.
+ *
+ * **Note**: when the voice limit is reached, the oldest voice not marked
+ * `keep_alive` is destroyed to make room, invalidating its handle.
  *
  * **Note**: the caller must free the voice with `bxr_voice_destroy()`, unless
  * `play_once` is set, in which case it is freed automatically once finished.
@@ -172,6 +171,15 @@ BXR_API float bxr_voice_get_volume(bxr_voice_t voice);
 BXR_API void bxr_voice_play(bxr_voice_t voice);
 
 /**
+ * Check whether a voice is currently playing.
+ *
+ * `voice` the voice to query.
+ *
+ * `return` true if the voice is playing, false if it is paused or stopped.
+ */
+BXR_API bool bxr_voice_is_playing(bxr_voice_t voice);
+
+/**
  * Pause playback, keeping the current position.
  *
  * `voice` the voice to pause.
@@ -183,7 +191,7 @@ BXR_API void bxr_voice_pause(bxr_voice_t voice);
  *
  * `voice` the voice to query.
  *
- * `return` true if the voice is paused or stopped, false if it is playing.
+ * `return` true if the voice is paused or stopped, false otherwise.
  */
 BXR_API bool bxr_voice_is_paused(bxr_voice_t voice);
 
@@ -193,6 +201,15 @@ BXR_API bool bxr_voice_is_paused(bxr_voice_t voice);
  * `voice` the voice to stop.
  */
 BXR_API void bxr_voice_stop(bxr_voice_t voice);
+
+/**
+ * Check whether a voice is stopped.
+ *
+ * `voice` the voice to query.
+ *
+ * `return` true if the voice is stopped, false otherwise.
+ */
+BXR_API bool bxr_voice_is_stopped(bxr_voice_t voice);
 
 /**
  * Get the playback position of a voice.
@@ -259,6 +276,15 @@ BXR_API bool bxr_voice_set_pan(bxr_voice_t voice, float pan);
 BXR_API float bxr_voice_get_pan(bxr_voice_t voice);
 
 /**
+ * Check whether a voice handle is valid.
+ *
+ * `voice` the voice to check.
+ *
+ * `return` true if the voice is valid, false otherwise.
+ */
+BXR_API bool bxr_voice_is_valid(bxr_voice_t voice);
+
+/**
  * Stop a voice and free it, removing it from all its tags.
  *
  * `voice` the voice to destroy.
@@ -275,10 +301,8 @@ BXR_API void bxr_voice_destroy(bxr_voice_t voice);
  * `tag_name` the tag; must not be NULL. The string is copied.
  * `voice` the voice to tag.
  *
- * `return` true on success, false on failure.
- *
- * FIXME: if `bxr_multimap_add()` fails, the tag stays in the voice's own list,
- * leaving both out of sync. Roll back the voice entry on failure.
+ * `return` true on success or if the voice already has this tag, false on
+ * failure.
  */
 BXR_API bool bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice);
 
@@ -288,11 +312,8 @@ BXR_API bool bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice);
  * `tag_name` the tag; must not be NULL.
  * `voice` the voice to untag.
  *
- * `return` true on success or if the voice has no tags, false if the voice
- * was not in the tag.
- *
- * FIXME: returns true when the voice has no tags at all but false when it has
- * other tags; the result should be consistent in both cases.
+ * `return` true on success, false if the voice is invalid or was not in the
+ * tag.
  */
 BXR_API bool bxr_audio_tag_remove(const char *tag_name, bxr_voice_t voice);
 

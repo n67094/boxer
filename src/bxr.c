@@ -47,7 +47,7 @@ update_refresh_rate_(bxr_context_t *context)
 SDL_AppResult
 SDL_AppInit(void **appstate, int argc, char **argv)
 {
-  bxr_game_config_t *config = bxr_game_config();
+  const bxr_game_config_t *config = bxr_game_config();
 
   BXR_ASSERT(config);
   BXR_ASSERT(config->name);
@@ -188,8 +188,8 @@ SDL_AppIterate(void *appstate)
 
   static Uint64 fps            = 0;
   static Uint64 ups            = 0;
-  static Uint64 frame_count    = 0;
-  static Uint64 update_count   = 0;
+  static Uint64 fps_count      = 0;
+  static Uint64 ups_count      = 0;
   static Uint64 lag_ns         = 0;
   static Uint64 last_ticks_ns  = 0;
   static Uint64 accumulator_ns = 0; // Track time for FPS counter
@@ -237,7 +237,7 @@ SDL_AppIterate(void *appstate)
       bxr_game_update((double)delta_ns / SDL_NS_PER_MS); // this use SDL_GP API
 
       lag_ns -= delta_ns;
-      ++update_count;
+      ++ups_count;
     }
 
     double alpha = (double)lag_ns / (double)delta_ns;
@@ -263,17 +263,19 @@ SDL_AppIterate(void *appstate)
   SDL_GPEnd();
   SDL_SubmitGPUCommandBuffer(cmd_buffer);
 
-  ++frame_count;
+  ++fps_count;
+  ++context->frame_count;
 
   // Calculate FPS and UPS every second
   if (accumulator_ns >= SDL_NS_PER_SECOND) {
-    fps = frame_count;
-    ups = update_count;
+    fps = fps_count;
+    ups = ups_count;
 
     BXR_LOG_INFO("FPS: %" SDL_PRIu64 ", UPS: %" SDL_PRIu64, fps, ups);
 
-    frame_count  = 0;
-    update_count = 0;
+    fps_count = 0;
+    ups_count = 0;
+
     accumulator_ns -= SDL_NS_PER_SECOND;
   }
 

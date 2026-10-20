@@ -111,3 +111,11 @@ bxr_context_is_resizable(void)
 
   return context_->config.resizable;
 }
+
+Uint64
+bxr_context_get_frame_count(void)
+{
+  BXR_ASSERT(context_);
+
+  return context_->frame_count;
+}
