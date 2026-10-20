@@ -45,14 +45,17 @@ typedef struct bxr_voice_s_
   SDL_AudioStream *stream;
   int audio_slot;
   float volume;
-  Uint32 position; // in bytes
-  bool feeding;
-  bool one_shot;
+  Uint32 position;                // in bytes
   char *tags[BXR_AUDIO_MAX_TAGS]; // tags associated with this voice
   size_t tag_count;
   float pitch; // pan (0.01 to 100.0, 1.0 is the base)
   float pan;   // pan adjustment (-1.0 left, 0.0 center, 1.0 right)
   int channels;
+  Uint64 age; // age of the voice, lowest = oldest.
+  bool feeding;
+  bool one_shot;
+  bool keep_alive; // if true, the voice is not evicted when the voice limit is
+                   // reached
 } bxr_voice_t_;
 
 static Uint32 initialized_ = 0;
@@ -62,6 +65,8 @@ static bxr_audio_t_ *audios_   = NULL;
 
 static bxr_pool_t *voice_pool_ = NULL;
 static bxr_voice_t_ *voices_   = NULL;
+static size_t voice_count_     = 0;
+static Uint64 voice_age_count_ = 0;
 
 static SDL_AudioDeviceID device_id_ = 0;
 static SDL_AudioSpec device_spec_;
@@ -93,6 +98,8 @@ bxr_voice_release_(int voice_slot)
   }
 
   bxr_pool_release_slot(voice_pool_, voice_slot);
+
+  --voice_count_;
 }
 
 static void
@@ -615,6 +622,30 @@ bxr_voice_get_(bxr_voice_t voice)
   return &voices_[voice_slot];
 }
 
+static bool
+bxr_voice_evict_oldest_(void)
+{
+  int oldest = -1;
+  for (int i = 0; i < BXR_AUDIO_MAX_VOICES; ++i) {
+    if (!voices_[i].stream) {
+      continue;
+    }
+    if ((oldest == -1 || voices_[i].age < voices_[oldest].age)
+        && !voices_[i].keep_alive) {
+      oldest = i;
+    }
+  }
+
+  if (oldest == -1) {
+    return false;
+  }
+
+  BXR_LOG_WARN("Voice limit reached, evicting voice ID: %u",
+               voices_[oldest].voice.id);
+  bxr_voice_release_(oldest);
+  return true;
+}
+
 bxr_voice_t
 bxr_voice_create(const bxr_voice_desc_t *desc)
 {
@@ -647,10 +678,16 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
-  // Borrow a voice slot for playback
+  // Borrow a voice slot for playback, evicting the oldest voice if full
+  if (voice_count_ >= BXR_AUDIO_MAX_VOICES) {
+    if (!bxr_voice_evict_oldest_()) {
+      return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
+    }
+  }
+
   int slot = bxr_pool_acquire_slot(voice_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
-    BXR_LOG_ERROR("No free voice slots available");
+    BXR_LOG_ERROR("No free voice slots available after eviction");
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
@@ -659,12 +696,14 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
   v->audio_slot   = audio_slot;
   v->volume       = bxr_clamp(desc->volume, 0.0f, 1.0f);
   v->position     = 0;
-  v->feeding      = desc->auto_play;
-  v->one_shot     = desc->play_once;
   v->tag_count    = 0;
   v->pitch        = 1.0f;
   v->pan          = 0.0f;
   v->stream       = SDL_CreateAudioStream(&a->spec, &device_spec_);
+  v->age          = voice_age_count_++;
+  v->feeding      = desc->auto_play;
+  v->one_shot     = desc->play_once;
+  v->keep_alive   = desc->keep_alive;
   if (!v->stream) {
     BXR_LOG_ERROR("Failed to create audio stream for voice: %s",
                   SDL_GetError());
@@ -696,6 +735,8 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
 
   BXR_LOG_INFO(
       "Created voice ID: %u for audio ID: %u", voice.id, desc->audio.id);
+
+  ++voice_count_;
 
   return voice;
 }
@@ -756,7 +797,7 @@ bxr_voice_play(bxr_voice_t voice)
 }
 
 bool
-bxr_voice_is_paused(bxr_voice_t voice)
+bxr_voice_is_playing(bxr_voice_t voice)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
@@ -770,7 +811,7 @@ bxr_voice_is_paused(bxr_voice_t voice)
     BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
     return false;
   }
-  return !v->feeding;
+  return v->feeding;
 }
 
 void
@@ -791,6 +832,24 @@ bxr_voice_pause(bxr_voice_t voice)
   v->feeding = false;
 }
 
+bool
+bxr_voice_is_paused(bxr_voice_t voice)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  if (device_id_ == 0) {
+    BXR_LOG_ERROR("Audio device not initialized");
+    return false;
+  }
+
+  bxr_voice_t_ *v = bxr_voice_get_(voice);
+  if (!v) {
+    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    return false;
+  }
+  return !v->feeding;
+}
+
 void
 bxr_voice_stop(bxr_voice_t voice)
 {
@@ -809,6 +868,25 @@ bxr_voice_stop(bxr_voice_t voice)
   v->feeding  = false;
   v->position = 0;
   SDL_ClearAudioStream(v->stream);
+}
+
+bool
+bxr_voice_is_stopped(bxr_voice_t voice)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  if (device_id_ == 0) {
+    BXR_LOG_ERROR("Audio device not initialized");
+    return false;
+  }
+
+  bxr_voice_t_ *v = bxr_voice_get_(voice);
+  if (!v) {
+    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    return false;
+  }
+  return !v->feeding && v->position == 0
+         && SDL_GetAudioStreamQueued(v->stream) == 0;
 }
 
 Uint64
@@ -984,6 +1062,24 @@ bxr_voice_get_pan(bxr_voice_t voice)
   return v->pan;
 }
 
+BXR_API bool
+bxr_voice_is_valid(bxr_voice_t voice)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+
+  if (voice.id == BXR_AUDIO_INVALID_ID) {
+    return false;
+  }
+
+  int voice_slot = bxr_pool_get_slot_from_id(voice_pool_, voice.id);
+  if (voice_slot == BXR_POOL_INVALID_SLOT) {
+    return false;
+  }
+
+  bxr_voice_t_ *v = &voices_[voice_slot];
+  return v->stream != NULL;
+}
+
 void
 bxr_voice_destroy(bxr_voice_t voice)
 {
@@ -1029,8 +1125,10 @@ bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice)
     }
   }
 
-  if (!bxr_multimap_add(audio_tags_, tag_name, voice.id)) {
-    BXR_LOG_ERROR("Failed to add tag '%s' to multimap", tag_name);
+  bool is_ok = bxr_multimap_add(audio_tags_, tag_name, voice.id);
+
+  // clean up if adding to multimap failed
+  if (!is_ok) {
     return false;
   }
 
@@ -1038,6 +1136,7 @@ bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice)
   v->tags[v->tag_count] = bxr_strdup(tag_name);
   if (!v->tags[v->tag_count]) {
     BXR_LOG_ERROR("Failed to allocate memory for tag name");
+    bxr_multimap_remove_value(audio_tags_, tag_name, voice.id);
     return false;
   }
   v->tag_count++;
@@ -1061,6 +1160,12 @@ bxr_audio_tag_remove(const char *tag_name, bxr_voice_t voice)
     return false; // No tags to remove
   }
 
+  bool is_ok = bxr_multimap_remove_value(audio_tags_, tag_name, voice.id);
+
+  if (!is_ok) {
+    return false;
+  }
+
   // Remove the tag from the voice's tag list
   for (size_t i = 0; i < v->tag_count; ++i) {
     if (bxr_strcmp(v->tags[i], tag_name) == 0) {
@@ -1075,7 +1180,7 @@ bxr_audio_tag_remove(const char *tag_name, bxr_voice_t voice)
     }
   }
 
-  return bxr_multimap_remove_value(audio_tags_, tag_name, voice.id);
+  return true;
 }
 
 void

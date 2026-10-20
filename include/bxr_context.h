@@ -25,6 +25,7 @@ typedef struct bxr_context_s
   SDL_GPUDevice *gpu_device;
 
   Uint64 target_delta_ns; // fixed time between updates, never 0.
+  Uint64 frame_count; // number of frames rendered since the application started
 } bxr_context_t;
 
 /**
@@ -115,5 +116,12 @@ BXR_API bool bxr_context_set_resizable(bool resizable);
  * `return` true if the window is resizable, `false` otherwise.
  */
 BXR_API bool bxr_context_is_resizable(void);
+
+/**
+ * Get the number of frames rendered since the application started.
+ *
+ * `return` the frame count.
+ */
+BXR_API Uint64 bxr_context_get_frame_count(void);
 
 #endif // BXR_CONTEXT_H_
