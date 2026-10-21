@@ -10,13 +10,20 @@ A lightweight and cross-platform easy to use 2D game library written in C.
 
 Features:
 
-- A file system for loading game assets from various archive formats like `.zip`, `.7z` and way more.
+- Asset management and resource loading from `.zip`, `.7z`, and more formats.
+- 2D immediate mode rendering with support for custom shaders and pipelines.
 - Image loading and rendering support for `.bmp` and `.png` formats.
+- Audio loading and playback support for `.wav` and `.ogg` formats.
 - Read/write support for `.ini`.
 - Keyboard, mouse, and gamepad input handling.
 - Math utilities for vectors, matrices, and transformations.
-- A 2D stack painter for drawing sprites, shapes, and text with support for custom shaders.
 - An entity-component system (ECS) for flexible game object management.
+
+Todo:
+
+- Demo
+- Error handling
+- Immediate mode UI
 
 ## Prerequisites
 
