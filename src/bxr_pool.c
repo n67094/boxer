@@ -1,6 +1,5 @@
 #include "bxr_pool.h"
 #include "bxr_error.h"
-#include "bxr_log.h"
 #include "bxr_mem.h"
 #include "bxr_sdl_gp.h"
 

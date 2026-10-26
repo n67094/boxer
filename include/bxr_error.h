@@ -18,8 +18,9 @@
  */
 
 /**
- * Set the error message of the calling thread. Messages longer than
- * `BXR_ERROR_MAX_LENGTH - 1` bytes are truncated.
+ * Set the error message.
+ *
+ * Messages longer than `BXR_ERROR_MAX_LENGTH - 1` bytes are truncated.
  *
  * `fmt` printf-style format string, followed by its arguments; must not be
  * NULL.
@@ -31,16 +32,17 @@ BXR_API bool bxr_set_error(SDL_PRINTF_FORMAT_STRING const char *fmt, ...)
     SDL_PRINTF_VARARG_FUNC(1);
 
 /**
- * Get the last error message of the calling thread.
+ * Get the last error message.
  *
  * `return` the message, or an empty string if no error was set. Never NULL.
+ *
  * The string is owned by boxer and stays valid until the next
  * `bxr_set_error()`.
  */
 BXR_API const char *bxr_get_error(void);
 
 /**
- * Clear the error message of the calling thread.
+ * Clear the error message.
  */
 BXR_API void bxr_clear_error(void);
 

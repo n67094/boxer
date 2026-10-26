@@ -426,9 +426,8 @@ bxr_audio_load_ogg_(const char *path)
   size_t file_size = 0;
   Uint8 *file_data = bxr_asset_read(path, &file_size);
   if (!file_data || file_size == 0) {
-    bxr_set_error("Failed to read OGG file: %s (error: %s)",
-                  path,
-                  bxr_get_error());
+    bxr_set_error(
+        "Failed to read OGG file: %s (error: %s)", path, bxr_get_error());
     BXR_FREE(audio);
     return NULL;
   }
@@ -985,8 +984,8 @@ bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms)
   Uint64 position_bytes = frames * frame_size;
 
   if (position_bytes >= a->length) {
-    bxr_set_error("Position %llu ms exceeds audio length for voice ID: %u",
-                  (unsigned long long)position_ms,
+    bxr_set_error("Position %lu ms exceeds audio length for voice ID: %u",
+                  position_ms,
                   voice.id);
     return false;
   }

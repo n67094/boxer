@@ -4,7 +4,6 @@
 #include "bxr_defs.h"
 #include "bxr_error.h"
 #include "bxr_gamepad.h"
-#include "bxr_log.h"
 #include "bxr_mem.h"
 
 typedef struct bxr_gamepad_button_state_s_

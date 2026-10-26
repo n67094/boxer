@@ -15,7 +15,7 @@ BXR_UNIT_CASE(case_error_clear)
   bxr_clear_error();
 
   BXR_UNIT_ASSERT(bxr_get_error() != NULL);
-  BXR_UNIT_ASSERT(SDL_strcmp(bxr_get_error(), "") == 0);
+  BXR_UNIT_ASSERT(bxr_strcmp(bxr_get_error(), "") == 0);
 
   return true;
 }
@@ -23,7 +23,7 @@ BXR_UNIT_CASE(case_error_clear)
 BXR_UNIT_CASE(case_error_set_get)
 {
   BXR_UNIT_ASSERT(bxr_set_error("Failed to load %s (%d)", "level", 3) == false);
-  BXR_UNIT_ASSERT(SDL_strcmp(bxr_get_error(), "Failed to load level (3)") == 0);
+  BXR_UNIT_ASSERT(bxr_strcmp(bxr_get_error(), "Failed to load level (3)") == 0);
 
   return true;
 }
@@ -33,7 +33,7 @@ BXR_UNIT_CASE(case_error_chain)
   bxr_set_error("inner");
   bxr_set_error("outer: %s", bxr_get_error());
 
-  BXR_UNIT_ASSERT(SDL_strcmp(bxr_get_error(), "outer: inner") == 0);
+  BXR_UNIT_ASSERT(bxr_strcmp(bxr_get_error(), "outer: inner") == 0);
 
   return true;
 }
@@ -46,7 +46,7 @@ BXR_UNIT_CASE(case_error_truncate)
 
   bxr_set_error("%s", long_msg);
 
-  BXR_UNIT_ASSERT(SDL_strlen(bxr_get_error()) == BXR_ERROR_MAX_LENGTH - 1);
+  BXR_UNIT_ASSERT(bxr_strlen(bxr_get_error()) == BXR_ERROR_MAX_LENGTH - 1);
 
   return true;
 }
@@ -58,7 +58,7 @@ BXR_UNIT_CASE(case_error_asset_read)
   Uint8 *data = bxr_asset_read("does_not_exist.txt", NULL);
 
   BXR_UNIT_ASSERT(data == NULL);
-  BXR_UNIT_ASSERT(SDL_strstr(bxr_get_error(), "does_not_exist.txt") != NULL);
+  BXR_UNIT_ASSERT(bxr_strstr(bxr_get_error(), "does_not_exist.txt") != NULL);
 
   return true;
 }
@@ -68,7 +68,7 @@ BXR_UNIT_CASE(case_error_asset_mount)
   bxr_clear_error();
 
   BXR_UNIT_ASSERT(!bxr_asset_mount("/does/not/exist"));
-  BXR_UNIT_ASSERT(SDL_strlen(bxr_get_error()) > 0);
+  BXR_UNIT_ASSERT(bxr_strlen(bxr_get_error()) > 0);
 
   return true;
 }

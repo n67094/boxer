@@ -3,7 +3,6 @@
 #include "bxr_assert.h"
 #include "bxr_context.h"
 #include "bxr_error.h"
-#include "bxr_log.h"
 #include "bxr_mem.h"
 #include "bxr_sampler.h"
 
