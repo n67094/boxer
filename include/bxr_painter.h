@@ -34,7 +34,7 @@ typedef struct bxr_painter_desc_t
   SDL_GPUDevice *gpu_device;
 } bxr_painter_desc_t;
 
-void bxr_painter_setup(const bxr_painter_desc_t *desc);
+bool bxr_painter_setup(const bxr_painter_desc_t *desc);
 void bxr_painter_teardown(void);
 
 /**

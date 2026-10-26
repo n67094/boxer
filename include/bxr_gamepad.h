@@ -67,7 +67,7 @@ typedef enum
   BXR_GAMEPAD_AXIS_SIZE,
 } bxr_gamepad_axis_e;
 
-void bxr_gamepad_setup(void);
+bool bxr_gamepad_setup(void);
 void bxr_gamepad_teardown(void);
 void bxr_gamepad_listen(void);
 void bxr_gamepad_begin_frame(void);
@@ -225,6 +225,7 @@ BXR_API float bxr_gamepad_axis_prev(int index, bxr_gamepad_axis_e axis);
  *
  * `return` true on success, false on failure or if the gamepad is not
  * connected.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_gamepad_rumble(int index,
                                 Uint16 low_frequency,

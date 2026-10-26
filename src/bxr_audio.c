@@ -10,6 +10,7 @@
 #include "bxr_asset.h"
 #include "bxr_audio.h"
 #include "bxr_config.h"
+#include "bxr_error.h"
 #include "bxr_log.h"
 #include "bxr_mem.h"
 #include "bxr_multimap.h"
@@ -144,7 +145,7 @@ bxr_audio_release_(void)
   }
 }
 
-void
+bool
 bxr_audio_setup(void)
 {
   BXR_ASSERT(initialized_ == 0);
@@ -152,45 +153,45 @@ bxr_audio_setup(void)
   // Open the default audio device for playback
   device_id_ = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Failed to open audio device: %s", SDL_GetError());
-    return;
+    bxr_set_error("Failed to open audio device: %s", SDL_GetError());
+    return false;
   }
 
   // Get the audio device format
   if (SDL_GetAudioDeviceFormat(device_id_, &device_spec_, NULL) == false) {
-    BXR_LOG_ERROR("Failed to get audio device format: %s", SDL_GetError());
+    bxr_set_error("Failed to get audio device format: %s", SDL_GetError());
     bxr_audio_release_();
-    return;
+    return false;
   }
 
   // Audio pool for loaded audio slots
   audio_pool_ = bxr_pool_create(BXR_AUDIO_MAX);
   if (!audio_pool_) {
-    BXR_LOG_ERROR("Failed to create audio pool");
+    bxr_set_error("Failed to create audio pool");
     bxr_audio_release_();
-    return;
+    return false;
   }
 
   audios_ = BXR_CALLOC(BXR_AUDIO_MAX, sizeof(bxr_audio_t_));
   if (!audios_) {
-    BXR_LOG_ERROR("Failed to allocate audio slots");
+    bxr_set_error("Failed to allocate audio slots");
     bxr_audio_release_();
-    return;
+    return false;
   }
 
   // Create a pool for audio voices
   voice_pool_ = bxr_pool_create(BXR_AUDIO_MAX_VOICES);
   if (!voice_pool_) {
-    BXR_LOG_ERROR("Failed to create voice pool");
+    bxr_set_error("Failed to create voice pool");
     bxr_audio_release_();
-    return;
+    return false;
   }
 
   voices_ = BXR_ALLOC(sizeof(bxr_voice_t_) * BXR_AUDIO_MAX_VOICES);
   if (!voices_) {
-    BXR_LOG_ERROR("Failed to allocate voice slots");
+    bxr_set_error("Failed to allocate voice slots");
     bxr_audio_release_();
-    return;
+    return false;
   }
 
   for (int i = 0; i < BXR_AUDIO_MAX_VOICES; ++i) {
@@ -205,14 +206,16 @@ bxr_audio_setup(void)
 
   audio_tags_ = bxr_multimap_create(BXR_AUDIO_MAX_TAGS);
   if (!audio_tags_) {
-    BXR_LOG_ERROR("Failed to create audio tags multimap");
+    bxr_set_error("Failed to create audio tags multimap");
     bxr_audio_release_();
-    return;
+    return false;
   }
 
   SDL_ResumeAudioDevice(device_id_);
 
   initialized_ = BXR_INIT_COOKIE;
+
+  return true;
 }
 
 static bool
@@ -256,7 +259,7 @@ bxr_audio_begin_frame(void)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return;
   }
 
@@ -282,14 +285,14 @@ bxr_audio_begin_frame(void)
     // Get the audio slot for this voice
     int audio_slot = voice->audio_slot;
     if (audio_slot < 0 || audio_slot >= BXR_AUDIO_MAX) {
-      BXR_LOG_ERROR("Invalid audio slot for voice %d", i);
+      bxr_set_error("Invalid audio slot for voice %d", i);
       continue;
     }
 
     // Get the audio data for this slot
     bxr_audio_t_ *audio = &audios_[audio_slot];
     if (!audio->data || audio->length == 0) {
-      BXR_LOG_ERROR("Audio data not available for slot %d", audio_slot);
+      bxr_set_error("Audio data not available for slot %d", audio_slot);
       continue;
     }
 
@@ -339,7 +342,7 @@ bxr_audio_begin_frame(void)
               : SDL_PutAudioStreamData(
                     voice->stream, src, frames * (int)single_frame);
     if (!queued) {
-      BXR_LOG_ERROR(
+      bxr_set_error(
           "Failed to queue audio data for voice %d: %s", i, SDL_GetError());
       continue;
     }
@@ -360,7 +363,10 @@ bxr_audio_begin_frame(void)
 void
 bxr_audio_teardown(void)
 {
-  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  // Also called after a failed or skipped setup
+  if (initialized_ != BXR_INIT_COOKIE) {
+    return;
+  }
   initialized_ = 0;
 
   bxr_audio_release_();
@@ -379,6 +385,7 @@ bxr_audio_load_wav_(const char *path)
   bxr_audio_t_ *audio = NULL;
   BXR_NEW(audio);
   if (!audio) {
+    bxr_set_error("Failed to allocate audio: %s", path);
     return NULL;
   }
 
@@ -392,7 +399,7 @@ bxr_audio_load_wav_(const char *path)
                      &audio->data,
                      &audio->length)
       == false) {
-    BXR_LOG_ERROR(
+    bxr_set_error(
         "Failed to load WAV file: %s (error: %s)", path, SDL_GetError());
     BXR_FREE(audio);
     return NULL;
@@ -408,6 +415,7 @@ bxr_audio_load_ogg_(const char *path)
   bxr_audio_t_ *audio = NULL;
   BXR_NEW(audio);
   if (!audio) {
+    bxr_set_error("Failed to allocate audio: %s", path);
     return NULL;
   }
 
@@ -418,7 +426,8 @@ bxr_audio_load_ogg_(const char *path)
   size_t file_size = 0;
   Uint8 *file_data = bxr_asset_read(path, &file_size);
   if (!file_data || file_size == 0) {
-    BXR_LOG_ERROR("Failed to read OGG file: %s", path);
+    bxr_set_error(
+        "Failed to read OGG file: %s (error: %s)", path, bxr_get_error());
     BXR_FREE(audio);
     return NULL;
   }
@@ -426,7 +435,7 @@ bxr_audio_load_ogg_(const char *path)
   int samples = stb_vorbis_decode_memory(
       file_data, file_size, &channels, &sample_rate, &decoded);
   if (samples < 0 || decoded == NULL) {
-    BXR_LOG_ERROR("Failed to load OGG file: %s", path);
+    bxr_set_error("Failed to load OGG file: %s", path);
     BXR_FREE(audio);
     BXR_FREE(file_data);
     return NULL;
@@ -453,7 +462,7 @@ bxr_audio_create(const char *path)
   BXR_LOG_INFO("Loading audio from: %s", path);
 
   if (!bxr_asset_exists(path)) {
-    BXR_LOG_ERROR("File not found: %s", path);
+    bxr_set_error("File not found: %s", path);
     return (bxr_audio_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
@@ -464,7 +473,7 @@ bxr_audio_create(const char *path)
   } else if (bxr_asset_has_extension(path, ".ogg")) {
     audio = bxr_audio_load_ogg_(path);
   } else {
-    BXR_LOG_ERROR("Unsupported audio format: %s", path);
+    bxr_set_error("Unsupported audio format: %s", path);
     return (bxr_audio_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
@@ -483,10 +492,11 @@ bxr_audio_create(const char *path)
                                &dst,
                                &converted,
                                &converted_len)) {
-    BXR_LOG_ERROR("Failed to convert audio samples: %s", SDL_GetError());
+    bxr_set_error("Failed to convert audio samples: %s", SDL_GetError());
     if (audio->data) {
       BXR_FREE(audio->data);
     }
+    BXR_FREE(audio);
     return (bxr_audio_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
@@ -497,7 +507,7 @@ bxr_audio_create(const char *path)
 
   int slot = bxr_pool_acquire_slot(audio_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
-    // No free slots
+    bxr_set_error("No free audio slot (max: %d)", BXR_AUDIO_MAX);
     if (audio->data) {
       BXR_FREE(audio->data);
     }
@@ -518,19 +528,19 @@ bxr_audio_get_length(bxr_audio_t audio)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (audio.id == BXR_AUDIO_INVALID_ID) {
-    BXR_LOG_ERROR("Invalid audio ID");
+    bxr_set_error("Invalid audio ID");
     return 0;
   }
 
   int slot = bxr_pool_get_slot_from_id(audio_pool_, audio.id);
   if (slot == BXR_POOL_INVALID_SLOT) {
-    BXR_LOG_ERROR("Audio slot not found for ID: %u", audio.id);
+    bxr_set_error("Audio slot not found for ID: %u", audio.id);
     return 0;
   }
 
   bxr_audio_t_ *a = &audios_[slot];
   if (!a || !a->data || a->length == 0) {
-    BXR_LOG_ERROR("Audio data not available for slot %d", slot);
+    bxr_set_error("Audio data not available for slot %d", slot);
     return 0;
   }
 
@@ -549,13 +559,13 @@ bxr_audio_destroy(bxr_audio_t audio)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (audio.id == BXR_AUDIO_INVALID_ID) {
-    BXR_LOG_ERROR("Invalid audio ID");
+    bxr_set_error("Invalid audio ID");
     return;
   }
 
   int slot = bxr_pool_get_slot_from_id(audio_pool_, audio.id);
   if (slot == BXR_POOL_INVALID_SLOT) {
-    BXR_LOG_ERROR("Audio slot not found for ID: %u", audio.id);
+    bxr_set_error("Audio slot not found for ID: %u", audio.id);
     return;
   }
 
@@ -582,14 +592,14 @@ bxr_audio_set_global_volume(float volume)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return;
   }
 
   volume = volume < 0.0f ? 0.0f : (volume > 1.0f ? 1.0f : volume);
 
   if (!SDL_SetAudioDeviceGain(device_id_, volume)) {
-    BXR_LOG_ERROR("Failed to set global volume: %s", SDL_GetError());
+    bxr_set_error("Failed to set global volume: %s", SDL_GetError());
   }
 }
 
@@ -599,7 +609,7 @@ bxr_audio_get_global_volume(void)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return 0.0f;
   }
 
@@ -615,7 +625,7 @@ bxr_voice_get_(bxr_voice_t voice)
 
   int voice_slot = bxr_pool_get_slot_from_id(voice_pool_, voice.id);
   if (voice_slot == BXR_POOL_INVALID_SLOT) {
-    BXR_LOG_ERROR("Track slot not found for ID: %u", voice.id);
+    bxr_set_error("Track slot not found for ID: %u", voice.id);
     return NULL;
   }
 
@@ -654,40 +664,41 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
 
   // Check if the audio device is initialized
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
   // Check if the audio ID is valid
   if (desc->audio.id == BXR_AUDIO_INVALID_ID) {
-    BXR_LOG_ERROR("Invalid audio ID");
+    bxr_set_error("Invalid audio ID");
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
   // Get the audio slot from the pool
   int audio_slot = bxr_pool_get_slot_from_id(audio_pool_, desc->audio.id);
   if (audio_slot == BXR_POOL_INVALID_SLOT) {
-    BXR_LOG_ERROR("Audio slot not found for ID: %u", desc->audio.id);
+    bxr_set_error("Audio slot not found for ID: %u", desc->audio.id);
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
   // Check if the audio data is valid
   bxr_audio_t_ *a = &audios_[audio_slot];
   if (!a || !a->data || a->length == 0) {
-    BXR_LOG_ERROR("Audio data not available for slot %d", audio_slot);
+    bxr_set_error("Audio data not available for slot %d", audio_slot);
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
   // Borrow a voice slot for playback, evicting the oldest voice if full
   if (voice_count_ >= BXR_AUDIO_MAX_VOICES) {
     if (!bxr_voice_evict_oldest_()) {
+      bxr_set_error("No voice can be evicted (max: %d)", BXR_AUDIO_MAX_VOICES);
       return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
     }
   }
 
   int slot = bxr_pool_acquire_slot(voice_pool_);
   if (slot == BXR_POOL_INVALID_SLOT) {
-    BXR_LOG_ERROR("No free voice slots available after eviction");
+    bxr_set_error("No free voice slots available after eviction");
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
   }
 
@@ -705,7 +716,7 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
   v->one_shot     = desc->play_once;
   v->keep_alive   = desc->keep_alive;
   if (!v->stream) {
-    BXR_LOG_ERROR("Failed to create audio stream for voice: %s",
+    bxr_set_error("Failed to create audio stream for voice: %s",
                   SDL_GetError());
     bxr_pool_release_slot(voice_pool_, slot);
     return (bxr_voice_t){ .id = BXR_AUDIO_INVALID_ID };
@@ -721,7 +732,7 @@ bxr_voice_create(const bxr_voice_desc_t *desc)
   }
 
   if (SDL_BindAudioStream(device_id_, v->stream) == false) {
-    BXR_LOG_ERROR("Failed to bind audio stream to device: %s", SDL_GetError());
+    bxr_set_error("Failed to bind audio stream to device: %s", SDL_GetError());
     bxr_pool_release_slot(voice_pool_, slot);
     SDL_DestroyAudioStream(v->stream);
     v->stream = NULL;
@@ -747,13 +758,13 @@ bxr_voice_set_volume(bxr_voice_t voice, float volume)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return;
   }
 
@@ -766,13 +777,13 @@ bxr_voice_get_volume(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return 0.0f;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return 0.0f;
   }
   return v->volume;
@@ -784,13 +795,13 @@ bxr_voice_play(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return;
   }
   v->feeding = true;
@@ -802,13 +813,13 @@ bxr_voice_is_playing(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return false;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
   return v->feeding;
@@ -820,13 +831,13 @@ bxr_voice_pause(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return;
   }
   v->feeding = false;
@@ -838,13 +849,13 @@ bxr_voice_is_paused(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return false;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
   return !v->feeding;
@@ -856,13 +867,13 @@ bxr_voice_stop(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return;
   }
   v->feeding  = false;
@@ -876,13 +887,13 @@ bxr_voice_is_stopped(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (device_id_ == 0) {
-    BXR_LOG_ERROR("Audio device not initialized");
+    bxr_set_error("Audio device not initialized");
     return false;
   }
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
   return !v->feeding && v->position == 0
@@ -896,18 +907,18 @@ bxr_voice_get_position(bxr_voice_t voice)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return 0;
   }
 
   if (v->audio_slot < 0 || v->audio_slot >= BXR_AUDIO_MAX) {
-    BXR_LOG_ERROR("Invalid audio slot for voice ID: %u", voice.id);
+    bxr_set_error("Invalid audio slot for voice ID: %u", voice.id);
     return 0;
   }
 
   bxr_audio_t_ *a = &audios_[v->audio_slot];
   if (!a || !a->data || a->length == 0) {
-    BXR_LOG_ERROR("Audio data not available for slot %d", v->audio_slot);
+    bxr_set_error("Audio data not available for slot %d", v->audio_slot);
     return 0;
   }
 
@@ -952,18 +963,18 @@ bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
 
   if (v->audio_slot < 0 || v->audio_slot >= BXR_AUDIO_MAX) {
-    BXR_LOG_ERROR("Invalid audio slot for voice ID: %u", voice.id);
+    bxr_set_error("Invalid audio slot for voice ID: %u", voice.id);
     return false;
   }
 
   bxr_audio_t_ *a = &audios_[v->audio_slot];
   if (!a || !a->data || a->length == 0) {
-    BXR_LOG_ERROR("Audio data not available for slot %d", v->audio_slot);
+    bxr_set_error("Audio data not available for slot %d", v->audio_slot);
     return false;
   }
 
@@ -973,9 +984,9 @@ bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms)
   Uint64 position_bytes = frames * frame_size;
 
   if (position_bytes >= a->length) {
-    BXR_LOG_WARN("Position %llu ms exceeds audio length for voice ID: %u",
-                 position_ms,
-                 voice.id);
+    bxr_set_error("Position %lu ms exceeds audio length for voice ID: %u",
+                  position_ms,
+                  voice.id);
     return false;
   }
 
@@ -994,7 +1005,7 @@ bxr_voice_set_pitch(bxr_voice_t voice, float pitch)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
 
@@ -1003,7 +1014,7 @@ bxr_voice_set_pitch(bxr_voice_t voice, float pitch)
   v->pitch = pitch;
 
   if (!SDL_SetAudioStreamFrequencyRatio(v->stream, pitch)) {
-    SDL_Log("Failed to set pitch: %s", SDL_GetError());
+    bxr_set_error("Failed to set pitch: %s", SDL_GetError());
     return false;
   }
 
@@ -1017,7 +1028,7 @@ bxr_voice_get_pitch(bxr_voice_t voice)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return 1.0f; // Return default pitch if voice is invalid
   }
 
@@ -1031,13 +1042,13 @@ bxr_voice_set_pan(bxr_voice_t voice, float pan)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
 
   if (v->channels != 2) {
-    BXR_LOG_WARN("Pan is only supported for mono and stereo voices, ID: %u",
-                 voice.id);
+    bxr_set_error("Pan is only supported for mono and stereo voices, ID: %u",
+                  voice.id);
     return false;
   }
 
@@ -1055,7 +1066,7 @@ bxr_voice_get_pan(bxr_voice_t voice)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return 0.0f; // Return default pan if voice is invalid
   }
 
@@ -1086,13 +1097,13 @@ bxr_voice_destroy(bxr_voice_t voice)
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
 
   if (voice.id == BXR_AUDIO_INVALID_ID) {
-    BXR_LOG_ERROR("Invalid voice ID");
+    bxr_set_error("Invalid voice ID");
     return;
   }
 
   int voice_slot = bxr_pool_get_slot_from_id(voice_pool_, voice.id);
   if (voice_slot == BXR_POOL_INVALID_SLOT) {
-    BXR_LOG_ERROR("Track slot not found for ID: %u", voice.id);
+    bxr_set_error("Track slot not found for ID: %u", voice.id);
     return;
   }
 
@@ -1107,12 +1118,12 @@ bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
 
   if (v->tag_count >= BXR_AUDIO_MAX_TAGS) {
-    BXR_LOG_ERROR("Track has reached maximum number of tags");
+    bxr_set_error("Track has reached maximum number of tags");
     return false;
   }
 
@@ -1129,13 +1140,17 @@ bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice)
 
   // clean up if adding to multimap failed
   if (!is_ok) {
+    bxr_set_error("Failed to add tag '%s' to voice ID: %u (error: %s)",
+                  tag_name,
+                  voice.id,
+                  bxr_get_error());
     return false;
   }
 
   // Add the tag to the voice's tag list
   v->tags[v->tag_count] = bxr_strdup(tag_name);
   if (!v->tags[v->tag_count]) {
-    BXR_LOG_ERROR("Failed to allocate memory for tag name");
+    bxr_set_error("Failed to allocate memory for tag name");
     bxr_multimap_remove_value(audio_tags_, tag_name, voice.id);
     return false;
   }
@@ -1152,7 +1167,7 @@ bxr_audio_tag_remove(const char *tag_name, bxr_voice_t voice)
 
   bxr_voice_t_ *v = bxr_voice_get_(voice);
   if (!v) {
-    BXR_LOG_ERROR("Invalid voice ID: %u", voice.id);
+    bxr_set_error("Invalid voice ID: %u", voice.id);
     return false;
   }
 

@@ -62,6 +62,7 @@ BXR_API SDL_Window *bxr_context_get_window(void);
  * `height` new height in window coordinates.
  *
  * return `true` if the window was resized successfully, `false` otherwise.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_context_set_window_dimensions(int width, int height);
 
@@ -93,6 +94,9 @@ BXR_API bxr_vec2_t bxr_context_get_virtual_window_dimensions(void);
  * Switch the window between fullscreen and windowed mode.
  *
  * `fullscreen` `true` for fullscreen, `false` for windowed.
+ *
+ * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_context_set_fullscreen(bool fullscreen);
 
@@ -107,6 +111,9 @@ BXR_API bool bxr_context_is_fullscreen(void);
  * Allow or forbid the user to resize the window.
  *
  * `resizable` `true` to allow resizing, `false` to forbid it.
+ *
+ * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_context_set_resizable(bool resizable);
 

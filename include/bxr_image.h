@@ -26,7 +26,7 @@ typedef struct bxr_image_s
   Uint32 id;
 } bxr_image_t;
 
-void bxr_image_setup(void);
+bool bxr_image_setup(void);
 void bxr_image_teardown(void);
 
 /**
@@ -42,6 +42,7 @@ void bxr_image_teardown(void);
  * `NULL` and must end with `.png` or `.bmp`.
  *
  * `return` the image, or an image with id `BXR_IMAGE_INVALID_ID` on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must destroy the result with `bxr_image_destroy()`.
  */
@@ -62,6 +63,7 @@ BXR_API bxr_image_t bxr_image_create(const char *path);
  * bytes per pixel.
  *
  * `return` the image, or an image with id `BXR_IMAGE_INVALID_ID` on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must destroy the result with `bxr_image_destroy()`.
  */

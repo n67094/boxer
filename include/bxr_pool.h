@@ -29,6 +29,7 @@ typedef struct bxr_pool_s bxr_pool_t;
  * `[0, number_of_slots)`.
  *
  * `return` the new pool, or NULL on allocation failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the result with `bxr_pool_destroy()`.
  */

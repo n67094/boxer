@@ -154,7 +154,7 @@ typedef enum
   BXR_KEYMOD_GUI    = SDL_KMOD_GUI,
 } bxr_keymod_e;
 
-void bxr_keyboard_setup(void);
+bool bxr_keyboard_setup(void);
 void bxr_keyboard_begin_frame(void);
 void bxr_keyboard_teardown(void);
 void bxr_key_down(bxr_key_e scancode);

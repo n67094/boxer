@@ -21,6 +21,12 @@
 #define BXR_PATH_MAX_LENGTH 512
 
 /**
+ * Max length of an error message in bytes, including the NUL terminator.
+ * Longer messages are truncated.
+ */
+#define BXR_ERROR_MAX_LENGTH 1024
+
+/**
  * ## Painter Configuration
  */
 

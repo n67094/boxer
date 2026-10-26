@@ -1,6 +1,7 @@
 #include "bxr.h"
 
 #include "ecs.h"
+#include "error.h"
 #include "ini.h"
 #include "math.h"
 #include "multimap.h"
@@ -36,6 +37,7 @@ bxr_game_setup(void)
   BXR_UNIT_RUN_SUITE(suite_sparse_set);
   BXR_UNIT_RUN_SUITE(suite_ecs);
   BXR_UNIT_RUN_SUITE(suite_multimap);
+  BXR_UNIT_RUN_SUITE(suite_error);
 
   bxr_unit_report();
 }

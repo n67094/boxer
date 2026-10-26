@@ -54,7 +54,7 @@ to_virtual_(float x, float y)
                          y * (virtual_dim.y / window_dim.y));
 }
 
-void
+bool
 bxr_mouse_setup(void)
 {
   BXR_ASSERT(initialized_ == 0);
@@ -68,6 +68,8 @@ bxr_mouse_setup(void)
   mouse_.prev_y  = mouse_.y;
 
   initialized_ = BXR_INIT_COOKIE;
+
+  return true;
 }
 
 void
@@ -99,7 +101,10 @@ bxr_mouse_begin_frame()
 void
 bxr_mouse_teardown(void)
 {
-  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  // Also called after a failed or skipped setup
+  if (initialized_ != BXR_INIT_COOKIE) {
+    return;
+  }
 
   initialized_ = 0;
   mouse_       = (bxr_mouse_t_){ 0 };

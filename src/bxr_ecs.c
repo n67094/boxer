@@ -14,6 +14,7 @@
 #include "bxr_config.h"
 #include "bxr_defs.h"
 #include "bxr_ecs.h"
+#include "bxr_error.h"
 #include "bxr_mem.h"
 #include "bxr_sparse_set.h"
 
@@ -349,6 +350,7 @@ bxr_ecs_create(size_t entity_count)
   bxr_ecs_t *ecs = NULL;
   BXR_NEW(ecs);
   if (!ecs) {
+    bxr_set_error("Failed to allocate ECS");
     return NULL;
   }
   BXR_MEMSET(ecs, 0, sizeof(bxr_ecs_t));
@@ -402,6 +404,8 @@ bxr_ecs_create(size_t entity_count)
   return ecs;
 
 free:
+  bxr_set_error("Failed to allocate ECS with %zu entities", entity_count);
+
   BXR_FREE(ecs->entity_free_stack);
   BXR_FREE(ecs->entity_add_queue);
   BXR_FREE(ecs->entity_remove_queue);
@@ -512,6 +516,7 @@ bxr_ecs_component_define(bxr_ecs_t *ecs,
   component_array->data
       = BXR_CALLOC(component_array->capacity, component_array->size);
   if (!component_array->data) {
+    bxr_set_error("Failed to allocate component array");
     return BXR_ECS_INVALID_COMPONENT;
   }
 
@@ -552,6 +557,7 @@ bxr_ecs_entity_create(bxr_ecs_t *ecs)
       bxr_ecs_entity_data_t_ *new_entities = SDL_realloc(
           ecs->entities, new_count * sizeof(bxr_ecs_entity_data_t_));
       if (!new_entities) {
+        bxr_set_error("Failed to grow entities to %zu", new_count);
         return BXR_ECS_INVALID_ENTITY;
       }
 
@@ -610,7 +616,10 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
   BXR_ASSERT(ecs->entities[entity].ready);
 
   if (bxr_ecs_bitset_test_(&ecs->entities[entity].component_bits, component)) {
-    return NULL; // Component already exists for this entity
+    bxr_set_error("Component %zu already exists for entity %zu",
+                  (size_t)component,
+                  (size_t)entity);
+    return NULL;
   }
 
   // Get the entity
@@ -631,6 +640,7 @@ bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
     void *new_data = BXR_RESIZE(component_array->data,
                                 new_capacity * component_array->size);
     if (!new_data) {
+      bxr_set_error("Failed to grow component array to %zu", new_capacity);
       return NULL;
     }
 
@@ -964,6 +974,8 @@ bxr_ecs_system_define(bxr_ecs_t *ecs,
   system_data->entity_ids = bxr_sparse_set_create(
       ecs->entity_count); // Start with capacity equal to max entities
   if (!system_data->entity_ids) {
+    bxr_set_error("Failed to create system entity set (error: %s)",
+                  bxr_get_error());
     return BXR_ECS_INVALID_SYSTEM;
   }
   system_data->logic_cb     = logic_cb;

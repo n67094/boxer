@@ -22,7 +22,6 @@ Features:
 Todo:
 
 - Demo
-- Error handling
 - Immediate mode UI
 
 ## Prerequisites

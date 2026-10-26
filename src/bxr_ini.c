@@ -6,6 +6,7 @@
 #include "bxr_assert.h"
 #include "bxr_asset.h"
 #include "bxr_config.h"
+#include "bxr_error.h"
 #include "bxr_ini.h"
 #include "bxr_mem.h"
 #include "bxr_string.h"
@@ -190,11 +191,13 @@ bxr_ini_create_reader(const Uint8 *data, size_t length)
   bxr_ini_reader_t *ini = NULL;
   BXR_NEW(ini);
   if (!ini) {
+    bxr_set_error("Failed to allocate INI reader");
     return NULL;
   }
 
   ini->data = BXR_ALLOC(length + 1); // +1 for null-terminator
   if (!ini->data) {
+    bxr_set_error("Failed to allocate INI reader data (%zu bytes)", length);
     BXR_FREE(ini);
     return NULL;
   }
@@ -334,7 +337,8 @@ bxr_ini_writer_append_(bxr_ini_writer_t *ini, const char *str)
     char *new_data      = NULL;
     new_data            = BXR_ALLOC(new_capacity);
     if (new_data == NULL) {
-      return false;
+      return bxr_set_error("Failed to grow INI writer to %zu bytes",
+                           new_capacity);
     }
     BXR_MEMCPY(new_data, ini->data, ini->size);
     BXR_FREE(ini->data);
@@ -395,12 +399,14 @@ bxr_ini_create_writer()
   bxr_ini_writer_t *ini = NULL;
   BXR_NEW(ini);
   if (!ini) {
+    bxr_set_error("Failed to allocate INI writer");
     return NULL;
   }
 
   ini->data = NULL;
   ini->data = BXR_ALLOC(BXR_INI_DEFAULT_DATA_CAPACITY);
   if (ini->data == NULL) {
+    bxr_set_error("Failed to allocate INI writer data");
     BXR_FREE(ini);
     return NULL;
   }
@@ -436,7 +442,7 @@ bxr_ini_writer_section_begin(bxr_ini_writer_t *ini, const char *section)
   char *line      = NULL;
   line            = BXR_ALLOC(line_len);
   if (line == NULL) {
-    return false;
+    return bxr_set_error("Failed to allocate INI section: %s", section);
   }
 
   SDL_snprintf(line, line_len, "[%s]\n", section);
@@ -478,7 +484,7 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value)
   char *left      = NULL;
   left            = BXR_ALLOC(left_len + 2);
   if (!left) {
-    return false;
+    return bxr_set_error("Failed to allocate INI key: %s", key);
   }
 
   SDL_snprintf(left, left_len, "%s=", key);
@@ -516,7 +522,7 @@ bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number)
   char *line = NULL;
   line       = BXR_ALLOC(line_len);
   if (!line) {
-    return false;
+    return bxr_set_error("Failed to allocate INI key: %s", key);
   }
 
   SDL_snprintf(line, line_len, "%s=%s\n", key, number_str);
