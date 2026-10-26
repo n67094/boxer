@@ -1,5 +1,6 @@
 #include "bxr_context.h"
 #include "bxr_assert.h"
+#include "bxr_error.h"
 #include "bxr_log.h"
 #include "bxr_math.h"
 #include "bxr_mem.h"
@@ -12,7 +13,7 @@ bxr_context_get(void)
   if (context_ == NULL) {
     BXR_NEW(context_);
     if (!context_) {
-      BXR_LOG_ERROR("Failed to create context");
+      bxr_set_error("Failed to create context");
       return NULL;
     }
 
@@ -46,7 +47,14 @@ bxr_context_set_window_dimensions(int width, int height)
   context_->config.width  = width;
   context_->config.height = height;
 
-  return SDL_SetWindowSize(context_->window, width, height);
+  if (!SDL_SetWindowSize(context_->window, width, height)) {
+    return bxr_set_error("Failed to set window dimensions to %dx%d (error: %s)",
+                         width,
+                         height,
+                         SDL_GetError());
+  }
+
+  return true;
 }
 
 void
@@ -83,7 +91,12 @@ bxr_context_set_fullscreen(bool fullscreen)
 
   context_->config.fullscreen = fullscreen;
 
-  return SDL_SetWindowFullscreen(context_->window, fullscreen);
+  if (!SDL_SetWindowFullscreen(context_->window, fullscreen)) {
+    return bxr_set_error("Failed to set fullscreen (error: %s)",
+                         SDL_GetError());
+  }
+
+  return true;
 }
 
 bool
@@ -101,7 +114,11 @@ bxr_context_set_resizable(bool resizable)
 
   context_->config.resizable = resizable;
 
-  return SDL_SetWindowResizable(context_->window, resizable);
+  if (!SDL_SetWindowResizable(context_->window, resizable)) {
+    return bxr_set_error("Failed to set resizable (error: %s)", SDL_GetError());
+  }
+
+  return true;
 }
 
 bool

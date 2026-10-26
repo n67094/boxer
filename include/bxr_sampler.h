@@ -43,7 +43,7 @@ typedef struct bxr_sampler_s
 /**
  * Initializes the sampler system.
  */
-void bxr_sampler_setup(void);
+bool bxr_sampler_setup(void);
 
 /**
  * Tears down the sampler system.
@@ -61,6 +61,7 @@ void bxr_sampler_teardown(void);
  *
  * `return` the created sampler, or a sampler whose `sampler` field is NULL on
  * failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller owns the sampler and must release it with
  * `bxr_sampler_destroy()` while the GPU device is still alive.

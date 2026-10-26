@@ -60,7 +60,7 @@ typedef struct bxr_voice_desc_s
   bool keep_alive; // keep it, don't evict it when the voice limit is reached
 } bxr_voice_desc_t;
 
-void bxr_audio_setup(void);
+bool bxr_audio_setup(void);
 void bxr_audio_begin_frame(void);
 void bxr_audio_teardown(void);
 
@@ -76,6 +76,7 @@ void bxr_audio_teardown(void);
  * `path` file path relative to the mounted directories; must not be NULL.
  *
  * `return` the audio handle, or an id of `BXR_AUDIO_INVALID_ID` on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the audio with `bxr_audio_destroy()`.
  */
@@ -130,6 +131,7 @@ BXR_API float bxr_audio_get_global_volume(void);
  * `return` the voice handle, or an id of `BXR_VOICE_INVALID_ID` if the audio
  * is invalid, all `BXR_AUDIO_MAX_VOICES` voices are marked `keep_alive`, or
  * the stream cannot be created.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the voice with `bxr_voice_destroy()`, unless
  * `play_once` is set, in which case it is freed automatically once finished.
@@ -219,6 +221,7 @@ BXR_API Uint64 bxr_voice_get_position(bxr_voice_t voice);
  *
  * `return` true on success, false if the position is out of range or the
  * voice is invalid.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms);
 
@@ -229,6 +232,7 @@ BXR_API bool bxr_voice_set_position(bxr_voice_t voice, Uint64 position_ms);
  * `pitch` frequency ratio clamped to [0.01, 100.0]; 1.0 is normal speed.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_voice_set_pitch(bxr_voice_t voice, float pitch);
 
@@ -251,6 +255,7 @@ BXR_API float bxr_voice_get_pitch(bxr_voice_t voice);
  * `pan` balance clamped to [-1.0, 1.0]: -1.0 left, 0.0 center, 1.0 right.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **NOTE:** Only mono and stereo sources can be panned.
  */
@@ -293,6 +298,7 @@ BXR_API void bxr_voice_destroy(bxr_voice_t voice);
  *
  * `return` true on success or if the voice already has this tag, false on
  * failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_audio_tag_add(const char *tag_name, bxr_voice_t voice);
 

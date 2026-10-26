@@ -6,6 +6,7 @@
 #include "bxr_assert.h"
 #include "bxr_asset.h"
 #include "bxr_defs.h"
+#include "bxr_error.h"
 #include "bxr_image.h"
 #include "bxr_log.h"
 #include "bxr_pixel.h"
@@ -13,17 +14,22 @@
 
 static Uint32 initialized_ = 0;
 
-void
+bool
 bxr_image_setup(void)
 {
   BXR_ASSERT(initialized_ == 0);
   initialized_ = BXR_INIT_COOKIE;
+
+  return true;
 }
 
 void
 bxr_image_teardown(void)
 {
-  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  // Also called after a failed or skipped setup
+  if (initialized_ != BXR_INIT_COOKIE) {
+    return;
+  }
   initialized_ = 0;
 }
 
@@ -37,21 +43,21 @@ bxr_image_create(const char *path)
 
   // Check if the file exists
   if (!bxr_asset_exists(path)) {
-    BXR_LOG_ERROR("File not found: %s", path);
+    bxr_set_error("File not found: %s", path);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
   // Check if the file has a supported extension
   if (!bxr_asset_has_extension(path, ".png")
       && !bxr_asset_has_extension(path, ".bmp")) {
-    BXR_LOG_ERROR("Unsupported image format: %s", path);
+    bxr_set_error("Unsupported image format: %s", path);
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
 
   // Open the file using PhysFS
   SDL_IOStream *stream = PHYSFSSDL3_openRead(path);
   if (!stream) {
-    BXR_LOG_ERROR("Failed to open image file: %s (error: %s)",
+    bxr_set_error("Failed to open image file: %s (error: %s)",
                   path,
                   PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
@@ -65,7 +71,7 @@ bxr_image_create(const char *path)
     surface = SDL_LoadPNG_IO(stream, true);
   }
   if (!surface) {
-    BXR_LOG_ERROR(
+    bxr_set_error(
         "Failed to load image from file: %s (error: %s)", path, SDL_GetError());
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
@@ -74,6 +80,12 @@ bxr_image_create(const char *path)
   bxr_image_t image = { .id = SDL_GPCreateImage(surface).id };
 
   SDL_DestroySurface(surface);
+
+  if (image.id == BXR_IMAGE_INVALID_ID) {
+    bxr_set_error("Failed to create GPU image from file: %s (error: %s)",
+                  path,
+                  SDL_GPGetErrorMessage(SDL_GPGetLastError()));
+  }
 
   return image;
 }
@@ -90,7 +102,7 @@ bxr_image_create_mem(
   if (pitch == 0) {
     int bytes_per_pixel = SDL_BYTESPERPIXEL(format);
     if (bytes_per_pixel == 0) {
-      BXR_LOG_ERROR("Cannot auto-calculate pitch for format %d", format);
+      bxr_set_error("Cannot auto-calculate pitch for format %d", format);
       return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
     }
     pitch = (int)width * bytes_per_pixel;
@@ -100,7 +112,7 @@ bxr_image_create_mem(
       width, height, (SDL_PixelFormat)format, pixels, pitch);
 
   if (!surface) {
-    BXR_LOG_ERROR("Failed to create surface from memory (error: %s)",
+    bxr_set_error("Failed to create surface from memory (error: %s)",
                   SDL_GetError());
     return (bxr_image_t){ .id = BXR_IMAGE_INVALID_ID };
   }
@@ -108,6 +120,11 @@ bxr_image_create_mem(
   bxr_image_t image = { .id = SDL_GPCreateImage(surface).id };
 
   SDL_DestroySurface(surface);
+
+  if (image.id == BXR_IMAGE_INVALID_ID) {
+    bxr_set_error("Failed to create GPU image from memory (error: %s)",
+                  SDL_GPGetErrorMessage(SDL_GPGetLastError()));
+  }
 
   return image;
 }

@@ -1,5 +1,6 @@
 #include "bxr_multimap.h"
 #include "bxr_assert.h"
+#include "bxr_error.h"
 #include "bxr_mem.h"
 #include "bxr_string.h"
 
@@ -50,6 +51,7 @@ bxr_multimap_alloc_arrays_(bxr_multimap_t *out, size_t size)
   is_ok &= out->buckets != NULL;
 
   if (!is_ok) {
+    bxr_set_error("Failed to allocate multimap of size %zu", size);
     BXR_FREE(out->state);
     BXR_FREE(out->hashes);
     BXR_FREE(out->keys);
@@ -169,6 +171,7 @@ bxr_multimap_create(size_t initial_size)
   bxr_multimap_t *map = NULL;
   BXR_NEW0(map);
   if (!map) {
+    bxr_set_error("Failed to allocate multimap");
     return NULL;
   }
 
@@ -207,7 +210,7 @@ bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value)
   if (!found) {
     char *key_copy = bxr_strdup(key);
     if (!key_copy) {
-      return false;
+      return bxr_set_error("Failed to allocate multimap key: %s", key);
     }
 
     if (map->state[i] != BXR_MULTIMAP_SLOT_TOMBSTONE) {
@@ -250,7 +253,7 @@ bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value)
         map->count--;
       }
 
-      return false;
+      return bxr_set_error("Failed to grow multimap bucket for key: %s", key);
     }
 
     bucket->values = new_values;

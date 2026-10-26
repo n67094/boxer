@@ -38,7 +38,7 @@
 #include "bxr_context.h"
 #include "bxr_defs.h"
 
-void bxr_asset_setup(bxr_context_t *context);
+bool bxr_asset_setup(bxr_context_t *context);
 void bxr_asset_teardown(void);
 
 /**
@@ -58,6 +58,7 @@ void bxr_asset_teardown(void);
  * not be NULL.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_asset_mount(const char *path);
 
@@ -121,6 +122,7 @@ BXR_API bool bxr_asset_is_directory(const char *path);
  *
  * `return` the file contents, or NULL if the file does not exist, is empty, or
  * cannot be read.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the result with `BXR_FREE()`.
  */
@@ -146,7 +148,8 @@ BXR_API Uint8 *bxr_asset_read(const char *path, size_t *length);
  * `length` number of bytes to write. Must be greater than 0.
  * `append` true to append to the end of the file, false to truncate it first.
  *
- * `return` true on success, false on failure
+ * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool
 bxr_asset_write(const char *path, const void *data, size_t length, bool append);
@@ -161,6 +164,7 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append);
  * NULL.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_asset_delete(const char *path);
 

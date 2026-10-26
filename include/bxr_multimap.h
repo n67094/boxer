@@ -35,6 +35,7 @@ typedef struct bxr_multimap_s bxr_multimap_t;
  * a minimum of `BXR_MULTIMAP_MIN_SIZE`; 0 is allowed.
  *
  * `return` the new multimap, or NULL on allocation failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the result with `bxr_multimap_destroy()`.
  */
@@ -51,6 +52,7 @@ bxr_multimap_t *bxr_multimap_create(size_t initial_size);
  * `value` the value to add.
  *
  * `return` true on success, false on allocation failure.
+ * Call `bxr_get_error()` for more information.
  */
 bool bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value);
 

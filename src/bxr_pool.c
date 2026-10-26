@@ -1,4 +1,5 @@
 #include "bxr_pool.h"
+#include "bxr_error.h"
 #include "bxr_log.h"
 #include "bxr_mem.h"
 #include "bxr_sdl_gp.h"
@@ -14,12 +15,15 @@ bxr_pool_create(size_t number_of_slots)
   bxr_pool_t *p = NULL;
   BXR_NEW(p);
   if (!p) {
+    bxr_set_error("Failed to allocate pool");
     return NULL;
   }
 
   p->pool = SDL_GPCreatePool(number_of_slots);
   if (!p->pool) {
-    BXR_LOG_ERROR("Failed to create pool with %zu slots", number_of_slots);
+    bxr_set_error("Failed to create pool with %zu slots (error: %s)",
+                  number_of_slots,
+                  SDL_GPGetErrorMessage(SDL_GPGetLastError()));
     BXR_FREE(p);
     return NULL;
   }

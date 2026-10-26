@@ -23,11 +23,13 @@ typedef struct bxr_keyboard_s_
 static Uint32 initialized_  = 0;
 static bxr_keyboard_t_ key_ = { 0 };
 
-void
+bool
 bxr_keyboard_setup(void)
 {
   BXR_ASSERT(initialized_ == 0);
   initialized_ = BXR_INIT_COOKIE;
+
+  return true;
 }
 
 void
@@ -53,7 +55,10 @@ bxr_keyboard_begin_frame(void)
 void
 bxr_keyboard_teardown(void)
 {
-  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  // Also called after a failed or skipped setup
+  if (initialized_ != BXR_INIT_COOKIE) {
+    return;
+  }
 
   initialized_ = 0;
   key_         = (bxr_keyboard_t_){ 0 };

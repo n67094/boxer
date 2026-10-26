@@ -74,7 +74,7 @@ typedef struct bxr_shader_desc_s
  *
  * `context` is the bxr context to use for shader operations.
  */
-void bxr_shader_setup(bxr_context_t *context);
+bool bxr_shader_setup(bxr_context_t *context);
 
 /**
  * Shuts down the shader system.
@@ -92,6 +92,7 @@ void bxr_shader_teardown(void);
  *
  * `return` the new shader, or a shader with `id` `BXR_SHADER_INVALID_ID` on
  * failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller owns the shader and must release it with
  * `bxr_shader_destroy()`.

@@ -25,7 +25,7 @@ typedef enum
   BXR_MOUSE_SIZE    = 6,
 } bxr_mouse_e;
 
-void bxr_mouse_setup(void);
+bool bxr_mouse_setup(void);
 void bxr_mouse_begin_frame(void);
 void bxr_mouse_teardown(void);
 void bxr_mouse_button_down(bxr_mouse_e button, Uint8 click);

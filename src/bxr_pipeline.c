@@ -1,4 +1,5 @@
 #include "bxr_pipeline.h"
+#include "bxr_error.h"
 #include "bxr_sdl_gp.h"
 #include "bxr_shader.h"
 
@@ -17,11 +18,18 @@ bxr_pipeline_create(bxr_shader_t shader_vert,
   SDL_GPPrimitiveType gp_primitive_type = (SDL_GPPrimitiveType)primitive_type;
   SDL_GPBlendMode gp_blend_mode         = (SDL_GPBlendMode)blend_mode;
 
-  return (bxr_pipeline_t){ .id = SDL_GPCreatePipeline(gp_shader_vert,
-                                                      gp_shader_frag,
-                                                      gp_primitive_type,
-                                                      gp_blend_mode)
-                                     .id };
+  bxr_pipeline_t pipeline = { .id = SDL_GPCreatePipeline(gp_shader_vert,
+                                                         gp_shader_frag,
+                                                         gp_primitive_type,
+                                                         gp_blend_mode)
+                                        .id };
+
+  if (pipeline.id == BXR_PIPELINE_INVALID_ID) {
+    bxr_set_error("Failed to create pipeline (error: %s)",
+                  SDL_GPGetErrorMessage(SDL_GPGetLastError()));
+  }
+
+  return pipeline;
 }
 
 void
