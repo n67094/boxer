@@ -2,12 +2,17 @@
 
 #include "bxr_assert.h"
 #include "bxr_context.h"
+#include "bxr_defs.h"
+#include "bxr_error.h"
 #include "bxr_painter.h"
 #include "bxr_sdl_gp.h"
 
-void
+static Uint32 initialized_ = 0;
+
+bool
 bxr_painter_setup(const bxr_painter_desc_t *desc)
 {
+  BXR_ASSERT(initialized_ == 0);
   BXR_ASSERT(desc);
   BXR_ASSERT(desc->window);
   BXR_ASSERT(desc->gpu_device);
@@ -19,13 +24,27 @@ bxr_painter_setup(const bxr_painter_desc_t *desc)
     .gpu_device   = desc->gpu_device,
   };
 
-  SDL_GPSetup(&painter_desc);
+  if (!SDL_GPSetup(&painter_desc)) {
+    return bxr_set_error("Failed to setup painter (error: %s)",
+                         SDL_GPGetErrorMessage(SDL_GPGetLastError()));
+  }
+
+  initialized_ = BXR_INIT_COOKIE;
+
+  return true;
 }
 
 void
 bxr_painter_teardown()
 {
+  // Also called after a failed or skipped setup
+  if (initialized_ != BXR_INIT_COOKIE) {
+    return;
+  }
+
   SDL_GPShutdown();
+
+  initialized_ = 0;
 }
 
 void

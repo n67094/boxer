@@ -8,6 +8,14 @@
 
 #include "bxr_sdl_gp.h"
 
+// Log the last error as the reason of the startup failure.
+static SDL_AppResult
+init_failed_(void)
+{
+  BXR_LOG_ERROR("Initialization failed: %s", bxr_get_error());
+  return SDL_APP_FAILURE;
+}
+
 static bool
 update_refresh_rate_(bxr_context_t *context)
 {
@@ -58,7 +66,12 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   BXR_ASSERT(config->fullscreen == true || config->fullscreen == false);
   BXR_ASSERT(config->resizable == true || config->resizable == false);
 
+  bxr_log_setup();
+
   bxr_context_t *context = bxr_context_get();
+  if (!context) {
+    return init_failed_();
+  }
 
   context->config.name           = config->name;
   context->config.title          = config->title;
@@ -75,8 +88,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 #endif
 
   if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
-    BXR_LOG_ERROR("Couldn't initialize SDL: %s\n", SDL_GetError());
-    return SDL_APP_FAILURE;
+    bxr_set_error("Couldn't initialize SDL (error: %s)", SDL_GetError());
+    return init_failed_();
   }
 
   int flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
@@ -88,8 +101,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   context->window
       = SDL_CreateWindow(config->title, config->width, config->height, flags);
   if (context->window == NULL) {
-    BXR_LOG_ERROR("Failed to create window (error: %s)", SDL_GetError());
-    return SDL_APP_FAILURE;
+    bxr_set_error("Failed to create window (error: %s)", SDL_GetError());
+    return init_failed_();
   }
 
   // Create a GPU Device
@@ -99,8 +112,8 @@ SDL_AppInit(void **appstate, int argc, char **argv)
                                             true,
                                             NULL);
   if (context->gpu_device == NULL) {
-    BXR_LOG_ERROR("Failed to create GPU Device (error: %s)", SDL_GetError());
-    return SDL_APP_FAILURE;
+    bxr_set_error("Failed to create GPU Device (error: %s)", SDL_GetError());
+    return init_failed_();
   }
 
   BXR_LOG_INFO("Using GPU Driver: %s",
@@ -108,7 +121,9 @@ SDL_AppInit(void **appstate, int argc, char **argv)
 
   // Claime the window for the GPU device
   if (!SDL_ClaimWindowForGPUDevice(context->gpu_device, context->window)) {
-    return SDL_APP_FAILURE;
+    bxr_set_error("Failed to claim window for GPU device (error: %s)",
+                  SDL_GetError());
+    return init_failed_();
   }
 
   // Set swapchain parameters
@@ -155,18 +170,19 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     .gpu_device   = context->gpu_device,
   };
 
-  // Setup subsystems
-  bxr_log_setup();
-  bxr_asset_setup(context);
-  bxr_keyboard_setup();
-  bxr_mouse_setup();
-  bxr_gamepad_setup();
-  bxr_shader_setup(context);
-  bxr_audio_setup();
-  bxr_image_setup();
-  bxr_sampler_setup();
-
-  bxr_painter_setup(&painter_desc);
+  bool is_ok = true;
+  is_ok &= bxr_asset_setup(context);
+  is_ok &= bxr_keyboard_setup();
+  is_ok &= bxr_mouse_setup();
+  is_ok &= bxr_gamepad_setup();
+  is_ok &= bxr_shader_setup(context);
+  is_ok &= bxr_audio_setup();
+  is_ok &= bxr_image_setup();
+  is_ok &= bxr_sampler_setup();
+  is_ok &= bxr_painter_setup(&painter_desc);
+  if (!is_ok) {
+    return init_failed_();
+  }
 
   // Call user setup
   bxr_game_setup();
@@ -179,7 +195,7 @@ SDL_AppIterate(void *appstate)
 {
   bxr_context_t *context = bxr_context_get();
   if (!context) {
-    BXR_LOG_ERROR("Invalid context in SDL_AppIterate");
+    BXR_LOG_ERROR("Invalid context in SDL_AppIterate: %s", bxr_get_error());
     return SDL_APP_FAILURE;
   }
 
@@ -220,8 +236,21 @@ SDL_AppIterate(void *appstate)
   // Acquire a command buffer for the current frame
   SDL_GPUCommandBuffer *cmd_buffer
       = SDL_AcquireGPUCommandBuffer(context->gpu_device);
+  if (!cmd_buffer) {
+    bxr_set_error("Failed to acquire GPU command buffer (error: %s)",
+                  SDL_GetError());
+    BXR_LOG_ERROR("%s", bxr_get_error());
+    return SDL_APP_FAILURE;
+  }
 
-  SDL_GPBegin(context->config.virtual_width, context->config.virtual_height);
+  if (!SDL_GPBegin(context->config.virtual_width,
+                   context->config.virtual_height)) {
+    bxr_set_error("Failed to begin painter frame (error: %s)",
+                  SDL_GPGetErrorMessage(SDL_GPGetLastError()));
+    BXR_LOG_ERROR("%s", bxr_get_error());
+    SDL_CancelGPUCommandBuffer(cmd_buffer);
+    return SDL_APP_FAILURE;
+  }
   {
     while (lag_ns >= delta_ns) {
       bxr_mouse_begin_frame();
@@ -250,12 +279,19 @@ SDL_AppIterate(void *appstate)
         cmd_buffer, context->window, &swapchain_texture, NULL, NULL);
 
     if (!swapchain_texture) {
-      BXR_LOG_ERROR("Failed to acquire swapchain texture: %s", SDL_GetError());
+      bxr_set_error("Failed to acquire swapchain texture (error: %s)",
+                    SDL_GetError());
+      BXR_LOG_ERROR("%s", bxr_get_error());
       SDL_CancelGPUCommandBuffer(cmd_buffer);
       return SDL_APP_FAILURE;
     }
 
-    SDL_GPFlush(cmd_buffer, swapchain_texture);
+    // Not fatal, the frame is dropped and the next one is tried
+    if (!SDL_GPFlush(cmd_buffer, swapchain_texture)) {
+      bxr_set_error("Failed to flush painter (error: %s)",
+                    SDL_GPGetErrorMessage(SDL_GPGetLastError()));
+      BXR_LOG_ERROR("%s", bxr_get_error());
+    }
   }
   SDL_GPEnd();
   SDL_SubmitGPUCommandBuffer(cmd_buffer);
@@ -389,8 +425,8 @@ bxr_quit(void)
   SDL_Event quit_event = { 0 };
   quit_event.type      = SDL_EVENT_QUIT;
   if (!SDL_PushEvent(&quit_event)) {
-    BXR_LOG_ERROR("Failed to push quit event: %s. Exiting immediately.",
-                  SDL_GetError());
+    bxr_set_error("Failed to push quit event (error: %s)", SDL_GetError());
+    BXR_LOG_ERROR("%s. Exiting immediately.", bxr_get_error());
     SDL_Quit();
   }
 }

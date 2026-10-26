@@ -1,6 +1,7 @@
 #include <SDL3/SDL.h>
 
 #include "bxr_assert.h"
+#include "bxr_error.h"
 #include "bxr_mem.h"
 #include "bxr_sparse_set.h"
 
@@ -25,23 +26,29 @@ bxr_sparse_set_t *
 bxr_sparse_set_create(size_t default_capacity)
 {
   if (default_capacity == 0) {
+    bxr_set_error("Sparse set capacity must be greater than 0");
     return NULL;
   }
 
   bxr_sparse_set_t *set = NULL;
   BXR_NEW0(set);
   if (!set) {
+    bxr_set_error("Failed to allocate sparse set");
     return NULL;
   }
 
   set->dense = BXR_ALLOC(default_capacity * sizeof(size_t));
   if (!set->dense) {
+    bxr_set_error("Failed to allocate sparse set of capacity %zu",
+                  default_capacity);
     bxr_sparse_set_destroy(set);
     return NULL;
   }
 
   set->sparse = BXR_CALLOC(default_capacity, sizeof(size_t));
   if (!set->sparse) {
+    bxr_set_error("Failed to allocate sparse set of capacity %zu",
+                  default_capacity);
     bxr_sparse_set_destroy(set);
     return NULL;
   }
@@ -82,7 +89,7 @@ bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle)
     while (handle >= new_capacity) {
       // *2 to cunter the *2 below since it's a pre-check for overflow.
       if (new_capacity >= SIZE_MAX / (2 * sizeof(size_t))) {
-        return false; // Cannot grow further
+        return bxr_set_error("Sparse set cannot grow further");
       }
 
       new_capacity *= 2;
@@ -92,13 +99,13 @@ bxr_sparse_set_insert(bxr_sparse_set_t *set, size_t handle)
     // the capacity is only updated once both succeeded.
     size_t *new_dense = BXR_RESIZE(set->dense, new_capacity * sizeof(size_t));
     if (!new_dense) {
-      return false;
+      return bxr_set_error("Failed to grow sparse set to %zu", new_capacity);
     }
     set->dense = new_dense;
 
     size_t *new_sparse = BXR_RESIZE(set->sparse, new_capacity * sizeof(size_t));
     if (!new_sparse) {
-      return false;
+      return bxr_set_error("Failed to grow sparse set to %zu", new_capacity);
     }
     set->sparse = new_sparse;
     // Zero the new part of the sparse array

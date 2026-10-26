@@ -55,6 +55,7 @@ typedef struct bxr_ecs_s bxr_ecs_t;
  * capacity doubles when more entities are created and never shrinks.
  *
  * `return` the ECS instance, or NULL on allocation failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the result with `bxr_ecs_destroy()`.
  */
@@ -112,6 +113,7 @@ typedef void (*bxr_ecs_component_remove_cb)(bxr_ecs_t *ecs,
  * NULL.
  *
  * `return` the component ID or `BXR_ECS_INVALID_COMPONENT` on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **NOTE:** at most `BXR_ECS_MAX_COMPONENT` components can be
  * defined.
@@ -132,6 +134,7 @@ bxr_ecs_component_define(bxr_ecs_t *ecs,
  * `ecs` the ECS instance; must not be NULL.
  *
  * `return` the entity ID, or `BXR_ECS_INVALID_ENTITY` on allocation failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bxr_ecs_entity_t bxr_ecs_entity_create(bxr_ecs_t *ecs);
 
@@ -168,6 +171,7 @@ BXR_API bool bxr_ecs_entity_has_component(const bxr_ecs_t *ecs,
  * `args` passed as is to the component's add callback; may be NULL.
  *
  * `return` the component data, or NULL on allocation failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API void *bxr_ecs_entity_add_component(bxr_ecs_t *ecs,
                                            bxr_ecs_entity_t entity,
@@ -263,6 +267,7 @@ typedef void (*bxr_ecs_system_remove_cb)(bxr_ecs_t *ecs,
  * `udata` user data passed to the callbacks; may be NULL. Not owned.
  *
  * `return` the system ID or `BXR_ECS_INVALID_SYSTEM` on allocation failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **NOTE:** At most `BXR_ECS_MAX_SYSTEM` systems can be defined.
  */

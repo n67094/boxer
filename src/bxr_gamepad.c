@@ -2,8 +2,8 @@
 
 #include "bxr_assert.h"
 #include "bxr_defs.h"
+#include "bxr_error.h"
 #include "bxr_gamepad.h"
-#include "bxr_log.h"
 #include "bxr_mem.h"
 
 typedef struct bxr_gamepad_button_state_s_
@@ -33,13 +33,15 @@ static Uint32 initialized_                       = 0;
 static bxr_gamepad_t_ gamepads_[BXR_GAMEPAD_MAX] = { 0 };
 static float deadzone_                           = BXR_GAMEPAD_DEADZONE;
 
-void
+bool
 bxr_gamepad_setup(void)
 {
   BXR_ASSERT(initialized_ == 0);
 
   initialized_ = BXR_INIT_COOKIE;
   deadzone_    = BXR_GAMEPAD_DEADZONE;
+
+  return true;
 }
 
 void
@@ -87,7 +89,7 @@ bxr_gamepad_listen(void)
     if (gamepad == NULL) { // Not connected yet try to open it
       gamepad = SDL_OpenGamepad(id);
       if (gamepad == NULL) {
-        BXR_LOG_ERROR("Failed to open gamepad with id %d (error: %s)",
+        bxr_set_error("Failed to open gamepad with id %d (error: %s)",
                       id,
                       SDL_GetError());
         continue;
@@ -162,7 +164,10 @@ bxr_gamepad_begin_frame(void)
 void
 bxr_gamepad_teardown(void)
 {
-  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  // Also called after a failed or skipped setup
+  if (initialized_ != BXR_INIT_COOKIE) {
+    return;
+  }
 
   // Close gamepads
   for (int i = 0; i < BXR_GAMEPAD_MAX; ++i) {
@@ -285,6 +290,7 @@ bxr_gamepad_name(int index)
   BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (!bxr_gamepad_connected(index)) {
+    bxr_set_error("Gamepad %d is not connected", index);
     return NULL;
   }
 
@@ -298,6 +304,7 @@ bxr_gamepad_serial(int index)
   BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (!bxr_gamepad_connected(index)) {
+    bxr_set_error("Gamepad %d is not connected", index);
     return NULL;
   }
 
@@ -415,14 +422,14 @@ bxr_gamepad_rumble(int index,
   BXR_ASSERT(index >= 0 && index < BXR_GAMEPAD_MAX);
 
   if (gamepads_[index].gamepad == NULL) {
-    return false;
+    return bxr_set_error("Gamepad %d is not connected", index);
   }
 
   if (!SDL_RumbleGamepad(gamepads_[index].gamepad,
                          low_frequency,
                          high_frequency,
                          duration_ms)) {
-    BXR_LOG_ERROR("Failed to start rumble for gamepad %d (error: %s)",
+    bxr_set_error("Failed to start rumble for gamepad %d (error: %s)",
                   index,
                   SDL_GetError());
     return false;

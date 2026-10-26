@@ -57,6 +57,7 @@ typedef enum
  * `blend_mode` how fragments are blended with the render target.
  *
  * `return` the new pipeline, or a pipeline with `id` 0 on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller owns the pipeline and must release it with
  * `bxr_pipeline_destroy()`. The shaders can be destroyed once the pipeline is

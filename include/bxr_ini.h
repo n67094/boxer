@@ -53,6 +53,7 @@ typedef struct bxr_ini_reader_s bxr_ini_reader_t;
  * `length` size of `data` in bytes.
  *
  * `return` the reader, or `NULL` on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the result with `bxr_ini_destroy_reader()`.
  */
@@ -139,6 +140,7 @@ typedef struct bxr_ini_writer_s bxr_ini_writer_t;
  * Create an empty INI writer.
  *
  * `return` the writer, or `NULL` on failure.
+ * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the result with `bxr_ini_destroy_writer()`.
  */
@@ -161,6 +163,7 @@ BXR_API void bxr_ini_destroy_writer(bxr_ini_writer_t *ini);
  * `section` section name, written as is. Must not be `NULL`.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini,
                                           const char *section);
@@ -171,6 +174,7 @@ BXR_API bool bxr_ini_writer_section_begin(bxr_ini_writer_t *ini,
  * `ini` writer to use, with a section open. Must not be `NULL`.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini);
 
@@ -184,6 +188,7 @@ BXR_API bool bxr_ini_writer_section_end(bxr_ini_writer_t *ini);
  * `value` string value. Must not be `NULL`.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool
 bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
@@ -198,6 +203,7 @@ bxr_ini_write_str(bxr_ini_writer_t *ini, const char *key, const char *value);
  * `number` value to write.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool
 bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number);
@@ -209,6 +215,7 @@ bxr_ini_write_number(bxr_ini_writer_t *ini, const char *key, float number);
  * `path` path to write to. Must not be `NULL`.
  *
  * `return` true on success, false on failure.
+ * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_ini_writer_save(bxr_ini_writer_t *ini, const char *path);
 
