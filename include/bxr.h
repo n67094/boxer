@@ -6,9 +6,6 @@
  * **NOTE:** Boxer owns the program entry point through SDL main callbacks: do
  * not write a `main()`, implement the callbacks of `bxr_game.h` instead.
  *
- * **NOTE:** Failing functions store a message readable with `bxr_get_error()`,
- * see `bxr_error.h`. If the engine fails to start, the reason is logged.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
 

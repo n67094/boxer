@@ -18,7 +18,6 @@ Features:
 - Keyboard, mouse, and gamepad input handling.
 - Math utilities for vectors, matrices, and transformations.
 - An entity-component system (ECS) for flexible game object management.
-- SDL-style error handling: failing functions set a message readable with `bxr_get_error()`.
 
 Todo:
 

@@ -170,11 +170,17 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     .gpu_device   = context->gpu_device,
   };
 
-  // Setup subsystems, the ones already set up are torn down by SDL_AppQuit
-  if (!bxr_asset_setup(context) || !bxr_keyboard_setup() || !bxr_mouse_setup()
-      || !bxr_gamepad_setup() || !bxr_shader_setup(context)
-      || !bxr_audio_setup() || !bxr_image_setup() || !bxr_sampler_setup()
-      || !bxr_painter_setup(&painter_desc)) {
+  bool is_ok = true;
+  is_ok &= bxr_asset_setup(context);
+  is_ok &= bxr_keyboard_setup();
+  is_ok &= bxr_mouse_setup();
+  is_ok &= bxr_gamepad_setup();
+  is_ok &= bxr_shader_setup(context);
+  is_ok &= bxr_audio_setup();
+  is_ok &= bxr_image_setup();
+  is_ok &= bxr_sampler_setup();
+  is_ok &= bxr_painter_setup(&painter_desc);
+  if (!is_ok) {
     return init_failed_();
   }
 
