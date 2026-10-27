@@ -17,7 +17,7 @@ void menu_render(double alpha);
 
 void menu_teardown(void);
 
-scene_t menu_scene = {
+scene_t SCENE_MENU = {
   .setup    = menu_setup,
   .update   = menu_update,
   .render   = menu_render,

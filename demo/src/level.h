@@ -45,7 +45,7 @@ void level_render(double alpha_ms);
 
 void level_teardown(void);
 
-scene_t level_scene = {
+scene_t SCENE_LEVEL = {
   .setup    = level_setup,
   .update   = level_update,
   .render   = level_render,
