@@ -11,33 +11,11 @@
 
 extern bxr_ecs_component_t component_position;
 extern bxr_ecs_component_t component_velocity;
+extern bxr_ecs_component_t component_collider;
+extern bxr_ecs_component_t component_gravity;
 extern bxr_ecs_component_t component_sprite;
+extern bxr_ecs_component_t component_animation;
 extern bxr_ecs_component_t component_player;
-
-typedef struct sprite_s
-{
-  bxr_image_t image;
-} sprite_t;
-
-typedef enum
-{
-  STATE_IDLE = 0,
-  STATE_WALKING,
-  STATE_JUMPING,
-  STATE_FALLING,
-} state_e;
-
-typedef enum
-{
-  LEFT = 0,
-  RIGHT,
-} direction_e;
-
-typedef struct
-{
-  state_e state;
-  direction_e direction;
-} player_t;
 
 /**
  * Registers the components used in the ECS.
