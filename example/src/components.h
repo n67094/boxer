@@ -9,6 +9,8 @@
 
 #include <boxer/bxr.h>
 
+#include "game.h"
+
 extern bxr_ecs_component_t component_position;
 extern bxr_ecs_component_t component_velocity;
 extern bxr_ecs_component_t component_collider;
@@ -22,6 +24,6 @@ extern bxr_ecs_component_t component_player;
  * `ecs` is a pointer to the ECS instance where the components will be
  * registered.
  */
-void component_register(bxr_ecs_t *ecs);
+void components_register(game_t *game);
 
 #endif // COMPONENTS_H_

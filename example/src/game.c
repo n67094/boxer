@@ -1,9 +1,10 @@
 #include <boxer/bxr.h>
 
-#include "camera.h"
+#include "components.h"
 #include "defs.h"
 #include "game.h"
 #include "map.h"
+#include "systems.h"
 
 static Uint32 _initialized = 0;
 static game_t _game        = { 0 };
@@ -19,16 +20,8 @@ game_setup(void)
     return;
   }
 
-  _game.camera = camera_create((bxr_rect_t){
-      .x = 0,
-      .y = 0,
-      .w = WINDOW_VIRTUAL_WIDTH,
-      .h = WINDOW_VIRTUAL_HEIGHT,
-  });
-  if (!_game.camera) {
-    BXR_LOG_ERROR("Failed to create camera");
-    return;
-  }
+  components_register(&_game);
+  systems_register(&_game);
 }
 
 void
@@ -39,56 +32,32 @@ game_set_map(map_t *map)
   _game.map = map;
 }
 
-map_t *
-game_get_map(void)
-{
-  BXR_ASSERT(_initialized && "game must be initialized before getting the map");
-
-  return _game.map;
-}
-
 void
-game_set_delta(double delta_ms)
+game_update(double delta_ms)
 {
-  BXR_ASSERT(_initialized
-             && "game must be initialized before setting delta time");
+  BXR_ASSERT(_initialized && "game must be initialized before updating");
 
   _game.delta_ms = delta_ms;
-}
 
-float
-game_get_delta(void)
-{
-  BXR_ASSERT(_initialized
-             && "game must be initialized before getting delta time");
-
-  return (float)_game.delta_ms;
+  bxr_ecs_system_run(_game.ecs, system_player_update, 0);
+  bxr_ecs_system_run(_game.ecs, system_animation_update, 0);
 }
 
 void
-game_set_alpha(double alpha_ms)
+game_render(double alpha_ms)
 {
-  BXR_ASSERT(_initialized
-             && "game must be initialized before setting alpha time");
+  BXR_ASSERT(_initialized && "game must be initialized before rendering");
 
   _game.alpha_ms = alpha_ms;
-}
 
-float
-game_get_alpha(void)
-{
-  BXR_ASSERT(_initialized
-             && "game must be initialized before getting alpha time");
-
-  return (float)_game.alpha_ms;
+  bxr_ecs_system_run(_game.ecs, system_map_render, 0);
+  bxr_ecs_system_run(_game.ecs, system_animation_render, 0);
 }
 
 void
 game_teardown(void)
 {
   _initialized = 1;
-
-  camera_destroy(_game.camera);
 
   bxr_ecs_destroy(_game.ecs);
 }

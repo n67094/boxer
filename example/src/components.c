@@ -2,6 +2,7 @@
 
 #include "animation.h"
 #include "components.h"
+#include "game.h"
 #include "player.h"
 
 bxr_ecs_component_t component_position;
@@ -12,8 +13,10 @@ bxr_ecs_component_t component_animation;
 bxr_ecs_component_t component_player;
 
 void
-component_register(bxr_ecs_t *ecs)
+components_register(game_t *game)
 {
+  bxr_ecs_t *ecs = game->ecs;
+
   component_position
       = bxr_ecs_component_define(ecs, sizeof(bxr_vec2_t), NULL, NULL);
   component_velocity

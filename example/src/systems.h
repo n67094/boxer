@@ -12,13 +12,10 @@
 #include "game.h"
 
 extern bxr_ecs_system_t system_player_update;
-extern bxr_ecs_system_t system_player_render;
-
 extern bxr_ecs_system_t system_animation_update;
-extern bxr_ecs_system_t system_animation_rendner;
-
+extern bxr_ecs_system_t system_animation_render;
 extern bxr_ecs_system_t system_map_render;
 
-void system_register(game_t *game);
+void systems_register(game_t *game);
 
 #endif // SYSTEMS_H_

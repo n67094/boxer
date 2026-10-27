@@ -1,9 +1,6 @@
 #include <boxer/bxr.h>
 
 #include "defs.h"
-#include "game.h"
-#include "level.h"
-#include "menu.h"
 #include "scene.h"
 
 static bxr_game_config_t _config = { 0 };
@@ -34,11 +31,6 @@ bxr_game_setup(void)
 
   bxr_log_enable_colors(true);
 
-  // Setup the menu and level systems at once for simplicity.
-  game_setup();
-  menu_setup();
-  level_setup();
-
   scene_go_to(SCENE_MENU);
 }
 
@@ -62,10 +54,6 @@ void
 bxr_game_teardown(void)
 {
   scene_teardown();
-
-  menu_teardown();
-  level_teardown();
-  game_teardown();
 
   bxr_asset_unmount(ASSET_MOUNT);
 }
