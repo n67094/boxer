@@ -1,21 +1,39 @@
 #include "level.h"
+#include "defs.h"
+#include "game.h"
+#include "map.h"
+
+static map_t *_map = NULL;
 
 void
 level_setup(void)
 {
+  _map
+      = map_create(ASSET_LEVEL_TILESET, LEVEL_TILES, LEVEL_WIDTH, LEVEL_HEIGHT);
+
+  if (!_map) {
+    BXR_LOG_ERROR("Failed to load map");
+    return;
+  }
+
+  game_set_map(_map);
 }
 
 void
-level_update(double delta_time_ms)
+level_update(double delta_ms)
 {
 }
 
 void
-level_render(double alpha)
+level_render(double alpha_ms)
 {
 }
 
 void
 level_teardown(void)
 {
+  if (_map) {
+    map_destroy(_map);
+    _map = NULL;
+  }
 }

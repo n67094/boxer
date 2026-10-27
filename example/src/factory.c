@@ -2,25 +2,26 @@
 
 #include "components.h"
 #include "factory.h"
-#include "types.h"
+#include "player.h"
 
 bxr_ecs_entity_t
-factory_create_player(bxr_ecs_t *ecs, bxr_vec2_t position)
+factory_player_create(bxr_ecs_t *ecs, factory_player_desc_t *desc)
 {
   BXR_ASSERT(ecs != NULL && "ecs must not be NULL");
 
   bxr_ecs_entity_t entity = bxr_ecs_entity_create(ecs);
 
-  // The image is keep until the game exits
-  bxr_image_t player_image = bxr_image_create("assets/player.png");
-
-  bxr_ecs_entity_add_component(ecs, entity, component_position, &position);
   bxr_ecs_entity_add_component(
       ecs, entity, component_velocity, &(bxr_vec2_t){ 0.0f, 0.0f });
-  bxr_ecs_entity_add_component(
-      ecs, entity, component_collider, &(bxr_rect_t){ 0.0f, 0.0f, 8.0f, 8.0f });
   bxr_ecs_entity_add_component(ecs, entity, component_gravity, NULL);
-  bxr_ecs_entity_add_component(ecs, entity, component_sprite, &player_image);
+
+  bxr_ecs_entity_add_component(
+      ecs, entity, component_position, &desc->position);
+  bxr_ecs_entity_add_component(
+      ecs, entity, component_collider, &desc->collider);
+  bxr_ecs_entity_add_component(
+      ecs, entity, component_animation, &desc->animation);
+
   bxr_ecs_entity_add_component(ecs,
                                entity,
                                component_player,

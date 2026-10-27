@@ -30,7 +30,7 @@ typedef struct map_s
  *
  * `width` and `height` are the dimensions of the map in tiles.
  *
- * `return` a pointer to the newly created map, or NULL if an error occurred.
+ * `return` a pointer to the newly created map, or NULL otherwise.
  */
 map_t *map_create(const char *tileset_path,
                   const Uint32 *tiles_data,

@@ -1,11 +1,12 @@
 #include <boxer/bxr.h>
 
+#include "defs.h"
 #include "input.h"
 #include "menu.h"
-#include "state.h"
 
-static bxr_image_t _title;
-static bxr_image_t _start_button;
+static bxr_image_t _img_background;
+static bxr_image_t _img_title;
+static bxr_image_t _img_press_start;
 
 static bxr_audio_t _music;
 static bxr_voice_t _music_voice;
@@ -13,8 +14,9 @@ static bxr_voice_t _music_voice;
 void
 menu_setup(void)
 {
-  _title        = bxr_image_create("assets/title.png");
-  _start_button = bxr_image_create("assets/start_button.png");
+  _img_title       = bxr_image_create(ASSET_TITLE);
+  _img_background  = bxr_image_create(ASSET_TITLE_BACKGROUND);
+  _img_press_start = bxr_image_create(ASSET_TITLE_PRESS_START);
 
   _music = bxr_audio_create("assets/music.ogg");
 
@@ -29,15 +31,15 @@ menu_setup(void)
 }
 
 void
-menu_update(double delta_time_ms)
+menu_update(double delta_ms)
 {
   if (input_just_pressed(INPUT_BUTTON_START)) {
-    state_set(STATE_LEVEL);
+    scene_go_to(SCENE_LEVEL);
   }
 }
 
 void
-menu_render(double alpha)
+menu_render(double alpha_ms)
 {
   // TODO render images
 }
@@ -48,6 +50,7 @@ menu_teardown(void)
   bxr_voice_destroy(_music_voice);
   bxr_audio_destroy(_music);
 
-  bxr_image_destroy(_title);
-  bxr_image_destroy(_start_button);
+  bxr_image_destroy(_img_press_start);
+  bxr_image_destroy(_img_title);
+  bxr_image_destroy(_img_background);
 }

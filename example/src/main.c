@@ -1,9 +1,10 @@
 #include <boxer/bxr.h>
 
 #include "defs.h"
+#include "game.h"
 #include "level.h"
 #include "menu.h"
-#include "state.h"
+#include "scene.h"
 
 static bxr_game_config_t _config = { 0 };
 
@@ -34,55 +35,37 @@ bxr_game_setup(void)
   bxr_log_enable_colors(true);
 
   // Setup the menu and level systems at once for simplicity.
-  state_setup();
+  game_setup();
   menu_setup();
   level_setup();
 
-  // Set the initial game state to the menu
-  state_set(STATE_MENU);
+  scene_go_to(SCENE_MENU);
 }
 
 void
-bxr_game_update(double delta_time_ms)
+bxr_game_update(double delta_ms)
 {
-
-  switch (state_get()) {
-  case STATE_MENU:
-    menu_update(delta_time_ms);
-    break;
-  case STATE_LEVEL:
-    level_update(delta_time_ms);
-    break;
-  default:
-    break;
-  }
+  scene_update(delta_ms);
 }
 
 void
-bxr_game_render(double alpha)
+bxr_game_render(double alpha_ms)
 {
   // Clear the screen to black before rendering the game scene
   bxr_painter_set_color(BXR_COLOR_BLACK);
   bxr_painter_clear();
 
-  switch (state_get()) {
-  case STATE_MENU:
-    menu_render(alpha);
-    break;
-  case STATE_LEVEL:
-    level_render(alpha);
-    break;
-  default:
-    break;
-  }
+  scene_render(alpha_ms);
 }
 
 void
 bxr_game_teardown(void)
 {
+  scene_teardown();
+
   menu_teardown();
   level_teardown();
-  state_teardown();
+  game_teardown();
 
   bxr_asset_unmount(ASSET_MOUNT);
 }

@@ -1,11 +1,11 @@
 /**
- * @file types.h
+ * @file player.h
  *
  * @copyright Copyright (c) 2026 nsix. All rights reserved.
  */
 
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef PLAYER_H_
+#define PLAYER_H_
 
 #include <boxer/bxr.h>
 
@@ -23,15 +23,6 @@ typedef enum
   DIR_RIGHT,
 } direction_e;
 
-typedef struct animation_s
-{
-  state_e state;
-  int from;
-  int to;
-  Uint64 frame_ms;   // Duration of a frame in milliseconds
-  Uint64 elapsed_ms; // Time elapsed since the last frame change
-} animation_t;
-
 typedef struct player_s
 {
   state_e state;
@@ -40,4 +31,4 @@ typedef struct player_s
   float speed;
 } player_t;
 
-#endif // TYPES_H_
+#endif // PLAYER_H_

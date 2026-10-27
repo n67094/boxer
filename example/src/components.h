@@ -13,7 +13,6 @@ extern bxr_ecs_component_t component_position;
 extern bxr_ecs_component_t component_velocity;
 extern bxr_ecs_component_t component_collider;
 extern bxr_ecs_component_t component_gravity;
-extern bxr_ecs_component_t component_sprite;
 extern bxr_ecs_component_t component_animation;
 extern bxr_ecs_component_t component_player;
 

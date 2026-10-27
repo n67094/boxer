@@ -1,11 +1,14 @@
 #include <boxer/bxr.h>
 
+#include "animation.h"
 #include "components.h"
-#include "types.h"
+#include "player.h"
 
 bxr_ecs_component_t component_position;
 bxr_ecs_component_t component_velocity;
-bxr_ecs_component_t component_sprite;
+bxr_ecs_component_t component_collider;
+bxr_ecs_component_t component_gravity;
+bxr_ecs_component_t component_animation;
 bxr_ecs_component_t component_player;
 
 void
@@ -18,8 +21,6 @@ component_register(bxr_ecs_t *ecs)
   component_collider
       = bxr_ecs_component_define(ecs, sizeof(bxr_rect_t), NULL, NULL);
   component_gravity = bxr_ecs_component_define(ecs, sizeof(void), NULL, NULL);
-  component_sprite
-      = bxr_ecs_component_define(ecs, sizeof(bxr_image_t), NULL, NULL);
   component_animation
       = bxr_ecs_component_define(ecs, sizeof(animation_t), NULL, NULL);
   component_player

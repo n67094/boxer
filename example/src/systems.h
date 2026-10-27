@@ -9,11 +9,16 @@
 
 #include <boxer/bxr.h>
 
-#include "state.h"
+#include "game.h"
 
-extern bxr_ecs_system_t system_player;
-extern bxr_ecs_system_t system_map;
+extern bxr_ecs_system_t system_player_update;
+extern bxr_ecs_system_t system_player_render;
 
-void system_register(state_t *game);
+extern bxr_ecs_system_t system_animation_update;
+extern bxr_ecs_system_t system_animation_rendner;
+
+extern bxr_ecs_system_t system_map_render;
+
+void system_register(game_t *game);
 
 #endif // SYSTEMS_H_
