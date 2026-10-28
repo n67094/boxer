@@ -5,13 +5,12 @@
 map_t *
 map_create(const char *tileset_path,
            const Uint32 *tiles_data,
+           Uint32 tile_size,
            Uint32 width,
            Uint32 height)
 {
   BXR_ASSERT(tileset_path != NULL && "tileset_path must not be NULL");
   BXR_ASSERT(tiles_data != NULL && "tiles_data must not be NULL");
-  BXR_ASSERT(width > 0 && "width must be greater than 0");
-  BXR_ASSERT(height > 0 && "height must be greater than 0");
 
   map_t *map = NULL;
   BXR_NEW(map);
@@ -20,8 +19,11 @@ map_create(const char *tileset_path,
     return NULL;
   }
 
-  map->tileset = bxr_image_create(tileset_path);
-  map->tiles   = BXR_ALLOC(sizeof(Uint32) * width * height);
+  map->tileset   = bxr_image_create(tileset_path);
+  map->tiles     = BXR_ALLOC(sizeof(Uint32) * width * height);
+  map->tile_size = tile_size;
+  map->width     = width;
+  map->height    = height;
 
   BXR_MEMCPY(map->tiles, tiles_data, sizeof(Uint32) * width * height);
 
@@ -37,10 +39,10 @@ map_render(map_t *map, bxr_rect_t viewport)
   bxr_painter_set_color(BXR_COLOR_WHITE);
   bxr_painter_set_image(0, map->tileset);
 
-  Uint32 start_x = (Uint32)(viewport.x / MAP_TILE_SIZE);
-  Uint32 start_y = (Uint32)(viewport.y / MAP_TILE_SIZE);
-  Uint32 end_x   = (Uint32)((viewport.x + viewport.w) / MAP_TILE_SIZE) + 1;
-  Uint32 end_y   = (Uint32)((viewport.y + viewport.h) / MAP_TILE_SIZE) + 1;
+  Uint32 start_x = (Uint32)(viewport.x / map->tile_size);
+  Uint32 start_y = (Uint32)(viewport.y / map->tile_size);
+  Uint32 end_x   = (Uint32)((viewport.x + viewport.w) / map->tile_size) + 1;
+  Uint32 end_y   = (Uint32)((viewport.y + viewport.h) / map->tile_size) + 1;
 
   for (Uint32 y = start_y; y < end_y; ++y) {
     for (Uint32 x = start_x; x < end_x; ++x) {
@@ -54,21 +56,21 @@ map_render(map_t *map, bxr_rect_t viewport)
 
       int tileset_w = bxr_image_get_width(map->tileset);
 
-      int tile_x = (tile_index % (tileset_w / MAP_TILE_SIZE)) * MAP_TILE_SIZE;
-      int tile_y = (tile_index / (tileset_w / MAP_TILE_SIZE)) * MAP_TILE_SIZE;
+      int tile_x = (tile_index % (tileset_w / map->tile_size)) * map->tile_size;
+      int tile_y = (tile_index / (tileset_w / map->tile_size)) * map->tile_size;
 
       bxr_rect_t src_rect = {
         .x = tile_x,
         .y = tile_y,
-        .w = MAP_TILE_SIZE,
-        .h = MAP_TILE_SIZE,
+        .w = map->tile_size,
+        .h = map->tile_size,
       };
 
       bxr_rect_t dst_rect = {
-        .x = x * MAP_TILE_SIZE,
-        .y = y * MAP_TILE_SIZE,
-        .w = MAP_TILE_SIZE,
-        .h = MAP_TILE_SIZE,
+        .x = x * map->tile_size - (Uint32)viewport.x,
+        .y = y * map->tile_size - (Uint32)viewport.y,
+        .w = map->tile_size,
+        .h = map->tile_size,
       };
 
       bxr_painter_draw_textured_rect(
@@ -86,8 +88,8 @@ map_is_solid(map_t *map, bxr_vec2_t position)
   BXR_ASSERT(map != NULL && "map must not be NULL");
 
   // Convert the position to tile coordinates
-  Uint32 tile_x = (Uint32)(position.x / MAP_TILE_SIZE);
-  Uint32 tile_y = (Uint32)(position.y / MAP_TILE_SIZE);
+  Uint32 tile_x = (Uint32)(position.x / map->tile_size);
+  Uint32 tile_y = (Uint32)(position.y / map->tile_size);
 
   // Check if the tile coordinates are within the map bounds
   if (tile_x >= map->width || tile_y >= map->height) {

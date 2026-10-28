@@ -17,16 +17,16 @@ typedef struct game_s
   map_t *map;
   double delta_ms; // time in seconds since last update
   double alpha_ms; // time in seconds since last render, used for interpolation
+
+  bxr_ecs_entity_t player_entity;
 } game_t;
 
-void game_setup(void);
+game_t *game_create(map_t *map);
 
-void game_set_map(map_t *map);
+void game_update(game_t *game, double delta_ms);
 
-void game_update(double delta_ms);
+void game_render(game_t *game, double alpha_ms);
 
-void game_render(double alpha_ms);
-
-void game_teardown(void);
+void game_destroy(game_t *game);
 
 #endif // GAME_H_

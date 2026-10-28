@@ -2,62 +2,64 @@
 
 #include "components.h"
 #include "defs.h"
+#include "factory.h"
 #include "game.h"
 #include "map.h"
 #include "systems.h"
 
-static Uint32 _initialized = 0;
-static game_t _game        = { 0 };
-
-void
-game_setup(void)
+game_t *
+game_create(map_t *map)
 {
-  _initialized = 1;
-
-  _game.ecs = bxr_ecs_create(GAME_MAX_ENTITIES);
-  if (!_game.ecs) {
-    BXR_LOG_ERROR("Failed to create ECS");
-    return;
+  game_t *game = NULL;
+  BXR_NEW(game);
+  if (game == NULL) {
+    BXR_LOG_ERROR("Failed to allocate memory for game");
+    return NULL;
   }
 
-  components_register(&_game);
-  systems_register(&_game);
+  game->ecs = bxr_ecs_create(GAME_MAX_ENTITIES);
+  if (!game->ecs) {
+    BXR_LOG_ERROR("Failed to create ECS");
+    return NULL;
+  }
+
+  game->map = map;
+
+  components_register(game);
+  systems_register(game);
+
+  /*
+  factory_player_desc_t player_desc = {
+    .position = { 32, 32 },
+    .collider = { 0, 0, 8, 8 },
+  };
+
+  game->player_entity = factory_player_create(game->ecs, &player_desc);
+  */
+
+  return game;
 }
 
 void
-game_set_map(map_t *map)
+game_update(game_t *game, double delta_ms)
 {
-  BXR_ASSERT(_initialized && "game must be initialized before setting the map");
+  game->delta_ms = delta_ms;
 
-  _game.map = map;
+  bxr_ecs_system_run(game->ecs, system_player_update, 0);
+  bxr_ecs_system_run(game->ecs, system_animation_update, 0);
 }
 
 void
-game_update(double delta_ms)
+game_render(game_t *game, double alpha_ms)
 {
-  BXR_ASSERT(_initialized && "game must be initialized before updating");
+  game->alpha_ms = alpha_ms;
 
-  _game.delta_ms = delta_ms;
-
-  bxr_ecs_system_run(_game.ecs, system_player_update, 0);
-  bxr_ecs_system_run(_game.ecs, system_animation_update, 0);
+  bxr_ecs_system_run(game->ecs, system_map_render, 0);
+  bxr_ecs_system_run(game->ecs, system_animation_render, 0);
 }
 
 void
-game_render(double alpha_ms)
+game_destroy(game_t *game)
 {
-  BXR_ASSERT(_initialized && "game must be initialized before rendering");
-
-  _game.alpha_ms = alpha_ms;
-
-  bxr_ecs_system_run(_game.ecs, system_map_render, 0);
-  bxr_ecs_system_run(_game.ecs, system_animation_render, 0);
-}
-
-void
-game_teardown(void)
-{
-  _initialized = 1;
-
-  bxr_ecs_destroy(_game.ecs);
+  BXR_ASSERT(game);
 }

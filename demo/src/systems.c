@@ -74,6 +74,13 @@ system_map_render_cb(bxr_ecs_t *ecs,
 
   map_t *map = game->map;
 
+  bxr_rect_t viewport = {
+    .x = 0,
+    .y = 0,
+    .w = WINDOW_VIRTUAL_WIDTH,
+    .h = WINDOW_VIRTUAL_HEIGHT,
+  };
+
   for (size_t i = 0; i < entity_count; ++i) {
     bxr_ecs_entity_t entity = entities[i];
 
@@ -83,16 +90,12 @@ system_map_render_cb(bxr_ecs_t *ecs,
         = bxr_ecs_entity_get_component(ecs, entity, component_position);
 
     if (player_entity && position) {
-      bxr_rect_t viewport = {
-        .x = position->x - (WINDOW_VIRTUAL_WIDTH * 0.5f),
-        .y = position->y - (WINDOW_VIRTUAL_HEIGHT * 0.5f),
-        .w = WINDOW_VIRTUAL_WIDTH,
-        .h = WINDOW_VIRTUAL_HEIGHT,
-      };
-
-      map_render(map, viewport);
+      viewport.x = position->x - (WINDOW_VIRTUAL_WIDTH * 0.5f);
+      viewport.y = position->y - (WINDOW_VIRTUAL_HEIGHT * 0.5f);
     }
   }
+
+  map_render(map, viewport);
 
   return 0;
 }

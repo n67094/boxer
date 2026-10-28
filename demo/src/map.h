@@ -7,16 +7,13 @@
 #ifndef MAP_H_
 #define MAP_H_
 
-#define MAP_TILE_SIZE 8
-#define MAP_WIDTH 20
-#define MAP_HEIGHT 18
-
 #include <boxer/bxr.h>
 
 typedef struct map_s
 {
   bxr_image_t tileset;
   Uint32 *tiles;
+  Uint32 tile_size;
   Uint32 width;
   Uint32 height;
 } map_t;
@@ -34,6 +31,7 @@ typedef struct map_s
  */
 map_t *map_create(const char *tileset_path,
                   const Uint32 *tiles_data,
+                  Uint32 tile_size,
                   Uint32 width,
                   Uint32 height);
 
