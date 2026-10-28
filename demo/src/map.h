@@ -58,6 +58,15 @@ void map_render(map_t *map, bxr_rect_t viewport);
 bool map_is_solid(map_t *map, bxr_vec2_t position);
 
 /**
+ * Gets the bounds of the given map in world space.
+ *
+ * `map` is a pointer to the map to get the bounds of.
+ *
+ * `return` a bxr_rect_t that describes the bounds of the map in world space.
+ */
+bxr_rect_t map_get_bounds(map_t *map);
+
+/**
  * Destroys the given map and frees its resources.
  *
  * `map` is a pointer to the map to destroy.

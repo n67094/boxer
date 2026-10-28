@@ -23,7 +23,7 @@ components_register(game_t *game)
       = bxr_ecs_component_define(ecs, sizeof(bxr_vec2_t), NULL, NULL);
   component_collider
       = bxr_ecs_component_define(ecs, sizeof(bxr_rect_t), NULL, NULL);
-  component_gravity = bxr_ecs_component_define(ecs, sizeof(void), NULL, NULL);
+  component_gravity = bxr_ecs_component_define(ecs, sizeof(float), NULL, NULL);
   component_animation
       = bxr_ecs_component_define(ecs, sizeof(animation_t), NULL, NULL);
   component_player

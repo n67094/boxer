@@ -5,10 +5,11 @@
 #include "factory.h"
 #include "game.h"
 #include "map.h"
+#include "player.h"
 #include "systems.h"
 
 game_t *
-game_create(map_t *map)
+game_create(map_t *map, bxr_vec2_t spawn_position)
 {
   game_t *game = NULL;
   BXR_NEW(game);
@@ -25,17 +26,28 @@ game_create(map_t *map)
 
   game->map = map;
 
+  game->camera = camera_create(
+      (bxr_rect_t){ 0, 0, WINDOW_VIRTUAL_WIDTH, WINDOW_VIRTUAL_HEIGHT },
+      map_get_bounds(map));
+  if (!game->camera) {
+    BXR_LOG_ERROR("Failed to create camera");
+    return NULL;
+  }
+
+  game->player_animation
+      = animation_create((animation_desc_t *)&PLAYER_ANIMATION_DESC);
+  if (!game->player_animation) {
+    BXR_LOG_ERROR("Failed to create player animation");
+    return NULL;
+  }
+
   components_register(game);
   systems_register(game);
 
-  /*
-  factory_player_desc_t player_desc = {
-    .position = { 32, 32 },
-    .collider = { 0, 0, 8, 8 },
-  };
+  game->player_entity = factory_player_create(
+      game->ecs, spawn_position, game->player_animation);
 
-  game->player_entity = factory_player_create(game->ecs, &player_desc);
-  */
+  camera_track(game->camera, spawn_position);
 
   return game;
 }
@@ -45,8 +57,13 @@ game_update(game_t *game, double delta_ms)
 {
   game->delta_ms = delta_ms;
 
+  bxr_vec2_t *player_position = bxr_ecs_entity_get_component(
+      game->ecs, game->player_entity, component_position);
+
   bxr_ecs_system_run(game->ecs, system_player_update, 0);
   bxr_ecs_system_run(game->ecs, system_animation_update, 0);
+
+  camera_track(game->camera, *player_position);
 }
 
 void
@@ -61,5 +78,15 @@ game_render(game_t *game, double alpha_ms)
 void
 game_destroy(game_t *game)
 {
+  if (!game) {
+    return;
+  }
+
+  animation_destroy(game->player_animation);
+
+  camera_destroy(game->camera);
+
+  bxr_ecs_destroy(game->ecs);
+
   BXR_ASSERT(game);
 }

@@ -15,6 +15,8 @@
 #define LEVEL_MAP_WIDTH 20
 #define LEVEL_MAP_HEIGHT 18
 
+static const bxr_vec2_t LEVEL_SPAWN_POSITION = { .x = 32, .y = 32 };
+
 /* clang-format off */
 static const Uint32 LEVEL_MAP[LEVEL_MAP_WIDTH * LEVEL_MAP_HEIGHT] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

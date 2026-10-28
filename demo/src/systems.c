@@ -48,6 +48,9 @@ system_animation_render_cb(bxr_ecs_t *ecs,
                            size_t entity_count,
                            void *udata)
 {
+  game_t *game        = (game_t *)udata;
+  bxr_rect_t viewport = camera_get_viewport(game->camera);
+
   for (size_t i = 0; i < entity_count; ++i) {
     bxr_ecs_entity_t entity = entities[i];
 
@@ -57,7 +60,9 @@ system_animation_render_cb(bxr_ecs_t *ecs,
         = bxr_ecs_entity_get_component(ecs, entity, component_position);
 
     if (animation && position) {
-      animation_render(animation, *position);
+      animation_render(
+          animation,
+          (bxr_vec2_t){ position->x - viewport.x, position->y - viewport.y });
     }
   }
 
@@ -72,30 +77,7 @@ system_map_render_cb(bxr_ecs_t *ecs,
 {
   game_t *game = (game_t *)udata;
 
-  map_t *map = game->map;
-
-  bxr_rect_t viewport = {
-    .x = 0,
-    .y = 0,
-    .w = WINDOW_VIRTUAL_WIDTH,
-    .h = WINDOW_VIRTUAL_HEIGHT,
-  };
-
-  for (size_t i = 0; i < entity_count; ++i) {
-    bxr_ecs_entity_t entity = entities[i];
-
-    bxr_ecs_entity_t *player_entity
-        = bxr_ecs_entity_get_component(ecs, entity, component_player);
-    bxr_vec2_t *position
-        = bxr_ecs_entity_get_component(ecs, entity, component_position);
-
-    if (player_entity && position) {
-      viewport.x = position->x - (WINDOW_VIRTUAL_WIDTH * 0.5f);
-      viewport.y = position->y - (WINDOW_VIRTUAL_HEIGHT * 0.5f);
-    }
-  }
-
-  map_render(map, viewport);
+  map_render(game->map, camera_get_viewport(game->camera));
 
   return 0;
 }

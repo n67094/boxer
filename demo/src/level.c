@@ -20,7 +20,7 @@ level_setup(void)
     return;
   }
 
-  _game = game_create(_map);
+  _game = game_create(_map, LEVEL_SPAWN_POSITION);
   if (!_game) {
     BXR_LOG_ERROR("Failed to create game");
     return;

@@ -39,36 +39,39 @@ map_render(map_t *map, bxr_rect_t viewport)
   bxr_painter_set_color(BXR_COLOR_WHITE);
   bxr_painter_set_image(0, map->tileset);
 
-  Uint32 start_x = (Uint32)(viewport.x / map->tile_size);
-  Uint32 start_y = (Uint32)(viewport.y / map->tile_size);
-  Uint32 end_x   = (Uint32)((viewport.x + viewport.w) / map->tile_size) + 1;
-  Uint32 end_y   = (Uint32)((viewport.y + viewport.h) / map->tile_size) + 1;
+  int start_x = (viewport.x / map->tile_size);
+  int start_y = (viewport.y / map->tile_size);
+  int end_x   = ((viewport.x + viewport.w) / map->tile_size) + 1;
+  int end_y   = ((viewport.y + viewport.h) / map->tile_size) + 1;
 
-  for (Uint32 y = start_y; y < end_y; ++y) {
-    for (Uint32 x = start_x; x < end_x; ++x) {
-      // Skip tiles that are outside the map bounds
-      if (x >= map->width || y >= map->height) {
-        continue;
-      }
+  // Clamp to the map, so no bounds check is needed inside the loop
+  if (start_x < 0)
+    start_x = 0;
+  if (start_y < 0)
+    start_y = 0;
+  if (end_x > (int)map->width)
+    end_x = map->width;
+  if (end_y > (int)map->height)
+    end_y = map->height;
 
+  int tileset_w = bxr_image_get_width(map->tileset);
+  int columns   = tileset_w / map->tile_size;
+
+  for (int y = start_y; y < end_y; ++y) {
+    for (int x = start_x; x < end_x; ++x) {
       // Get the tile index from the map's tile data
       Uint32 tile_index = map->tiles[y * map->width + x];
 
-      int tileset_w = bxr_image_get_width(map->tileset);
-
-      int tile_x = (tile_index % (tileset_w / map->tile_size)) * map->tile_size;
-      int tile_y = (tile_index / (tileset_w / map->tile_size)) * map->tile_size;
-
       bxr_rect_t src_rect = {
-        .x = tile_x,
-        .y = tile_y,
+        .x = (tile_index % columns) * map->tile_size,
+        .y = (tile_index / columns) * map->tile_size,
         .w = map->tile_size,
         .h = map->tile_size,
       };
 
       bxr_rect_t dst_rect = {
-        .x = x * map->tile_size - (Uint32)viewport.x,
-        .y = y * map->tile_size - (Uint32)viewport.y,
+        .x = x * (float)map->tile_size - viewport.x,
+        .y = y * (float)map->tile_size - viewport.y,
         .w = map->tile_size,
         .h = map->tile_size,
       };
@@ -100,6 +103,21 @@ map_is_solid(map_t *map, bxr_vec2_t position)
   Uint32 tile_index = map->tiles[tile_y * map->width + tile_x];
 
   return tile_index >= 1;
+}
+
+bxr_rect_t
+map_get_bounds(map_t *map)
+{
+  BXR_ASSERT(map != NULL && "map must not be NULL");
+
+  bxr_rect_t bounds = {
+    .x = 0,
+    .y = 0,
+    .w = map->width * map->tile_size,
+    .h = map->height * map->tile_size,
+  };
+
+  return bounds;
 }
 
 void
