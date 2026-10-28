@@ -105,6 +105,31 @@ map_is_solid(map_t *map, bxr_vec2_t position)
   return tile_index >= 1;
 }
 
+bool
+map_rect_is_solid(map_t *map, bxr_rect_t rect)
+{
+  BXR_ASSERT(map != NULL && "map must not be NULL");
+
+  int start_x = bxr_floorf(rect.x / map->tile_size);
+  int start_y = bxr_floorf(rect.y / map->tile_size);
+  int end_x   = bxr_floorf((rect.x + rect.w) / map->tile_size);
+  int end_y   = bxr_floorf((rect.y + rect.h) / map->tile_size);
+
+  for (int y = start_y; y <= end_y; ++y) {
+    for (int x = start_x; x <= end_x; ++x) {
+      if (x < 0 || y < 0 || x >= (int)map->width || y >= (int)map->height) {
+        return true; // Out of bounds, treat as solid
+      }
+
+      if (map->tiles[y * map->width + x] >= 1) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 bxr_rect_t
 map_get_bounds(map_t *map)
 {

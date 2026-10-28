@@ -9,7 +9,7 @@ typedef struct scene_s
   void (*teardown)(void);
 } scene_t;
 
-extern scene_t SCENE_MENU, SCENE_LEVEL;
+extern scene_t SCENE_TITLE, SCENE_LEVEL;
 
 void scene_setup(void);
 

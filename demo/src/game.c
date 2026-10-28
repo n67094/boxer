@@ -47,8 +47,6 @@ game_create(map_t *map, bxr_vec2_t spawn_position)
   game->player_entity = factory_player_create(
       game->ecs, spawn_position, game->player_animation);
 
-  camera_track(game->camera, spawn_position);
-
   return game;
 }
 
@@ -57,19 +55,24 @@ game_update(game_t *game, double delta_ms)
 {
   game->delta_ms = delta_ms;
 
-  bxr_vec2_t *player_position = bxr_ecs_entity_get_component(
-      game->ecs, game->player_entity, component_position);
-
   bxr_ecs_system_run(game->ecs, system_player_update, 0);
   bxr_ecs_system_run(game->ecs, system_animation_update, 0);
-
-  camera_track(game->camera, *player_position);
 }
 
 void
 game_render(game_t *game, double alpha_ms)
 {
   game->alpha_ms = alpha_ms;
+
+  bxr_vec2_t *player_position = bxr_ecs_entity_get_component(
+      game->ecs, game->player_entity, component_position);
+
+  bxr_vec2_t target = {
+    .x = bxr_floorf(player_position->x),
+    .y = bxr_floorf(player_position->y),
+  };
+
+  camera_track(game->camera, target);
 
   bxr_ecs_system_run(game->ecs, system_map_render, 0);
   bxr_ecs_system_run(game->ecs, system_animation_render, 0);

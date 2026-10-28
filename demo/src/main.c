@@ -31,7 +31,7 @@ bxr_game_setup(void)
 
   bxr_log_enable_colors(true);
 
-  scene_go_to(SCENE_MENU);
+  scene_go_to(SCENE_TITLE);
 }
 
 void

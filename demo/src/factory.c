@@ -23,7 +23,7 @@ factory_player_create(bxr_ecs_t *ecs,
   // Gravity
   bxr_ecs_entity_add_component(ecs, entity, component_gravity, NULL);
   float *gravity = bxr_ecs_entity_get_component(ecs, entity, component_gravity);
-  *gravity       = 1.0f;
+  *gravity       = PLAYER_GRAVITY;
 
   // Position
   bxr_ecs_entity_add_component(ecs, entity, component_position, NULL);

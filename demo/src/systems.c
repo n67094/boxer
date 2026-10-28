@@ -1,8 +1,8 @@
 #include "systems.h"
 #include "animation.h"
 #include "components.h"
-#include "defs.h"
 #include "game.h"
+#include "player.h"
 
 bxr_ecs_system_t system_player_update;
 bxr_ecs_system_t system_animation_update;
@@ -15,7 +15,77 @@ system_player_update_cb(bxr_ecs_t *ecs,
                         size_t entity_count,
                         void *udata)
 {
-  // TODO handle player input and update player state
+  game_t *game = (game_t *)udata;
+
+  for (size_t i = 0; i < entity_count; ++i) {
+    bxr_ecs_entity_t entity = entities[i];
+
+    player_t *player
+        = bxr_ecs_entity_get_component(ecs, entity, component_player);
+    bxr_vec2_t *position
+        = bxr_ecs_entity_get_component(ecs, entity, component_position);
+    bxr_vec2_t *velocity
+        = bxr_ecs_entity_get_component(ecs, entity, component_velocity);
+    bxr_rect_t *collider
+        = bxr_ecs_entity_get_component(ecs, entity, component_collider);
+    float *gravity
+        = bxr_ecs_entity_get_component(ecs, entity, component_gravity);
+    animation_t *animation
+        = bxr_ecs_entity_get_component(ecs, entity, component_animation);
+
+    if (!player || !position || !velocity || !collider || !gravity
+        || !animation) {
+      continue;
+    }
+
+    player_update(player, animation, velocity);
+
+    // Apply gravity
+    velocity->y += (*gravity) * game->delta_ms;
+    if (velocity->y > PLAYER_MAX_FALL) {
+      velocity->y = PLAYER_MAX_FALL;
+    }
+
+    // X axis
+    bxr_vec2_t next_position = {
+      .x = position->x + velocity->x * game->delta_ms,
+      .y = position->y,
+    };
+
+    bxr_rect_t box = {
+      .x = next_position.x + collider->x,
+      .y = next_position.y + collider->y,
+      .w = collider->w,
+      .h = collider->h,
+    };
+
+    if (map_rect_is_solid(game->map, box)) {
+      velocity->x = 0.0f; // Stop horizontal movement on collision
+    }
+
+    position->x += velocity->x * game->delta_ms;
+
+    // Y axis
+    next_position = (bxr_vec2_t){
+      .x = position->x,
+      .y = position->y + velocity->y * game->delta_ms,
+    };
+
+    box = (bxr_rect_t){
+      .x = next_position.x + collider->x,
+      .y = next_position.y + collider->y,
+      .w = collider->w,
+      .h = collider->h,
+    };
+
+    player->on_ground = false; // Reset on_ground before checking for collision
+    if (map_rect_is_solid(game->map, box)) {
+      player->on_ground = true;
+      velocity->y       = 0.0f; // Stop vertical movement on collision
+    }
+
+    position->y += velocity->y * game->delta_ms;
+  }
 
   return 0;
 }
@@ -60,9 +130,9 @@ system_animation_render_cb(bxr_ecs_t *ecs,
         = bxr_ecs_entity_get_component(ecs, entity, component_position);
 
     if (animation && position) {
-      animation_render(
-          animation,
-          (bxr_vec2_t){ position->x - viewport.x, position->y - viewport.y });
+      animation_render(animation,
+                       (bxr_vec2_t){ bxr_floorf(position->x - viewport.x),
+                                     bxr_floorf(position->y - viewport.y) });
     }
   }
 

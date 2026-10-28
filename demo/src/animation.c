@@ -25,7 +25,6 @@ animation_create(animation_desc_t *desc)
   animation->current_frame = 0;
   animation->elapsed_ms    = 0.0f;
   animation->flip_x        = false;
-  animation->pivot         = desc->pivot;
 
   BXR_MEMCPY(animation->clips, desc->clips, sizeof(clip_t) * desc->clip_count);
 
@@ -85,14 +84,19 @@ animation_render(animation_t *animation, bxr_vec2_t position)
     .h = animation->frame_height,
   };
 
+  if (animation->flip_x) {
+    src_rect.x += src_rect.w;
+    src_rect.w = -src_rect.w;
+  }
+
   bxr_painter_set_blendmode(BXR_BLENDMODE_BLEND);
   bxr_painter_set_color(BXR_COLOR_WHITE);
   bxr_painter_set_image(0, animation->spritesheet);
 
   bxr_painter_draw_textured_rect(0, (bxr_textured_rect_t){
     .dst = (bxr_rect_t){
-      .x = position.x - animation->pivot.x,
-      .y = position.y - animation->pivot.y,
+      .x = position.x,
+      .y = position.y,
       .w = animation->frame_width,
       .h = animation->frame_height,
     },

@@ -27,7 +27,6 @@ typedef struct animation_s
   Uint32 current_frame;
   double elapsed_ms; // Elapsed time since the last frame change
   bool flip_x;
-  bxr_vec2_t pivot; // Pivot point for rendering the animation
 } animation_t;
 
 typedef struct animation_desc_s
@@ -35,7 +34,6 @@ typedef struct animation_desc_s
   const char *spritesheet_path;
   Uint32 frame_width;
   Uint32 frame_height;
-  bxr_vec2_t pivot; // Pivot point for rendering the animation
   const clip_t *clips;
   Uint32 clip_count;
 } animation_desc_t;

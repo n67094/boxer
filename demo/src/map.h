@@ -51,11 +51,23 @@ void map_render(map_t *map, bxr_rect_t viewport);
  *
  * `map` is a pointer to the map to check.
  *
- * `position` is the position in world space to check for solidity.
+ * `rect` is the position in world space to check for solidity.
  *
  * `return` true if the tile at the given position is solid, false otherwise.
  */
 bool map_is_solid(map_t *map, bxr_vec2_t position);
+
+/**
+ * Checks if the given rectangle in the map is solid.
+ *
+ * `map` is a pointer to the map to check.
+ *
+ * `rect` is the rectangle in world space to check for solidity.
+ *
+ * `return` true if any part of the rectangle overlaps with solid tiles, false
+ * otherwise.
+ */
+bool map_rect_is_solid(map_t *map, bxr_rect_t rect);
 
 /**
  * Gets the bounds of the given map in world space.
