@@ -19,7 +19,7 @@ typedef struct map_s
 } map_t;
 
 /**
- * Creates a new map with the given tileset and tile data.
+ * Creates a new map.
  *
  * `tileset_path` is the path to the tileset image file.
  *
@@ -36,7 +36,7 @@ map_t *map_create(const char *tileset_path,
                   Uint32 height);
 
 /**
- * Renders the given map to the screen using the provided viewport.
+ * Renders the map.
  *
  * `map` is a pointer to the map to render.
  *

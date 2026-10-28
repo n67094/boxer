@@ -1,8 +1,8 @@
 #ifndef DEFS_H_
 #define DEFS_H_
 
-#define WINDOW_WIDTH 160 * 4
-#define WINDOW_HEIGHT 144 * 4
+#define WINDOW_WIDTH (160 * 4)
+#define WINDOW_HEIGHT (144 * 4)
 
 #define WINDOW_VIRTUAL_WIDTH 160
 #define WINDOW_VIRTUAL_HEIGHT 144
@@ -17,8 +17,8 @@
 #define ASSET_TITLE "assets/title/title.png"
 #define ASSET_TITLE_BACKGROUND "assets/title/background.png"
 #define ASSET_TITLE_PRESS_START "assets/title/press-start.png"
-#define ASSET_TITLE_MUSIC "assets/title/music.wav"
 
 #define ASSET_LEVEL_TILESET "assets/level/tileset.png"
+#define ASSET_LEVEL_MUSIC "assets/level/music.wav"
 
 #endif // DEFS_H_

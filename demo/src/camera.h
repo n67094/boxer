@@ -17,7 +17,7 @@ typedef struct camera_s
 } camera_t;
 
 /**
- * Creates a new camera with the given viewport.
+ * Creates a new camera.
  *
  * `viewport` is the rectangle that defines the camera's view in world space.
  *

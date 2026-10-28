@@ -26,19 +26,19 @@ typedef enum input_button_e
 } input_button_e;
 
 /**
- * returns true if any button was just pressed in the current frame. False
+ * `return` true if any button was just pressed in the current frame. False
  * otherwise.
  */
 bool input_any_just_pressed(void);
 
 /**
- * returns true if any button is being held down in the current frame. False
+ * `return` true if any button is being held down in the current frame. False
  * otherwise.
  */
 bool input_just_pressed(input_button_e button);
 
 /**
- * returns true if any button was just released in the current frame. False
+ * `return` true if any button was just released in the current frame. False
  * otherwise.
  */
 bool input_held(input_button_e button);

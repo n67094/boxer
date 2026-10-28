@@ -9,8 +9,6 @@
 
 #include <boxer/bxr.h>
 
-#include "scene.h"
-
 #define LEVEL_TILE_SIZE 8
 #define LEVEL_MAP_WIDTH 40
 #define LEVEL_MAP_HEIGHT 36
@@ -66,12 +64,5 @@ void level_update(double delta_ms);
 void level_render(double alpha_ms);
 
 void level_teardown(void);
-
-scene_t SCENE_LEVEL = {
-  .setup    = level_setup,
-  .update   = level_update,
-  .render   = level_render,
-  .teardown = level_teardown,
-};
 
 #endif // LEVEL_H_

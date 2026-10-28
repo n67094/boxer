@@ -71,7 +71,7 @@ static const animation_desc_t PLAYER_ANIMATION_DESC = {
 };
 
 /**
- * Updates the player's state based on input and physics.
+ * Updates the player..
  *
  * `player` is a pointer to the player instance to update.
  *

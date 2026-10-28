@@ -39,17 +39,17 @@ typedef struct animation_desc_s
 } animation_desc_t;
 
 /**
- * Creates a new animation with the given clips.
+ * Creates a new animation.
  *
  * `desc` is a pointer to the animation description that defines the animation's
  * properties.
  *
  * `return` a pointer to the newly created animation, or NULL otherwise.
  */
-animation_t *animation_create(animation_desc_t *desc);
+animation_t *animation_create(const animation_desc_t *desc);
 
 /**
- * Sets the current animation clip to the specified index.
+ * Sets the current animation clip.
  *
  * `animation` is a pointer to the animation to modify.
  *
@@ -58,16 +58,16 @@ animation_t *animation_create(animation_desc_t *desc);
 void animation_set_clip(animation_t *animation, Uint32 index);
 
 /**
- * Updates the animation based on the elapsed time since the last update.
+ * Updates the animation.
  *
  * `animation` is a pointer to the animation to update.
  *
  * `delta_ms` is the time elapsed since the last update in milliseconds.
  */
-void animation_update(animation_t *animation, Uint64 delta_ms);
+void animation_update(animation_t *animation, double delta_ms);
 
 /**
- * Renders the current frame of the animation at the specified position.
+ * Renders the animation.
  *
  * `animation` is a pointer to the animation to update.
  *

@@ -1,7 +1,7 @@
 #include "animation.h"
 
 animation_t *
-animation_create(animation_desc_t *desc)
+animation_create(const animation_desc_t *desc)
 {
   BXR_ASSERT(desc != NULL && "desc must not be NULL");
   BXR_ASSERT(desc->spritesheet_path != NULL
@@ -46,7 +46,7 @@ animation_set_clip(animation_t *animation, Uint32 index)
 }
 
 void
-animation_update(animation_t *animation, Uint64 delta_ms)
+animation_update(animation_t *animation, double delta_ms)
 {
   BXR_ASSERT(animation != NULL && "animation must not be NULL");
 

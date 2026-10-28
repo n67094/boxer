@@ -27,7 +27,7 @@ typedef struct game_s
 } game_t;
 
 /**
- * Creates a new game instance with the given map and spawn position.
+ * Creates a new game instance.
  *
  * `map` is a pointer to the map to use for the game.
  *
@@ -38,7 +38,7 @@ typedef struct game_s
 game_t *game_create(map_t *map, bxr_vec2_t spawn_position);
 
 /**
- * Updates the game state based on the elapsed time since the last update.
+ * Updates the game.
  *
  * `game` is a pointer to the game instance to update.
  *
@@ -47,7 +47,7 @@ game_t *game_create(map_t *map, bxr_vec2_t spawn_position);
 void game_update(game_t *game, double delta_ms);
 
 /**
- * Renders the game state to the screen
+ * Renders the game.
  *
  * `game` is a pointer to the game instance to render.
  *

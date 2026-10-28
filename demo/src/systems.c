@@ -80,8 +80,10 @@ system_player_update_cb(bxr_ecs_t *ecs,
 
     player->on_ground = false; // Reset on_ground before checking for collision
     if (map_rect_is_solid(game->map, box)) {
-      player->on_ground = true;
-      velocity->y       = 0.0f; // Stop vertical movement on collision
+      if (velocity->y > 0.0f) {
+        player->on_ground = true; // Only landing counts as ground
+      }
+      velocity->y = 0.0f; // Stop vertical movement on collision
     }
 
     position->y += velocity->y * game->delta_ms;

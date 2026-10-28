@@ -72,7 +72,7 @@ BXR_API void bxr_ecs_destroy(bxr_ecs_t *ecs);
  * Remove all entities, keeping component and system definitions.
  *
  * `ecs` the ECS instance to reset; must not be NULL.
- *
+ */
 BXR_API void bxr_ecs_reset(bxr_ecs_t *ecs);
 
 /**

@@ -6,8 +6,7 @@
 #include "animation.h"
 
 /**
- * Creates a new player entity in the given ECS with the specified spawn
- * position and animation.
+ * Creates a new player entity.
  *
  * `ecs` is a pointer to the ECS where the player entity will be created.
  *

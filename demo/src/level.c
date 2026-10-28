@@ -2,6 +2,14 @@
 #include "defs.h"
 #include "game.h"
 #include "map.h"
+#include "scene.h"
+
+scene_t SCENE_LEVEL = {
+  .setup    = level_setup,
+  .update   = level_update,
+  .render   = level_render,
+  .teardown = level_teardown,
+};
 
 static map_t *_map   = NULL;
 static game_t *_game = NULL;
@@ -29,7 +37,7 @@ level_setup(void)
     return;
   }
 
-  _music = bxr_audio_create(ASSET_TITLE_MUSIC);
+  _music = bxr_audio_create(ASSET_LEVEL_MUSIC);
 
   bxr_voice_desc_t music_desc = {
     .audio      = _music,

@@ -21,6 +21,7 @@ game_create(map_t *map, bxr_vec2_t spawn_position)
   game->ecs = bxr_ecs_create(GAME_MAX_ENTITIES);
   if (!game->ecs) {
     BXR_LOG_ERROR("Failed to create ECS");
+    game_destroy(game);
     return NULL;
   }
 
@@ -31,6 +32,8 @@ game_create(map_t *map, bxr_vec2_t spawn_position)
       map_get_bounds(map));
   if (!game->camera) {
     BXR_LOG_ERROR("Failed to create camera");
+    bxr_ecs_destroy(game->ecs);
+    game_destroy(game);
     return NULL;
   }
 
@@ -38,6 +41,9 @@ game_create(map_t *map, bxr_vec2_t spawn_position)
       = animation_create((animation_desc_t *)&PLAYER_ANIMATION_DESC);
   if (!game->player_animation) {
     BXR_LOG_ERROR("Failed to create player animation");
+    bxr_ecs_destroy(game->ecs);
+    camera_destroy(game->camera);
+    game_destroy(game);
     return NULL;
   }
 
@@ -91,5 +97,5 @@ game_destroy(game_t *game)
 
   bxr_ecs_destroy(game->ecs);
 
-  BXR_ASSERT(game);
+  BXR_FREE(game);
 }

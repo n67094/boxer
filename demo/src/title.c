@@ -2,7 +2,15 @@
 
 #include "defs.h"
 #include "input.h"
+#include "scene.h"
 #include "title.h"
+
+scene_t SCENE_TITLE = {
+  .setup    = title_setup,
+  .update   = title_update,
+  .render   = title_render,
+  .teardown = title_teardown,
+};
 
 #define PRESS_START_BLINK 500
 

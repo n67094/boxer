@@ -24,7 +24,7 @@ input_just_pressed(input_button_e button)
     return bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_START)
            || bxr_key_just_pressed(BXR_KEY_RETURN);
   case INPUT_BUTTON_SELECT:
-    return bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_START)
+    return bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_BACK)
            || bxr_key_just_pressed(BXR_KEY_BACKSPACE);
   case INPUT_BUTTON_UP:
     return bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_DPAD_UP)
