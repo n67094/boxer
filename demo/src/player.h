@@ -70,6 +70,17 @@ static const animation_desc_t PLAYER_ANIMATION_DESC = {
   .clip_count       = PLAYER_STATE_SIZE,
 };
 
+/**
+ * Updates the player's state based on input and physics.
+ *
+ * `player` is a pointer to the player instance to update.
+ *
+ * `animation` is a pointer to the animation instance associated with the
+ * player.
+ *
+ * `velocity` is a pointer to the player's velocity vector, which will be
+ * modified based on input and physics.
+ */
 void
 player_update(player_t *player, animation_t *animation, bxr_vec2_t *velocity);
 

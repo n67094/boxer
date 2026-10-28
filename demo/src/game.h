@@ -26,12 +26,41 @@ typedef struct game_s
   bxr_ecs_entity_t player_entity;
 } game_t;
 
+/**
+ * Creates a new game instance with the given map and spawn position.
+ *
+ * `map` is a pointer to the map to use for the game.
+ *
+ * `spawn_position` is the initial position of the player in world space.
+ *
+ * `return` a pointer to the newly created game instance, or NULL on failure.
+ */
 game_t *game_create(map_t *map, bxr_vec2_t spawn_position);
 
+/**
+ * Updates the game state based on the elapsed time since the last update.
+ *
+ * `game` is a pointer to the game instance to update.
+ *
+ * `delta_ms` is the time in milliseconds since the last update.
+ */
 void game_update(game_t *game, double delta_ms);
 
+/**
+ * Renders the game state to the screen
+ *
+ * `game` is a pointer to the game instance to render.
+ *
+ * `alpha_ms` is the time in milliseconds since the last render, used for
+ * interpolation.
+ */
 void game_render(game_t *game, double alpha_ms);
 
+/**
+ * Destroys the game instance and releases all associated resources.
+ *
+ * `game` is a pointer to the game instance to destroy.
+ */
 void game_destroy(game_t *game);
 
 #endif // GAME_H_
