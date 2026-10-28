@@ -112,7 +112,7 @@ BXR_API bxr_shader_t bxr_shader_create(const bxr_shader_desc_t *desc);
 BXR_API SDL_GPUShader *bxr_shader_get_sdl(bxr_shader_t shader);
 
 /**
- * Check if a shader is valid.
+ * Check if a shader handle is valid.
  *
  * `shader` a shader from `bxr_shader_create()`.
  *

@@ -90,7 +90,7 @@ BXR_API int bxr_image_get_width(bxr_image_t image);
 BXR_API int bxr_image_get_height(bxr_image_t image);
 
 /**
- * Check if an image is valid.
+ * Check if an image handle is valid.
  *
  * `image` image to check.
  *

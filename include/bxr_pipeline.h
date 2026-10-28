@@ -69,7 +69,7 @@ BXR_API bxr_pipeline_t bxr_pipeline_create(bxr_shader_t shader_vert,
                                            bxr_blendmode_e blend_mode);
 
 /**
- * Check if a graphics pipeline is valid.
+ * Check if a graphics pipeline handle is valid.
  *
  * `pipeline` a pipeline from `bxr_pipeline_create()`.
  *
