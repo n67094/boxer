@@ -120,6 +120,15 @@ BXR_API void bxr_audio_set_global_volume(float volume);
 BXR_API float bxr_audio_get_global_volume(void);
 
 /**
+ * Check whether an audio handle is valid.
+ *
+ * `audio` the audio to check.
+ *
+ * `return` true if the audio is valid, false otherwise.
+ */
+BXR_API bool bxr_audio_is_valid(bxr_audio_t audio);
+
+/**
  * ## Voice playback
  */
 

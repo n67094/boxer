@@ -90,6 +90,15 @@ BXR_API int bxr_image_get_width(bxr_image_t image);
 BXR_API int bxr_image_get_height(bxr_image_t image);
 
 /**
+ * Check if an image is valid.
+ *
+ * `image` image to check.
+ *
+ * `return` true if the image id is not `BXR_IMAGE_INVALID_ID`, false otherwise.
+ */
+BXR_API bool bxr_image_is_valid(bxr_image_t image);
+
+/**
  * Destroy an image and release its GPU texture.
  *
  * `image` image to destroy.

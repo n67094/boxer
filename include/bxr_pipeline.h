@@ -69,6 +69,15 @@ BXR_API bxr_pipeline_t bxr_pipeline_create(bxr_shader_t shader_vert,
                                            bxr_blendmode_e blend_mode);
 
 /**
+ * Check if a graphics pipeline is valid.
+ *
+ * `pipeline` a pipeline from `bxr_pipeline_create()`.
+ *
+ * `return` true if the pipeline is valid, false otherwise.
+ */
+BXR_API bool bxr_pipeline_is_valid(bxr_pipeline_t pipeline);
+
+/**
  * Destroy a graphics pipeline and release its GPU resources.
  *
  * `pipeline` a pipeline from `bxr_pipeline_create()`. It must not be in use

@@ -21,10 +21,10 @@ typedef struct animation_s
   bxr_image_t spritesheet;
   Uint32 frame_width;
   Uint32 frame_height;
-  clip_t *clips;
+  const clip_t *clips;
   Uint32 clip_count;
-  Uint32 current_clip;
-  Uint32 current_frame;
+  int current_clip;
+  int current_frame;
   double elapsed_ms; // Elapsed time since the last frame change
   bool flip_x;
 } animation_t;

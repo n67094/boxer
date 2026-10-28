@@ -7,7 +7,6 @@ animation_create(animation_desc_t *desc)
   BXR_ASSERT(desc->spritesheet_path != NULL
              && "spritesheet_path must not be NULL");
   BXR_ASSERT(desc->clips != NULL && "clips must not be NULL");
-  BXR_ASSERT(desc->clip_count > 0 && "clip_count must be greater than 0");
 
   animation_t *animation = NULL;
   BXR_NEW0(animation);
@@ -16,17 +15,21 @@ animation_create(animation_desc_t *desc)
     return NULL;
   }
 
-  animation->spritesheet   = bxr_image_create(desc->spritesheet_path);
+  animation->spritesheet = bxr_image_create(desc->spritesheet_path);
+  if (!bxr_image_is_valid(animation->spritesheet)) {
+    BXR_LOG_ERROR("Failed to load spritesheet: %s", desc->spritesheet_path);
+    BXR_FREE(animation);
+    return NULL;
+  }
+
   animation->frame_width   = desc->frame_width;
   animation->frame_height  = desc->frame_height;
-  animation->clips         = BXR_ALLOC(sizeof(clip_t) * desc->clip_count);
+  animation->clips         = desc->clips;
   animation->clip_count    = desc->clip_count;
   animation->current_clip  = 0;
   animation->current_frame = 0;
   animation->elapsed_ms    = 0.0f;
   animation->flip_x        = false;
-
-  BXR_MEMCPY(animation->clips, desc->clips, sizeof(clip_t) * desc->clip_count);
 
   return animation;
 }
@@ -47,11 +50,11 @@ animation_update(animation_t *animation, Uint64 delta_ms)
 {
   BXR_ASSERT(animation != NULL && "animation must not be NULL");
 
-  clip_t *clip = &animation->clips[animation->current_clip];
+  const clip_t *clip = &animation->clips[animation->current_clip];
 
   animation->elapsed_ms += delta_ms;
 
-  if (animation->elapsed_ms >= clip->frame_ms) {
+  while (animation->elapsed_ms >= clip->frame_ms) {
     animation->elapsed_ms -= clip->frame_ms;
     animation->current_frame++;
 
@@ -66,7 +69,7 @@ animation_render(animation_t *animation, bxr_vec2_t position)
 {
   BXR_ASSERT(animation != NULL && "animation must not be NULL");
 
-  clip_t *clip = &animation->clips[animation->current_clip];
+  const clip_t *clip = &animation->clips[animation->current_clip];
 
   Uint32 frame_index = clip->from + animation->current_frame;
 
@@ -115,6 +118,5 @@ animation_destroy(animation_t *animation)
   }
 
   bxr_image_destroy(animation->spritesheet);
-  BXR_FREE(animation->clips);
   BXR_FREE(animation);
 }

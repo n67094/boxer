@@ -32,6 +32,12 @@ bxr_pipeline_create(bxr_shader_t shader_vert,
   return pipeline;
 }
 
+bool
+bxr_pipeline_is_valid(bxr_pipeline_t pipeline)
+{
+  return pipeline.id != BXR_PIPELINE_INVALID_ID;
+}
+
 void
 bxr_pipeline_destroy(bxr_pipeline_t pipeline)
 {
