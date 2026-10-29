@@ -152,8 +152,7 @@ The demo is a simple game that showcases the features of the Boxer library. It i
 Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer library.
 
 <p align="center">
-  <img src="images/skullboy_1.png" alt="Skullboy title screen" />
-  <img src="images/skullboy_2.png" alt="Skullboy in game" />
+  <img src="images/skullboy_1.png" alt="Skullboy title screen" width="49%" /><img src="images/skullboy_2.png" alt="Skullboy in game" width="49%" />
 </p>
 
 # AI Usage Policy
