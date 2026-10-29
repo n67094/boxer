@@ -1,27 +1,26 @@
 <p align="center">
-  <img src="logo.png" alt="Boxer logo" />
+  <img src="images/logo.png" alt="Boxer logo" />
 </p>
 
 _The Boxer project draws its name from the boxer engine architecture found in cars, symbolizing efficiency in a compact form. The logo's left and right ends evoke the horizontally opposed pistons of the boxer engine's flat design._
 
-# Boxer (In Progress)
+# Boxer
 
-A lightweight and cross-platform easy to use 2D game library written in C.
+> Build games fast with a lightweight, cross-platform 2D game library written in C.
 
 Features:
 
-- Asset management and resource loading from `.zip`, `.7z`, and more formats.
+- Asset management and resource loading from `.zip`, `.7z`, and other archive formats.
 - 2D immediate mode rendering with support for custom shaders and pipelines.
 - Image loading and rendering support for `.bmp` and `.png` formats.
 - Audio loading and playback support for `.wav` and `.ogg` formats.
-- Read/write support for `.ini`.
+- Read/write support for `.ini` files.
 - Keyboard, mouse, and gamepad input handling.
 - Math utilities for vectors, matrices, and transformations.
 - An entity-component system (ECS) for flexible game object management.
 
 Todo:
 
-- Demo
 - Immediate mode UI
 
 ## Prerequisites
@@ -49,12 +48,12 @@ Build the library with:
 make
 ```
 
-Install the library at `/usr/lib` by default so make sure to have it in your library path, or specify a custom installation prefix with `PREFIX`:
+By default, make install installs the library to /usr/lib and the headers to /usr/include/boxer (requires root). Use PREFIX to install elsewhere:
 
 ```bash
 make install
-or
-make install PREFIX=/custom/prefix
+# or
+make install PREFIX=$HOME/.local
 ```
 
 Uninstall the library with:
@@ -69,18 +68,18 @@ Build documentation with:
 make docs
 ```
 
-Once `boxer` is installed on your system, in order to run the example you may need to update the shared library cache with:
+Once `boxer` is installed on your system, in order to run the demo you may need to update the shared library cache with:
 
 ```bash
 sudo ldconfig
 ```
 
-Then you can build the example with:
+Then you can build the demo with:
 
 ```bash
-cd example
+cd demo
 make
-./example
+./demo
 ```
 
 _let's make it roar!_
@@ -89,29 +88,32 @@ _let's make it roar!_
 
 To get started with Boxer, you can:
 
-- Check out the [example](example) directory for code demonstrating how to use the library's features.
-- Generate the documentation with `make docs` to get detailed information on the API and how to integrate use it in your projects.
+- Check out the [demo](demo) directory for code demonstrating how to use the library's features.
+- Generate the documentation with `make docs` to get detailed information on the API and how to integrate it in your projects.
 
 Here is a simple example of how to initialize the library and create a window:
 
 ```c
-#include "bxr.h"
+#include <boxer/bxr.h>
 
 // Define the game configuration
 static bxr_game_config_t _config = { 0 };
 
 // Allows boxer to get the game configuration
-bxr_game_config_t *
+const bxr_game_config_t *
 bxr_game_config(void)
 {
   _config.name  = "application_name";
   _config.title = "Window Title";
 
-  _config.width  = 1280;
-  _config.height = 720;
+  _config.width  = 160 * 4;
+  _config.height = 144 * 4;
+
+  _config.virtual_width  = 160;
+  _config.virtual_height = 144;
 
   _config.fullscreen = false;
-  _config.resizable  = true;
+  _config.resizable  = false;
 
   return &_config;
 }
@@ -123,14 +125,14 @@ bxr_game_setup(void)
 }
 
 void
-bxr_game_update(Uint64 delta_time_ms)
+bxr_game_update(double delta_ms)
 {
     // Update the game logic here.
     // The logic is updated at a fixed timestep depending on the screen refresh rate it's running on
 }
 
 void
-bxr_game_render(Uint64 alpha_time_ms)
+bxr_game_render(double alpha_ms)
 {
     // Render the game here.
     // The game is rendered as many times per second as possible
@@ -143,9 +145,19 @@ bxr_game_teardown(void)
 }
 ```
 
+# Demo
+
+The demo is a simple game that showcases the features of the Boxer library. It includes a title screen, a level with a player character, and basic input handling.
+
+Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer library.
+
+<p align="center">
+  <img src="images/skullboy_1.png" alt="Skullboy title screen" width="49%" /><img src="images/skullboy_2.png" alt="Skullboy in game" width="49%" />
+</p>
+
 # AI Usage Policy
 
-I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md).
+I want this project to remain as human as possible, please check out the [AGENTS.md](AGENTS.md).
 
 # Sponsors
 
@@ -154,7 +166,7 @@ Hi everyone, I'm nsix, an indie game developer and open source contributor tryin
 If you enjoy what I create and want to support me, consider becoming a sponsor on [GitHub Sponsors](https://github.com/sponsors/n67094).
 Every bit of support means a lot and is greatly appreciated!
 
-You can also check out my blog at www.nsix.blog.
+You can also check out my blog at [nsix.blog](https://www.nsix.blog).
 
 # License
 

@@ -71,12 +71,12 @@ extern void bxr_game_setup(void);
  * refresh rate (60 Hz if it can't be queried). When the game falls behind,
  * at most 5 steps are caught up and the remaining lag is dropped.
  *
- * `delta_time_ms` duration of the fixed step in milliseconds (e.g. 16.67 at
+ * `delta_ms` duration of the fixed step in milliseconds (e.g. 16.67 at
  * 60 Hz), the same value on every call until the refresh rate changes.
  *
  * **NOTE:** Input state is refreshed before each step.
  */
-extern void bxr_game_update(double delta_time_ms);
+extern void bxr_game_update(double delta_ms);
 
 /**
  * Draw the current game state, implemented by the user.
@@ -84,11 +84,11 @@ extern void bxr_game_update(double delta_time_ms);
  * Called once per frame after the updates. Drawing
  * coordinates are in the virtual resolution from the configuration.
  *
- * `alpha` how far the current time is between the last update and the next
+ * `alpha_ms` how far the current time is between the last update and the next
  * one, in [0, 1), used to interpolate between the previous and current update
  * state for smooth rendering.
  */
-extern void bxr_game_render(double alpha);
+extern void bxr_game_render(double alpha_ms);
 
 /**
  * Release the game resources, implemented by the user.

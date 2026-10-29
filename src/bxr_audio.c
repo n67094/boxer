@@ -616,6 +616,12 @@ bxr_audio_get_global_volume(void)
   return SDL_GetAudioDeviceGain(device_id_);
 }
 
+bool
+bxr_audio_is_valid(bxr_audio_t audio)
+{
+  return audio.id != BXR_AUDIO_INVALID_ID;
+}
+
 static bxr_voice_t_ *
 bxr_voice_get_(bxr_voice_t voice)
 {

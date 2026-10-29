@@ -166,6 +166,12 @@ bxr_shader_get_sdl(bxr_shader_t shader)
   return SDL_GPGetGPUShader((SDL_GPShader){ .id = shader.id });
 }
 
+bool
+bxr_shader_is_valid(bxr_shader_t shader)
+{
+  return shader.id != BXR_SHADER_INVALID_ID;
+}
+
 void
 bxr_shader_destroy(bxr_shader_t shader)
 {

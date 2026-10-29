@@ -112,6 +112,15 @@ BXR_API bxr_shader_t bxr_shader_create(const bxr_shader_desc_t *desc);
 BXR_API SDL_GPUShader *bxr_shader_get_sdl(bxr_shader_t shader);
 
 /**
+ * Check if a shader handle is valid.
+ *
+ * `shader` a shader from `bxr_shader_create()`.
+ *
+ * `return` true if the shader is valid, false otherwise.
+ */
+BXR_API bool bxr_shader_is_valid(bxr_shader_t shader);
+
+/**
  * Destroy a shader and release its GPU resources.
  *
  * Invalid or already destroyed shaders are ignored.

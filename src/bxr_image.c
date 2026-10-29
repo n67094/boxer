@@ -145,6 +145,12 @@ bxr_image_get_height(bxr_image_t image)
   return SDL_GPGetImageHeight((SDL_GPImage){ .id = image.id });
 }
 
+bool
+bxr_image_is_valid(bxr_image_t image)
+{
+  return image.id != BXR_IMAGE_INVALID_ID;
+}
+
 void
 bxr_image_destroy(bxr_image_t image)
 {

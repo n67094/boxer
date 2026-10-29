@@ -1,5 +1,5 @@
 #
-# Makefile for building: example
+# Makefile for building: demo
 #
 # Command examples:
 #
@@ -13,7 +13,7 @@
 #
 
 # Config
-TARGET := example
+TARGET := demo
 
 BUILD_DIR := build
 SRCS_DIR := src
