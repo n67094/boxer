@@ -10,11 +10,11 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 Features:
 
-- Asset management and resource loading from `.zip`, `.7z`, and more formats.
+- Asset management and resource loading from `.zip`, `.7z`, and other archive formats.
 - 2D immediate mode rendering with support for custom shaders and pipelines.
 - Image loading and rendering support for `.bmp` and `.png` formats.
 - Audio loading and playback support for `.wav` and `.ogg` formats.
-- Read/write support for `.ini`.
+- Read/write support for `.ini` files.
 - Keyboard, mouse, and gamepad input handling.
 - Math utilities for vectors, matrices, and transformations.
 - An entity-component system (ECS) for flexible game object management.
@@ -89,7 +89,7 @@ _let's make it roar!_
 To get started with Boxer, you can:
 
 - Check out the [demo](demo) directory for code demonstrating how to use the library's features.
-- Generate the documentation with `make docs` to get detailed information on the API and how to integrate use it in your projects.
+- Generate the documentation with `make docs` to get detailed information on the API and how to integrate it in your projects.
 
 Here is a simple example of how to initialize the library and create a window:
 
@@ -158,7 +158,7 @@ Check out the [demo](demo) directory for the source code to see how the game is 
 
 # AI Usage Policy
 
-I want this project to remain human as possible, please check out the [AGENTS.md](AGENTS.md).
+I want this project to remain as human as possible, please check out the [AGENTS.md](AGENTS.md).
 
 # Sponsors
 
@@ -167,7 +167,7 @@ Hi everyone, I'm nsix, an indie game developer and open source contributor tryin
 If you enjoy what I create and want to support me, consider becoming a sponsor on [GitHub Sponsors](https://github.com/sponsors/n67094).
 Every bit of support means a lot and is greatly appreciated!
 
-You can also check out my blog at www.nsix.blog.
+You can also check out my blog at [nsix.blog](https://www.nsix.blog).
 
 # License
 
