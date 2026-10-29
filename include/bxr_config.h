@@ -134,4 +134,13 @@
  */
 #define BXR_ECS_MAX_SYSTEM 16
 
+/**
+ * ## IMUI Configuration
+ */
+
+/**
+ * Max length of a string in bytes, including the NUL terminator.
+ */
+#define BXR_IMUI_STR_MAX 256
+
 #endif // BXR_CONFIG_H_
