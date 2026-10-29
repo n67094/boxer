@@ -48,11 +48,16 @@ Build the library with:
 make
 ```
 
-By default, make install installs the library to /usr/lib and the headers to /usr/include/boxer (requires root). Use PREFIX to install elsewhere:
+By default, make install installs the library to /usr/lib and the headers to /usr/include/boxer on Linux, and to /usr/local on macOS (requires root):
 
 ```bash
-make install
-# or
+sudo make install
+```
+
+Use PREFIX to install elsewhere. On macOS the install path is recorded in the library at build time, so pass the same PREFIX to both commands:
+
+```bash
+make PREFIX=$HOME/.local
 make install PREFIX=$HOME/.local
 ```
 
@@ -68,7 +73,7 @@ Build documentation with:
 make docs
 ```
 
-Once `boxer` is installed on your system, in order to run the demo you may need to update the shared library cache with:
+Once `boxer` is installed on your system, in order to run the demo you may need to update the shared library cache with (Linux only):
 
 ```bash
 sudo ldconfig

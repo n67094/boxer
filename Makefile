@@ -16,6 +16,8 @@
 # Authors: nsix
 #
 
+UNAME_S := $(shell uname -s)
+
 TARGET := boxer
 TEST_TARGET := tests
 
@@ -46,13 +48,42 @@ STB_DIR := $(LIB_DIR)/stb
 # Options
 DEBUG ?= 0
 SANITIZER ?= 0
+
+ifeq ($(UNAME_S), Darwin)
+PREFIX  ?= /usr/local
+else
 PREFIX  ?= /usr
+endif
 
 # Output library names
 STATIC_LIB := $(LIB_OUT_DIR)/lib$(TARGET).a
-SHARED_LIB := $(LIB_OUT_DIR)/lib$(TARGET).so.$(VERSION)
-SHARED_SO  := $(LIB_OUT_DIR)/lib$(TARGET).so.$(SOVERSION)
-SHARED_LNK := $(LIB_OUT_DIR)/lib$(TARGET).so
+
+ifeq ($(UNAME_S), Darwin)
+SHARED_EXT     := dylib
+SHARED_LIB_NAME := lib$(TARGET).$(VERSION).$(SHARED_EXT)
+SHARED_SO_NAME  := lib$(TARGET).$(SOVERSION).$(SHARED_EXT)
+SHARED_LDFLAGS  := -dynamiclib \
+                   -install_name $(PREFIX)/lib/$(SHARED_SO_NAME) \
+                   -compatibility_version $(SOVERSION) \
+                   -current_version $(VERSION) \
+                   -Wl,-U,_bxr_game_config -Wl,-U,_bxr_game_setup \
+                   -Wl,-U,_bxr_game_update -Wl,-U,_bxr_game_render \
+                   -Wl,-U,_bxr_game_teardown
+
+PHYSFS_OBJC_SRCS := $(PHYSFS_DIR)/physfs_platform_apple.m
+else
+SHARED_EXT     := so
+SHARED_LIB_NAME := lib$(TARGET).$(SHARED_EXT).$(VERSION)
+SHARED_SO_NAME  := lib$(TARGET).$(SHARED_EXT).$(SOVERSION)
+SHARED_LDFLAGS  := -shared -Wl,-soname,$(SHARED_SO_NAME)
+PHYSFS_OBJC_SRCS :=
+endif
+
+SHARED_LNK_NAME := lib$(TARGET).$(SHARED_EXT)
+
+SHARED_LIB := $(LIB_OUT_DIR)/$(SHARED_LIB_NAME)
+SHARED_SO  := $(LIB_OUT_DIR)/$(SHARED_SO_NAME)
+SHARED_LNK := $(LIB_OUT_DIR)/$(SHARED_LNK_NAME)
 
 # Compiler
 CC = gcc
@@ -61,6 +92,10 @@ AR = ar
 # Flags
 LDLIBS  = -lSDL3 -lm
 LDFLAGS =
+
+ifeq ($(UNAME_S), Darwin)
+LDLIBS += -framework Foundation -framework IOKit
+endif
 
 CFLAGS = -std=c99 -Wall -DBOXER_BUILD -I$(PHYSFS_DIR) -I$(SDL_GP_DIR) -I$(BOXER_INC_DIR) -I$(STB_DIR)
 
@@ -89,11 +124,13 @@ ALL_SRCS = $(PHYSFS_SRCS) $(BOXER_SRCS)
 
 # Object Files
 PHYSFS_OBJS := $(patsubst $(PHYSFS_DIR)/%.c, $(OBJ_DIR)/physfs/%.o, $(PHYSFS_SRCS))
+PHYSFS_OBJS += $(patsubst $(PHYSFS_DIR)/%.m, $(OBJ_DIR)/physfs/%.o, $(PHYSFS_OBJC_SRCS))
 BOXER_OBJS := $(patsubst $(BOXER_SRC_DIR)/%.c, $(OBJ_DIR)/boxer/%.o, $(BOXER_SRCS))
 ALL_OBJS = $(PHYSFS_OBJS) $(BOXER_OBJS)
 
 # Object Files (PIC build for the shared library)
 PHYSFS_PIC_OBJS := $(patsubst $(PHYSFS_DIR)/%.c,    $(PIC_OBJ_DIR)/physfs/%.o, $(PHYSFS_SRCS))
+PHYSFS_PIC_OBJS += $(patsubst $(PHYSFS_DIR)/%.m,    $(PIC_OBJ_DIR)/physfs/%.o, $(PHYSFS_OBJC_SRCS))
 BOXER_PIC_OBJS  := $(patsubst $(BOXER_SRC_DIR)/%.c, $(PIC_OBJ_DIR)/boxer/%.o,  $(BOXER_SRCS))
 ALL_PIC_OBJS    := $(PHYSFS_PIC_OBJS) $(BOXER_PIC_OBJS)
 
@@ -120,8 +157,7 @@ $(STATIC_LIB): $(ALL_OBJS) | $(LIB_OUT_DIR)
 
 # --- Shared library ---------------------------------------------------------
 $(SHARED_LIB): $(ALL_PIC_OBJS) | $(LIB_OUT_DIR)
-	$(CC) -shared -Wl,-soname,lib$(TARGET).so.$(SOVERSION) \
-	$(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CC) $(SHARED_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # Versioned symlinks: libboxer.so -> libboxer.so.1 -> libboxer.so.1.0.0
 $(SHARED_SO): $(SHARED_LIB)
@@ -136,11 +172,17 @@ $(SHARED_LNK): $(SHARED_SO)
 $(OBJ_DIR)/physfs/%.o: $(PHYSFS_DIR)/%.c | $(OBJ_DIR)/physfs
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(OBJ_DIR)/physfs/%.o: $(PHYSFS_DIR)/%.m | $(OBJ_DIR)/physfs
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(OBJ_DIR)/boxer/%.o: $(BOXER_SRC_DIR)/%.c | $(OBJ_DIR)/boxer
 	$(CC) $(CFLAGS) -DBOXER_BUILD -c $< -o $@
 
 # PIC objects (for the shared library)
 $(PIC_OBJ_DIR)/physfs/%.o: $(PHYSFS_DIR)/%.c | $(PIC_OBJ_DIR)/physfs
+	$(CC) $(CFLAGS) -fPIC -c $< -o $@
+
+$(PIC_OBJ_DIR)/physfs/%.o: $(PHYSFS_DIR)/%.m | $(PIC_OBJ_DIR)/physfs
 	$(CC) $(CFLAGS) -fPIC -c $< -o $@
 
 $(PIC_OBJ_DIR)/boxer/%.o: $(BOXER_SRC_DIR)/%.c | $(PIC_OBJ_DIR)/boxer
@@ -171,13 +213,13 @@ install: all
 	install -d $(PREFIX)/include/$(TARGET)
 	install -m 644 $(STATIC_LIB) $(PREFIX)/lib/
 	install -m 755 $(SHARED_LIB) $(PREFIX)/lib/
-	ln -sf lib$(TARGET).so.$(VERSION)   $(PREFIX)/lib/lib$(TARGET).so.$(SOVERSION)
-	ln -sf lib$(TARGET).so.$(SOVERSION) $(PREFIX)/lib/lib$(TARGET).so
+	ln -sf $(SHARED_LIB_NAME) $(PREFIX)/lib/$(SHARED_SO_NAME)
+	ln -sf $(SHARED_SO_NAME)  $(PREFIX)/lib/$(SHARED_LNK_NAME)
 	install -m 644 $(BOXER_HDRS) $(PREFIX)/include/$(TARGET)/
 
 uninstall:
 	rm -f $(PREFIX)/lib/lib$(TARGET).a
-	rm -f $(PREFIX)/lib/lib$(TARGET).so*
+	rm -f $(PREFIX)/lib/lib$(TARGET).*$(SHARED_EXT)*
 	rm -rf $(PREFIX)/include/$(TARGET)
 
 # --- Clean ------------------------------------------------------------------
