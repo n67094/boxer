@@ -6,7 +6,9 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 # Boxer
 
-> Build games fast with a lightweight, cross-platform 2D game library written in C.
+> let's make it roar!
+
+Build games fast with a lightweight, cross-platform 2D game library written in C.
 
 Features:
 
@@ -30,7 +32,11 @@ Install the following development dependencies (via your package manager or from
 
 # Build and Run Demo
 
-There's no need to install the library to build and run the demo, as `libboxer` is statically linked. You just have to run the following commands:
+The demo is a simple game that showcases the features of the Boxer library. It includes a title screen, a level with a player character, and basic input handling.
+
+Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer library.
+
+To run the game you just have to run the following commands:
 
 ```bash
 cd demo
@@ -38,7 +44,9 @@ make
 ./demo
 ```
 
-_let's make it roar!_
+<p align="center">
+  <img src="images/skullboy_1.png" alt="Skullboy title screen" width="49%" /><img src="images/skullboy_2.png" alt="Skullboy in game" width="49%" />
+</p>
 
 ## Build and Install the Library (Optional)
 
@@ -145,14 +153,6 @@ bxr_game_teardown(void)
 ```
 
 # Demo
-
-The demo is a simple game that showcases the features of the Boxer library. It includes a title screen, a level with a player character, and basic input handling.
-
-Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer library.
-
-<p align="center">
-  <img src="images/skullboy_1.png" alt="Skullboy title screen" width="49%" /><img src="images/skullboy_2.png" alt="Skullboy in game" width="49%" />
-</p>
 
 # AI Usage Policy
 
