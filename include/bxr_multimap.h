@@ -1,7 +1,7 @@
 /**
  * File `bxr_multimap.h`.
  *
- * # Boxer's String Multimap.
+ * # String Multimap.
  *
  * Hash map from string keys to sets of `Uint32` values (boxer resource ids).
  *

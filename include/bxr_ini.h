@@ -1,7 +1,7 @@
 /**
  * File `bxr_ini.h`.
  *
- * # Boxer's INI Reader and Writer.
+ * # INI Reader and Writer.
  *
  * Supported types:
  *

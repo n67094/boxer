@@ -1,7 +1,7 @@
 /**
  * File `bxr_color.h`.
  *
- * # Boxer's Color Utilities.
+ * # Color Utilities.
  *
  * Copyright (c) 2025 nsix. All rights reserved.
  */

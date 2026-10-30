@@ -1,7 +1,7 @@
 /**
  * File `bxr_game.h`.
  *
- * # Boxer's Game Lifecycle.
+ * # Game Lifecycle.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

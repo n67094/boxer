@@ -1,7 +1,7 @@
 /**
  * File `bxr_assert.h`.
  *
- * # Boxer's Assertion Macro.
+ * # Assertion Macro.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

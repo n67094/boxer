@@ -1,7 +1,7 @@
 /**
  * File `bxr_painter.h`.
  *
- * # Boxer's 2D Painter.
+ * # 2D Painter.
  *
  * Immediate-mode 2D renderer (thin wrapper over SDL_gp).
  *
