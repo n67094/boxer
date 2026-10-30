@@ -1,5 +1,6 @@
 #include <boxer/bxr.h>
 
+#include "assets.h"
 #include "defs.h"
 #include "scene.h"
 
@@ -26,8 +27,10 @@ bxr_game_config(void)
 void
 bxr_game_setup(void)
 {
-  // Mount the asset archive to the virtual file system
-  bxr_asset_mount(ASSET_MOUNT);
+  // Mount the asset archive embedded in the executable
+  if (!bxr_asset_mount_memory(assets_data, assets_length, ASSET_MOUNT)) {
+    BXR_LOG_ERROR("%s", bxr_get_error());
+  }
 
   bxr_log_enable_colors(true);
 

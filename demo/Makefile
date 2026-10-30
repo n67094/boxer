@@ -23,12 +23,16 @@ BUILD_DIR := build
 SRCS_DIR := src
 
 ASSETS_DIR := assets
-ASSETS_ZIP := $(ASSETS_DIR).zip
+ASSETS_ZIP := $(BUILD_DIR)/$(ASSETS_DIR).zip
+ASSETS_FILES := $(shell find $(ASSETS_DIR) -type f)
+ASSETS_EMBED := $(BUILD_DIR)/$(ASSETS_DIR).o
+ASSETS_EMBED_INC := $(BUILD_DIR)/$(ASSETS_DIR).inc
 
 # Boxer
 BOXER_DIR := ..
 BOXER_LIB := $(BOXER_DIR)/build/lib/libboxer.a
 BOXER_INC := $(BUILD_DIR)/include
+BOXER_BIN2C := $(BUILD_DIR)/bin2c
 
 UNAME_S := $(shell uname -s)
 
@@ -65,11 +69,12 @@ OBJS := $(patsubst $(SRCS_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 .PHONY: all clean FORCE
 .DEFAULT_GOAL := all
 
-all: $(TARGET) $(ASSETS_ZIP)
+all: $(TARGET)
 
 # Create a zip archive of the assets directory
-$(ASSETS_ZIP): $(ASSETS_DIR)
-	zip -r $@ $<
+$(ASSETS_ZIP): $(ASSETS_FILES) | $(BUILD_DIR)
+	rm -f $@
+	zip -r $@ $(ASSETS_DIR)
 
 # Create build directory
 $(BUILD_DIR):
@@ -87,8 +92,19 @@ $(BOXER_INC)/boxer: | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: $(SRCS_DIR)/%.c | $(BUILD_DIR) $(BOXER_INC)/boxer
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+# Build boxer's bin2c tool, used to turn files into C byte lists
+$(BOXER_BIN2C): $(BOXER_DIR)/tools/bin2c.c | $(BUILD_DIR)
+	$(CC) -std=c99 -Wall -O2 -o $@ $<
+
+# Embed the asset archive in the executable as a C byte list
+$(ASSETS_EMBED_INC): $(ASSETS_ZIP) $(BOXER_BIN2C)
+	$(BOXER_BIN2C) $< $@
+
+$(ASSETS_EMBED): CFLAGS += -I$(BUILD_DIR)
+$(ASSETS_EMBED): $(ASSETS_EMBED_INC)
+
 $(TARGET): $(OBJS) $(BOXER_LIB)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
 clean:
-	rm -rf $(BUILD_DIR) $(ASSETS_ZIP) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET)
