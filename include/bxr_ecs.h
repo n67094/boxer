@@ -1,7 +1,13 @@
 /**
  * File `bxr_ecs.h`.
  *
- * # Entity Component System.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * This is an altered version of pico_ecs by James McLean
+ * (https://github.com/empyreanx/pico_headers).
+ * Copyright (c) 2025 James McLean.
+ *
+ * # Entity Component System
  *
  * Overview:
  *
@@ -16,12 +22,6 @@
  * `bxr_ecs_system_exclude_component()`, then create entities and add
  * components. Each frame call `bxr_ecs_systems_run()`. Free everything with
  * `bxr_ecs_destroy()`.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
- *
- * This is an altered version of pico_ecs by James McLean
- * (https://github.com/empyreanx/pico_headers).
- * Copyright (c) 2025 James McLean.
  */
 
 #ifndef BXR_ECS_H_

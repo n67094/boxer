@@ -1,9 +1,9 @@
 /**
  * File `bxr_math.h`.
  *
- * # Math Utilities.
- *
  * Copyright (c) 2025 nsix. All rights reserved.
+ *
+ * # Math Utilities
  */
 
 #ifndef BXR_MATH_H_

@@ -1,7 +1,9 @@
 /**
  * File `bxr_gamepad.h`.
  *
- * # Gamepad Input Handling.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Gamepad Input Handling
  *
  * Up to `BXR_GAMEPAD_MAX` gamepads are tracked.
  *
@@ -9,8 +11,6 @@
  * (player index) it was assigned when connected.
  *
  * Boxer polls connections and feeds events itself.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_GAMEPAD_H_

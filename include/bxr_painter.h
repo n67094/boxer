@@ -1,7 +1,9 @@
 /**
  * File `bxr_painter.h`.
  *
- * # 2D Painter.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # 2D Painter
  *
  * Immediate-mode 2D renderer (thin wrapper over SDL_gp).
  *
@@ -10,8 +12,6 @@
  *
  * Default coordinate space: virtual resolution in pixels, origin at the
  * top-left corner, y pointing down.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_PAINTER_H_

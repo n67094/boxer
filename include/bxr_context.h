@@ -1,9 +1,9 @@
 /**
  * File `bxr_context.h`.
  *
- * # Global Context.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Global Context
  */
 
 #ifndef BXR_CONTEXT_H_

@@ -1,7 +1,9 @@
 /**
  * File `bxr_ini.h`.
  *
- * # INI Reader and Writer.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # INI Reader and Writer
  *
  * Supported types:
  *
@@ -26,8 +28,6 @@
  * name="nsix\ttest" ; Please note that the name contains a tab character
  * test= ; this will be ignored
  * ```
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_INI_H_

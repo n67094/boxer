@@ -1,11 +1,11 @@
 /**
  * File `bxr_pixel.h`.
  *
- * # Pixel Formats.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Pixel Formats
  *
  * Pixel formats used by boxer images.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_PIXEL_H_

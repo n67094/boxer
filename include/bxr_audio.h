@@ -1,7 +1,9 @@
 /**
  * File `bxr_audio.h`.
  *
- * # Audio Management and Playback.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Audio Management and Playback
  *
  * Typical usage: `bxr_audio_create()`, then `bxr_voice_create()` for as many
  * voices as you need, then `bxr_voice_play()`, `bxr_voice_pause()`, etc.
@@ -11,8 +13,6 @@
  * When `BXR_AUDIO_MAX_VOICES` voices are alive, creating a new one stops and
  * destroys the oldest voice that was not created with `keep_alive` set. If
  * every voice is kept alive, the creation fails instead.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_AUDIO_H_

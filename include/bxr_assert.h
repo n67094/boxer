@@ -1,9 +1,9 @@
 /**
- * File `bxr_assert.h`.
- *
- * # Assertion Macro.
+ * File `bxr_assert.h`
  *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Assertion Macro
  */
 
 #ifndef BXR_ASSERT_H_

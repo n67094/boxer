@@ -1,7 +1,9 @@
 /**
  * File `bxr_sparse_set.h`.
  *
- * # Sparse Set.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Sparse Set
  *
  * Set of integer handles (e.g. entity ids) with O(1) insert, remove and lookup.
  *
@@ -16,8 +18,6 @@
  *
  * Typical usage: create the set, insert / remove / check handles, iterate the
  * dense array, destroy the set.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_SPARSE_SET_H_

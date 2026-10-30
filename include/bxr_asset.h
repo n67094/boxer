@@ -1,7 +1,9 @@
 /**
  * File `bxr_asset.h`.
  *
- * # Game Asset Management.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Game Asset Management
  *
  * Built on PhysicsFS. Directories and archives are mounted into a single
  * read-only search path, and one write directory.
@@ -27,7 +29,6 @@
  * - .POD (Terminal Velocity POD archives)
  * - .DAT (Resident Evil 3 rofs.dat archives)
  *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_ASSET_H_

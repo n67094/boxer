@@ -1,9 +1,9 @@
 /**
  * File `bxr_game.h`.
  *
- * # Game Lifecycle.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Game Lifecycle
  */
 
 #ifndef BXR_GAME_H_

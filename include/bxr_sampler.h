@@ -1,14 +1,14 @@
 /**
  * File `bxr_sampler.h`.
  *
- * # GPU Samplers.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # GPU Samplers
  *
  * GPU samplers used to sample textures in shaders.
  *
  * Create a sampler from one of the `bxr_sampler_e` presets, bind it with
  * `bxr_painter_set_sampler()`, and release it with `bxr_sampler_destroy()`.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_SAMPLER_H_

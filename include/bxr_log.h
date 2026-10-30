@@ -1,7 +1,9 @@
 /**
  * File `bxr_log.h`.
  *
- * # Logging Utilities.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Logging Utilities
  *
  * The default minimum priority is `BXR_LOG_PRIORITY_DEBUG`, so every level is
  * shown until `bxr_log_set_priority()` is called.
@@ -14,8 +16,6 @@
  * Optionally enable ANSI terminal colors:
  *
  *   bxr_log_enable_colors(true);
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_LOG_H_

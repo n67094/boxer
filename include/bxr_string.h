@@ -1,9 +1,9 @@
 /**
  * File `bxr_string.h`.
  *
- * # String Utilities.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # String Utilities
  */
 
 #ifndef BXR_STR_H_

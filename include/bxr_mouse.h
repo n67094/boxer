@@ -1,9 +1,9 @@
 /**
  * File `bxr_mouse.h`.
  *
- * # Mouse Input Handling.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Mouse Input Handling
  */
 
 #ifndef BXR_MOUSE_H_
