@@ -30,7 +30,7 @@ Install the following development dependencies (via your package manager or from
 - C compiler.
 - SDL3 (>= 3.4.2).
 
-# Build and Run Demo
+## Build and Run Demo
 
 The demo is a simple game that showcases the features of the Boxer library. It includes a title screen, a level with a player character, and basic input handling.
 
@@ -151,8 +151,6 @@ bxr_game_teardown(void)
     // Clean up game state here.
 }
 ```
-
-# Demo
 
 # AI Usage Policy
 
