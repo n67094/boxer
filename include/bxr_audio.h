@@ -7,7 +7,7 @@
  *
  * Typical usage:
  *
- * ```
+ * ```cpp
  * _music = bxr_audio_create("path/to/music.ogg");
  *
  * bxr_voice_desc_t music_desc = {
