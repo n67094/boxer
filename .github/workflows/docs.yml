@@ -1,10 +1,13 @@
-# Generate the markdown documentation from the headers and publish it to
-# the boxerwiki repository.
-#
-# Requires the BOXERWIKI_TOKEN secret: a fine-grained token with
-# "Contents: read and write" on n67094/boxerwiki.
+# Generate the markdown documentation from the headers and publish it to the boxerwiki repository.
 
 name: docs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs
+  cancel-in-progress: false
 
 on:
   push:
@@ -32,14 +35,15 @@ jobs:
           token: ${{ secrets.BOXERWIKI_TOKEN }}
           path: boxerwiki
 
-      # Files only maintained in boxerwiki are excluded so --delete keeps them.
       - name: Publish to boxerwiki
         run: |
+          boxer_commit=$(git rev-parse --short HEAD)
+
           rsync -a --delete --exclude .git --exclude .github --exclude README.md build/docs/ boxerwiki/
 
           cd boxerwiki
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "boxer docs"
+          git config user.email "docs@boxer.invalid"
           git add -A
 
           if git diff --cached --quiet; then
@@ -47,5 +51,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "docs: boxer@${GITHUB_SHA::7}"
+          git commit -m "docs: boxer@$boxer_commit"
           git push
