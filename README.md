@@ -28,9 +28,23 @@ Install the following development dependencies (via your package manager or from
 - C compiler.
 - SDL3 (>= 3.4.2).
 
-## Build and Installation
+# Build and Run Demo
 
-First clone the repository with:
+There's no need to install the library to build and run the demo, as `libboxer` is statically linked. You just have to run the following commands:
+
+```bash
+cd demo
+make
+./demo
+```
+
+_let's make it roar!_
+
+## Build and Install the Library (Optional)
+
+Here are the steps to build and install `libboxer` on your system.
+
+First, clone the repository with:
 
 ```bash
 git clone git@github.com:n67094/boxer.git
@@ -44,13 +58,13 @@ Build the library with:
 make
 ```
 
-By default, make install installs the library to /usr/lib and the headers to /usr/include/boxer on Linux, and to /usr/local on macOS (requires root):
+By default, `make install` installs the library to `/usr/lib` and the headers to `/usr/include/boxer` on Linux, and under `/usr/local` on macOS (requires root):
 
 ```bash
 sudo make install
 ```
 
-Use PREFIX to install elsewhere. On macOS the install path is recorded in the library at build time, so pass the same PREFIX to both commands:
+Use `PREFIX` to install elsewhere. On macOS, the install path is recorded in the library at build time, so pass the same `PREFIX` to both commands:
 
 ```bash
 make PREFIX=$HOME/.local
@@ -69,22 +83,12 @@ Build documentation with:
 make docs
 ```
 
-Then you can build the demo with:
-
-```bash
-cd demo
-make
-./demo
-```
-
-_let's make it roar!_
-
 # Getting Started
 
 To get started with Boxer, you can:
 
 - Check out the [demo](demo) directory for code demonstrating how to use the library's features.
-- Generate the documentation with `make docs` to get detailed information on the API and how to integrate it in your projects.
+- Generate the documentation with `make docs` to get detailed information on the API and how to integrate it into your projects.
 
 Here is a simple example of how to initialize the library and create a window:
 
@@ -116,27 +120,27 @@ bxr_game_config(void)
 void
 bxr_game_setup(void)
 {
-    // Initialize game state here
+    // Initialize game state here.
 }
 
 void
 bxr_game_update(double delta_ms)
 {
     // Update the game logic here.
-    // The logic is updated at a fixed timestep depending on the screen refresh rate it's running on
+    // The logic is updated at a fixed timestep depending on the refresh rate of the screen it's running on.
 }
 
 void
 bxr_game_render(double alpha_ms)
 {
     // Render the game here.
-    // The game is rendered as many times per second as possible
+    // The game is rendered as many times per second as possible.
 }
 
 void
 bxr_game_teardown(void)
 {
-    // Clean up game state here
+    // Clean up game state here.
 }
 ```
 
@@ -152,7 +156,7 @@ Check out the [demo](demo) directory for the source code to see how the game is 
 
 # AI Usage Policy
 
-I want this project to remain as human as possible, please check out the [AGENTS.md](AGENTS.md).
+I want this project to remain as human as possible; please check out the [AGENTS.md](AGENTS.md).
 
 # Sponsors
 
