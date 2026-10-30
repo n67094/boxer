@@ -1,7 +1,9 @@
 #
 # Makefile for building: demo
 #
-# Using this make file libboxer is statically linked.
+# libboxer is statically linked, so no need to install the library to build and run the demo.
+# When building the demo for the first time libboxer will be built from source and linked statically.
+# To clean libboxer build artifacts, run `make clean` in the boxer directory, not in the demo directory itself.
 #
 # Command examples:
 #
@@ -23,7 +25,7 @@ SRCS_DIR := src
 ASSETS_DIR := assets
 ASSETS_ZIP := $(ASSETS_DIR).zip
 
-# Boxer (built from source, linked statically)
+# Boxer
 BOXER_DIR := ..
 BOXER_LIB := $(BOXER_DIR)/build/lib/libboxer.a
 BOXER_INC := $(BUILD_DIR)/include
@@ -77,7 +79,7 @@ $(BUILD_DIR):
 $(BOXER_LIB): FORCE
 	$(MAKE) -C $(BOXER_DIR) static DEBUG=$(DEBUG) SANITIZER=$(SANITIZER)
 
-# Expose boxer headers as <boxer/...> without installing them
+# Expose boxer headers using symlinks
 $(BOXER_INC)/boxer: | $(BUILD_DIR)
 	mkdir -p $(BOXER_INC)
 	ln -sfn $(abspath $(BOXER_DIR)/include) $@
