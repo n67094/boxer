@@ -1,9 +1,9 @@
 /**
  * File `bxr_time.h`.
  *
- * # Time Utilities.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Time Utilities
  */
 
 #ifndef BXR_TIME_H_

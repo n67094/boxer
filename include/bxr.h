@@ -1,12 +1,12 @@
 /**
  * File `bxr.h`.
  *
- * # Main Header File.
- *
- * **NOTE:** Boxer owns the program entry point through SDL main callbacks: do
- * not write a `main()`, implement the callbacks of `bxr_game.h` instead.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Main Header File
+ *
+ * Boxer owns the program entry point through SDL main callbacks: do
+ * not write a `main()`, implement the callbacks of `bxr_game.h` instead.
  */
 
 #ifndef BXR_H_

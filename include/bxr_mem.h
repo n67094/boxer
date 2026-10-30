@@ -1,11 +1,11 @@
 /**
  * File `bxr_mem.h`.
  *
- * # Memory Utilities.
+ * Copyright (c) 2025 nsix. All rights reserved.
+ *
+ * # Memory Utilities
  *
  * Memory allocation and memory manipulation utilities.
- *
- * Copyright (c) 2025 nsix. All rights reserved.
  */
 
 #ifndef BXR_MEM_H_

@@ -1,15 +1,15 @@
 /**
  * File `bxr_pool.h`.
  *
- * # Resource Pool.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Resource Pool
  *
  * Fixed-size slot pool handing out generational ids, used to manage resources.
  *
  * Typical usage: create the pool, acquire a slot, generate an id for it and
  * give the id to callers, check or resolve the id back to its slot, release the
  * slot, destroy the pool.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_POOL_H_

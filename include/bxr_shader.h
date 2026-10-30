@@ -1,7 +1,9 @@
 /**
  * File `bxr_shader.h`.
  *
- * # GPU Shaders.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # GPU Shaders
  *
  * GPU shaders loaded from bytecode files in the mounted asset directories.
  *
@@ -19,8 +21,6 @@
  * Typical usage: create a vertex and a fragment shader with
  * `bxr_shader_create()`, combine them with `bxr_pipeline_create()`, and
  * release them with `bxr_shader_destroy()`.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_SHADER_H_

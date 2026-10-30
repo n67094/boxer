@@ -1,13 +1,13 @@
 /**
  * File `bxr_pipeline.h`.
  *
- * # Custom Graphics Pipelines for the Painter.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Custom Graphics Pipelines for the Painter
  *
  * Typical usage: create shaders with `bxr_shader_create()`, combine them with
  * `bxr_pipeline_create()`, select the pipeline with
  * `bxr_painter_set_pipeline()`, and release it with `bxr_pipeline_destroy()`.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_PIPELINE_H_
