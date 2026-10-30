@@ -19,10 +19,6 @@ Features:
 - Math utilities for vectors, matrices, and transformations.
 - An entity-component system (ECS) for flexible game object management.
 
-Todo:
-
-- Immediate mode UI
-
 ## Prerequisites
 
 Install the following development dependencies (via your package manager or from source):
@@ -71,12 +67,6 @@ Build documentation with:
 
 ```bash
 make docs
-```
-
-Once `boxer` is installed on your system, in order to run the demo you may need to update the shared library cache with (Linux only):
-
-```bash
-sudo ldconfig
 ```
 
 Then you can build the demo with:

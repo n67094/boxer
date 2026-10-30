@@ -49,19 +49,15 @@ STB_DIR := $(LIB_DIR)/stb
 DEBUG ?= 0
 SANITIZER ?= 0
 
-ifeq ($(UNAME_S), Darwin)
-PREFIX  ?= /usr/local
-else
-PREFIX  ?= /usr
-endif
-
 # Output library names
 STATIC_LIB := $(LIB_OUT_DIR)/lib$(TARGET).a
 
 ifeq ($(UNAME_S), Darwin)
+PREFIX  ?= /usr/local
+
 SHARED_EXT     := dylib
 SHARED_LIB_NAME := lib$(TARGET).$(VERSION).$(SHARED_EXT)
-SHARED_SO_NAME  := lib$(TARGET).$(SOVERSION).$(SHARED_EXT)
+SHARED_LIB_VER_NAME  := lib$(TARGET).$(SOVERSION).$(SHARED_EXT)
 SHARED_LDFLAGS  := -dynamiclib \
                    -install_name $(PREFIX)/lib/$(SHARED_SO_NAME) \
                    -compatibility_version $(SOVERSION) \
@@ -72,17 +68,20 @@ SHARED_LDFLAGS  := -dynamiclib \
 
 PHYSFS_OBJC_SRCS := $(PHYSFS_DIR)/physfs_platform_apple.m
 else
+PREFIX  ?= /usr
+
 SHARED_EXT     := so
 SHARED_LIB_NAME := lib$(TARGET).$(SHARED_EXT).$(VERSION)
-SHARED_SO_NAME  := lib$(TARGET).$(SHARED_EXT).$(SOVERSION)
+SHARED_LIB_VER_NAME  := lib$(TARGET).$(SHARED_EXT).$(SOVERSION)
 SHARED_LDFLAGS  := -shared -Wl,-soname,$(SHARED_SO_NAME)
+
 PHYSFS_OBJC_SRCS :=
 endif
 
 SHARED_LNK_NAME := lib$(TARGET).$(SHARED_EXT)
 
 SHARED_LIB := $(LIB_OUT_DIR)/$(SHARED_LIB_NAME)
-SHARED_SO  := $(LIB_OUT_DIR)/$(SHARED_SO_NAME)
+SHARED_LIB_VER  := $(LIB_OUT_DIR)/$(SHARED_LIB_VER_NAME)
 SHARED_LNK := $(LIB_OUT_DIR)/$(SHARED_LNK_NAME)
 
 # Compiler
@@ -91,11 +90,12 @@ AR = ar
 
 # Flags
 LDLIBS  = -lSDL3 -lm
-LDFLAGS =
 
 ifeq ($(UNAME_S), Darwin)
 LDLIBS += -framework Foundation -framework IOKit
 endif
+
+LDFLAGS =
 
 CFLAGS = -std=c99 -Wall -DBOXER_BUILD -I$(PHYSFS_DIR) -I$(SDL_GP_DIR) -I$(BOXER_INC_DIR) -I$(STB_DIR)
 
@@ -160,10 +160,10 @@ $(SHARED_LIB): $(ALL_PIC_OBJS) | $(LIB_OUT_DIR)
 	$(CC) $(SHARED_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # Versioned symlinks: libboxer.so -> libboxer.so.1 -> libboxer.so.1.0.0
-$(SHARED_SO): $(SHARED_LIB)
+$(SHARED_LIB_VER): $(SHARED_LIB)
 	ln -sf $(notdir $<) $@
 
-$(SHARED_LNK): $(SHARED_SO)
+$(SHARED_LNK): $(SHARED_LIB_VER)
 	ln -sf $(notdir $<) $@
 
 # --- Compile rules ----------------------------------------------------------
@@ -213,8 +213,8 @@ install: all
 	install -d $(PREFIX)/include/$(TARGET)
 	install -m 644 $(STATIC_LIB) $(PREFIX)/lib/
 	install -m 755 $(SHARED_LIB) $(PREFIX)/lib/
-	ln -sf $(SHARED_LIB_NAME) $(PREFIX)/lib/$(SHARED_SO_NAME)
-	ln -sf $(SHARED_SO_NAME)  $(PREFIX)/lib/$(SHARED_LNK_NAME)
+	ln -sf $(SHARED_LIB_NAME) $(PREFIX)/lib/$(SHARED_LIB_VER)
+	ln -sf $(SHARED_LIB_VER)  $(PREFIX)/lib/$(SHARED_LNK_NAME)
 	install -m 644 $(BOXER_HDRS) $(PREFIX)/include/$(TARGET)/
 
 uninstall:

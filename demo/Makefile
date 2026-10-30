@@ -1,6 +1,8 @@
 #
 # Makefile for building: demo
 #
+# Using this make file libboxer is statically linked.
+#
 # Command examples:
 #
 #   make                              Build the project
@@ -71,7 +73,7 @@ $(ASSETS_ZIP): $(ASSETS_DIR)
 $(BUILD_DIR):
 	mkdir -p $@
 
-# Build boxer static library (always delegated, boxer's Makefile decides what to rebuild)
+# Build boxer static library
 $(BOXER_LIB): FORCE
 	$(MAKE) -C $(BOXER_DIR) static DEBUG=$(DEBUG) SANITIZER=$(SANITIZER)
 
