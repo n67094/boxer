@@ -13,6 +13,13 @@
 
 #include <SDL3/SDL.h>
 
+/**
+ * ## Enums
+ */
+
+/**
+ * Pixel formats.
+ */
 typedef enum bxr_pixel_format_e
 {
   BXR_PIXEL_FORMAT_UNKNOWN       = SDL_PIXELFORMAT_UNKNOWN,

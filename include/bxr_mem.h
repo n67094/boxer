@@ -14,6 +14,10 @@
 #include <SDL3/SDL.h>
 
 /**
+ * ## Macros
+ */
+
+/**
  * Allocate uninitialized memory.
  *
  * `nbytes` size of the block in bytes.
@@ -28,6 +32,7 @@
  * Allocate zero-initialized memory for an array.
  *
  * `count` number of elements.
+ *
  * `nbytes` size of one element in bytes.
  *
  * `return` the new pointer, or NULL on failure.
@@ -70,6 +75,7 @@
  * Resize a block of memory.
  *
  * `ptr` pointer to the block to resize, NULL behaves like `BXR_ALLOC()`.
+ *
  * `nbytes` new size of the block in bytes.
  *
  * `return` the new pointer, or NULL on failure.

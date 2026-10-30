@@ -4,12 +4,18 @@
  * Copyright (c) 2026 nsix. All rights reserved.
  *
  * # Assertion Macro
+ *
+ * Asserts that an expression is true, and aborts the program if it is false.
  */
 
 #ifndef BXR_ASSERT_H_
 #define BXR_ASSERT_H_
 
 #include <SDL3/SDL.h>
+
+/**
+ * ## Macros
+ */
 
 /**
  * Check that `expr` is true, and abort the program if it is false.

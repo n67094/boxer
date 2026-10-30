@@ -4,6 +4,9 @@
  * Copyright (c) 2026 nsix. All rights reserved.
  *
  * # Mouse Input Handling
+ *
+ * The mouse position is tracked in the game's virtual resolution, and the mouse
+ * wheel scroll is tracked in the current frame.
  */
 
 #ifndef BXR_MOUSE_H_
@@ -14,6 +17,13 @@
 #include "bxr_defs.h"
 #include "bxr_math.h"
 
+/**
+ * ## Enums
+ */
+
+/**
+ * Mouse buttons.
+ */
 typedef enum
 {
   BXR_MOUSE_UNKNOWN = 0,
@@ -34,7 +44,7 @@ void bxr_mouse_motion(float x, float y);
 void bxr_mouse_wheel_motion(float x, float y);
 
 /**
- * ## Public API
+ * ## API
  */
 
 /**

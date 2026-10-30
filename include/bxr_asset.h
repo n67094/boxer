@@ -28,7 +28,6 @@
  * - .SLB (Independence War archives)
  * - .POD (Terminal Velocity POD archives)
  * - .DAT (Resident Evil 3 rofs.dat archives)
- *
  */
 
 #ifndef BXR_ASSET_H_
@@ -43,7 +42,7 @@ bool bxr_asset_setup(bxr_context_t *context);
 void bxr_asset_teardown(void);
 
 /**
- * ## Public API
+ * ## API
  */
 
 /**
@@ -95,6 +94,7 @@ BXR_API bool bxr_asset_exists(const char *path);
  * other dot (`.hidden`) has no extension.
  *
  * `path` path to check. Must not be NULL.
+ *
  * `extension` extension including the leading dot (e.g. ".png"). Must not be
  * NULL.
  *
@@ -118,11 +118,13 @@ BXR_API bool bxr_asset_is_directory(const char *path);
  * without copying it.
  *
  * `path` virtual path of the file to read. Must not be NULL.
+ *
  * `length` receives the size of the returned data in bytes. May be NULL. Left
  * untouched on failure.
  *
  * `return` the file contents, or NULL if the file does not exist, is empty, or
  * cannot be read.
+ *
  * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller must free the result with `BXR_FREE()`.
@@ -145,11 +147,15 @@ BXR_API Uint8 *bxr_asset_read(const char *path, size_t *length);
  *
  * `path` virtual path of the file, relative to the write directory. Must not be
  * NULL.
+ *
  * `data` bytes to write. Must not be NULL.
+ *
  * `length` number of bytes to write. Must be greater than 0.
+ *
  * `append` true to append to the end of the file, false to truncate it first.
  *
  * `return` true on success, false on failure.
+ *
  * Call `bxr_get_error()` for more information.
  */
 BXR_API bool
@@ -165,6 +171,7 @@ bxr_asset_write(const char *path, const void *data, size_t length, bool append);
  * NULL.
  *
  * `return` true on success, false on failure.
+ *
  * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_asset_delete(const char *path);

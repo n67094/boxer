@@ -3,9 +3,9 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # GPU Samplers
+ * # Samplers
  *
- * GPU samplers used to sample textures in shaders.
+ * samplers used to sample textures in shaders.
  *
  * Create a sampler from one of the `bxr_sampler_e` presets, bind it with
  * `bxr_painter_set_sampler()`, and release it with `bxr_sampler_destroy()`.
@@ -17,6 +17,10 @@
 #include <SDL3/SDL.h>
 
 #include "bxr_defs.h"
+
+/**
+ * ## Enums
+ */
 
 /**
  * Sampler presets: filtering (point = nearest, linear) and address mode
@@ -31,27 +35,23 @@ typedef enum
   BXR_GP_SAMPLER_SIZE,
 } bxr_sampler_e;
 
+/**
+ * ## Typedefs
+ */
+
+/**
+ * Handle to a GPU sampler.
+ */
 typedef struct bxr_sampler_s
 {
   SDL_GPUSampler *sampler;
 } bxr_sampler_t;
 
-/**
- * ## Internal API
- */
-
-/**
- * Initializes the sampler system.
- */
 bool bxr_sampler_setup(void);
-
-/**
- * Tears down the sampler system.
- */
 void bxr_sampler_teardown(void);
 
 /**
- * ## Public API
+ * ## API
  */
 
 /**
@@ -61,6 +61,7 @@ void bxr_sampler_teardown(void);
  *
  * `return` the created sampler, or a sampler whose `sampler` field is NULL on
  * failure.
+ *
  * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller owns the sampler and must release it with

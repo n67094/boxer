@@ -3,9 +3,9 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # GPU Shaders
+ * # Shaders
  *
- * GPU shaders loaded from bytecode files in the mounted asset directories.
+ * shaders loaded from bytecode files in the mounted asset directories.
  *
  * Shader files are read with the `bxr_asset.h` API and must be named
  * `<name>.<stage>.<format>`, where:
@@ -33,6 +33,13 @@
 
 #define BXR_SHADER_INVALID_ID 0
 
+/**
+ * ## Enums
+ */
+
+/**
+ * Shader stage.
+ */
 typedef enum
 {
   BXR_SHADER_STAGE_VERTEX   = SDL_GPU_SHADERSTAGE_VERTEX,
@@ -40,6 +47,13 @@ typedef enum
   BXR_SHADER_STAGE_SIZE     = 2,
 } bxr_shader_stage_e;
 
+/**
+ * ## Typedefs
+ */
+
+/**
+ * Handle to a GPU shader.
+ */
 typedef struct bxr_shader_s
 {
   size_t id;
@@ -50,8 +64,11 @@ typedef struct bxr_shader_s
  *
  * `name` asset path without the format extension (e.g. "shaders/basic.vert").
  * Must not be NULL.
+ *
  * `entrypoint` name of the entry function in the bytecode (e.g. "main").
+ *
  * `stage` must match the `<stage>` part of `name`.
+ *
  * `num_*` number of resources of each kind used by the shader.
  */
 typedef struct bxr_shader_desc_s
@@ -65,24 +82,11 @@ typedef struct bxr_shader_desc_s
   Uint32 num_uniform_buffers;
 } bxr_shader_desc_t;
 
-/**
- * ## Internal API
- */
-
-/**
- * Initializes the shader system.
- *
- * `context` is the bxr context to use for shader operations.
- */
 bool bxr_shader_setup(bxr_context_t *context);
-
-/**
- * Shuts down the shader system.
- */
 void bxr_shader_teardown(void);
 
 /**
- * ## Public API
+ * ## API
  */
 
 /**

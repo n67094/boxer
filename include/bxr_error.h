@@ -14,7 +14,7 @@
 #include "bxr_defs.h"
 
 /**
- * ## Public API
+ * ## API
  */
 
 /**

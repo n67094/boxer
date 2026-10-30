@@ -12,6 +12,10 @@
 #include <SDL3/SDL.h>
 
 /**
+ * ## Typedefs
+ */
+
+/**
  * Boxer configuration.
  *
  * `name` application name, also used to build the save directory
@@ -44,6 +48,10 @@ typedef struct bxr_game_config_s
   bool fullscreen;
   bool resizable;
 } bxr_game_config_t;
+
+/**
+ * ## API
+ */
 
 /**
  * Provide the game configuration, implemented by the user.

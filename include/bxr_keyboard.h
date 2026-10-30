@@ -19,6 +19,13 @@
 
 #include "bxr_defs.h"
 
+/**
+ * ## Enums
+ */
+
+/**
+ * Keyboard keys.
+ */
 typedef enum
 {
   BXR_KEY_UNKNOWN = SDL_SCANCODE_UNKNOWN,
@@ -132,6 +139,9 @@ typedef enum
   BXR_KEY_SIZE = SDL_SCANCODE_COUNT
 } bxr_key_e;
 
+/**
+ * Keyboard modifiers.
+ */
 typedef enum
 {
   BXR_KEYMOD_NONE   = SDL_KMOD_NONE,
@@ -161,7 +171,7 @@ void bxr_key_down(bxr_key_e scancode);
 void bxr_key_up(bxr_key_e scancode);
 
 /**
- * ## Public API
+ * ## API
  */
 
 /**
@@ -169,6 +179,7 @@ void bxr_key_up(bxr_key_e scancode);
  * modifier state.
  *
  * `key` key to name, in `[0, BXR_KEY_SIZE)`.
+ *
  * `mod` modifiers to apply, as a bitwise OR of `bxr_keymod_e` values.
  *
  * `return` the key name, or an empty string if there is no name for the key or

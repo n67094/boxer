@@ -24,9 +24,6 @@
 #define BXR_FLOAT_MIN FLT_MIN
 #define BXR_FLOAT_MAX FLT_MAX
 
-/**
- * Aliases for the SDL math functions, see the SDL documentation for details.
- */
 #define bxr_min SDL_min
 #define bxr_max SDL_max
 #define bxr_clamp SDL_clamp
@@ -75,15 +72,52 @@
 #define bxr_tan SDL_tan
 #define bxr_tanf SDL_tanf
 
+/**
+ * ## Typedefs
+ */
+
+/**
+ * 2D vector with `x` and `y` components.
+ */
 typedef struct bxr_vec2_s
 {
   float x, y;
 } bxr_vec2_t;
 
+/**
+ * 2D point with `x` and `y` coordinates.
+ */
 typedef bxr_vec2_t bxr_point_t;
 
 /**
- * ## Scalar Functions and Macros
+ * 2D line segment with endpoints `a` and `b`.
+ */
+typedef struct bxr_line_s
+{
+  bxr_vec2_t a;
+  bxr_vec2_t b;
+} bxr_line_t;
+
+/**
+ * ## 2D triangle with vertices `a`, `b` and `c`.
+ */
+typedef struct bxr_triangle_s
+{
+  bxr_vec2_t a;
+  bxr_vec2_t b;
+  bxr_vec2_t c;
+} bxr_triangle_t;
+
+/**
+ * 2D rectangle with top-left corner `(x, y)` and size `(w, h)`.
+ */
+typedef struct bxr_rect_s
+{
+  float x, y, w, h;
+} bxr_rect_t;
+
+/**
+ * ## Macros
  */
 
 /**
@@ -121,7 +155,9 @@ bxr_equal(float c1, float c2)
  * Linearly interpolates between two values.
  *
  * `a` the start value, returned when `step` is 0.
+ *
  * `b` the end value, returned when `step` is 1.
+ *
  * `step` the position between the values, usually in [0, 1]; values outside
  * this range extrapolate.
  *
@@ -137,7 +173,9 @@ bxr_lerp(float a, float b, float step)
  * Linearly interpolates between two angles along the shortest arc.
  *
  * `angle1` the start angle in radians.
+ *
  * `angle2` the end angle in radians.
+ *
  * `step` the position between the angles, usually in [0, 1].
  *
  * `return` the interpolated angle in radians.
@@ -392,6 +430,7 @@ bxr_vec2_lerp(bxr_vec2_t v1, bxr_vec2_t v2, float step)
  * Builds a vector from polar coordinates.
  *
  * `angle` the angle in radians from the positive x axis.
+ *
  * `len` the length of the vector.
  *
  * `return` the vector in cartesian coordinates.
@@ -439,16 +478,6 @@ bxr_vec2_ceil(bxr_vec2_t v)
 }
 
 /**
- * ## Line
- */
-
-typedef struct bxr_line_s
-{
-  bxr_vec2_t a;
-  bxr_vec2_t b;
-} bxr_line_t;
-
-/**
  * Constructs a `bxr_line_t` compound literal from the segment `(ax, ay)` to
  * `(bx, by)`.
  */
@@ -456,30 +485,10 @@ typedef struct bxr_line_s
   ((const bxr_line_t){ { ax, ay }, { bx, by } })
 
 /**
- * ## Triangle
- */
-
-typedef struct bxr_triangle_s
-{
-  bxr_vec2_t a;
-  bxr_vec2_t b;
-  bxr_vec2_t c;
-} bxr_triangle_t;
-
-/**
  * Constructs a `bxr_triangle_t` compound literal from its three vertices.
  */
 #define bxr_triangle_create(ax, ay, bx, by, cx, cy)                            \
   ((const bxr_triangle_t){ { ax, ay }, { bx, by }, { cx, cy } })
-
-/**
- * ## Rectangle
- */
-
-typedef struct bxr_rect_s
-{
-  float x, y, w, h;
-} bxr_rect_t;
 
 /**
  * Constructs a `bxr_rect_t` compound literal from its top-left corner

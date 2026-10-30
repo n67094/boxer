@@ -29,7 +29,7 @@ void bxr_log_setup(void);
 void bxr_log_teardown(void);
 
 /**
- * ## Public API
+ * ## Enums
  */
 
 /**
@@ -45,9 +45,14 @@ typedef enum
 } bxr_log_priority_e;
 
 /**
+ * ## API
+ */
+
+/**
  * Log a printf-style message at the given priority.
  *
  * `priority` level of the message, in `[0, BXR_LOG_PRIORITY_SIZE)`.
+ *
  * `fmt` printf-style format string, followed by its arguments; must not be
  * NULL.
  */

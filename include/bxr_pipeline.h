@@ -17,11 +17,13 @@
 
 #define BXR_PIPELINE_INVALID_ID 0
 
-typedef struct bxr_pipeline_s
-{
-  size_t id;
-} bxr_pipeline_t;
+/**
+ * ## Enums
+ */
 
+/**
+ * Blend mode for the pipeline.
+ */
 typedef enum
 {
   BXR_BLENDMODE_NONE = 0,
@@ -34,6 +36,9 @@ typedef enum
   BXR_BLENDMODE_SIZE,
 } bxr_blendmode_e;
 
+/**
+ * Primitive type for the pipeline.
+ */
 typedef enum
 {
   BXR_PRIMITIVE_TRIANGLES      = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
@@ -45,18 +50,34 @@ typedef enum
 } bxr_primitive_e;
 
 /**
- * ## Public API
+ * ## Typedefs
+ */
+
+/**
+ * Handle to a graphics pipeline.
+ */
+typedef struct bxr_pipeline_s
+{
+  size_t id;
+} bxr_pipeline_t;
+
+/**
+ * ## API
  */
 
 /**
  * Create a graphics pipeline from a vertex and a fragment shader.
  *
  * `shader_vert` a vertex shader from `bxr_shader_create()`.
+ *
  * `shader_frag` a fragment shader from `bxr_shader_create()`.
+ *
  * `primitive_type` how vertices are assembled into primitives.
+ *
  * `blend_mode` how fragments are blended with the render target.
  *
  * `return` the new pipeline, or a pipeline with `id` 0 on failure.
+ *
  * Call `bxr_get_error()` for more information.
  *
  * **Note**: the caller owns the pipeline and must release it with
