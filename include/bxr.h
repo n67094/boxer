@@ -1,7 +1,7 @@
 /**
  * File `bxr.h`.
  *
- * # Boxer's Main Header File.
+ * # Main Header File.
  *
  * **NOTE:** Boxer owns the program entry point through SDL main callbacks: do
  * not write a `main()`, implement the callbacks of `bxr_game.h` instead.

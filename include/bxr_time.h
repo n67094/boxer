@@ -1,7 +1,7 @@
 /**
  * File `bxr_time.h`.
  *
- * # Boxer's Time Utilities.
+ * # Time Utilities.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

@@ -1,7 +1,7 @@
 /**
  * File `bxr_mem.h`.
  *
- * # Boxer's Memory Utilities.
+ * # Memory Utilities.
  *
  * Memory allocation and memory manipulation utilities.
  *

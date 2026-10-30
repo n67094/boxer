@@ -1,7 +1,7 @@
 /**
  * File `bxr_string.h`.
  *
- * # Boxer's String Utilities.
+ * # String Utilities.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */

@@ -1,7 +1,7 @@
 /**
  * File `bxr_error.h`.
  *
- * # Boxer's Error Handling.
+ * # Error Handling.
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  */
