@@ -16,7 +16,7 @@
  *
  * Example INI file:
  *
- * ```c
+ * ```cpp
  * [Window] ; comment
  * title="Test"
  * width=800

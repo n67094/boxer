@@ -32,7 +32,7 @@ bxr_time_get_ticks(void)
  *
  * Callback signature:
  *
- * ```c
+ * ```cpp
  * Uint32 callback(void *udata, bxr_timer_t timer_id, Uint32 interval);
  * ```
  *

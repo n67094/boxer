@@ -44,6 +44,10 @@
 #include "bxr_unit.h"
 
 /**
+ * ## API
+ */
+
+/**
  * Request the application to exit.
  *
  * Asynchronous: pushes an `SDL_EVENT_QUIT` and returns immediately. The

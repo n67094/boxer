@@ -7,7 +7,7 @@
  *
  * Example usage:
  *
- * ```c
+ * ```cpp
  * BXR_UNIT_CASE(test_case) { // Define case
  *   BXR_UNIT_ASSERT(1 + 1 == 2) // Assert something
  *   BXR_UNIT_ASSERT(...)
