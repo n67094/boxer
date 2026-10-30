@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Custom Graphics Pipelines for the Painter
+ * # Pipelines
  *
  * Typical usage: create shaders with `bxr_shader_create()`, combine them with
  * `bxr_pipeline_create()`, select the pipeline with

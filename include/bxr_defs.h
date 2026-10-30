@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Global Definitions and Constants
+ * # Global Definitions
  */
 
 #ifndef BXR_DEFS_H_

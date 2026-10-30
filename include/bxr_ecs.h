@@ -7,7 +7,7 @@
  * (https://github.com/empyreanx/pico_headers).
  * Copyright (c) 2025 James McLean.
  *
- * # Entity Component System
+ * # Entity Component System (ECS)
  *
  * Overview:
  *

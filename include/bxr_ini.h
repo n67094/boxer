@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # INI Reader and Writer
+ * # INI reader/writer
  *
  * Supported types:
  *

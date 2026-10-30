@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Audio Management and Playback
+ * # Audio and Playback
  *
  * Typical usage:
  *

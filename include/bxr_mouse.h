@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Mouse Input Handling
+ * # Mouse Handling
  *
  * The mouse position is tracked in the game's virtual resolution, and the mouse
  * wheel scroll is tracked in the current frame.

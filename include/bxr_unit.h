@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Simple Unit Testing API
+ * # Unit Testing
  *
  * Example usage:
  *

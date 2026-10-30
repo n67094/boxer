@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Game Asset Management
+ * # Game Asset
  *
  * Built on PhysicsFS. Directories and archives are mounted into a single
  * read-only search path, and one write directory.

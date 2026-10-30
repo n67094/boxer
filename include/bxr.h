@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Main Header File
+ * # Main Header
  *
  * Boxer owns the program entry point through SDL main callbacks: do
  * not write a `main()`, implement the callbacks of `bxr_game.h` instead.

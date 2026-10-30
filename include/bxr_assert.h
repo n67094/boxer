@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Assertion Macro
+ * # Assertion
  *
  * Asserts that an expression is true, and aborts the program if it is false.
  */

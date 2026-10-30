@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Image Management
+ * # Image
  *
  * Images are handles (`bxr_image_t`) created from asset files mounted with the
  * `bxr_asset.h` API or from raw pixels in memory, and released with

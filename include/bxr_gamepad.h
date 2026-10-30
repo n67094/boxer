@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026 nsix. All rights reserved.
  *
- * # Gamepad Input Handling
+ * # Gamepad Handling
  *
  * Up to `BXR_GAMEPAD_MAX` gamepads are tracked.
  *
