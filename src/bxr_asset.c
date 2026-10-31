@@ -93,6 +93,24 @@ bxr_asset_mount(const char *path)
 }
 
 bool
+bxr_asset_mount_memory(const void *data, size_t length, const char *name)
+{
+  BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);
+  BXR_ASSERT(data);
+  BXR_ASSERT(length > 0);
+  BXR_ASSERT(name);
+
+  // Mounted as append (lower priority than write dir), memory is not freed
+  if (!PHYSFS_mountMemory(data, length, NULL, name, NULL, 1)) {
+    bxr_set_error("Failed to mount %s from memory: (error: %s)",
+                  name,
+                  PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+    return false;
+  }
+  return true;
+}
+
+bool
 bxr_asset_unmount(const char *path)
 {
   BXR_ASSERT(initialized_ == BXR_INIT_COOKIE);

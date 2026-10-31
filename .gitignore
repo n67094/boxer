@@ -5,6 +5,5 @@ compile_commands.json
 tests
 
 demo/build/
-demo/assets.zip
 demo/demo
 demo/core.*
