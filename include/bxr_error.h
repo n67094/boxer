@@ -1,9 +1,9 @@
 /**
  * File `bxr_error.h`.
  *
- * # Boxer's Error Handling.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Error Handling
  */
 
 #ifndef BXR_ERROR_H_
@@ -14,7 +14,7 @@
 #include "bxr_defs.h"
 
 /**
- * ## Public API
+ * ## API
  */
 
 /**

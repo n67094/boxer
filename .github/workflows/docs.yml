@@ -1,0 +1,55 @@
+# Generate the markdown documentation from the headers and publish it to the boxerwiki repository.
+
+name: docs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs
+  cancel-in-progress: false
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Generate docs
+        run: make docs
+
+      - uses: actions/checkout@v4
+        with:
+          repository: n67094/boxerwiki
+          ref: main
+          token: ${{ secrets.BOXERWIKI_TOKEN }}
+          path: boxerwiki
+
+      - name: Publish to boxerwiki
+        run: |
+          boxer_commit=$(git rev-parse --short HEAD)
+
+          rsync -a --delete --exclude .git --exclude .github --exclude README.md build/docs/ boxerwiki/
+
+          cd boxerwiki
+          git config user.name "boxer docs"
+          git config user.email "docs@boxer.invalid"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Docs are up to date."
+            exit 0
+          fi
+
+          git commit -m "docs: boxer@$boxer_commit"
+          git push

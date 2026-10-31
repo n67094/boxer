@@ -1,7 +1,9 @@
 /**
  * File `bxr_log.h`.
  *
- * # Boxer's Logging Utilities.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Logging Utilities
  *
  * The default minimum priority is `BXR_LOG_PRIORITY_DEBUG`, so every level is
  * shown until `bxr_log_set_priority()` is called.
@@ -14,8 +16,6 @@
  * Optionally enable ANSI terminal colors:
  *
  *   bxr_log_enable_colors(true);
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_LOG_H_
@@ -29,7 +29,7 @@ void bxr_log_setup(void);
 void bxr_log_teardown(void);
 
 /**
- * ## Public API
+ * ## Enums
  */
 
 /**
@@ -45,9 +45,14 @@ typedef enum
 } bxr_log_priority_e;
 
 /**
+ * ## API
+ */
+
+/**
  * Log a printf-style message at the given priority.
  *
  * `priority` level of the message, in `[0, BXR_LOG_PRIORITY_SIZE)`.
+ *
  * `fmt` printf-style format string, followed by its arguments; must not be
  * NULL.
  */

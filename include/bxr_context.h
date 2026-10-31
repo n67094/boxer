@@ -1,9 +1,9 @@
 /**
  * File `bxr_context.h`.
  *
- * # Boxer's Global Context.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Global Context
  */
 
 #ifndef BXR_CONTEXT_H_
@@ -15,6 +15,16 @@
 #include "bxr_game.h"
 #include "bxr_math.h"
 
+/**
+ * ## Typedefs
+ */
+
+/**
+ * Global context of the application.
+ *
+ * Contains the configuration, the window, the GPU device and other global
+ * state.
+ */
 typedef struct bxr_context_s
 {
   bxr_game_config_t config;
@@ -27,6 +37,10 @@ typedef struct bxr_context_s
   Uint64 target_delta_ns; // fixed time between updates, never 0.
   Uint64 frame_count; // number of frames rendered since the application started
 } bxr_context_t;
+
+/**
+ * ## API
+ */
 
 /**
  * Get the global context and create it if it doesn't exist yet.
@@ -59,9 +73,11 @@ BXR_API SDL_Window *bxr_context_get_window(void);
  * Resize the window and store the new size in the configuration.
  *
  * `width` new width in window coordinates.
+ *
  * `height` new height in window coordinates.
  *
  * return `true` if the window was resized successfully, `false` otherwise.
+ *
  * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_context_set_window_dimensions(int width, int height);
@@ -79,6 +95,7 @@ BXR_API bxr_vec2_t bxr_context_get_window_dimensions(void);
  * Takes effect on the next frame, the window itself is not resized.
  *
  * `width` virtual width in pixels.
+ *
  * `height` virtual height in pixels.
  */
 BXR_API void bxr_context_set_virtual_window_dimensions(int width, int height);
@@ -96,6 +113,7 @@ BXR_API bxr_vec2_t bxr_context_get_virtual_window_dimensions(void);
  * `fullscreen` `true` for fullscreen, `false` for windowed.
  *
  * `return` true on success, false on failure.
+ *
  * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_context_set_fullscreen(bool fullscreen);
@@ -113,6 +131,7 @@ BXR_API bool bxr_context_is_fullscreen(void);
  * `resizable` `true` to allow resizing, `false` to forbid it.
  *
  * `return` true on success, false on failure.
+ *
  * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_context_set_resizable(bool resizable);

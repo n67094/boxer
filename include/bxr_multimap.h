@@ -1,11 +1,11 @@
 /**
  * File `bxr_multimap.h`.
  *
- * # Boxer's String Multimap.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # String Multimap
  *
  * Hash map from string keys to sets of `Uint32` values (boxer resource ids).
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_MULTIMAP_H_
@@ -19,6 +19,13 @@
 #define BXR_MULTIMAP_LOAD_NUMERATOR 3
 #define BXR_MULTIMAP_LOAD_DENOMINATOR 4
 
+/**
+ * ## Enums
+ */
+
+/**
+ * Slot state in the multimap.
+ */
 typedef enum
 {
   BXR_MULTIMAP_SLOT_EMPTY     = 0, // Empty slot
@@ -26,7 +33,18 @@ typedef enum
   BXR_MULTIMAP_SLOT_TOMBSTONE = 2  // Deleted slot (tombstone)
 } bxr_multimap_slot_e;
 
+/**
+ * ## Typedefs
+ */
+
+/**
+ * Handle to a multimap.
+ */
 typedef struct bxr_multimap_s bxr_multimap_t;
+
+/**
+ * ## API
+ */
 
 /**
  * Create an empty multimap.
@@ -48,10 +66,13 @@ bxr_multimap_t *bxr_multimap_create(size_t initial_size);
  * is a no-op that succeeds.
  *
  * `map` the multimap; must not be NULL.
+ *
  * `key` the key; must not be NULL. The string is copied.
+ *
  * `value` the value to add.
  *
  * `return` true on success, false on allocation failure.
+ *
  * Call `bxr_get_error()` for more information.
  */
 bool bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value);
@@ -63,7 +84,9 @@ bool bxr_multimap_add(bxr_multimap_t *map, const char *key, Uint32 value);
  * value is removed.
  *
  * `map` the multimap; must not be NULL.
+ *
  * `key` the key; must not be NULL.
+ *
  * `value` the value to remove.
  *
  * `return` true if the value was removed, false if the key or the value was
@@ -76,6 +99,7 @@ bxr_multimap_remove_value(bxr_multimap_t *map, const char *key, Uint32 value);
  * Remove a key and all its values.
  *
  * `map` the multimap; must not be NULL.
+ *
  * `key` the key; must not be NULL.
  *
  * `return` true if the key was removed, false if it was not found.
@@ -86,7 +110,9 @@ bool bxr_multimap_remove(bxr_multimap_t *map, const char *key);
  * Get a copy of the values of a key, in no particular order.
  *
  * `map` the multimap; must not be NULL.
+ *
  * `key` the key; must not be NULL.
+ *
  * `out_values` receives a newly allocated array of the values, or NULL if the
  * key does not exist. May be NULL to only query the count.
  *

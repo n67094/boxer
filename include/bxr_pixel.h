@@ -1,11 +1,11 @@
 /**
  * File `bxr_pixel.h`.
  *
- * # Boxer's Pixel Formats.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Pixel Formats
  *
  * Pixel formats used by boxer images.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_PIXEL_H_
@@ -13,6 +13,13 @@
 
 #include <SDL3/SDL.h>
 
+/**
+ * ## Enums
+ */
+
+/**
+ * Pixel formats.
+ */
 typedef enum bxr_pixel_format_e
 {
   BXR_PIXEL_FORMAT_UNKNOWN       = SDL_PIXELFORMAT_UNKNOWN,

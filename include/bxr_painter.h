@@ -1,7 +1,9 @@
 /**
  * File `bxr_painter.h`.
  *
- * # Boxer's 2D Painter.
+ * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # 2D Painter
  *
  * Immediate-mode 2D renderer (thin wrapper over SDL_gp).
  *
@@ -10,8 +12,6 @@
  *
  * Default coordinate space: virtual resolution in pixels, origin at the
  * top-left corner, y pointing down.
- *
- * Copyright (c) 2026 nsix. All rights reserved.
  */
 
 #ifndef BXR_PAINTER_H_
@@ -38,7 +38,7 @@ bool bxr_painter_setup(const bxr_painter_desc_t *desc);
 void bxr_painter_teardown(void);
 
 /**
- * ## Public API
+ * ## Typedefs
  */
 
 /**
@@ -61,6 +61,10 @@ typedef struct bxr_textured_rect_s
 } bxr_textured_rect_t;
 
 /**
+ * ## API
+ */
+
+/**
  * Constructs a `bxr_textured_rect_t` compound literal from the `dst`
  * destination region (in the current coordinate space) and the `src` region
  * in the texture.
@@ -72,6 +76,7 @@ typedef struct bxr_textured_rect_s
  * Set the coordinate space boundaries mapped onto the current viewport.
  *
  * `left` and `right` the x coordinates of the left and right edges.
+ *
  * `bottom` and `top` the y coordinates of the bottom and top edges.
  */
 BXR_API void
@@ -122,6 +127,7 @@ BXR_API void bxr_painter_rotate(float angle);
  *
  * `angle` the angle in radians. Positive is clockwise on screen with the
  * default y-down projection.
+ *
  * `ax` and `ay` the pivot, in current coordinates.
  */
 BXR_API void bxr_painter_rotate_at(float angle, float ax, float ay);
@@ -137,6 +143,7 @@ BXR_API void bxr_painter_scale(float sx, float sy);
  * Scale the coordinate space of subsequent draws around a point.
  *
  * `sx` and `sy` the scale factors along each axis. Negative values mirror.
+ *
  * `ax` and `ay` the pivot, in current coordinates.
  */
 BXR_API void bxr_painter_scale_at(float sx, float sy, float ax, float ay);
@@ -161,8 +168,11 @@ BXR_API void bxr_painter_reset_pipeline(void);
  * `BXR_PAINTER_MAX_UNIFORM_FLOATS * sizeof(float)` bytes (asserted).
  *
  * `vs_data` vertex stage data. May be NULL only if `vs_size` is 0.
+ *
  * `vs_size` size of `vs_data` in bytes.
+ *
  * `fs_data` fragment stage data. May be NULL only if `fs_size` is 0.
+ *
  * `fs_size` size of `fs_data` in bytes.
  */
 BXR_API void bxr_painter_set_uniform(const void *vs_data,
@@ -206,6 +216,7 @@ BXR_API void bxr_painter_reset_color(void);
  * Bind an image to a texture channel for subsequent draws.
  *
  * `channel` the texture channel, in `[0, BXR_PAINTER_MAX_TEXTURE_SLOTS)`.
+ *
  * `image` the image to bind. Ownership stays with the caller.
  */
 BXR_API void bxr_painter_set_image(int channel, bxr_image_t image);
@@ -232,6 +243,7 @@ BXR_API void bxr_painter_reset_image(int channel);
  * Bind a sampler to a texture channel for subsequent draws.
  *
  * `channel` the texture channel, in `[0, BXR_PAINTER_MAX_TEXTURE_SLOTS)`.
+ *
  * `sampler` the sampler to bind. Ownership stays with the caller.
  */
 BXR_API void bxr_painter_set_sampler(int channel, bxr_sampler_t *sampler);
@@ -257,6 +269,7 @@ BXR_API void bxr_painter_reset_sampler(int channel);
  * ignore the projection and transform.
  *
  * `x` and `y` the top-left corner.
+ *
  * `w` and `h` the size.
  */
 BXR_API void bxr_painter_scissor(int x, int y, int w, int h);
@@ -284,7 +297,9 @@ BXR_API void bxr_painter_clear(void);
  * Draw raw vertices as the given primitive.
  *
  * `primitive_type` how vertices are assembled.
+ *
  * `vertices` the vertex array. Must not be NULL if `vertices_count` > 0.
+ *
  * `vertices_count` number of elements in `vertices`.
  */
 BXR_API void bxr_painter_draw(bxr_primitive_e primitive_type,
@@ -295,6 +310,7 @@ BXR_API void bxr_painter_draw(bxr_primitive_e primitive_type,
  * Draw points with the current color.
  *
  * `points` the point array. Must not be NULL if `count` > 0.
+ *
  * `count` number of points.
  */
 BXR_API void bxr_painter_draw_points(const bxr_vec2_t *points, Uint32 count);
@@ -308,6 +324,7 @@ BXR_API void bxr_painter_draw_point(bxr_vec2_t point);
  * Draw independent line segments with the current color.
  *
  * `lines` the segment array. Must not be NULL if `count` > 0.
+ *
  * `count` number of segments.
  */
 BXR_API void bxr_painter_draw_lines(const bxr_line_t *lines, Uint32 count);
@@ -321,6 +338,7 @@ BXR_API void bxr_painter_draw_line(bxr_line_t line);
  * Draw a polyline joining consecutive points with the current color.
  *
  * `points` the point array. Must not be NULL if `count` > 0.
+ *
  * `count` number of points
  */
 BXR_API void bxr_painter_draw_lines_strip(const bxr_vec2_t *points,
@@ -330,6 +348,7 @@ BXR_API void bxr_painter_draw_lines_strip(const bxr_vec2_t *points,
  * Draw filled triangles with the current color.
  *
  * `triangles` the triangle array. Must not be NULL if `count` > 0.
+ *
  * `count` number of triangles.
  */
 BXR_API void bxr_painter_draw_filled_triangles(const bxr_triangle_t *triangles,
@@ -344,6 +363,7 @@ BXR_API void bxr_painter_draw_filled_triangle(bxr_triangle_t triangle);
  * Draw a filled triangle strip with the current color.
  *
  * `points` the strip vertices. Must not be NULL if `count` > 0.
+ *
  * `count` number of points.
  */
 BXR_API void bxr_painter_draw_filled_triangles_strip(const bxr_vec2_t *points,
@@ -353,6 +373,7 @@ BXR_API void bxr_painter_draw_filled_triangles_strip(const bxr_vec2_t *points,
  * Draw filled rectangles with the current color.
  *
  * `rects` the rectangle array. Must not be NULL if `count` > 0.
+ *
  * `count` number of rectangles.
  */
 BXR_API void bxr_painter_draw_filled_rects(const bxr_rect_t *rects,
@@ -369,7 +390,9 @@ BXR_API void bxr_painter_draw_filled_rect(bxr_rect_t rect);
  *
  * `channel` the texture channel, in `[0, BXR_PAINTER_MAX_TEXTURE_SLOTS)`; an
  * image must be bound to it.
+ *
  * `rects` the rectangle array. Must not be NULL if `count` > 0.
+ *
  * `count` number of rectangles.
  */
 BXR_API void bxr_painter_draw_textured_rects(int channel,
@@ -382,6 +405,7 @@ BXR_API void bxr_painter_draw_textured_rects(int channel,
  *
  * `channel` the texture channel, in `[0, BXR_PAINTER_MAX_TEXTURE_SLOTS)`; an
  * image must be bound to it.
+ *
  * `rect` the rectangle to draw.
  */
 BXR_API void bxr_painter_draw_textured_rect(int channel,

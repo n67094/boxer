@@ -1,17 +1,21 @@
 /**
  * File `bxr_mem.h`.
  *
- * # Boxer's Memory Utilities.
+ * Copyright (c) 2025 nsix. All rights reserved.
+ *
+ * # Memory Utilities
  *
  * Memory allocation and memory manipulation utilities.
- *
- * Copyright (c) 2025 nsix. All rights reserved.
  */
 
 #ifndef BXR_MEM_H_
 #define BXR_MEM_H_
 
 #include <SDL3/SDL.h>
+
+/**
+ * ## Macros
+ */
 
 /**
  * Allocate uninitialized memory.
@@ -28,6 +32,7 @@
  * Allocate zero-initialized memory for an array.
  *
  * `count` number of elements.
+ *
  * `nbytes` size of one element in bytes.
  *
  * `return` the new pointer, or NULL on failure.
@@ -70,6 +75,7 @@
  * Resize a block of memory.
  *
  * `ptr` pointer to the block to resize, NULL behaves like `BXR_ALLOC()`.
+ *
  * `nbytes` new size of the block in bytes.
  *
  * `return` the new pointer, or NULL on failure.

@@ -1,15 +1,19 @@
 /**
  * File `bxr_color.h`.
  *
- * # Boxer's Color Utilities.
- *
  * Copyright (c) 2025 nsix. All rights reserved.
+ *
+ * # Color Utilities
  */
 
 #ifndef BXR_COLOR_H_
 #define BXR_COLOR_H_
 
 #include <SDL3/SDL.h>
+
+/**
+ * ## Typedefs
+ */
 
 /**
  * RGBA color with 8 bits per channel, from 0 to 255.
@@ -25,24 +29,55 @@ typedef struct bxr_color_s
 } bxr_color_t;
 
 /**
- * Predefined opaque colors, plus `BXR_COLOR_TRANSPARENT`.
+ * ## Macros
+ */
+
+/**
+ * White
  */
 #define BXR_COLOR_WHITE (bxr_color_t){ .r = 255, .g = 255, .b = 255, .a = 255 }
+/**
+ * Black
+ */
 #define BXR_COLOR_BLACK (bxr_color_t){ .r = 0, .g = 0, .b = 0, .a = 255 }
+/**
+ * Red
+ */
 #define BXR_COLOR_RED (bxr_color_t){ .r = 255, .g = 0, .b = 0, .a = 255 }
+/**
+ * Green
+ */
 #define BXR_COLOR_GREEN (bxr_color_t){ .r = 0, .g = 255, .b = 0, .a = 255 }
+/**
+ * Blue
+ */
 #define BXR_COLOR_BLUE (bxr_color_t){ .r = 0, .g = 0, .b = 255, .a = 255 }
+/**
+ * Magenta
+ */
 #define BXR_COLOR_MAGENTA (bxr_color_t){ .r = 255, .g = 0, .b = 255, .a = 255 }
+/**
+ * Cyan
+ */
 #define BXR_COLOR_CYAN (bxr_color_t){ .r = 0, .g = 255, .b = 255, .a = 255 }
+/**
+ * Yellow
+ */
 #define BXR_COLOR_YELLOW (bxr_color_t){ .r = 255, .g = 255, .b = 0, .a = 255 }
+/**
+ * Transparent
+ */
 #define BXR_COLOR_TRANSPARENT (bxr_color_t){ .r = 0, .g = 0, .b = 0, .a = 0 }
 
 /**
  * Build a color from its channels.
  *
  * `r` red channel, from 0 to 255.
+ *
  * `g` green channel, from 0 to 255.
+ *
  * `b` blue channel, from 0 to 255.
+ *
  * `a` alpha channel, from 0 (transparent) to 255 (opaque).
  *
  * `return` a `bxr_color_t` compound literal, by value.

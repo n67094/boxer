@@ -1,9 +1,9 @@
 /**
  * File `bxr_time.h`.
  *
- * # Boxer's Time Utilities.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Time Utilities
  */
 
 #ifndef BXR_TIME_H_
@@ -32,7 +32,7 @@ bxr_time_get_ticks(void)
  *
  * Callback signature:
  *
- * ```c
+ * ```cpp
  * Uint32 callback(void *udata, bxr_timer_t timer_id, Uint32 interval);
  * ```
  *
@@ -41,7 +41,9 @@ bxr_time_get_ticks(void)
  *
  * `interval_ms` the delay before the first call, in milliseconds; also passed
  * to `callback` as `interval`.
+ *
  * `callback` the function to call when the delay has elapsed, must not be NULL.
+ *
  * `udata` a pointer passed to `callback`, may be NULL.
  *
  * `return` the timer ID on success, or 0 on failure.

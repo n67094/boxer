@@ -1,9 +1,9 @@
 /**
  * File `bxr_defs.h`.
  *
- * # Boxer's Global Definitions and Constants.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Global Definitions
  */
 
 #ifndef BXR_DEFS_H_

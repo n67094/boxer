@@ -1,15 +1,19 @@
 /**
  * File `bxr_game.h`.
  *
- * # Boxer's Game Lifecycle.
- *
  * Copyright (c) 2026 nsix. All rights reserved.
+ *
+ * # Game Lifecycle
  */
 
 #ifndef BXR_GAME_H_
 #define BXR_GAME_H_
 
 #include <SDL3/SDL.h>
+
+/**
+ * ## Typedefs
+ */
 
 /**
  * Boxer configuration.
@@ -44,6 +48,10 @@ typedef struct bxr_game_config_s
   bool fullscreen;
   bool resizable;
 } bxr_game_config_t;
+
+/**
+ * ## API
+ */
 
 /**
  * Provide the game configuration, implemented by the user.
