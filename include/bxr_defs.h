@@ -9,13 +9,6 @@
 #ifndef BXR_DEFS_H_
 #define BXR_DEFS_H_
 
-/**
- * Marks a public function for export from (or import into) the boxer library.
- *
- * On Windows it expands to `__declspec(dllexport)` when `BOXER_BUILD` is
- * defined (building boxer) and `__declspec(dllimport)` otherwise. Elsewhere it
- * expands to `extern`.
- */
 #if defined(_WIN32)
 #ifdef BOXER_BUILD
 #define BXR_API __declspec(dllexport)
