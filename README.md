@@ -10,8 +10,6 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 Boxer is a layer over SDL3 that provides a simple and efficent API for building games fast.
 
-The documentation is hosted [here](https://www.nsix.blog/docs).
-
 Features:
 
 - Asset management and resource loading from `.zip`, `.7z`, and more.
@@ -22,6 +20,8 @@ Features:
 - Keyboard, mouse, and gamepad input handling.
 - Math utilities for vectors, matrices, and transformations.
 - An entity-component system (ECS) for flexible game object management.
+
+The documentation is hosted [here](https://www.nsix.blog/docs).
 
 ## Prerequisites
 
