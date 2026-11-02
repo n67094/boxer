@@ -6,14 +6,16 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 # Boxer
 
-> let's make it roar!
+> Build games fast with a lightweight, cross-platform 2D game library written in C.
 
-Build games fast with a lightweight, cross-platform 2D game library written in C.
+Boxer is a layer over SDL3 that provides a simple and efficent API for building games fast.
+
+The documentation is hosted [here](https://www.nsix.blog/docs).
 
 Features:
 
-- Asset management and resource loading from `.zip`, `.7z`, and other archive formats.
-- 2D immediate mode rendering with support for custom shaders and pipelines.
+- Asset management and resource loading from `.zip`, `.7z`, and more.
+- 2D rendering with support for custom shaders and pipelines.
 - Image loading and rendering support for `.bmp` and `.png` formats.
 - Audio loading and playback support for `.wav` and `.ogg` formats.
 - Read/write support for `.ini` files.
@@ -155,6 +157,10 @@ bxr_game_teardown(void)
 # AI Usage Policy
 
 I want this project to remain as human as possible; please check out the [AGENTS.md](AGENTS.md).
+
+# Contributing
+
+Feel free to suggest features, report bugs, or submit pull requests to improve the Boxer library. Your contributions are welcome!
 
 # Sponsors
 
