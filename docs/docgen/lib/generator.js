@@ -105,8 +105,10 @@ export class Generator {
     if (token.code) {
       this.apply_code_pattern(token);
       // this.add_sub_header(token.header || token.code);
-      this.add_lines(token.text, true);
       this.add_code_line(token);
+      this.add_lines(token.text, true);
+      // Blank line so "---" is a rule, not a setext heading underline for the text above
+      this.add_line("");
       this.add_line("---");
       this.add_line("");
     } else {
