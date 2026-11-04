@@ -94,6 +94,44 @@ function collect_declaration(next_line, has_more) {
 }
 
 /**
+ * Checks if the declaration lines are a function declaration (prototype or function pointer typedef).
+ * Macros and declarations with a body (struct, enum, union, inline function...) are not.
+ *
+ * @param {string[]} lines - The raw lines of the declaration.
+ *
+ * @returns {boolean} - True if the declaration is a function declaration.
+ */
+function is_function_declaration(lines) {
+  if (lines.length === 0) return false;
+  if (lines[0].trim().startsWith("#")) return false;
+
+  let code = lines.join("\n");
+
+  // Line comments would swallow the rest of the line once joined
+  if (code.includes("//")) return false;
+
+  return code.includes("(") && !code.includes("{");
+}
+
+/**
+ * Joins the declaration lines into a single line.
+ * e.g. "int f(int a,\n      int b);" => "int f(int a, int b);"
+ *
+ * @param {string[]} lines - The raw lines of the declaration.
+ *
+ * @returns {string} - The declaration on one line.
+ */
+function join_on_one_line(lines) {
+  return lines
+    .map((line) => line.trim())
+    .filter((line) => line !== "")
+    .join(" ")
+    .replace(/\*\s+(?=\w)/g, "*")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")");
+}
+
+/**
  * Parses the provided code text and extracts documentation blocks along with their associated code lines.
  *
  * @param {string} text - The code text to be parsed.
@@ -144,9 +182,14 @@ export function parse_code(text) {
 
     // Collect the code lines associated with the documentation block
     block.code_line = line_count + 1;
-    block.code = trim_code(
-      collect_declaration(next_line, () => lines.length > 0).join("\n"),
-    );
+    let declaration = collect_declaration(next_line, () => lines.length > 0);
+
+    // Functions are shown on one line, other code blocks are kept as is
+    if (is_function_declaration(declaration)) {
+      block.code = trim_code(join_on_one_line(declaration));
+    } else {
+      block.code = trim_code(declaration.join("\n"));
+    }
 
     // Store the collected documentation block in the array
     doc_blocks.push(block);
