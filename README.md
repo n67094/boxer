@@ -6,20 +6,19 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 # Boxer
 
-> Build games fast with a lightweight, cross-platform 2D game library written in C.
+> Build games fast with a lightweight, cross-platform 2D game framework written in C.
 
 Boxer is a layer over SDL3 that provides a simple and efficent API for building games fast.
 
 Features:
 
-- Asset management and resource loading from `.zip`, `.7z`, and more.
-- 2D rendering with support for custom shaders and pipelines.
-- Image loading and rendering support for `.bmp` and `.png` formats.
-- Audio loading and playback support for `.wav` and `.ogg` formats.
-- Read/write support for `.ini` files.
-- Keyboard, mouse, and gamepad input handling.
-- Math utilities for vectors, matrices, and transformations.
-- An entity-component system (ECS) for flexible game object management.
+- **2D rendering**: support for custom shaders and pipelines.
+- **Images**: `.bmp` and `.png` support.
+- **Audio**: `.wav` and `.ogg` playback.
+- **Configuration**: read and write `.ini` files.
+- **Input**: keyboard, mouse, and gamepad handling.
+- **Math**: vectors, matrices, and transformation utilities.
+- **ECS**: an entity-component system for flexible game object management.
 
 The documentation is hosted [here](https://www.nsix.blog/docs).
 
@@ -34,9 +33,9 @@ Install the following development dependencies (via your package manager or from
 
 ## Build and Run Demo
 
-The demo is a simple game that showcases the features of the Boxer library. It includes a title screen, a level with a player character, and basic input handling.
+The demo is a simple game that showcases some of Boxer's features. It includes a title screen, a level with a player character, and basic input handling.
 
-Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer library.
+Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer framework.
 
 To run the game you just have to run the following commands:
 
@@ -50,7 +49,7 @@ make
   <img src="images/skullboy_1.png" alt="Skullboy title screen" width="49%" /><img src="images/skullboy_2.png" alt="Skullboy in game" width="49%" />
 </p>
 
-## Build and Install the Library (Optional)
+## Build and Install as a Library (Optional)
 
 Here are the steps to build and install `libboxer` on your system.
 
