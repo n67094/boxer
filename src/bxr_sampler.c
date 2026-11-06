@@ -1,10 +1,10 @@
 #include <SDL3/SDL.h>
 
 #include "bxr_assert.h"
-#include "bxr_context.h"
+#include "bxr_context_internal.h"
 #include "bxr_error.h"
 #include "bxr_mem.h"
-#include "bxr_sampler.h"
+#include "bxr_sampler_internal.h"
 
 static Uint32 initialized_     = 0;
 static bxr_context_t *context_ = NULL;

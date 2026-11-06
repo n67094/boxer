@@ -35,11 +35,7 @@
 
 #include <SDL3/SDL.h>
 
-#include "bxr_context.h"
 #include "bxr_defs.h"
-
-bool bxr_asset_setup(bxr_context_t *context);
-void bxr_asset_teardown(void);
 
 /**
  * ## API
@@ -58,6 +54,7 @@ void bxr_asset_teardown(void);
  * not be NULL.
  *
  * `return` true on success, false on failure.
+ *
  * Call `bxr_get_error()` for more information.
  */
 BXR_API bool bxr_asset_mount(const char *path);
@@ -74,6 +71,7 @@ BXR_API bool bxr_asset_mount(const char *path);
  * NULL.
  *
  * `return` true on success, false on failure.
+ *
  * Call `bxr_get_error()` for more information.
  */
 BXR_API bool

@@ -8,6 +8,7 @@
 #define SPARSE_SET_H_
 
 #include "bxr.h"
+#include "bxr_sparse_set.h"
 
 BXR_UNIT_CASE(case_sparse_set_insert)
 {

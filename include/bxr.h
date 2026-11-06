@@ -5,8 +5,9 @@
  *
  * # Main Header
  *
- * Boxer owns the program entry point through SDL main callbacks: do
- * not write a `main()`, implement the callbacks of `bxr_game.h` instead.
+ * Boxer is a lightweight 2D game framework built for rapid development of
+ * simple games. It offers a straightforward API for graphics, input, and core
+ * game mechanics, which makes it a great fit for beginners and hobbyists.
  */
 
 #ifndef BXR_H_
@@ -32,13 +33,11 @@
 #include "bxr_math.h"
 #include "bxr_mem.h"
 #include "bxr_mouse.h"
-#include "bxr_multimap.h"
 #include "bxr_painter.h"
 #include "bxr_pipeline.h"
 #include "bxr_pixel.h"
 #include "bxr_sampler.h"
 #include "bxr_shader.h"
-#include "bxr_sparse_set.h"
 #include "bxr_string.h"
 #include "bxr_time.h"
 #include "bxr_unit.h"
@@ -49,10 +48,6 @@
 
 /**
  * Request the application to exit.
- *
- * Asynchronous: pushes an `SDL_EVENT_QUIT` and returns immediately. The
- * current frame finishes, then `bxr_game_teardown()` and the subsystem
- * teardowns run before the process exits. Safe to call from any thread.
  */
 void bxr_quit(void);
 

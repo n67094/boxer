@@ -5,6 +5,17 @@
 #include <SDL3/SDL_main.h>
 
 #include "bxr.h"
+#include "bxr_asset_internal.h"
+#include "bxr_audio_internal.h"
+#include "bxr_context_internal.h"
+#include "bxr_gamepad_internal.h"
+#include "bxr_image_internal.h"
+#include "bxr_keyboard_internal.h"
+#include "bxr_log_internal.h"
+#include "bxr_mouse_internal.h"
+#include "bxr_painter_internal.h"
+#include "bxr_sampler_internal.h"
+#include "bxr_shader_internal.h"
 
 #include "bxr_sdl_gp.h"
 

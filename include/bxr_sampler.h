@@ -47,9 +47,6 @@ typedef struct bxr_sampler_s
   SDL_GPUSampler *sampler;
 } bxr_sampler_t;
 
-bool bxr_sampler_setup(void);
-void bxr_sampler_teardown(void);
-
 /**
  * ## API
  */

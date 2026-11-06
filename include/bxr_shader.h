@@ -28,7 +28,6 @@
 
 #include <SDL3/SDL.h>
 
-#include "bxr_context.h"
 #include "bxr_defs.h"
 
 #define BXR_SHADER_INVALID_ID 0
@@ -81,9 +80,6 @@ typedef struct bxr_shader_desc_s
   Uint32 num_storage_buffers;
   Uint32 num_uniform_buffers;
 } bxr_shader_desc_t;
-
-bool bxr_shader_setup(bxr_context_t *context);
-void bxr_shader_teardown(void);
 
 /**
  * ## API

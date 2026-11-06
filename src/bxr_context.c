@@ -1,4 +1,4 @@
-#include "bxr_context.h"
+#include "bxr_context_internal.h"
 #include "bxr_assert.h"
 #include "bxr_error.h"
 #include "bxr_math.h"

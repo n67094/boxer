@@ -1,4 +1,4 @@
-#include "bxr_mouse.h"
+#include "bxr_mouse_internal.h"
 #include "bxr_assert.h"
 #include "bxr_context.h"
 #include "bxr_defs.h"

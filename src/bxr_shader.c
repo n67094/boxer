@@ -7,11 +7,11 @@
 #include "bxr_assert.h"
 #include "bxr_asset.h"
 #include "bxr_config.h"
-#include "bxr_context.h"
+#include "bxr_context_internal.h"
 #include "bxr_defs.h"
 #include "bxr_error.h"
 #include "bxr_mem.h"
-#include "bxr_shader.h"
+#include "bxr_shader_internal.h"
 
 typedef struct bxr_shader_bytecode_s_
 {

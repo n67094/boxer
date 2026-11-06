@@ -2,7 +2,7 @@
 
 #include "bxr_assert.h"
 #include "bxr_defs.h"
-#include "bxr_keyboard.h"
+#include "bxr_keyboard_internal.h"
 
 typedef struct bxr_key_state_s_
 {

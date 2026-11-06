@@ -33,9 +33,6 @@ typedef struct bxr_image_s
   Uint32 id;
 } bxr_image_t;
 
-bool bxr_image_setup(void);
-void bxr_image_teardown(void);
-
 /**
  * ## API
  */

@@ -77,14 +77,6 @@ typedef enum
   BXR_GAMEPAD_AXIS_SIZE,
 } bxr_gamepad_axis_e;
 
-bool bxr_gamepad_setup(void);
-void bxr_gamepad_teardown(void);
-void bxr_gamepad_listen(void);
-void bxr_gamepad_begin_frame(void);
-void bxr_gamepad_button_down(int index, bxr_gamepad_button_e button);
-void bxr_gamepad_button_up(int index, bxr_gamepad_button_e button);
-void bxr_gamepad_axis_motion(int index, bxr_gamepad_axis_e axis, Sint16 value);
-
 /**
  * ## API
  */

@@ -113,7 +113,7 @@ LDFLAGS += -fsanitize=address
 endif
 
 # Test compilation flags
-TEST_CFLAGS  := $(CFLAGS) -I$(TEST_DIR)
+TEST_CFLAGS  := $(CFLAGS) -I$(TEST_DIR) -I$(BOXER_SRC_DIR)
 TEST_LDFLAGS := $(LDFLAGS)
 TEST_LDLIBS  := $(STATIC_LIB) $(LDLIBS)
 

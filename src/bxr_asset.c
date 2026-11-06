@@ -1,7 +1,7 @@
 #include <physfs.h>
 
 #include "bxr_assert.h"
-#include "bxr_asset.h"
+#include "bxr_asset_internal.h"
 #include "bxr_defs.h"
 #include "bxr_error.h"
 #include "bxr_log.h"

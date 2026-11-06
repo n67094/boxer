@@ -6,21 +6,11 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 # Boxer
 
-> Build games fast with a lightweight, cross-platform 2D game framework written in C.
+**Boxer** is a lightweight 2D game framework built for rapid development of simple games. It offers a straightforward API for graphics, input, and core game mechanics, which makes it a great fit for beginners and hobbyists.
 
-Boxer is a layer over SDL3 that provides a simple and efficent API for building games fast.
+## Why Boxer?
 
-Features:
-
-- **2D rendering**: support for custom shaders and pipelines.
-- **Images**: `.bmp` and `.png` support.
-- **Audio**: `.wav` and `.ogg` playback.
-- **Configuration**: read and write `.ini` files.
-- **Input**: keyboard, mouse, and gamepad handling.
-- **Math**: vectors, matrices, and transformation utilities.
-- **ECS**: an entity-component system for flexible game object management.
-
-The documentation is hosted [here](https://www.nsix.blog/docs).
+Boxer grew out of three passions: game development, C programming, and reading technical books. Those interests shaped its design and philosophy. The goal is a framework that is **easy to use** without sacrificing **efficiency**.
 
 ## Prerequisites
 
@@ -31,13 +21,84 @@ Install the following development dependencies (via your package manager or from
 - C compiler.
 - SDL3 (>= 3.4.2).
 
+## Features
+
+Boxer is currently focused on 2D games and applications. Out of the box, it provides:
+
+- **Asset management**: load resources from `.zip`, `.7z` and other archive formats.
+- **2D rendering**: support for custom shaders and pipelines.
+- **Images**: `.bmp` and `.png` support.
+- **Audio**: `.wav` and `.ogg` playback.
+- **Configuration**: read and write `.ini` files.
+- **Input**: keyboard, mouse, and gamepad handling.
+- **Math**: vectors, matrices, and transformation utilities.
+- **ECS**: an entity-component system for flexible game object management.
+
+## Getting Started
+
+The best way to learn Boxer is to dive into the documentation below and read the code of the [demo](https://github.com/n67094/boxer/tree/main/demo).
+
+Here is a simple example of how to initialize the library and create a window:
+
+```c
+#include <boxer/bxr.h>
+
+// Define the game configuration
+static bxr_game_config_t _config = { 0 };
+
+// Allows boxer to get the game configuration
+const bxr_game_config_t *
+bxr_game_config(void)
+{
+  _config.name  = "application_name";
+  _config.title = "Window Title";
+
+  _config.width  = 160 * 4;
+  _config.height = 144 * 4;
+
+  _config.virtual_width  = 160;
+  _config.virtual_height = 144;
+
+  _config.fullscreen = false;
+  _config.resizable  = false;
+
+  return &_config;
+}
+
+void
+bxr_game_setup(void)
+{
+    // Initialize game state here.
+}
+
+void
+bxr_game_update(double delta_ms)
+{
+    // Update the game logic here.
+    // The logic is updated at a fixed timestep depending on the refresh rate of the screen it's running on.
+}
+
+void
+bxr_game_render(double alpha_ms)
+{
+    // Render the game here.
+    // The game is rendered as many times per second as possible.
+}
+
+void
+bxr_game_teardown(void)
+{
+    // Clean up game state here.
+}
+```
+
 ## Build and Run Demo
 
 The demo is a simple game that showcases some of Boxer's features. It includes a title screen, a level with a player character, and basic input handling.
 
 Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer framework.
 
-To run the game you just have to run the following commands:
+To run the game, you just have to run the following commands:
 
 ```bash
 cd demo
@@ -93,65 +154,6 @@ make docs
 ```
 
 # Getting Started
-
-To get started with Boxer, you can:
-
-- Check out the [demo](demo) directory for code demonstrating how to use the library's features.
-- Generate the documentation with `make docs` to get detailed information on the API and how to integrate it into your projects.
-
-Here is a simple example of how to initialize the library and create a window:
-
-```c
-#include <boxer/bxr.h>
-
-// Define the game configuration
-static bxr_game_config_t _config = { 0 };
-
-// Allows boxer to get the game configuration
-const bxr_game_config_t *
-bxr_game_config(void)
-{
-  _config.name  = "application_name";
-  _config.title = "Window Title";
-
-  _config.width  = 160 * 4;
-  _config.height = 144 * 4;
-
-  _config.virtual_width  = 160;
-  _config.virtual_height = 144;
-
-  _config.fullscreen = false;
-  _config.resizable  = false;
-
-  return &_config;
-}
-
-void
-bxr_game_setup(void)
-{
-    // Initialize game state here.
-}
-
-void
-bxr_game_update(double delta_ms)
-{
-    // Update the game logic here.
-    // The logic is updated at a fixed timestep depending on the refresh rate of the screen it's running on.
-}
-
-void
-bxr_game_render(double alpha_ms)
-{
-    // Render the game here.
-    // The game is rendered as many times per second as possible.
-}
-
-void
-bxr_game_teardown(void)
-{
-    // Clean up game state here.
-}
-```
 
 # AI Usage Policy
 

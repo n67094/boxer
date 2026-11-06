@@ -1,4 +1,4 @@
-#include "bxr_log.h"
+#include "bxr_log_internal.h"
 #include "bxr_assert.h"
 #include "bxr_defs.h"
 

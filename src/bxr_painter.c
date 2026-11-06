@@ -1,10 +1,10 @@
 #include <SDL3/SDL.h>
 
 #include "bxr_assert.h"
-#include "bxr_context.h"
+#include "bxr_context_internal.h"
 #include "bxr_defs.h"
 #include "bxr_error.h"
-#include "bxr_painter.h"
+#include "bxr_painter_internal.h"
 #include "bxr_sdl_gp.h"
 
 static Uint32 initialized_ = 0;

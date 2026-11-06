@@ -25,9 +25,6 @@
 
 #include "bxr_defs.h"
 
-void bxr_log_setup(void);
-void bxr_log_teardown(void);
-
 /**
  * ## Enums
  */

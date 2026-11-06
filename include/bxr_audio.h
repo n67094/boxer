@@ -89,10 +89,6 @@ typedef struct bxr_voice_desc_s
   bool keep_alive; // keep it, don't evict it when the voice limit is reached
 } bxr_voice_desc_t;
 
-bool bxr_audio_setup(void);
-void bxr_audio_begin_frame(void);
-void bxr_audio_teardown(void);
-
 /**
  * ## API
  */

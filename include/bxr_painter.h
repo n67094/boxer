@@ -26,17 +26,6 @@
 #include "bxr_pipeline.h"
 #include "bxr_sampler.h"
 
-typedef struct bxr_painter_desc_t
-{
-  Uint32 max_vertices;
-  Uint32 max_commands;
-  SDL_Window *window;
-  SDL_GPUDevice *gpu_device;
-} bxr_painter_desc_t;
-
-bool bxr_painter_setup(const bxr_painter_desc_t *desc);
-void bxr_painter_teardown(void);
-
 /**
  * ## Typedefs
  */

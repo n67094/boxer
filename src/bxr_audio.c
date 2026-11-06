@@ -8,10 +8,11 @@
 
 #include "bxr_assert.h"
 #include "bxr_asset.h"
-#include "bxr_audio.h"
+#include "bxr_audio_internal.h"
 #include "bxr_config.h"
 #include "bxr_error.h"
 #include "bxr_log.h"
+#include "bxr_math.h"
 #include "bxr_mem.h"
 #include "bxr_multimap.h"
 #include "bxr_pool.h"

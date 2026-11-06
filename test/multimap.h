@@ -8,6 +8,7 @@
 #define MULTIMAP_H_
 
 #include "bxr.h"
+#include "bxr_multimap.h"
 
 bxr_multimap_t *multimap = NULL;
 
