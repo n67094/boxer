@@ -1,9 +1,12 @@
 /**
  * File `bxr_defs.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Global Definitions
+ *
+ * Export and inline macros, and small helper macros (`BXR_ARRAY_SIZE()`,
+ * `BXR_DEFAULT()`, terminal escape codes, ...) shared by every boxer header.
  */
 
 #ifndef BXR_DEFS_H_

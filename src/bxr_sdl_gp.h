@@ -1,7 +1,7 @@
 /**
  * File `bxr_sdl_gp.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # SDL_gp Configuration
  *

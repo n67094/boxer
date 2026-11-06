@@ -1,21 +1,22 @@
 /**
  * File `bxr_log.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Logging Utilities
  *
  * The default minimum priority is `BXR_LOG_PRIORITY_DEBUG`, so every level is
  * shown until `bxr_log_set_priority()` is called.
  *
- * Basic usage:
+ * Typical usage:
  *
- *   BXR_LOG_INFO("Hello, %s!", "world");
- *   BXR_LOG_ERROR("Something went wrong: %d", error_code);
+ * ```cpp
+ * bxr_log_enable_colors(true); // optional ANSI terminal colors
+ * bxr_log_set_priority(BXR_LOG_PRIORITY_INFO);
  *
- * Optionally enable ANSI terminal colors:
- *
- *   bxr_log_enable_colors(true);
+ * BXR_LOG_INFO("Hello, %s!", "world");
+ * BXR_LOG_ERROR("Something went wrong: %s", bxr_get_error());
+ * ```
  */
 
 #ifndef BXR_LOG_H_
@@ -29,9 +30,7 @@
  * ## Enums
  */
 
-/**
- * Log priority levels.
- */
+/** @self */
 typedef enum
 {
   BXR_LOG_PRIORITY_DEBUG = 0,

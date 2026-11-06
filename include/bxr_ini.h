@@ -1,7 +1,7 @@
 /**
  * File `bxr_ini.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # INI reader/writer
  *
@@ -27,6 +27,37 @@
  * [Player]
  * name="nsix\ttest" ; Please note that the name contains a tab character
  * test= ; this will be ignored
+ * ```
+ *
+ * Typical usage, reading:
+ *
+ * ```cpp
+ * size_t length = 0;
+ * Uint8 *data   = bxr_asset_read("config.ini", &length);
+ *
+ * bxr_ini_reader_t *ini = bxr_ini_create_reader(data, length);
+ * BXR_FREE(data); // the reader keeps its own copy
+ *
+ * const char *title = bxr_ini_read_str_or_else(ini, "Window", "title", "Game");
+ * float width       = bxr_ini_read_number_or_else(ini, "Window", "width", 800);
+ *
+ * ...
+ *
+ * bxr_ini_destroy_reader(ini); // `title` becomes invalid
+ * ```
+ *
+ * Typical usage, writing:
+ *
+ * ```cpp
+ * bxr_ini_writer_t *ini = bxr_ini_create_writer();
+ *
+ * bxr_ini_writer_section_begin(ini, "Window");
+ * bxr_ini_write_str(ini, "title", "Test");
+ * bxr_ini_write_number(ini, "width", 800);
+ * bxr_ini_writer_section_end(ini);
+ *
+ * bxr_ini_writer_save(ini, "config.ini");
+ * bxr_ini_destroy_writer(ini);
  * ```
  */
 

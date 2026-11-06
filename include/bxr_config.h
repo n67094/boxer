@@ -1,9 +1,12 @@
 /**
  * File `bxr_config.h`.
  *
- * Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Configuration
+ *
+ * Compile-time limits and default sizes for each boxer subsystem. Changing a
+ * value requires rebuilding boxer.
  */
 
 #ifndef BXR_CONFIG_H_

@@ -1,7 +1,7 @@
 /**
  * File `math.c`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * TODO add test cases for math functions.
  */

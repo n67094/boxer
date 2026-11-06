@@ -1,7 +1,7 @@
 /**
  * File `bxr_ecs.c`.
  *
- * Copyright (c) 2026 nsix.
+ * Copyright (c) 2025 - 2026 nsix.
  *
  * This is an altered version of pico_ecs by James McLean
  * (https://github.com/empyreanx/pico_headers).

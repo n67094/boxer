@@ -1,9 +1,13 @@
 /**
  * File `bxr_color.h`.
  *
- * Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Color Utilities
+ *
+ * RGBA color type (`bxr_color_t`), a set of predefined colors
+ * (`BXR_COLOR_WHITE`, `BXR_COLOR_BLACK`, ...) and `bxr_color_create()` to build
+ * your own.
  */
 
 #ifndef BXR_COLOR_H_
@@ -32,41 +36,15 @@ typedef struct bxr_color_s
  * ## Macros
  */
 
-/**
- * White
- */
+/** @self */
 #define BXR_COLOR_WHITE (bxr_color_t){ .r = 255, .g = 255, .b = 255, .a = 255 }
-/**
- * Black
- */
 #define BXR_COLOR_BLACK (bxr_color_t){ .r = 0, .g = 0, .b = 0, .a = 255 }
-/**
- * Red
- */
 #define BXR_COLOR_RED (bxr_color_t){ .r = 255, .g = 0, .b = 0, .a = 255 }
-/**
- * Green
- */
 #define BXR_COLOR_GREEN (bxr_color_t){ .r = 0, .g = 255, .b = 0, .a = 255 }
-/**
- * Blue
- */
 #define BXR_COLOR_BLUE (bxr_color_t){ .r = 0, .g = 0, .b = 255, .a = 255 }
-/**
- * Magenta
- */
 #define BXR_COLOR_MAGENTA (bxr_color_t){ .r = 255, .g = 0, .b = 255, .a = 255 }
-/**
- * Cyan
- */
 #define BXR_COLOR_CYAN (bxr_color_t){ .r = 0, .g = 255, .b = 255, .a = 255 }
-/**
- * Yellow
- */
 #define BXR_COLOR_YELLOW (bxr_color_t){ .r = 255, .g = 255, .b = 0, .a = 255 }
-/**
- * Transparent
- */
 #define BXR_COLOR_TRANSPARENT (bxr_color_t){ .r = 0, .g = 0, .b = 0, .a = 0 }
 
 /**

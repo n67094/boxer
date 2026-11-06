@@ -1,9 +1,12 @@
 /**
  * File `bxr_error.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Error Handling
+ *
+ * Failing boxer functions store a message describing the error; read it with
+ * `bxr_get_error()`. Only the last error is kept.
  */
 
 #ifndef BXR_ERROR_H_

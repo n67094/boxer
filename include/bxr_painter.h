@@ -1,7 +1,7 @@
 /**
  * File `bxr_painter.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # 2D Painter
  *
@@ -12,6 +12,25 @@
  *
  * Default coordinate space: virtual resolution in pixels, origin at the
  * top-left corner, y pointing down.
+ *
+ * Typical usage, in `bxr_game_render()`:
+ *
+ * ```cpp
+ * bxr_painter_set_color(BXR_COLOR_BLACK);
+ * bxr_painter_clear();
+ *
+ * bxr_painter_set_blendmode(BXR_BLENDMODE_BLEND);
+ * bxr_painter_set_color(BXR_COLOR_WHITE);
+ *
+ * bxr_painter_set_image(0, _img);
+ * bxr_painter_draw_textured_rect(0, (bxr_textured_rect_t){
+ *   .dst = { .x = 8, .y = 24, .w = 64, .h = 32 },
+ *   .src = { .x = 0, .y = 0,  .w = 64, .h = 32 },
+ * });
+ * bxr_painter_reset_image(0);
+ *
+ * bxr_painter_reset_blendmode();
+ * ```
  */
 
 #ifndef BXR_PAINTER_H_

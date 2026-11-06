@@ -1,7 +1,7 @@
 /**
  * @file map.h
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * @copyright Copyright (c) 2025 - 2026 nsix. All rights reserved.
  */
 
 #ifndef MAP_H_

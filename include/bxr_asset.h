@@ -1,7 +1,7 @@
 /**
  * File `bxr_asset.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Game Asset
  *
@@ -28,6 +28,28 @@
  * - .SLB (Independence War archives)
  * - .POD (Terminal Velocity POD archives)
  * - .DAT (Resident Evil 3 rofs.dat archives)
+ *
+ * Typical usage:
+ *
+ * ```cpp
+ * bxr_asset_mount("assets.zip");
+ *
+ * size_t length = 0;
+ * Uint8 *data   = bxr_asset_read("level/map.txt", &length);
+ * if (data == NULL) {
+ *   BXR_LOG_ERROR("%s", bxr_get_error());
+ * }
+ *
+ * ...
+ *
+ * BXR_FREE(data);
+ *
+ * bxr_asset_write("save.ini", text, text_length, false);
+ *
+ * ...
+ *
+ * bxr_asset_unmount("assets.zip");
+ * ```
  */
 
 #ifndef BXR_ASSET_H_

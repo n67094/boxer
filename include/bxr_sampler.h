@@ -1,7 +1,7 @@
 /**
  * File `bxr_sampler.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Samplers
  *
@@ -9,6 +9,8 @@
  *
  * Create a sampler from one of the `bxr_sampler_e` presets, bind it with
  * `bxr_painter_set_sampler()`, and release it with `bxr_sampler_destroy()`.
+ *
+ * See `bxr_pipeline.h` for a typical usage example.
  */
 
 #ifndef BXR_SAMPLER_H_

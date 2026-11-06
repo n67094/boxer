@@ -1,7 +1,7 @@
 /**
  * File `error.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  */
 
 #ifndef ERROR_H_

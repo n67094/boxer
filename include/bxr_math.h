@@ -1,9 +1,12 @@
 /**
  * File `bxr_math.h`.
  *
- * Copyright (c) 2025 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Math Utilities
+ *
+ * 2D vector, line, triangle and rectangle types with their helpers, plus
+ * scalar functions (mostly aliases of the SDL math functions).
  */
 
 #ifndef BXR_MATH_H_
@@ -15,18 +18,56 @@
 
 #include "bxr_defs.h"
 
+/**
+ * ## Constants
+ */
+
+/**
+ * Pi and 2 * pi, in `float` (`_F`) and `double` (`_D`) precision.
+ */
 #define BXR_PI_D SDL_PI_D
 #define BXR_PI_F SDL_PI_F
 #define BXR_PI2_F (2.0f * SDL_PI_F)
 #define BXR_PI2_D (2.0f * SDL_PI_D)
 
+/**
+ * Smallest positive and largest `float` values, and the tolerance used by
+ * `bxr_equal()`.
+ */
 #define BXR_EPSILON SDL_FLT_EPSILON
 #define BXR_FLOAT_MIN FLT_MIN
 #define BXR_FLOAT_MAX FLT_MAX
 
+/**
+ * ## Min, Max and Clamp
+ */
+
+/**
+ * Minimum, maximum and clamping of values of any numeric type.
+ *
+ * Aliases of the SDL macros of the same name; arguments may be evaluated more
+ * than once.
+ */
 #define bxr_min SDL_min
 #define bxr_max SDL_max
 #define bxr_clamp SDL_clamp
+
+/**
+ * ## Trigonometry
+ */
+
+/**
+ * Trigonometric functions, angles in radians.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior. The `f` variants work on `float`, the others on `double`.
+ */
+#define bxr_cos SDL_cos
+#define bxr_cosf SDL_cosf
+#define bxr_sin SDL_sin
+#define bxr_sinf SDL_sinf
+#define bxr_tan SDL_tan
+#define bxr_tanf SDL_tanf
 #define bxr_acos SDL_acos
 #define bxr_acosf SDL_acosf
 #define bxr_asin SDL_asin
@@ -35,42 +76,69 @@
 #define bxr_atanf SDL_atanf
 #define bxr_atan2 SDL_atan2
 #define bxr_atan2f SDL_atan2f
+
+/**
+ * ## Rounding
+ */
+
+/**
+ * Rounding to an integral value.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior. The `f` variants work on `float`, the others on `double`.
+ */
 #define bxr_ceil SDL_ceil
 #define bxr_ceilf SDL_ceilf
-#define bxr_copysign SDL_copysign
-#define bxr_copysignf SDL_copysignf
-#define bxr_cos SDL_cos
-#define bxr_cosf SDL_cosf
-#define bxr_exp SDL_exp
-#define bxr_expf SDL_expf
-#define bxr_fabs SDL_fabs
-#define bxr_fabsf SDL_fabsf
 #define bxr_floor SDL_floor
 #define bxr_floorf SDL_floorf
 #define bxr_trunc SDL_trunc
 #define bxr_truncf SDL_truncf
-#define bxr_fmod SDL_fmod
-#define bxr_fmodf SDL_fmodf
-#define bxr_isinf SDL_isinf
-#define bxr_isinff SDL_isinff
-#define bxr_isnan SDL_isnan
-#define bxr_isnanf SDL_isnanf
-#define bxr_modf SDL_modf
-#define bxr_modff SDL_modff
-#define bxr_pow SDL_pow
-#define bxr_powf SDL_powf
 #define bxr_round SDL_round
 #define bxr_roundf SDL_roundf
 #define bxr_lround SDL_lround
 #define bxr_lroundf SDL_lroundf
-#define bxr_scalbn SDL_scalbn
-#define bxr_scalbnf SDL_scalbnf
-#define bxr_sin SDL_sin
-#define bxr_sinf SDL_sinf
+
+/**
+ * ## Powers and Roots
+ */
+
+/**
+ * Powers, exponentials and square roots.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior. The `f` variants work on `float`, the others on `double`.
+ */
+#define bxr_pow SDL_pow
+#define bxr_powf SDL_powf
+#define bxr_exp SDL_exp
+#define bxr_expf SDL_expf
 #define bxr_sqrt SDL_sqrt
 #define bxr_sqrtf SDL_sqrtf
-#define bxr_tan SDL_tan
-#define bxr_tanf SDL_tanf
+#define bxr_scalbn SDL_scalbn
+#define bxr_scalbnf SDL_scalbnf
+
+/**
+ * ## Floating Point
+ */
+
+/**
+ * Absolute value, sign copy, remainders, and infinity / NaN checks.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior. The `f` variants work on `float`, the others on `double`.
+ */
+#define bxr_fabs SDL_fabs
+#define bxr_fabsf SDL_fabsf
+#define bxr_copysign SDL_copysign
+#define bxr_copysignf SDL_copysignf
+#define bxr_fmod SDL_fmod
+#define bxr_fmodf SDL_fmodf
+#define bxr_modf SDL_modf
+#define bxr_modff SDL_modff
+#define bxr_isinf SDL_isinf
+#define bxr_isinff SDL_isinff
+#define bxr_isnan SDL_isnan
+#define bxr_isnanf SDL_isnanf
 
 /**
  * ## Typedefs
@@ -99,7 +167,7 @@ typedef struct bxr_line_s
 } bxr_line_t;
 
 /**
- * ## 2D triangle with vertices `a`, `b` and `c`.
+ * 2D triangle with vertices `a`, `b` and `c`.
  */
 typedef struct bxr_triangle_s
 {
@@ -117,7 +185,7 @@ typedef struct bxr_rect_s
 } bxr_rect_t;
 
 /**
- * ## Macros
+ * ## Scalar Helpers
  */
 
 /**
@@ -478,6 +546,10 @@ bxr_vec2_ceil(bxr_vec2_t v)
 }
 
 /**
+ * ## Line and Triangle
+ */
+
+/**
  * Constructs a `bxr_line_t` compound literal from the segment `(ax, ay)` to
  * `(bx, by)`.
  */
@@ -489,6 +561,10 @@ bxr_vec2_ceil(bxr_vec2_t v)
  */
 #define bxr_triangle_create(ax, ay, bx, by, cx, cy)                            \
   ((const bxr_triangle_t){ { ax, ay }, { bx, by }, { cx, cy } })
+
+/**
+ * ## Rectangle
+ */
 
 /**
  * Constructs a `bxr_rect_t` compound literal from its top-left corner

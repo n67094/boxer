@@ -1,7 +1,7 @@
 /**
  * File `bxr_image.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Image
  *
@@ -9,6 +9,22 @@
  * `bxr_asset.h` API or from raw pixels in memory, and released with
  * `bxr_image_destroy()`. A handle whose `id` is `BXR_IMAGE_INVALID_ID` is
  * invalid.
+ *
+ * Typical usage:
+ *
+ * ```cpp
+ * _img = bxr_image_create("title/background.png");
+ * if (!bxr_image_is_valid(_img)) {
+ *   BXR_LOG_ERROR("%s", bxr_get_error());
+ * }
+ *
+ * int w = bxr_image_get_width(_img);
+ * int h = bxr_image_get_height(_img);
+ *
+ * ...
+ *
+ * bxr_image_destroy(_img);
+ * ```
  */
 
 #ifndef BXR_IMAGE_H_
@@ -19,6 +35,7 @@
 #include "bxr_defs.h"
 #include "bxr_pixel.h"
 
+/** @self */
 #define BXR_IMAGE_INVALID_ID 0
 
 /**

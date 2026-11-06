@@ -1,9 +1,12 @@
 /**
  * File `bxr_string.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # String Utilities
+ *
+ * Utilities for character classification, string manipulation, number
+ * conversion and formatting, and pseudo-random number generation.
  */
 
 #ifndef BXR_STR_H_
@@ -13,6 +16,16 @@
 
 #include "bxr_defs.h"
 
+/**
+ * ## Character Classification
+ */
+
+/**
+ * Character classification and case conversion.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior.
+ */
 #define bxr_isalpha SDL_isalpha
 #define bxr_isnum SDL_isalnum
 #define bxr_isblank SDL_isblank
@@ -27,6 +40,17 @@
 #define bxr_isgraph SDL_isgraph
 #define bxr_toupper SDL_toupper
 #define bxr_tolower SDL_tolower
+
+/**
+ * ## Wide Strings
+ */
+
+/**
+ * Wide character (`wchar_t`) string functions.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior.
+ */
 #define bxr_wcslen SDL_wcslen
 #define bxr_wcsnlen SDL_wcsnlen
 #define bxr_wcslcpy SDL_wcslcpy
@@ -39,6 +63,17 @@
 #define bxr_wcscasecmp SDL_wcscasecmp
 #define bxr_wcsncasecmp SDL_wcsncasecmp
 #define bxr_wcstol SDL_wcstol
+
+/**
+ * ## Strings
+ */
+
+/**
+ * Length, copy, duplication, in-place transformation and search.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior.
+ */
 #define bxr_strlen SDL_strlen
 #define bxr_strnlen SDL_strnlen
 #define bxr_strlcpy SDL_strlcpy
@@ -53,12 +88,24 @@
 #define bxr_strstr SDL_strstr
 #define bxr_strnstr SDL_strnstr
 #define bxr_strcasestr SDL_strcasestr
-#define bxr_strtok SDL_strtoko
+#define bxr_strpbrk SDL_strpbrk
+#define bxr_strtok SDL_strtok_r
+
+/**
+ * ## Number Conversion
+ */
+
+/**
+ * Conversion between numbers and strings.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior.
+ */
 #define bxr_itoa SDL_itoa
-#define bxr_uitoa SDL_utoa
+#define bxr_uitoa SDL_uitoa
 #define bxr_ltoa SDL_ltoa
-#define bxr_ultoa SDL_ultoao
-#define bxr_lltoa SDL_llttoa
+#define bxr_ultoa SDL_ultoa
+#define bxr_lltoa SDL_lltoa
 #define bxr_ulltoa SDL_ulltoa
 #define bxr_atoi SDL_atoi
 #define bxr_atof SDL_atof
@@ -67,11 +114,32 @@
 #define bxr_strtoll SDL_strtoll
 #define bxr_strtoull SDL_strtoull
 #define bxr_strtod SDL_strtod
+
+/**
+ * ## Comparison
+ */
+
+/**
+ * String comparison, case-sensitive or not.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior.
+ */
 #define bxr_strcmp SDL_strcmp
 #define bxr_strncmp SDL_strncmp
 #define bxr_strcasecmp SDL_strcasecmp
 #define bxr_strncasecmp SDL_strncasecmp
-#define bxr_strpbrk SDL_strpbrk
+
+/**
+ * ## Formatting
+ */
+
+/**
+ * Formatted input and output.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior.
+ */
 #define bxr_vsscanf SDL_vsscanf
 #define bxr_snprintf SDL_snprintf
 #define bxr_swprintf SDL_swprintf
@@ -79,6 +147,18 @@
 #define bxr_vswprintf SDL_vswprintf
 #define bxr_asprintf SDL_asprintf
 #define bxr_vasprintf SDL_vasprintf
+
+/**
+ * ## Random Numbers
+ */
+
+/**
+ * Pseudo-random number generation. The `_r` variants use a
+ * caller-provided state instead of the global one.
+ *
+ * Aliases of the SDL functions of the same name, with the same signature and
+ * behavior.
+ */
 #define bxr_srand SDL_srand
 #define bxr_rand SDL_rand
 #define bxr_randf SDL_randf
@@ -86,6 +166,10 @@
 #define bxr_rand_r SDL_rand_r
 #define bxr_randf_r SDL_randf_r
 #define bxr_rand_bits_r SDL_rand_bits_r
+
+/**
+ * ## Helpers
+ */
 
 /**
  * Trim leading and trailing whitespace from the given string.

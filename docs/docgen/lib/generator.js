@@ -93,7 +93,7 @@ export class Generator {
    */
   add_token(token) {
     // Every block gets an anchor from its line number: <a name="line-42"></a>
-    let anchors = get_html_anchor("line-" + token.textLine);
+    let anchors = get_html_anchor("line-" + token.text_line);
 
     // Plus a named anchor if the comment started with "(name)", e.g. /** (vec-add)
     if (token.anchor) {

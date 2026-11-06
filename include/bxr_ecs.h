@@ -1,7 +1,7 @@
 /**
  * File `bxr_ecs.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * This is an altered version of pico_ecs by James McLean
  * (https://github.com/empyreanx/pico_headers).
@@ -16,12 +16,46 @@
  * - Systems run logic over every entity that matches their required and
  * excluded components.
  *
- * Typical usage: `bxr_ecs_create()`, define components with
- * `bxr_ecs_component_define()`, define systems with `bxr_ecs_system_define()`
- * and set their requirements with `bxr_ecs_system_require_component()` /
- * `bxr_ecs_system_exclude_component()`, then create entities and add
- * components. Each frame call `bxr_ecs_systems_run()`. Free everything with
- * `bxr_ecs_destroy()`.
+ * Typical usage:
+ *
+ * ```cpp
+ * _ecs = bxr_ecs_create(1024);
+ *
+ * _position = bxr_ecs_component_define(_ecs, sizeof(bxr_vec2_t), NULL, NULL);
+ * _velocity = bxr_ecs_component_define(_ecs, sizeof(bxr_vec2_t), NULL, NULL);
+ *
+ * _move = bxr_ecs_system_define(_ecs, 0, move_cb, NULL, NULL, NULL);
+ * bxr_ecs_system_require_component(_ecs, _move, _position);
+ * bxr_ecs_system_require_component(_ecs, _move, _velocity);
+ *
+ * bxr_ecs_entity_t e = bxr_ecs_entity_create(_ecs);
+ * bxr_vec2_t *pos    = bxr_ecs_entity_add_component(_ecs, e, _position, NULL);
+ * bxr_vec2_t *vel    = bxr_ecs_entity_add_component(_ecs, e, _velocity, NULL);
+ *
+ * ...
+ *
+ * // each update
+ * bxr_ecs_systems_run(_ecs, 0);
+ *
+ * ...
+ *
+ * bxr_ecs_destroy(_ecs);
+ * ```
+ *
+ * With the system logic callback:
+ *
+ * ```cpp
+ * int move_cb(bxr_ecs_t *ecs, const bxr_ecs_entity_t *entities,
+ *             size_t entity_count, void *udata) {
+ *   for (size_t i = 0; i < entity_count; ++i) {
+ *     bxr_vec2_t *pos = bxr_ecs_entity_get_component(ecs, entities[i], _position);
+ *     bxr_vec2_t *vel = bxr_ecs_entity_get_component(ecs, entities[i], _velocity);
+ *     pos->x += vel->x;
+ *     pos->y += vel->y;
+ *   }
+ *   return 0;
+ * }
+ * ```
  */
 
 #ifndef BXR_ECS_H_
@@ -35,35 +69,32 @@
  * ## Typedefs
  */
 
-/**
- * Entity
- */
+/** @self */
+typedef struct bxr_ecs_s bxr_ecs_t;
+
+/** @self */
 typedef size_t bxr_ecs_entity_t;
 
-/**
- * Component
- */
+/** @self */
 typedef size_t bxr_ecs_component_t;
 
-/**
- * System
- */
+/** @self */
 typedef size_t bxr_ecs_system_t;
 
 /**
- * Component mask
+ * Group bits used to filter which systems `bxr_ecs_system_run()` and
+ * `bxr_ecs_systems_run()` run; a system with mask 0 matches any mask.
  */
 typedef size_t bxr_ecs_mask_t;
 
+/** @self */
 #define BXR_ECS_INVALID_ENTITY ((bxr_ecs_entity_t)(-1))
 #define BXR_ECS_INVALID_COMPONENT ((bxr_ecs_component_t)(-1))
-#define BXR_ECS_INVALID_SYSTEM ((bxr_ecs_component_t)(-1))
+#define BXR_ECS_INVALID_SYSTEM ((bxr_ecs_system_t)(-1))
 
 /**
  * ## API
  */
-
-typedef struct bxr_ecs_s bxr_ecs_t;
 
 /**
  * Create a new ECS instance.

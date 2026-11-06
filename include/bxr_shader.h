@@ -1,7 +1,7 @@
 /**
  * File `bxr_shader.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Shaders
  *
@@ -18,9 +18,7 @@
  *
  * Example: "shaders/basic.vert.spv" is a vertex shader named "basic" in SPIR-V.
  *
- * Typical usage: create a vertex and a fragment shader with
- * `bxr_shader_create()`, combine them with `bxr_pipeline_create()`, and
- * release them with `bxr_shader_destroy()`.
+ * See `bxr_pipeline.h` for a typical usage example.
  */
 
 #ifndef BXR_SHADER_H_
@@ -30,15 +28,14 @@
 
 #include "bxr_defs.h"
 
+/** @self */
 #define BXR_SHADER_INVALID_ID 0
 
 /**
  * ## Enums
  */
 
-/**
- * Shader stage.
- */
+/** @self */
 typedef enum
 {
   BXR_SHADER_STAGE_VERTEX   = SDL_GPU_SHADERSTAGE_VERTEX,

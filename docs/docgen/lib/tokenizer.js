@@ -58,10 +58,11 @@ function trim_text(text) {
  *
  * @param {Function} next_line - Returns the next line, or undefined at EOF.
  * @param {Function} has_more - Returns true while lines remain.
+ * @param {Function} lines_peek - Returns the next line without consuming it.
  *
  * @returns {string[]} - The raw lines of the declaration.
  */
-function collect_declaration(next_line, has_more) {
+function collect_declaration(next_line, has_more, lines_peek) {
   let out = [];
   let depth = 0;
 
@@ -74,10 +75,13 @@ function collect_declaration(next_line, has_more) {
     if (l === "" && depth === 0) break;
     out.push(raw);
 
-    // If the line starts with a comment, we ignore it and continue to the next line
+    // Preprocessor lines: follow "\" continuations, and keep consecutive
+    // #define lines together so one doc block can cover a group of macros
     if (out[0].trim().startsWith("#")) {
-      if (!l.endsWith("\\")) break;
-      continue;
+      if (l.endsWith("\\")) continue;
+      if (!out[0].trim().startsWith("#define")) break;
+      if (lines_peek()?.trim().startsWith("#define")) continue;
+      break;
     }
 
     // Update the depth based on the number of opening and closing braces and parentheses
@@ -132,6 +136,87 @@ function join_on_one_line(lines) {
 }
 
 /**
+ * Shortens one #define line for display.
+ *
+ * @param {string} line - A "#define ..." line, continuation lines already joined.
+ *
+ * @returns {string} - The line to display.
+ */
+function summarize_macro(line) {
+  let m = line.trim().match(/^#\s*define\s+(\w+)(\([^)]*\))?\s*(.*)$/s);
+  if (!m) return line.trim();
+
+  let [, name, params, value] = m;
+
+  // Function-like: "(" right after the name
+  if (params) {
+    return `#define ${name}${params}`;
+  }
+
+  // Drop a trailing line comment
+  value = value.replace(/\s*\/\/.*$/, "").trim();
+
+  const simple =
+    value.length <= 40 &&
+    !value.includes("\\") &&
+    /^[\w\s"().+\-*/<|]*$/.test(value);
+
+  if (value === "" || !simple) {
+    return `#define ${name}`;
+  }
+
+  return `#define ${name} ${value}`;
+}
+
+/**
+ * Shortens a group of #define lines, following "\" continuations.
+ *
+ * @param {string[]} lines - The raw lines of the declaration.
+ *
+ * @returns {string} - One summarized line per macro.
+ */
+function summarize_macros(lines) {
+  let out = [];
+  let current = "";
+
+  for (const raw of lines) {
+    let l = raw.trim();
+    if (l.endsWith("\\")) {
+      current += l.slice(0, -1) + " ";
+      continue;
+    }
+    current += l;
+    out.push(summarize_macro(current));
+    current = "";
+  }
+
+  if (current) out.push(summarize_macro(current));
+
+  return out.join("\n");
+}
+
+/**
+ * Checks if the declaration lines are a function definition with a body, as opposed to a struct, enum or union.
+ *
+ * @param {string[]} lines - The raw lines of the declaration.
+ *
+ * @returns {boolean} - True if the declaration is a function definition.
+ */
+function is_function_definition(lines) {
+  if (lines.length === 0) return false;
+  if (lines[0].trim().startsWith("#")) return false;
+
+  let code = lines.join("\n");
+  let brace = code.indexOf("{");
+  if (brace < 0) return false;
+
+  let head = code.slice(0, brace);
+  if (/^\s*(typedef|struct|enum|union)\b/.test(head)) return false;
+
+  return head.includes("(");
+}
+
+/**
  * Parses the provided code text and extracts documentation blocks along with their associated code lines.
  *
  * @param {string} text - The code text to be parsed.
@@ -164,6 +249,7 @@ export function parse_code(text) {
     let block = {
       text: [],
       code: [],
+      text_line: line_count,
     };
 
     // Check for anchor in the first line of the comment block
@@ -173,20 +259,47 @@ export function parse_code(text) {
       block.anchor = m[1];
     }
 
-    // Collect the text lines of the documentation block until we reach the end of the comment block
-    while ((current_line = next_line())) {
-      l = current_line.trim();
-      if (l.startsWith("*/") || l.startsWith("**/")) break;
-      block.text.push(trim_text(l));
+    // The "@self" tag marks a declaration whose name is self-explanatory: it is
+    // documented without a description, e.g. /** @self */
+    if (/(^|\s)@self(\s|\*\/|$)/.test(l.slice(3))) {
+      block.self = true;
+    }
+
+    // One-line comment, e.g. /** @self */: no text lines to collect
+    if (!l.slice(3).includes("*/")) {
+      // Collect the text lines of the documentation block until we reach the end of the comment block
+      while ((current_line = next_line())) {
+        l = current_line.trim();
+        if (l.startsWith("*/") || l.startsWith("**/")) break;
+        block.text.push(trim_text(l));
+      }
+    }
+
+    // "@self" may also be on its own line inside the comment block
+    if (block.text.some((t) => t === "@self")) {
+      block.self = true;
+      block.text = block.text.filter((t) => t !== "@self");
     }
 
     // Collect the code lines associated with the documentation block
     block.code_line = line_count + 1;
-    let declaration = collect_declaration(next_line, () => lines.length > 0);
+    let declaration = collect_declaration(
+      next_line,
+      () => lines.length > 0,
+      () => lines[0],
+    );
 
-    // Functions are shown on one line, other code blocks are kept as is
+    // Functions are shown on one line, macros without their body, other code
+    // blocks are kept as is
     if (is_function_declaration(declaration)) {
       block.code = trim_code(join_on_one_line(declaration));
+    } else if (is_function_definition(declaration)) {
+      let code = declaration.join("\n");
+      block.code = trim_code(
+        join_on_one_line(code.slice(0, code.indexOf("{")).split("\n")),
+      );
+    } else if (declaration[0]?.trim().startsWith("#define")) {
+      block.code = summarize_macros(declaration);
     } else {
       block.code = trim_code(declaration.join("\n"));
     }

@@ -1,7 +1,7 @@
 /**
  * File `bxr_gamepad.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Gamepad Handling
  *
@@ -11,6 +11,19 @@
  * (player index) it was assigned when connected.
  *
  * Boxer polls connections and feeds events itself.
+ *
+ * Typical usage, in `bxr_game_update()`:
+ *
+ * ```cpp
+ * if (bxr_gamepad_connected(0)) {
+ *   float x = bxr_gamepad_axis(0, BXR_GAMEPAD_AXIS_LEFTX);
+ *
+ *   if (bxr_gamepad_just_pressed(0, BXR_GAMEPAD_BUTTON_SOUTH)) {
+ *     player_jump();
+ *     bxr_gamepad_rumble(0, 0x4000, 0x4000, 100);
+ *   }
+ * }
+ * ```
  */
 
 #ifndef BXR_GAMEPAD_H_
@@ -20,16 +33,22 @@
 
 #include "bxr_defs.h"
 
+/**
+ * Maximum number of gamepads tracked at the same time.
+ */
 #define BXR_GAMEPAD_MAX 4
+
+/**
+ * Default stick deadzone, in [0, 1]; change it with
+ * `bxr_gamepad_set_deadzone()`.
+ */
 #define BXR_GAMEPAD_DEADZONE 0.15f
 
 /**
  * ## Enums
  */
 
-/**
- * Gamepad buttons.
- */
+/** @self */
 typedef enum
 {
   BXR_GAMEPAD_BUTTON_UNKNOWN = -1,
@@ -62,9 +81,7 @@ typedef enum
   BXR_GAMEPAD_BUTTON_SIZE,
 } bxr_gamepad_button_e;
 
-/**
- * Gamepad axes.
- */
+/** @self */
 typedef enum
 {
   BXR_GAMEPAD_AXIS_INVALID = -1,

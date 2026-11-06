@@ -1,9 +1,27 @@
 /**
  * File `bxr_time.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Time Utilities
+ *
+ * Elapsed time since startup, blocking delays, and timers calling a callback
+ * after a delay.
+ *
+ * Typical usage:
+ *
+ * ```cpp
+ * Uint32 on_tick(void *udata, bxr_timer_t id, Uint32 interval_ms) {
+ *   ...
+ *   return interval_ms; // 0 to stop the timer
+ * }
+ *
+ * _timer = bxr_time_add_timer(1000, on_tick, NULL);
+ *
+ * ...
+ *
+ * bxr_time_remove_timer(_timer);
+ * ```
  */
 
 #ifndef BXR_TIME_H_
@@ -13,7 +31,10 @@
 
 #include "bxr_defs.h"
 
+/** @self */
 typedef SDL_TimerID bxr_timer_t;
+
+/** @self */
 typedef SDL_TimerCallback bxr_timer_cb_t;
 
 /**

@@ -1,13 +1,46 @@
 /**
  * File `bxr_pipeline.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Pipelines
  *
- * Typical usage: create shaders with `bxr_shader_create()`, combine them with
- * `bxr_pipeline_create()`, select the pipeline with
- * `bxr_painter_set_pipeline()`, and release it with `bxr_pipeline_destroy()`.
+ * Typical usage:
+ *
+ * ```cpp
+ * bxr_shader_t vert = bxr_shader_create(&(bxr_shader_desc_t){
+ *   .name       = "shaders/sprite.vert",
+ *   .entrypoint = "main",
+ *   .stage      = BXR_SHADER_STAGE_VERTEX,
+ * });
+ * bxr_shader_t frag = bxr_shader_create(&(bxr_shader_desc_t){
+ *   .name         = "shaders/sprite.frag",
+ *   .entrypoint   = "main",
+ *   .stage        = BXR_SHADER_STAGE_FRAGMENT,
+ *   .num_samplers = 1,
+ * });
+ *
+ * _pipeline = bxr_pipeline_create(vert, frag, BXR_PRIMITIVE_TRIANGLES,
+ *                                 BXR_BLENDMODE_BLEND);
+ * bxr_shader_destroy(vert); // no longer needed once the pipeline exists
+ * bxr_shader_destroy(frag);
+ *
+ * _sampler = bxr_sampler_create(BXR_SAMPLER_POINT_CLAMP);
+ *
+ * ...
+ *
+ * // in bxr_game_render()
+ * bxr_painter_set_pipeline(_pipeline);
+ * bxr_painter_set_sampler(0, &_sampler);
+ * ... draw ...
+ * bxr_painter_reset_sampler(0);
+ * bxr_painter_reset_pipeline();
+ *
+ * ...
+ *
+ * bxr_sampler_destroy(&_sampler);
+ * bxr_pipeline_destroy(_pipeline);
+ * ```
  */
 
 #ifndef BXR_PIPELINE_H_
@@ -15,6 +48,7 @@
 
 #include "bxr_shader.h"
 
+/** @self */
 #define BXR_PIPELINE_INVALID_ID 0
 
 /**

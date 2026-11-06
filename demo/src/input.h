@@ -4,7 +4,7 @@
  * Mimic an NES controller input system with an easy to use API for checking
  * button states.
  *
- * @copyright Copyright (c) 2026 nsix. All rights reserved.
+ * @copyright Copyright (c) 2025 - 2026 nsix. All rights reserved.
  */
 
 #ifndef INPUT_H_

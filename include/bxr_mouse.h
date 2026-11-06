@@ -1,12 +1,24 @@
 /**
  * File `bxr_mouse.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Mouse Handling
  *
  * The mouse position is tracked in the game's virtual resolution, and the mouse
  * wheel scroll is tracked in the current frame.
+ *
+ * Typical usage, in `bxr_game_update()`:
+ *
+ * ```cpp
+ * bxr_vec2_t pos = bxr_mouse_pos(); // virtual resolution
+ *
+ * if (bxr_mouse_just_pressed(BXR_MOUSE_LEFT)) {
+ *   select_at(pos);
+ * }
+ *
+ * zoom += bxr_mouse_wheel().y;
+ * ```
  */
 
 #ifndef BXR_MOUSE_H_
@@ -21,9 +33,7 @@
  * ## Enums
  */
 
-/**
- * Mouse buttons.
- */
+/** @self */
 typedef enum
 {
   BXR_MOUSE_UNKNOWN = 0,

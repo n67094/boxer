@@ -1,7 +1,7 @@
 /**
  * File `bxr_keyboard.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Keyboard Handling
  *
@@ -10,6 +10,18 @@
  * press, which can change based on keyboard layout and modifiers). To get the
  * key value of the current keyboard layout, use `bxr_key_name()` or
  * `bxr_key_name_ex()` with the appropriate modifiers.
+ *
+ * Typical usage, in `bxr_game_update()`:
+ *
+ * ```cpp
+ * if (bxr_key_held(BXR_KEY_D)) {
+ *   player.x += speed * delta_ms;
+ * }
+ *
+ * if (bxr_key_just_pressed(BXR_KEY_RETURN)) {
+ *   scene_go_to(SCENE_LEVEL);
+ * }
+ * ```
  */
 
 #ifndef BXR_KEYBOARD_H_
@@ -23,9 +35,7 @@
  * ## Enums
  */
 
-/**
- * Keyboard keys.
- */
+/** @self */
 typedef enum
 {
   BXR_KEY_UNKNOWN = SDL_SCANCODE_UNKNOWN,
@@ -139,9 +149,7 @@ typedef enum
   BXR_KEY_SIZE = SDL_SCANCODE_COUNT
 } bxr_key_e;
 
-/**
- * Keyboard modifiers.
- */
+/** @self */
 typedef enum
 {
   BXR_KEYMOD_NONE   = SDL_KMOD_NONE,

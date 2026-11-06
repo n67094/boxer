@@ -1,7 +1,7 @@
 /**
  * File `bxr_pixel.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Pixel Formats
  *
@@ -17,9 +17,7 @@
  * ## Enums
  */
 
-/**
- * Pixel formats.
- */
+/** @self */
 typedef enum bxr_pixel_format_e
 {
   BXR_PIXEL_FORMAT_UNKNOWN       = SDL_PIXELFORMAT_UNKNOWN,

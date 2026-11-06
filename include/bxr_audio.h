@@ -1,7 +1,7 @@
 /**
  * File `bxr_audio.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Audio and Playback
  *
@@ -43,6 +43,7 @@
 
 #include "bxr_defs.h"
 
+/** @self */
 #define BXR_AUDIO_INVALID_ID 0
 #define BXR_VOICE_INVALID_ID 0
 

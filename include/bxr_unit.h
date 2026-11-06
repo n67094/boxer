@@ -1,7 +1,7 @@
 /**
  * File `bxr_unit.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Unit Testing
  *
@@ -27,7 +27,10 @@
 
 #include <SDL3/SDL.h>
 
+/** @self */
 typedef bool (*bxr_unit_case_cb)(void);
+
+/** @self */
 typedef void (*bxr_unit_suite_cb)(void);
 
 bool bxr_unit_assert(bool passed,

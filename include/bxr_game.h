@@ -1,9 +1,49 @@
 /**
  * File `bxr_game.h`.
  *
- * Copyright (c) 2026 nsix. All rights reserved.
+ * Copyright (c) 2025 - 2026 nsix. All rights reserved.
  *
  * # Game Lifecycle
+ *
+ * Boxer owns `main()`. Don't implement it yourself. Use the five callbacks
+ * below to implement your game logic:
+ *
+ * - `bxr_game_config()`
+ * - `bxr_game_setup()`
+ * - `bxr_game_update()`
+ * - `bxr_game_render()`
+ * - `bxr_game_teardown()`
+ *
+ * Typical usage:
+ *
+ * ```cpp
+ * static bxr_game_config_t _config = { 0 };
+ *
+ * const bxr_game_config_t *bxr_game_config(void) {
+ *   _config.name           = "my_game";
+ *   _config.title          = "My Game";
+ *
+ *   _config.width          = 960;
+ *   _config.height         = 540;
+ *
+ *   _config.virtual_width  = 320;
+ *   _config.virtual_height = 180;
+ *
+ *   return &_config;
+ * }
+ *
+ * void bxr_game_setup(void) { ... }          // load assets, create state
+ *
+ * void bxr_game_update(double delta_ms) { ... }
+ *
+ * void bxr_game_render(double alpha_ms) {
+ *   bxr_painter_set_color(BXR_COLOR_BLACK);
+ *   bxr_painter_clear();
+ *   ...
+ * }
+ *
+ * void bxr_game_teardown(void) { ... }       // release assets, destroy state
+ * ```
  */
 
 #ifndef BXR_GAME_H_
