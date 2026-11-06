@@ -94,11 +94,7 @@ bxr_game_teardown(void)
 
 ## Build and Run Demo
 
-The demo is a simple game that showcases some of Boxer's features. It includes a title screen, a level with a player character, and basic input handling.
-
-Check out the [demo](demo) directory for the source code to see how the game is implemented using the Boxer framework.
-
-To run the game, you just have to run the following commands:
+To run the demo, you just have to run the following commands:
 
 ```bash
 cd demo
@@ -110,7 +106,7 @@ make
   <img src="images/skullboy_1.png" alt="Skullboy title screen" width="49%" /><img src="images/skullboy_2.png" alt="Skullboy in game" width="49%" />
 </p>
 
-## Build and Install as a Library (Optional)
+## Build and Install Boxer as a Library (Optional)
 
 Here are the steps to build and install `libboxer` on your system.
 
@@ -152,8 +148,6 @@ Build documentation with:
 ```bash
 make docs
 ```
-
-# Getting Started
 
 # AI Usage Policy
 
