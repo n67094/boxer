@@ -217,6 +217,25 @@ function is_function_definition(lines) {
 }
 
 /**
+ * Removes the file preamble from the text of the first documentation block:
+ * the "File `name`." line and the "Copyright (c) ..." lines, plus the blank
+ * lines left at the start of the block.
+ *
+ * @param {string[]} text - The text lines of the first documentation block.
+ *
+ * @returns {string[]} - The text lines without the preamble.
+ */
+function strip_file_preamble(text) {
+  text = text.filter(
+    (t) => !/^File `[^`]+`\.?$/.test(t) && !/^Copyright \(c\)/i.test(t),
+  );
+
+  while (text.length > 0 && text[0] === "") text.shift();
+
+  return text;
+}
+
+/**
  * Parses the provided code text and extracts documentation blocks along with their associated code lines.
  *
  * @param {string} text - The code text to be parsed.
@@ -273,6 +292,12 @@ export function parse_code(text) {
         if (l.startsWith("*/") || l.startsWith("**/")) break;
         block.text.push(trim_text(l));
       }
+    }
+
+    // The first documentation block of the file starts with the file name and
+    // the copyright, they are not part of the documentation
+    if (doc_blocks.length === 0) {
+      block.text = strip_file_preamble(block.text);
     }
 
     // "@self" may also be on its own line inside the comment block
