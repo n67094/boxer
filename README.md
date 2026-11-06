@@ -6,7 +6,7 @@ _The Boxer project draws its name from the boxer engine architecture found in ca
 
 # Boxer
 
-**Boxer** is a lightweight 2D game framework built for rapid development of simple games. It offers a straightforward API for graphics, input, and core game mechanics, which makes it a great fit for beginners and hobbyists.
+**Boxer** is a lightweight 2D game framework built on top of [SDL3](https://www.libsdl.org/) for rapid development of simple games. It offers a straightforward API for graphics, input, and core game mechanics, which makes it a great fit for beginners and hobbyists.
 
 ## Why Boxer?
 
