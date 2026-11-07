@@ -36,7 +36,7 @@ Boxer is currently focused on 2D games and applications. Out of the box, it prov
 
 ## Getting Started
 
-The best way to learn Boxer is to dive into the documentation below and read the code of the [demo](https://github.com/n67094/boxer/tree/main/demo).
+The best way to learn Boxer is to dive into the [documentation](https://nsix.blog/boxer) and read the code of the [demo](https://github.com/n67094/boxer/tree/main/demo).
 
 Here is a simple example of how to initialize the library and create a window:
 
@@ -157,12 +157,12 @@ I want this project to remain as human as possible; please check out the [AGENTS
 
 Feel free to suggest features, report bugs, or submit pull requests to improve the Boxer library. Your contributions are welcome!
 
-# Sponsors
+# Support Me
 
 Hi everyone, I'm nsix, an indie game developer and open source contributor trying to make a living from my work.
 
 If you enjoy what I create and want to support me, consider becoming a sponsor on [GitHub Sponsors](https://github.com/sponsors/n67094).
-Every bit of support means a lot and is greatly appreciated!
+Every bit of support means a lot and is greatly appreciated! Also I have two cats to feed.
 
 You can also check out my blog at [nsix.blog](https://www.nsix.blog).
 
