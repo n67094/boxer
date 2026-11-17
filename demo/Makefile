@@ -6,7 +6,7 @@
 # with libboxer, SDL3 and the assets embedded.
 #
 # This requires a static SDL3 (libSDL3.a) in the linker search path:
-#   Linux:   distribution package or SDL3 built with -DSDL_STATIC=ON
+#   Linux:   distribution package (e.g fedora dnf install SDL3-static) or SDL3 built with -DSDL_STATIC=ON
 #   macOS:   SDL3 built with -DSDL_STATIC=ON, by default /usr/local/lib/libSDL3.a
 #            (or SDL3_LIB=/path/to/libSDL3.a)
 #   Windows: MSYS2, from its MinGW64 shell:
@@ -132,4 +132,4 @@ $(BIN2C): $(TOOLS_DIR)/bin2c.c | $(BUILD_DIR)
 	$(CC) -std=c99 -Wall -O2 -o $@ $<
 
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET) demo$(EXE)

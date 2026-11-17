@@ -14,9 +14,7 @@
 #   make test                         Build tests (build/test/boxer_test)
 #   make clean                        Clean build artifacts
 #
-# On Windows, build from an MSYS2 MinGW shell. The shared library is boxer.dll
-# with its import library libboxer.dll.a. Code linking the static library must
-# define BXR_STATIC.
+# On Windows, build from an MSYS2 MinGW shell.
 
 UNAME_S := $(shell uname -s)
 

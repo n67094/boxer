@@ -51,10 +51,6 @@
  */
 BXR_API void bxr_quit(void);
 
-/**
- * ## Entry Point
- */
-
 typedef struct bxr_game_callbacks_s
 {
   const bxr_game_config_t *(*config)(void);
@@ -64,32 +60,14 @@ typedef struct bxr_game_callbacks_s
   void (*teardown)(void);
 } bxr_game_callbacks_t;
 
-/**
- * Start boxer and call the game setup, from `SDL_AppInit()`.
- *
- * `game` the game callbacks, all must be set. The struct is copied.
- *
- * `argc` and `argv` the program arguments.
- *
- * `return` `SDL_APP_CONTINUE` on success, `SDL_APP_FAILURE` otherwise.
- */
 BXR_API SDL_AppResult bxr_app_init(const bxr_game_callbacks_t *game,
                                    int argc,
                                    char **argv);
 
-/**
- * Run one frame (updates and render), from `SDL_AppIterate()`.
- */
 BXR_API SDL_AppResult bxr_app_iterate(void);
 
-/**
- * Handle one SDL event, from `SDL_AppEvent()`.
- */
 BXR_API SDL_AppResult bxr_app_event(SDL_Event *event);
 
-/**
- * Call the game teardown and stop boxer, from `SDL_AppQuit()`.
- */
 BXR_API void bxr_app_quit(SDL_AppResult result);
 
 #endif // BXR_H_
