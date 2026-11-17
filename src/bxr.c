@@ -1,8 +1,6 @@
 #include <SDL3/SDL.h>
 
 #include <SDL3/SDL_init.h>
-#define SDL_MAIN_USE_CALLBACKS
-#include <SDL3/SDL_main.h>
 
 #include "bxr.h"
 #include "bxr_asset_internal.h"
@@ -18,6 +16,9 @@
 #include "bxr_shader_internal.h"
 
 #include "bxr_sdl_gp.h"
+
+// Game callbacks, given by the entry point in bxr_main.h.
+static bxr_game_callbacks_t game_ = { 0 };
 
 // Log the last error as the reason of the startup failure.
 static SDL_AppResult
@@ -49,7 +50,7 @@ update_refresh_rate_(bxr_context_t *context)
   }
 
   // Rounded to the nearest nanosecond and never 0, otherwise the fixed update
-  // loop in SDL_AppIterate would never end.
+  // loop in bxr_app_iterate would never end.
   Uint64 delta_ns
       = (Uint64)SDL_lround((double)SDL_NS_PER_SECOND / mode->refresh_rate);
   context->target_delta_ns = SDL_max(delta_ns, 1);
@@ -61,9 +62,18 @@ update_refresh_rate_(bxr_context_t *context)
 }
 
 SDL_AppResult
-SDL_AppInit(void **appstate, int argc, char **argv)
+bxr_app_init(const bxr_game_callbacks_t *game, int argc, char **argv)
 {
-  const bxr_game_config_t *config = bxr_game_config();
+  BXR_ASSERT(game);
+  BXR_ASSERT(game->config);
+  BXR_ASSERT(game->setup);
+  BXR_ASSERT(game->update);
+  BXR_ASSERT(game->render);
+  BXR_ASSERT(game->teardown);
+
+  game_ = *game;
+
+  const bxr_game_config_t *config = game_.config();
 
   BXR_ASSERT(config);
   BXR_ASSERT(config->name);
@@ -92,6 +102,16 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   context->config.virtual_height = config->virtual_height;
   context->config.fullscreen     = config->fullscreen;
   context->config.resizable      = config->resizable;
+  context->config.vsync          = config->vsync;
+  context->config.max_fps        = config->max_fps;
+
+  // Without vsync nothing waits for the display, so cap the frame rate.
+  // Must be set before SDL_Init, it drives the SDL main callbacks loop.
+  if (!config->vsync && config->max_fps > 0) {
+    char rate[16];
+    SDL_snprintf(rate, sizeof(rate), "%u", config->max_fps);
+    SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, rate);
+  }
 
 // This is set because renderdoc doesn't support wayland
 #if defined(__linux__) && defined(DEBUG)
@@ -137,22 +157,38 @@ SDL_AppInit(void **appstate, int argc, char **argv)
     return init_failed_();
   }
 
-  // Set swapchain parameters
+  // Set swapchain parameters. VSYNC is always supported; without vsync prefer
+  // MAILBOX (no tearing) over IMMEDIATE (may tear).
   SDL_GPUPresentMode present_mode = SDL_GPU_PRESENTMODE_VSYNC;
-  if (SDL_WindowSupportsGPUPresentMode(context->gpu_device,
-                                       context->window,
-                                       SDL_GPU_PRESENTMODE_IMMEDIATE)) {
-    present_mode = SDL_GPU_PRESENTMODE_IMMEDIATE;
-  } else if (SDL_WindowSupportsGPUPresentMode(context->gpu_device,
-                                              context->window,
-                                              SDL_GPU_PRESENTMODE_MAILBOX)) {
-    present_mode = SDL_GPU_PRESENTMODE_MAILBOX;
+  if (!context->config.vsync) {
+    if (SDL_WindowSupportsGPUPresentMode(context->gpu_device,
+                                         context->window,
+                                         SDL_GPU_PRESENTMODE_MAILBOX)) {
+      present_mode = SDL_GPU_PRESENTMODE_MAILBOX;
+    } else if (SDL_WindowSupportsGPUPresentMode(context->gpu_device,
+                                                context->window,
+                                                SDL_GPU_PRESENTMODE_IMMEDIATE)) {
+      present_mode = SDL_GPU_PRESENTMODE_IMMEDIATE;
+    }
   }
 
-  SDL_SetGPUSwapchainParameters(context->gpu_device,
-                                context->window,
-                                SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
-                                present_mode);
+  if (!SDL_SetGPUSwapchainParameters(context->gpu_device,
+                                     context->window,
+                                     SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
+                                     present_mode)) {
+    BXR_LOG_WARN("Couldn't set present mode, falling back to vsync: %s",
+                 SDL_GetError());
+    present_mode = SDL_GPU_PRESENTMODE_VSYNC;
+    SDL_SetGPUSwapchainParameters(context->gpu_device,
+                                  context->window,
+                                  SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
+                                  present_mode);
+  }
+
+  BXR_LOG_INFO("Present mode: %s",
+               present_mode == SDL_GPU_PRESENTMODE_VSYNC     ? "vsync"
+               : present_mode == SDL_GPU_PRESENTMODE_MAILBOX ? "mailbox"
+                                                             : "immediate");
 
   context->texture_format
       = SDL_GetGPUSwapchainTextureFormat(context->gpu_device, context->window);
@@ -196,17 +232,17 @@ SDL_AppInit(void **appstate, int argc, char **argv)
   }
 
   // Call user setup
-  bxr_game_setup();
+  game_.setup();
 
   return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult
-SDL_AppIterate(void *appstate)
+bxr_app_iterate(void)
 {
   bxr_context_t *context = bxr_context_get();
   if (!context) {
-    BXR_LOG_ERROR("Invalid context in SDL_AppIterate: %s", bxr_get_error());
+    BXR_LOG_ERROR("Invalid context in bxr_app_iterate: %s", bxr_get_error());
     return SDL_APP_FAILURE;
   }
 
@@ -271,7 +307,7 @@ SDL_AppIterate(void *appstate)
 
       // --- Update here (fixed timestep) ---
 
-      bxr_game_update((double)delta_ns / SDL_NS_PER_MS); // this use SDL_GP API
+      game_.update((double)delta_ns / SDL_NS_PER_MS); // this use SDL_GP API
 
       lag_ns -= delta_ns;
       ++ups_count;
@@ -281,7 +317,7 @@ SDL_AppIterate(void *appstate)
 
     // --- Render here (use alpha for interpolation if needed) ---
 
-    bxr_game_render(alpha); // this use SDL_GP API
+    game_.render(alpha); // this use SDL_GP API
 
     // Acquire the swapchain texture for the current frame
     SDL_GPUTexture *swapchain_texture = NULL;
@@ -327,7 +363,7 @@ SDL_AppIterate(void *appstate)
 }
 
 SDL_AppResult
-SDL_AppEvent(void *appstate, SDL_Event *event)
+bxr_app_event(SDL_Event *event)
 {
   BXR_ASSERT(event);
 
@@ -395,11 +431,14 @@ SDL_AppEvent(void *appstate, SDL_Event *event)
 }
 
 void
-SDL_AppQuit(void *appstate, SDL_AppResult result)
+bxr_app_quit(SDL_AppResult result)
 {
   bxr_context_t *context = bxr_context_get();
 
-  bxr_game_teardown();
+  // Not set if startup failed before the callbacks were given
+  if (game_.teardown) {
+    game_.teardown();
+  }
 
   bxr_audio_teardown();
   bxr_shader_teardown();

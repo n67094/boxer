@@ -27,18 +27,20 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_defs.h"
+
 /** @self */
 typedef bool (*bxr_unit_case_cb)(void);
 
 /** @self */
 typedef void (*bxr_unit_suite_cb)(void);
 
-bool bxr_unit_assert(bool passed,
-                     const char *const expr,
-                     const char *const file,
-                     int line);
-void bxr_unit_run_case(const char *const name, bxr_unit_case_cb case_cb);
-void bxr_unit_run_suite(const char *const name, bxr_unit_suite_cb suite_cb);
+BXR_API bool bxr_unit_assert(bool passed,
+                             const char *const expr,
+                             const char *const file,
+                             int line);
+BXR_API void bxr_unit_run_case(const char *const name, bxr_unit_case_cb case_cb);
+BXR_API void bxr_unit_run_suite(const char *const name, bxr_unit_suite_cb suite_cb);
 
 /**
  * API
@@ -102,30 +104,30 @@ typedef void (*bxr_unit_setup_cb)(void);
  *
  * `teardown_cb` The teardown callback function.
  */
-void bxr_unit_setup(bxr_unit_setup_cb setup_cb, bxr_unit_setup_cb teardown_cb);
+BXR_API void bxr_unit_setup(bxr_unit_setup_cb setup_cb, bxr_unit_setup_cb teardown_cb);
 
 /**
  * Disables the setup and teardown functions by setting them to `NULL`.
  */
-void bxr_unit_clear_setup(void);
+BXR_API void bxr_unit_clear_setup(void);
 
 /**
  * Enables or disables colored output in the console.
  *
  * `enabled` `true` to enable colored output, `false` to disable it.
  */
-void bxr_unit_enable_colors(bool enabled);
+BXR_API void bxr_unit_enable_colors(bool enabled);
 
 /**
  * Reports the results of the unit tests to the console.
  */
-void bxr_unit_report(void);
+BXR_API void bxr_unit_report(void);
 
 /**
  * Check whether at least one test failed.
  *
  * `return` `true` if any test failed, `false` if they all passed
  */
-bool bxr_unit_failed(void);
+BXR_API bool bxr_unit_failed(void);
 
 #endif // BXR_UNIT_H

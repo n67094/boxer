@@ -49,6 +49,25 @@
 /**
  * Request the application to exit.
  */
-void bxr_quit(void);
+BXR_API void bxr_quit(void);
+
+typedef struct bxr_game_callbacks_s
+{
+  const bxr_game_config_t *(*config)(void);
+  void (*setup)(void);
+  void (*update)(double delta_ms);
+  void (*render)(double alpha_ms);
+  void (*teardown)(void);
+} bxr_game_callbacks_t;
+
+BXR_API SDL_AppResult bxr_app_init(const bxr_game_callbacks_t *game,
+                                   int argc,
+                                   char **argv);
+
+BXR_API SDL_AppResult bxr_app_iterate(void);
+
+BXR_API SDL_AppResult bxr_app_event(SDL_Event *event);
+
+BXR_API void bxr_app_quit(SDL_AppResult result);
 
 #endif // BXR_H_

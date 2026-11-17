@@ -1,4 +1,5 @@
 #include <boxer/bxr.h>
+#include <boxer/bxr_main.h>
 
 #include "assets.h"
 #include "defs.h"
@@ -20,6 +21,9 @@ bxr_game_config(void)
 
   _config.fullscreen = false;
   _config.resizable  = false;
+
+  _config.vsync   = true;
+  _config.max_fps = 0; // only used when vsync is false
 
   return &_config;
 }

@@ -6,4 +6,5 @@ tests
 
 demo/build/
 demo/demo
+demo/demo.exe
 demo/core.*

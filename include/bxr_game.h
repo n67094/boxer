@@ -5,8 +5,9 @@
  *
  * # Game Lifecycle
  *
- * Boxer owns `main()`. Don't implement it yourself. Use the five callbacks
- * below to implement your game logic:
+ * Boxer owns `main()`. Don't implement it yourself. Include `bxr_main.h` in
+ * exactly one source file of your game, and use the five callbacks below to
+ * implement your game logic:
  *
  * - `bxr_game_config()`
  * - `bxr_game_setup()`
@@ -17,6 +18,9 @@
  * Typical usage:
  *
  * ```cpp
+ * #include <boxer/bxr.h>
+ * #include <boxer/bxr_main.h> // in one source file only
+ *
  * static bxr_game_config_t _config = { 0 };
  *
  * const bxr_game_config_t *bxr_game_config(void) {
@@ -51,6 +55,8 @@
 
 #include <SDL3/SDL.h>
 
+#include "bxr_defs.h"
+
 /**
  * ## Typedefs
  */
@@ -73,6 +79,12 @@
  * `fullscreen` create the window in fullscreen mode.
  *
  * `resizable` allow the user to resize the window.
+ *
+ * `vsync` wait for the display refresh before presenting a frame (no tearing,
+ * frame rate limited to the refresh rate). When `false`, frames are presented
+ * as soon as they are ready.
+ *
+ * `max_fps` frame rate cap used only when `vsync` is `false`, `0` for no cap.
  */
 typedef struct bxr_game_config_s
 {
@@ -87,6 +99,9 @@ typedef struct bxr_game_config_s
 
   bool fullscreen;
   bool resizable;
+
+  bool vsync;
+  unsigned int max_fps;
 } bxr_game_config_t;
 
 /**

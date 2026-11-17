@@ -1,4 +1,5 @@
 #include "bxr.h"
+#include "bxr_main.h"
 
 #include "ecs.h"
 #include "error.h"
