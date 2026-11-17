@@ -42,6 +42,7 @@ Here is a simple example of how to initialize the library and create a window:
 
 ```c
 #include <boxer/bxr.h>
+#include <boxer/bxr_main.h> // entry point, in one source file only
 
 // Define the game configuration
 static bxr_game_config_t _config = { 0 };
@@ -61,6 +62,9 @@ bxr_game_config(void)
 
   _config.fullscreen = false;
   _config.resizable  = false;
+
+  _config.vsync   = true;
+  _config.max_fps = 0; // only used when vsync is false
 
   return &_config;
 }

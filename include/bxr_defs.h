@@ -12,7 +12,9 @@
 #ifndef BXR_DEFS_H_
 #define BXR_DEFS_H_
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(BXR_STATIC)
+#define BXR_API extern
+#elif defined(_WIN32)
 #ifdef BOXER_BUILD
 #define BXR_API __declspec(dllexport)
 #else
