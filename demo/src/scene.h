@@ -5,7 +5,7 @@ typedef struct scene_s
 {
   void (*setup)(void);
   void (*update)(double delta_ms);
-  void (*render)(double alpha_ms);
+  void (*render)(double alpha);
   void (*teardown)(void);
 } scene_t;
 
@@ -15,7 +15,7 @@ void scene_setup(void);
 
 void scene_update(double delta_ms);
 
-void scene_render(double alpha_ms);
+void scene_render(double alpha);
 
 void scene_teardown(void);
 

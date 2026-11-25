@@ -45,7 +45,7 @@ title_update(double delta_ms)
 }
 
 void
-title_render(double alpha_ms)
+title_render(double alpha)
 {
   bxr_painter_set_blendmode(BXR_BLENDMODE_BLEND);
   bxr_painter_set_color(BXR_COLOR_WHITE);

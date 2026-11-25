@@ -61,7 +61,7 @@ void level_setup(void);
 
 void level_update(double delta_ms);
 
-void level_render(double alpha_ms);
+void level_render(double alpha);
 
 void level_teardown(void);
 

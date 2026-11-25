@@ -83,7 +83,7 @@ bxr_game_update(double delta_ms)
 }
 
 void
-bxr_game_render(double alpha_ms)
+bxr_game_render(double alpha)
 {
     // Render the game here.
     // The game is rendered as many times per second as possible.

@@ -48,13 +48,13 @@ bxr_game_update(double delta_ms)
 }
 
 void
-bxr_game_render(double alpha_ms)
+bxr_game_render(double alpha)
 {
   // Clear the screen to black before rendering the game scene
   bxr_painter_set_color(BXR_COLOR_BLACK);
   bxr_painter_clear();
 
-  scene_render(alpha_ms);
+  scene_render(alpha);
 }
 
 void
