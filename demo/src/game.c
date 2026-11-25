@@ -66,9 +66,9 @@ game_update(game_t *game, double delta_ms)
 }
 
 void
-game_render(game_t *game, double alpha_ms)
+game_render(game_t *game, double alpha)
 {
-  game->alpha_ms = alpha_ms;
+  game->alpha = alpha;
 
   bxr_vec2_t *player_position = bxr_ecs_entity_get_component(
       game->ecs, game->player_entity, component_position);

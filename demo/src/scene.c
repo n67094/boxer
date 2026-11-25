@@ -19,9 +19,9 @@ scene_update(double delta_ms)
   scene.update(delta_ms);
 }
 void
-scene_render(double alpha_ms)
+scene_render(double alpha)
 {
-  scene.render(alpha_ms);
+  scene.render(alpha);
 }
 void
 scene_teardown()

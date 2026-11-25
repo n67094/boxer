@@ -40,7 +40,7 @@
  *
  * void bxr_game_update(double delta_ms) { ... }
  *
- * void bxr_game_render(double alpha_ms) {
+ * void bxr_game_render(double alpha) {
  *   bxr_painter_set_color(BXR_COLOR_BLACK);
  *   bxr_painter_clear();
  *   ...
@@ -147,11 +147,11 @@ extern void bxr_game_update(double delta_ms);
  * Called once per frame after the updates. Drawing
  * coordinates are in the virtual resolution from the configuration.
  *
- * `alpha_ms` how far the current time is between the last update and the next
+ * `alpha` how far the current time is between the last update and the next
  * one, in [0, 1), used to interpolate between the previous and current update
  * state for smooth rendering.
  */
-extern void bxr_game_render(double alpha_ms);
+extern void bxr_game_render(double alpha);
 
 /**
  * Release the game resources, implemented by the user.

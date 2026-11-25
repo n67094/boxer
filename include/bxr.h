@@ -56,7 +56,7 @@ typedef struct bxr_game_callbacks_s
   const bxr_game_config_t *(*config)(void);
   void (*setup)(void);
   void (*update)(double delta_ms);
-  void (*render)(double alpha_ms);
+  void (*render)(double alpha);
   void (*teardown)(void);
 } bxr_game_callbacks_t;
 

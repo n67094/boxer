@@ -57,9 +57,9 @@ level_update(double delta_ms)
 }
 
 void
-level_render(double alpha_ms)
+level_render(double alpha)
 {
-  game_render(_game, alpha_ms);
+  game_render(_game, alpha);
 }
 
 void

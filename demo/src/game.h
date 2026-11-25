@@ -19,7 +19,8 @@ typedef struct game_s
   camera_t *camera;
   map_t *map;
   double delta_ms; // time in seconds since last update
-  double alpha_ms; // time in seconds since last render, used for interpolation
+  double alpha; // how far the current time is between the last update and the
+                // next one, in [0, 1)
 
   animation_t *player_animation;
 
@@ -51,10 +52,10 @@ void game_update(game_t *game, double delta_ms);
  *
  * `game` is a pointer to the game instance to render.
  *
- * `alpha_ms` is the time in milliseconds since the last render, used for
- * interpolation.
+ * `alpha` is how far the current time is between the last update and the next
+ * one, in [0, 1).
  */
-void game_render(game_t *game, double alpha_ms);
+void game_render(game_t *game, double alpha);
 
 /**
  * Destroys the game instance and releases all associated resources.
